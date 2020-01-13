@@ -64,6 +64,9 @@ INSTALLED_APPS = [
     "hijack",
     "compat",  # Part of hijack
     "hijack_admin",
+    "solo",
+    "django_camunda",
+    "zgw_consumers",
     # Project applications.
     "camunda_worker.accounts",
     "camunda_worker.utils",
