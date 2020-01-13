@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     # Note: If enabled, at least one Site object is required
     # 'django.contrib.sites',
     "django.contrib.messages",
+    "django.contrib.postgres",
     "django.contrib.staticfiles",
     "ordered_model",
     "django_admin_index",
@@ -69,6 +70,7 @@ INSTALLED_APPS = [
     "zgw_consumers",
     # Project applications.
     "camunda_worker.accounts",
+    "camunda_worker.external_tasks",
     "camunda_worker.utils",
 ]
 
