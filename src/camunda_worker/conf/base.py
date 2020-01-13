@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     # 'django.contrib.sites',
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "ordered_model",
+    "django_admin_index",
     # Optional applications.
     "django.contrib.admin",
     # 'django.contrib.admindocs',
