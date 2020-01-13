@@ -11,7 +11,7 @@ certifi==2019.11.28       # via elastic-apm, requests, sentry-sdk
 chardet==3.0.4            # via requests
 django-appconf==1.0.3     # via django-axes
 django-axes==5.2.2
-django-camunda==0.2.1
+django-camunda==0.3.0
 django-choices==1.7.1     # via zgw-consumers
 django-compat==1.0.15     # via django-hijack, django-hijack-admin
 django-hijack-admin==2.1.10
