@@ -7,7 +7,7 @@ Camunda Worker
 :Keywords: bpmn, camunda, external tasks, process engine, VNG, Common Ground
 :PythonVersion: 3.8
 
-|build-status| |requirements|
+|build-status| |black|
 
 A webapplication to configure and run workers to process Camunda `external tasks`_.
 
@@ -45,14 +45,12 @@ References
 * `Issues <https://github.com/GemeenteUtrecht/camunda-worker/issues>`_
 * `Code <https://github.com/GemeenteUtrecht/camunda-worker>`_
 
-
-.. |build-status| image:: http://jenkins.maykin.nl/buildStatus/icon?job=bitbucket/camunda-worker/master
+.. |build-status| image:: https://travis-ci.org/GemeenteUtrecht/camunda-worker.svg?branch=master
     :alt: Build status
-    :target: http://jenkins.maykin.nl/job/camunda-worker
+    :target: https://travis-ci.org/GemeenteUtrecht/camunda-worker
 
-.. |requirements| image:: https://requires.io/bitbucket/maykinmedia/camunda-worker/requirements.svg?branch=master
-     :target: https://requires.io/bitbucket/maykinmedia/camunda-worker/requirements/?branch=master
-     :alt: Requirements status
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
 
 .. _Common Ground: https://commonground.nl/
 .. _external tasks: https://docs.camunda.org/manual/7.12/user-guide/process-engine/external-tasks/
