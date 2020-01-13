@@ -5,7 +5,7 @@ camunda_worker
 :Version: 0.1.0
 :Source: https://bitbucket.org/maykinmedia/camunda_worker
 :Keywords: ``<keywords>``
-:PythonVersion: 3.7
+:PythonVersion: 3.8
 
 |build-status| |requirements|
 
