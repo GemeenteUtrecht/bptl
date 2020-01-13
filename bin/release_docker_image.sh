@@ -3,7 +3,7 @@
 set -e # exit on error
 set -x # echo commands
 
-CONTAINER_REPO=maykinmedia/camunda_worker
+CONTAINER_REPO=scrumteamzgw/camunda-worker
 
 git_tag=$(git tag --points-at HEAD) &>/dev/null
 git_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -12,7 +12,6 @@ git_branch=$(git rev-parse --abbrev-ref HEAD)
 build_image() {
     tag=$1
     docker build \
-        --target production \
         -t ${CONTAINER_REPO}:$tag \
         -f Dockerfile .
 }
@@ -38,22 +37,10 @@ push_image() {
             build_image latest
             docker push ${CONTAINER_REPO}:latest
         fi
-
-        write_deploy_params
     else
         echo "Not pushing image, set the JOB_NAME envvar to push after building"
     fi
 }
-
-write_deploy_params() {
-    # if on jenkins AND it's a tagged release -> prepare deployment
-    if [[ -n "$JENKINS_URL" && -n "$git_tag" ]]; then
-        echo "
-VERSION=${git_tag}
-" > deployment-parameters
-    fi
-}
-
 
 if [[ -n "$git_tag" ]]; then
     echo "Building image for git tag $git_tag"

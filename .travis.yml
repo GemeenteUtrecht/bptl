@@ -1,0 +1,51 @@
+language: python
+
+python: "3.8"
+
+services:
+  - postgresql
+  - redis-server
+  - docker
+
+addons:
+  postgresql: "11"
+
+env:
+  global:
+  - DJANGO_SETTINGS_MODULE=camunda_worker.conf.dev
+  - SECRET_KEY=dummy
+  - DB_USER=postgres
+  - DB_PASSWORD=
+
+jobs:
+  include:
+    - stage: Tests / Linting
+      name: Django tests
+      cache: pip
+      install:
+        - pip install -r requirements/dev.txt codecov
+        - npm ci
+        - npm run build
+      script:
+        - python src/manage.py collectstatic --noinput --link
+        - coverage run src/manage.py test src
+      after_success:
+        - codecov
+
+    - name: Import ordering
+      install:
+        - pip install isort
+      before_script: skip
+      script: isort --recursive --check-only --diff .
+
+    - name: Code style
+      install:
+        - pip install black
+      before_script: skip
+      script: black --check src
+
+    - name: Test docker image build
+      before_install: skip
+      install: skip
+      before_script: skip
+      script: docker build
