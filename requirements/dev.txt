@@ -5,12 +5,15 @@
 #    pip-compile --no-index --output-file=requirements/dev.txt requirements/ci.txt requirements/dev.in
 #
 alabaster==0.7.12         # via sphinx
+amqp==2.5.2
 appdirs==1.4.3            # via black
 attrs==19.3.0             # via black
 babel==2.8.0              # via sphinx
 beautifulsoup4==4.8.2
+billiard==3.6.1.0
 black==19.10b0
 bumpversion==0.5.3
+celery==4.4.0
 certifi==2019.11.28
 chardet==3.0.4
 click==7.0                # via black, pip-tools
@@ -18,6 +21,8 @@ coverage==4.5.4
 cssselect==1.1.0
 django-appconf==1.0.3
 django-axes==5.2.2
+django-camunda==0.2.1
+django-choices==1.7.1
 django-compat==1.0.15
 django-debug-toolbar==2.1
 django-extensions==2.2.5
@@ -28,6 +33,7 @@ django-jenkins==0.110.0
 django-redis==4.11.0
 django-rosetta==0.9.3
 django-sniplates==0.6.0
+django-solo==1.1.3
 django-webtest==1.9.7
 django==2.2.9
 docutils==0.16            # via sphinx
@@ -37,10 +43,13 @@ factory-boy==2.12.0
 faker==3.0.0
 flake8==3.7.9
 freezegun==0.3.12
+gemma-zds-client==0.13.0
 idna==2.8
 imagesize==1.2.0          # via sphinx
+inflection==0.3.1
 isort==4.3.21
 jinja2==2.10.3            # via sphinx
+kombu==4.6.7
 lxml==4.4.2
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
@@ -53,12 +62,14 @@ psycopg2==2.8.4
 pycodestyle==2.5.0        # via flake8
 pyflakes==2.1.1           # via flake8
 pygments==2.5.2           # via sphinx
+pyjwt==1.7.1
 pyparsing==2.4.6          # via packaging
 pyquery==1.4.1
 python-dateutil==2.8.1
 python-decouple==3.3
 python-dotenv==0.10.3
 pytz==2019.3
+pyyaml==5.3
 redis==3.3.11
 regex==2020.1.8           # via black
 requests-mock==1.7.0
@@ -82,9 +93,11 @@ toml==0.10.0              # via black
 typed-ast==1.4.0          # via black
 urllib3==1.25.7
 uwsgi==2.0.18
+vine==1.3.0
 waitress==1.4.2
 webob==1.8.5
 webtest==2.0.33
+zgw-consumers==0.4.1
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
