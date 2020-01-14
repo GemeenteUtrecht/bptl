@@ -1,7 +1,6 @@
 'use strict';
 var gulp = require('gulp');
 var gulpif = require('gulp-if');
-var Eyeglass = require('eyeglass');
 var postcss = require('gulp-postcss');
 var sourcemaps = require('gulp-sourcemaps');
 var sass = require('gulp-sass');
@@ -15,9 +14,9 @@ var paths = require('../paths');
 var isProduction = argv.production ? true : false;
 var sourcemap = argv.sourcemap ? true : false;
 
-var eyeglass = new Eyeglass({
+var sassOptions = {
     outputStyle: isProduction ? 'compressed' : 'expanded',
-});
+};
 
 let selectorLintConfig = {
     global: {
@@ -65,7 +64,7 @@ var plugins = isProduction ? [cssnano(), autoprefixer()] : [autoprefixer(), sele
 function scss() {
     return gulp.src(paths.sassSrc)
         .pipe(gulpif(sourcemap, sourcemaps.init()))
-        .pipe(sass(eyeglass.options).on("error", sass.logError))
+        .pipe(sass(sassOptions).on("error", sass.logError))
         .pipe(postcss(plugins))
         .pipe(gulpif(sourcemap, sourcemaps.write('./')))
         .pipe(gulp.dest(paths.cssDir));
