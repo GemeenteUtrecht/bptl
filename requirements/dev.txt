@@ -19,9 +19,10 @@ chardet==3.0.4
 click==7.0                # via black, pip-tools
 coverage==4.5.4
 cssselect==1.1.0
+django-admin-index==1.2.2
 django-appconf==1.0.3
 django-axes==5.2.2
-django-camunda==0.3.0
+django-camunda==0.3.1
 django-choices==1.7.1
 django-compat==1.0.15
 django-debug-toolbar==2.1
@@ -30,6 +31,7 @@ django-hijack-admin==2.1.10
 django-hijack==2.1.10
 django-ipware==2.1.0
 django-jenkins==0.110.0
+django-ordered-model==2.1.0
 django-redis==4.11.0
 django-rosetta==0.9.3
 django-sniplates==0.6.0

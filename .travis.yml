@@ -8,7 +8,7 @@ services:
   - docker
 
 addons:
-  postgresql: "11"
+  postgresql: "10"
 
 env:
   global:
@@ -48,4 +48,4 @@ jobs:
       before_install: skip
       install: skip
       before_script: skip
-      script: docker build
+      script: docker build .
