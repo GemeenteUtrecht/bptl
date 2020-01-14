@@ -48,6 +48,7 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int]:
                 topic_name=task["topic_name"],
                 priority=task["priority"],
                 task_id=task["id"],
+                lock_expires_at=task["lock_expiration_time"],
                 variables=task["variables"],
             )
         )
