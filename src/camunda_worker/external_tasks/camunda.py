@@ -4,11 +4,11 @@ Module for Camunda API interaction.
 TODO: fetch the handled/known topics from the DB and pass that to the fetch and lock
 call.
 """
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
-from django_camunda.client import Camunda
+from django_camunda.client import get_client_class
 
-from camunda_worker.utils.typing import Object
+from camunda_worker.utils.typing import Object, ProcessVariables
 
 from .models import FetchedTask, get_worker_id
 
@@ -22,7 +22,7 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int]:
 
     API reference: https://docs.camunda.org/manual/7.12/reference/rest/external-task/fetch/
     """
-    camunda = Camunda()
+    camunda = get_client_class()()
 
     worker_id = get_worker_id()
     external_tasks: List[Object] = camunda.request(
@@ -55,3 +55,28 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int]:
     FetchedTask.objects.bulk_create(fetched)
 
     return (worker_id, len(fetched))
+
+
+def complete_task(
+    task: FetchedTask, variables: Optional[ProcessVariables] = None
+) -> None:
+    """
+    Complete an External Task, while optionally setting process variables.
+
+    API reference: https://docs.camunda.org/manual/7.12/reference/rest/external-task/post-complete/
+
+    Note that we currently only support setting process variables and not local task
+    variables.
+    """
+    camunda = get_client_class()()
+    serialized_variables = (
+        {name: {"value": value} for name, value in variables.items()}
+        if variables
+        else {}
+    )
+
+    body = {
+        "workerId": task.worker_id,
+        "variables": serialized_variables,
+    }
+    camunda.request(f"external-task/{task.task_id}/complete", method="POST", json=body)

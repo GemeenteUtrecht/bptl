@@ -8,3 +8,5 @@ from typing import Dict, List, Union
 JSONValue = Union[str, float, bool, List["JSONValue"], "Object", None]
 
 Object = Dict[str, JSONValue]
+
+ProcessVariables = Dict[str, Union[str, int, bool]]
