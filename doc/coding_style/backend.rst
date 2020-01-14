@@ -11,7 +11,7 @@ Imports
 =======
 
 In short: use `isort`_ to check your import ordering. The config file is in
-``.isort.cfg``.
+``setup.cfg``.
 
 Order and group your imports
 
