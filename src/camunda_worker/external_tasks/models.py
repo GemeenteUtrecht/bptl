@@ -50,4 +50,4 @@ class FetchedTask(models.Model):
         verbose_name_plural = _("fetched tasks")
 
     def __str__(self):
-        return f"{self.tpic_name} / {self.task_id}"
+        return f"{self.topic_name} / {self.task_id}"
