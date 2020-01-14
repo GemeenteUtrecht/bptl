@@ -27,7 +27,7 @@ class FetchAndLockTests(TestCase):
 
     def test_fetch_one(self, m):
         m.post(
-            "https://some.camunda.com/engine-rest/fetchAndLock",
+            "https://some.camunda.com/engine-rest/external-task/fetchAndLock",
             json=[
                 {
                     "activityId": "anActivityId",
