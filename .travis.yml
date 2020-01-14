@@ -48,4 +48,4 @@ jobs:
       before_install: skip
       install: skip
       before_script: skip
-      script: docker build
+      script: docker build .
