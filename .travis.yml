@@ -49,3 +49,21 @@ jobs:
       install: skip
       before_script: skip
       script: docker build .
+
+    - stage: Push Docker image(s)
+      if: fork = false
+      before_install: skip
+      install: skip
+      before_script: skip
+      script: echo "noop"
+      after_success: echo "trigger deploy?"
+      deploy:
+        - provider: script
+          script: bin/docker_push.sh latest
+          on:
+            branch: master
+
+        - provider: script
+          script: bin/docker_push.sh $TRAVIS_TAG
+          on:
+            tags: true
