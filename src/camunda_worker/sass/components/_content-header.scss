@@ -1,0 +1,29 @@
+@import "../lib/colors";
+@import "../lib/margins";
+@import "../lib/typography";
+
+.content-header {
+  padding: 1em 2.5em;
+  text-align: left;
+
+  border-left: solid 10px $theme-border-color;
+
+  & &__title {
+    @include reset-block-margins;
+    @include title;
+    font-size: 2em;
+    margin: 0 0 1em;
+  }
+
+  & &__subtitle {
+    @include reset-block-margins;
+    @include subtitle;
+    font-size: 1em;
+    margin: 0 0 1em;
+  }
+
+  & &__explanation {
+    @include body;
+    margin: 0;
+  }
+}

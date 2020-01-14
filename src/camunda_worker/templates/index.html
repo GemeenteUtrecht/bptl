@@ -1,0 +1,27 @@
+{% extends "master.html" %}
+{% load i18n %}
+
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content-header-subtitle %}{% trans "Manage Camunda process building blocks" %}{% endblock %}
+{% block content-header-title %}{% trans "Camunda Worker Configuration" %}{% endblock %}
+{% block content-header-explanation %}
+{% blocktrans trimmed %}
+    De Camunda Worker pikt taken op van Camunda processen.
+    <br>
+    In deze omgeving kan je bestaande functies/bouwblokken configureren voor je processen,
+    en die opnemen in je procesmodel.
+{% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+<article class="dashboard">
+    TODO: show dashboard
+</article>
+
+<section class="index-admin">
+    <span>Go to <a href="{% url 'admin:index' %}">admin</a></span>
+</section>
+{% endblock %}

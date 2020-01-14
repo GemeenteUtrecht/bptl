@@ -1,0 +1,24 @@
+.flex-container {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.flex-container--even {
+  justify-content: space-evenly;
+}
+
+.flex-column {
+  flex: 1;
+}
+
+.flex-column--center {
+  text-align: center;
+}
+
+.flex-column--small {
+  flex-basis: 25%;
+}
+
+.flex-column--large {
+  flex-basis: 75%;
+}

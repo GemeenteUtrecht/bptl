@@ -1,0 +1,54 @@
+@import "../lib/colors";
+
+.section + .section {
+  margin-top: 4em;
+  border-top: 1px solid grey;
+}
+
+.item-link {
+  border: 1px solid darken($border-color, 20%);
+  border-radius: 5px;
+  text-decoration: none;
+  padding: 0.5em;
+  font-weight: 600;
+
+  &:hover {
+    background-color: #2A5587;
+    border-color: #2A5587;
+    color: white;
+  }
+}
+
+.button {
+  background-color: #2A5587;
+  border: 1px solid #2A5587;
+  border-radius: 5px;
+  color: #FFF;
+  text-transform: uppercase;
+  padding: 0.5em;
+  cursor: pointer;
+}
+
+.container {
+  max-width: 74em;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.card {
+  background-color: #FFF;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25em;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  min-height: 500px;
+}

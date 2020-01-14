@@ -1,0 +1,5 @@
+// override Chrome's user agent
+@mixin reset-block-margins() {
+  margin-block-start: 0;
+  margin-block-end: 0;
+}

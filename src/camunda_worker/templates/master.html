@@ -2,10 +2,12 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>{% block title %}Camunda_Worker{% endblock %}</title>
+        <title>{% block title %}Camunda Worker{% endblock %}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="">
         <meta name="author" content="">
+
+        <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400,600|Material+Icons|Material+Icons+Outlined" rel="stylesheet">
 
         <link href="{% static 'css/screen.css' %}" media="screen" rel="stylesheet" type="text/css" />
         <link href="{% static 'hijack/hijack-styles.css' %}" rel="stylesheet" type="text/css" />
@@ -15,14 +17,81 @@
 
     <body class="{% block body-class %}{% endblock %}">
         {% hijack_notification %}
+        <header>
+            {% block header %}
+                <div class="container">
+                    <div class="logo">
+                        <img class="logo__img" src="{% static 'img/wapen-utrecht-rood.svg' %}">
+                    </div>
+                </div>
+
+            {% endblock %}
+        </header>
         <main>
-            {% block content %}
-                Override <code>{% verbatim %}{% block content %}{% endverbatim %}</code>
-                to get some actual content.
+            {% block main %}
+            <!-- START container for centering -->
+            <div class="container">
+
+                <div class="card shadow p-small content">
+                    {% block breadcrumbs %}
+                    <ol class="breadcrumbs">
+                        <li class="breadcrumbs__item"><a href="{% url 'index' %}">Home</a></li>
+                        {% block crumbs %}
+                        {% endblock %}
+                    </ol>
+                    {% endblock %}
+
+                    {% spaceless %}
+                    {% block content-header %}
+                        <header class="content-header">
+                            <h2 class="content-header__subtitle">
+                                {% block content-header-subtitle %}{% endblock content-header-subtitle %}
+                            </h2>
+                            <h1 class="content-header__title">
+                                {% block content-header-title %}{% endblock %}
+                            </h1>
+                            <p class="content-header__explanation">
+                                {% block content-header-explanation %}{% endblock %}
+                            </p>
+                        </header>
+                    {% endblock content-header %}
+                    {% endspaceless %}
+
+                    {% block content %}
+                        Override <code>{% verbatim %}{% block content %}{% endverbatim %}</code>
+                        to get some actual content.
+                    {% endblock %}
+                </div>
+
+            </div>
+            <!-- END container -->
             {% endblock %}
         </main>
 
-        
+        <footer class="footer">
+            <!-- START container for centering -->
+            <div class="container">
+                <div class="footer__column">
+                    <h3>GEMEENTE UTRECHT</h3>
+                    <p>Maandag t/m vrijdag 8.30 - 17.30 uur,<br> donderdag tot 20.00 uur</p>
+
+                    <div class="flex-container">
+                        <div class="flex-column">
+                            <h3>Telefoon</h3>
+                            <p>14 030</p>
+                        </div>
+                        <div class="flex-column">
+                            <h3>Adres</h3>
+                            <p>Stadskantoor<br> Stadsplateau 1<br> 3521 AZ Utrecht</p>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- END container -->
+            </div>
+        </footer>
+
         <script src="{% static 'js/main.js' %}"></script>
     </body>
+
 </html>

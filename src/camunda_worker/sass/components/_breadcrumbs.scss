@@ -1,0 +1,31 @@
+.breadcrumbs {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  padding: .75em 1em;
+  margin-left: 1.5em;
+  margin-block-start: 0;
+  margin-block-end: 0;
+
+  &__item {
+    display: block;
+    padding: .45em 1.8em .55em 1.3em;
+    background: url(../img/bg-crumb.svg) right center no-repeat;
+    font-size: .875em;
+    margin: 0 -1em 0 0;
+    z-index: 20;
+
+    a {
+      color: #1D1D1C;
+    }
+  }
+
+  &__item + &__item {
+    z-index: 19;
+    padding-left: 2.5em;
+  }
+
+  &__item + &__item + &__item {
+    z-index: 18;
+  }
+}

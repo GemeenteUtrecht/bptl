@@ -1,0 +1,40 @@
+@import "../lib/colors";
+@import "../lib/typography";
+
+.index {
+  padding: 2.5rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & &__item {
+    @include body;
+    display: block;
+    background: $theme-primary-color;
+    padding: 0.375rem 0.75rem;
+    border: solid 1px transparent;
+    border-radius: 0.25rem;
+    min-width: 150px;
+
+    color: white;
+    text-align: center;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  & &__item-separator {
+    display: block;
+    width: 5rem;
+  }
+}
+
+.index-admin {
+  padding: 2em;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}

@@ -1,0 +1,12 @@
+.footer {
+  margin-top: -2em;
+  padding-top: 4em;
+  padding-bottom: 2em;
+  background: url(../img/bg-footer.svg) top center #C00;
+  background-size: cover;
+  color: #FFF;
+
+   &__column {
+     max-width: 33%;
+   }
+}
