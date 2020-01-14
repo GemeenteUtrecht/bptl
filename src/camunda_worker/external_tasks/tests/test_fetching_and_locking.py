@@ -53,7 +53,13 @@ class FetchAndLockTests(TestCase):
             ],
         )
 
-        fetch_and_lock(max_tasks=1)
+        with patch(
+            "camunda_worker.external_tasks.camunda.get_worker_id",
+            return_value="aWorkerId",
+        ) as m_get_worker_id:
+            fetch_and_lock(max_tasks=1)
+
+        m_get_worker_id.assert_called_once()
 
         qs = FetchedTask.objects.all()
         self.assertEqual(qs.count(), 1)

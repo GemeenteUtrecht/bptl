@@ -12,7 +12,7 @@ chardet==3.0.4            # via requests
 django-admin-index==1.2.2
 django-appconf==1.0.3     # via django-axes
 django-axes==5.2.2
-django-camunda==0.3.0
+django-camunda==0.3.1
 django-choices==1.7.1     # via zgw-consumers
 django-compat==1.0.15     # via django-hijack, django-hijack-admin
 django-hijack-admin==2.1.10
