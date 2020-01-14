@@ -172,7 +172,7 @@ Indentation
 
 * Indent using two spaces
 
-  .. code-block:: scss
+  .. code-block:: css
 
     .block {
       width: 100%;
@@ -330,7 +330,7 @@ Variables
 
 Privatize variables by assigning them on top of the module.
 
-.. code-block:: scss
+.. code-block:: none
 
   $article-color: $color;  // We copy the contents of a global variable into a private one
   $article-font: $font;    // This allow us easily "fix" the values and reuse our component

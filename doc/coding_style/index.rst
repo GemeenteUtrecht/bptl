@@ -6,6 +6,12 @@ Below you can find some best practices to maintain a good coding style. There
 are detailed coding style guides for the `frontend <coding_style_frontend>` and
 the `backend <coding_style_backend>`.
 
+.. toctree::
+    :maxdepth: 2
+
+    backend
+    frontend
+
 Best practices
 ==============
 
@@ -33,7 +39,7 @@ CSS/SASS
 * Only select using (BEM) class names (``.block__element``), avoid using tag/id
   (Matching id's breaks reusability, matching tags breaks flexibility).
 * WYSIWYG is an exception (customers don’t type content__heading--primary).
-* The Block (**B**EM) cannot set margin on itself, only on children. This avoids
+* The Block (**B** in BEM) cannot set margin on itself, only on children. This avoids
   spacing issues.
 * Use Neat mixins for (responsive) grids. Avoid complex overdoing mixins (e.g. Bourbon).
 * Respect the `coding style <coding_style_frontend>`.
