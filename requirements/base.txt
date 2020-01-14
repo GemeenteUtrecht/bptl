@@ -9,6 +9,7 @@ billiard==3.6.1.0         # via celery
 celery==4.4.0
 certifi==2019.11.28       # via elastic-apm, requests, sentry-sdk
 chardet==3.0.4            # via requests
+django-admin-index==1.2.2
 django-appconf==1.0.3     # via django-axes
 django-axes==5.2.2
 django-camunda==0.3.0
@@ -17,6 +18,7 @@ django-compat==1.0.15     # via django-hijack, django-hijack-admin
 django-hijack-admin==2.1.10
 django-hijack==2.1.10
 django-ipware==2.1.0      # via django-axes
+django-ordered-model==2.1.0  # via django-admin-index
 django-redis==4.11.0
 django-rosetta==0.9.3
 django-sniplates==0.6.0
