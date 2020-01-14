@@ -43,6 +43,7 @@ class FetchedTask(models.Model):
     )
     priority = models.PositiveIntegerField(_("priority"), null=True, blank=True)
     task_id = models.CharField(_("task id"), max_length=50,)
+    lock_expires_at = models.DateTimeField(_("lock expires at"), null=True, blank=True)
     variables = JSONField(default=dict)
 
     class Meta:
