@@ -23,3 +23,19 @@ Example:
 .. code-block:: bash
 
     python src/manage.py fetch_and_lock_tasks 1
+
+Python API
+==========
+
+.. TODO Use sphinx-autodoc for this
+
+Whenever an external task for a certain topic is done/performed, the task itself
+needs to be completed and updated with resulting process variables.
+
+For this purpose, ``camunda_worker.external_tasks.camunda.complete_task`` exists. Pass
+the ``FetchedTask`` instance and a dict of ``variable_name: value`` to update
+process variables. If no process variables need to be updated, you can leave the
+``variables`` off.
+
+Note that this needs to happen within the expiry time for the tasks - when a task is
+fetched and locked, the lock expires after a while. You can verify this in the admin.
