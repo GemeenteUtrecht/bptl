@@ -52,3 +52,7 @@ class FetchedTask(models.Model):
 
     def __str__(self):
         return f"{self.topic_name} / {self.task_id}"
+
+    @property
+    def flat_variables(self) -> dict:
+        return {k: v["value"] for k, v in self.variables.items()}
