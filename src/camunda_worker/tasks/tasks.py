@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from zgw_consumers.models import APITypes, Service
 
+from camunda_worker.external_tasks.constants import Statuses
 from camunda_worker.external_tasks.models import FetchedTask
 
 
@@ -13,6 +14,11 @@ class Task:
 
     def perform(self) -> dict:
         raise NotImplementedError("subclasses of Task must provide a perform() method")
+
+    def save_result(self, result_data: dict):
+        self.task.status = Statuses.completed
+        self.task.result_variables = result_data
+        self.task.save()
 
 
 class CreateZaakTask(Task):
@@ -33,7 +39,7 @@ class CreateZaakTask(Task):
         zaak = client.create("zaak", data)
         return zaak
 
-    def create_status(self, zaak) -> dict:
+    def create_status(self, zaak: dict) -> dict:
         # get statustype for initial status
         ztc = Service.objects.get(api_type=APITypes.ztc)
         ztc_client = ztc.build_client()
@@ -56,4 +62,8 @@ class CreateZaakTask(Task):
     def perform(self):
         zaak = self.create_zaak()
         self.create_status(zaak)
-        return {"zaak": zaak["url"]}
+
+        # save result
+        result_data = {"zaak": zaak["url"]}
+        self.save_result(result_data)
+        return result_data
