@@ -16,6 +16,7 @@ ZAAK = f"{ZRC_URL}zaken/4f8b4811-5d7e-4e9b-8201-b35f5101f891"
 STATUS = f"{ZRC_URL}statussen/b7218c76-7478-41e9-a088-54d2f914a713"
 
 
+# TODO replace real schema request with mock
 @requests_mock.Mocker(real_http=True)
 class CreateZaakTaskTests(TestCase):
     @classmethod
