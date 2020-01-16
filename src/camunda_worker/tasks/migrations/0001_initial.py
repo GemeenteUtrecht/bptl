@@ -7,21 +7,46 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='TaskMapping',
+            name="TaskMapping",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('topic_name', models.CharField(help_text='Topics determine which functions need to run for a task.', max_length=255, unique=True, verbose_name='topic name')),
-                ('callback', models.CharField(help_text='Python function or class to process a task', max_length=255, verbose_name='callback')),
-                ('active', models.BooleanField(default=True, verbose_name='active flag')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "topic_name",
+                    models.CharField(
+                        help_text="Topics determine which functions need to run for a task.",
+                        max_length=255,
+                        unique=True,
+                        verbose_name="topic name",
+                    ),
+                ),
+                (
+                    "callback",
+                    models.CharField(
+                        help_text="Python function or class to process a task",
+                        max_length=255,
+                        verbose_name="callback",
+                    ),
+                ),
+                (
+                    "active",
+                    models.BooleanField(default=True, verbose_name="active flag"),
+                ),
             ],
             options={
-                'verbose_name': 'task mapping',
-                'verbose_name_plural': 'task mappings',
+                "verbose_name": "task mapping",
+                "verbose_name_plural": "task mappings",
             },
         ),
     ]
