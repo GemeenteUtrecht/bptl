@@ -22,6 +22,14 @@ class Task:
 
 
 class CreateZaakTask(Task):
+    """
+    This task creates zaak in ZRC API and sets initial status for this zaak
+
+    Required process variables:
+    * zaaktype
+    * organisatieRSIN
+    """
+
     def create_zaak(self) -> dict:
         zrc = Service.objects.get(api_type=APITypes.zrc)
         client = zrc.build_client()
@@ -65,5 +73,34 @@ class CreateZaakTask(Task):
 
         # save result
         result_data = {"zaak": zaak["url"]}
+        self.save_result(result_data)
+        return result_data
+
+
+class CreateStatusTask(Task):
+    """
+    This task creates new status for particular zaak in ZRC API
+
+    Required process variables:
+    * zaak
+    * statustype
+    """
+
+    def create_status(self) -> dict:
+        zrc = Service.objects.get(api_type=APITypes.zrc)
+        zrc_client = zrc.build_client()
+        data = {
+            "zaak": self.task.flat_variables["zaak"],
+            "statustype": self.task.flat_variables["statustype"],
+            "datumStatusGezet": timezone.now().isoformat(),
+        }
+        status = zrc_client.create("status", data)
+        return status
+
+    def perform(self):
+        status = self.create_status()
+
+        # save result
+        result_data = {"status": status["url"]}
         self.save_result(result_data)
         return result_data
