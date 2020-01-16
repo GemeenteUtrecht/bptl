@@ -72,6 +72,9 @@ class TaskRegistry:
     def __iter__(self):
         return iter(self._registry.values())
 
+    def __getitem__(self, key: str):
+        return self._registry[key]
+
     def autodiscover(self):
         autodiscover_modules("tasks", register_to=self)
 
