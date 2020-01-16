@@ -80,6 +80,7 @@ class CreateZaakTask(Task):
         return result_data
 
 
+@register
 class CreateStatusTask(Task):
     """
     This task creates new status for particular zaak in ZRC API
