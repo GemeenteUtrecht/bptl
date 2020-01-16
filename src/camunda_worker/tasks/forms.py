@@ -12,7 +12,7 @@ from .registry import register
 def get_callback_choices() -> Tuple[Tuple[str, str]]:
     for task in register:
         task_label = format_html(
-            '<span class="task-name">{name}<span>'
+            '<span class="task-name">{name}</span>'
             "<br>"
             '<span class="task-doc">{doc}</span>',
             name=task.name,

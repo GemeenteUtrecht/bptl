@@ -47,7 +47,9 @@ class TaskRegistry:
 
         # check the expected type hint
         param = list(sig.parameters.values())[0]
-        if param.annotation and not issubclass(param.annotation, FetchedTask):
+        if param.annotation is not inspect._empty and not issubclass(
+            param.annotation, FetchedTask
+        ):
             raise TypeError(
                 f"The '{param.name}' typehint does not appear to be a FetchedTask"
             )
