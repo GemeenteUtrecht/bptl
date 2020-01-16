@@ -55,10 +55,13 @@ class TaskRegistry:
         dotted_path = f"{func_or_class.__module__}.{func_or_class.__qualname__}"
         self._registry[dotted_path] = Task(
             dotted_path=dotted_path,
-            name=func_or_class.__class__,
+            name=func_or_class.__name__,
             documentation=inspect.getdoc(func_or_class),
             func=func_or_class,
         )
+
+    def __iter__(self):
+        return iter(self._registry.values())
 
     def autodiscover(self):
         autodiscover_modules("tasks", register_to=self)
