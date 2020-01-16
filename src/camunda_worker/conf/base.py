@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     # Project applications.
     "camunda_worker.accounts",
     "camunda_worker.external_tasks",
+    "camunda_worker.tasks",
     "camunda_worker.utils",
 ]
 
