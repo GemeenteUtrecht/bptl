@@ -16,7 +16,7 @@ class Task:
     dotted_path: str
     name: str
     documentation: str
-    func: callable
+    callback: callable
 
 
 class TaskRegistry:
@@ -52,12 +52,19 @@ class TaskRegistry:
                 f"The '{param.name}' typehint does not appear to be a FetchedTask"
             )
 
+        # check that classes have a perform method
+        if inspect.isclass(func_or_class):
+            if not hasattr(func_or_class, "perform"):
+                raise TypeError(
+                    f"The '{func_or_class}' class must have a `perform` method"
+                )
+
         dotted_path = f"{func_or_class.__module__}.{func_or_class.__qualname__}"
         self._registry[dotted_path] = Task(
             dotted_path=dotted_path,
             name=func_or_class.__name__,
-            documentation=inspect.getdoc(func_or_class),
-            func=func_or_class,
+            documentation=inspect.getdoc(func_or_class) or "- docstring missing -",
+            callback=func_or_class,
         )
 
     def __iter__(self):
