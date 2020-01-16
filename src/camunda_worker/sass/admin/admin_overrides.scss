@@ -168,3 +168,8 @@ div.breadcrumbs {
   color: $color_dark !important;
   font-weight: bold !important;
 }
+
+// django-admin-index override
+.dashboard .dropdown-menu {
+  top: unset;
+}
