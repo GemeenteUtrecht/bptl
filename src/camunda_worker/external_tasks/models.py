@@ -10,6 +10,8 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from .constants import Statuses
+
 
 def get_worker_id() -> str:
     prefix = "camunda-worker"
@@ -42,9 +44,17 @@ class FetchedTask(models.Model):
         ),
     )
     priority = models.PositiveIntegerField(_("priority"), null=True, blank=True)
-    task_id = models.CharField(_("task id"), max_length=50,)
+    task_id = models.CharField(_("task id"), max_length=50)
     lock_expires_at = models.DateTimeField(_("lock expires at"), null=True, blank=True)
     variables = JSONField(default=dict)
+    status = models.CharField(
+        _("status"),
+        max_length=50,
+        choices=Statuses.choices,
+        default=Statuses.initial,
+        help_text=_("The current status of task processing"),
+    )
+    result_variables = JSONField(default=dict)
 
     class Meta:
         verbose_name = _("fetched task")
