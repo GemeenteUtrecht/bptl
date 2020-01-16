@@ -2,10 +2,12 @@ import logging
 
 from camunda_worker.external_tasks.camunda import complete_task
 from camunda_worker.external_tasks.models import FetchedTask
+from camunda_worker.tasks.registry import register
 
 logger = logging.getLogger(__name__)
 
 
+@register
 def dummy(task: FetchedTask) -> None:
     """
     A dummy task to demonstrate the registry machinery.
