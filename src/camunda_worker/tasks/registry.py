@@ -69,6 +69,8 @@ class TaskRegistry:
             callback=func_or_class,
         )
 
+        return func_or_class
+
     def __iter__(self):
         return iter(self._registry.values())
 
