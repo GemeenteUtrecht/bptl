@@ -24,6 +24,25 @@ Example:
 
     python src/manage.py fetch_and_lock_tasks 1
 
+``show_task_registry``
+----------------------
+
+A command to quickly see which tasks are registered in the project.
+
+Example:
+
+.. code-block:: bash
+
+    python src/manage.py show_task_registry
+
+    camunda_worker.dummy.tasks.dummy
+
+      A dummy task to demonstrate the registry machinery.
+
+      The task receives the :class:`FetchedTask` instance and logs some information,
+      after which it completes the task.
+
+
 Python API
 ==========
 

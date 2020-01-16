@@ -7,6 +7,8 @@ from zgw_consumers.models import APITypes, Service
 from camunda_worker.external_tasks.constants import Statuses
 from camunda_worker.external_tasks.models import FetchedTask
 
+from .registry import register
+
 
 class Task:
     def __init__(self, task: FetchedTask):
@@ -21,6 +23,7 @@ class Task:
         self.task.save()
 
 
+@register
 class CreateZaakTask(Task):
     """
     This task creates zaak in ZRC API and sets initial status for this zaak
@@ -77,6 +80,7 @@ class CreateZaakTask(Task):
         return result_data
 
 
+@register
 class CreateStatusTask(Task):
     """
     This task creates new status for particular zaak in ZRC API

@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "camunda_worker.accounts",
     "camunda_worker.external_tasks",
     "camunda_worker.tasks",
+    "camunda_worker.dummy",
     "camunda_worker.utils",
 ]
 
