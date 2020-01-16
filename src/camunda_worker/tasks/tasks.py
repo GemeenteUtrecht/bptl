@@ -4,20 +4,22 @@ from django.utils import timezone
 
 from zgw_consumers.models import APITypes, Service
 
+from camunda_worker.external_tasks.models import FetchedTask
+
 
 class Task:
-    def __init__(self, task):
+    def __init__(self, task: FetchedTask):
         self.task = task
 
-    def perform(self):
+    def perform(self) -> dict:
         raise NotImplementedError("subclasses of Task must provide a perform() method")
 
 
 class CreateZaakTask(Task):
     def create_zaak(self) -> dict:
-        zrc = Service.objects.filter(api_type=APITypes.zrc)
+        zrc = Service.objects.get(api_type=APITypes.zrc)
         client = zrc.build_client()
-        variables = self.task.flat_variables()
+        variables = self.task.flat_variables
         today = date.today().strftime("%Y-%m-%d")
         data = {
             "zaaktype": variables["zaaktype"],
@@ -33,18 +35,18 @@ class CreateZaakTask(Task):
 
     def create_status(self, zaak) -> dict:
         # get statustype for initial status
-        ztc = Service.objects.filter(api_type=APITypes.ztc)
+        ztc = Service.objects.get(api_type=APITypes.ztc)
         ztc_client = ztc.build_client()
         statustypen = ztc_client.list(
-            "status", {"zaaktype": self.task.flat_variables()["zaaktype"]}
-        )
-        statustype = next(filter(lambda x: x["statustypevolgnummer"] == 1, statustypen))
+            "statustype", {"zaaktype": self.task.flat_variables["zaaktype"]}
+        )["results"]
+        statustype = next(filter(lambda x: x["volgnummer"] == 1, statustypen))
 
         # create status
-        zrc = Service.objects.filter(api_type=APITypes.zrc)
+        zrc = Service.objects.get(api_type=APITypes.zrc)
         zrc_client = zrc.build_client()
         data = {
-            "zaaK": zaak["url"],
+            "zaak": zaak["url"],
             "statustype": statustype["url"],
             "datumStatusGezet": timezone.now().isoformat(),
         }
@@ -55,9 +57,3 @@ class CreateZaakTask(Task):
         zaak = self.create_zaak()
         self.create_status(zaak)
         return {"zaak": zaak["url"]}
-
-
-# mapping of task topic and correspondent python class to perform the task
-MAPPING = {
-    "zaak-initialize": CreateZaakTask,
-}
