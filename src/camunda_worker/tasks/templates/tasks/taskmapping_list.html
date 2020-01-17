@@ -1,5 +1,5 @@
 {% extends "master.html" %}
-{% load i18n %}
+{% load i18n tasks %}
 
 {% block content-header-subtitle %}{% trans "View active configured topic listeners" %}{% endblock %}
 {% block content-header-title %}{% trans "Active listeners" %}{% endblock %}
@@ -11,12 +11,47 @@
     You can see which topics are handled by this application and what the handler
     function does for each topic. Topics are unique, but the same handler may be
     executed for different topics.
+    <br>
+    <br>
+    Task handlers often require some variables to be set in the process before they can
+    be invoked. The task documentation describes those requirements.
 {% endblocktrans %}
 {% endblock %}
 
 
 {% block content %}
-<article class="list">
-    {{ object_list }}
-</article>
+<section class="list">
+
+    <header class="task-details">
+        <div class="task-details__topic">
+            <strong>{% trans "Topic" %}</strong>
+            <span class="help-text">
+            {% blocktrans trimmed %}
+                External tasks in Camunda get assigned to a particular topic, describing
+                the unit of work that needs to be performed. This is where we match
+                the handler for a topic.
+            {% endblocktrans %}
+            </span>
+        </div>
+
+        <div class="task-details__description">
+            <strong>{% trans "Handler and description" %}</strong>
+        </div>
+    </header>
+
+    {% for task_mapping in tasks %}
+        {% get_registry_task task_mapping as task %}
+
+        <article class="task-details">
+            <div class="task-details__topic">
+                {{ task_mapping.topic_name }}
+            </div>
+            <div class="task-details__description">
+                <code class="task-details__handler">{{ task.dotted_path }}</code>
+                <p class="task-details__description-text">{{ task.documentation|linebreaksbr }}</p>
+            </div>
+        </article>
+    {% endfor %}
+
+</section>
 {% endblock %}

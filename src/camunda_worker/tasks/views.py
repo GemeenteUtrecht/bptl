@@ -9,3 +9,4 @@ class TasksView(ListView):
     """
 
     queryset = TaskMapping.objects.filter(active=True)
+    context_object_name = "tasks"
