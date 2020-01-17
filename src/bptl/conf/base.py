@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     # 'django.contrib.sitemaps',
     # External applications.
     "axes",
+    "django_auth_adfs",
+    "django_auth_adfs_db",
     "sniplates",
     "hijack",
     "compat",  # Part of hijack
@@ -269,11 +271,13 @@ AUTH_USER_MODEL = "accounts.User"
 # Allow logging in with both username+password and email+password
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesBackend",
+    "django_auth_adfs_db.backends.AdfsAuthCodeBackend",
     "bptl.accounts.backends.UserModelEmailBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-LOGIN_URL = "admin:login"
+LOGIN_URL = reverse_lazy("admin:login")
+LOGIN_REDIRECT_URL = reverse_lazy("index")
 
 #
 # Custom settings
@@ -332,6 +336,11 @@ HIJACK_REGISTER_ADMIN = False
 # This is a CSRF-security risk.
 # See: http://django-hijack.readthedocs.io/en/latest/configuration/#allowing-get-method-for-hijack-views
 HIJACK_ALLOW_GET_REQUESTS = True
+
+#
+# AUTH-ADFS
+#
+AUTH_ADFS = {"SETTINGS_CLASS": "django_auth_adfs_db.settings.Settings"}
 
 # Sentry SDK
 SENTRY_DSN = os.getenv("SENTRY_DSN")
