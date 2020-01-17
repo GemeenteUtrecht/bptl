@@ -39,6 +39,7 @@ Usage
    :maxdepth: 2
 
    usage
+   api
 
 
 Developers

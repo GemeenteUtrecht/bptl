@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.utils import timezone
 
 from .models import FetchedTask
 
@@ -11,8 +10,6 @@ class FetchedTaskAdmin(admin.ModelAdmin):
     search_fields = ("task_id", "worker_id")
 
     def is_expired(self, obj) -> bool:
-        if obj.lock_expires_at is None:
-            return False
-        return obj.lock_expires_at <= timezone.now()
+        return obj.is_expired
 
     is_expired.boolean = True
