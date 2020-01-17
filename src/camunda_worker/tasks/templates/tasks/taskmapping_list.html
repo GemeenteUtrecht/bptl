@@ -1,0 +1,22 @@
+{% extends "master.html" %}
+{% load i18n %}
+
+{% block content-header-subtitle %}{% trans "View active configured topic listeners" %}{% endblock %}
+{% block content-header-title %}{% trans "Active listeners" %}{% endblock %}
+{% block content-header-explanation %}
+{% blocktrans trimmed %}
+    Inspect which topic listeners are configured.
+    <br>
+    <br>
+    You can see which topics are handled by this application and what the handler
+    function does for each topic. Topics are unique, but the same handler may be
+    executed for different topics.
+{% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+<article class="list">
+    {{ object_list }}
+</article>
+{% endblock %}

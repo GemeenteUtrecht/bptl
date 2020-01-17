@@ -37,6 +37,7 @@ urlpatterns = [
     ),
     # Simply show the master template.
     path("", TemplateView.as_view(template_name="index.html"), name="index"),
+    path("tasks/", include("camunda_worker.tasks.urls")),
 ]
 
 # NOTE: The staticfiles_urlpatterns also discovers static files (ie. no need to run collectstatic). Both the static
