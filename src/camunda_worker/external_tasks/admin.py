@@ -10,6 +10,6 @@ class FetchedTaskAdmin(admin.ModelAdmin):
     search_fields = ("task_id", "worker_id")
 
     def is_expired(self, obj) -> bool:
-        return obj.is_expired
+        return obj.expired
 
     is_expired.boolean = True
