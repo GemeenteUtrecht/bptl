@@ -21,6 +21,12 @@
     TODO: show dashboard
 </article>
 
+<article class="index">
+    <a class="index__item" href="{% url 'tasks:task-list' %}">
+        {% trans "View tasks" %}
+    </a>
+</article>
+
 <section class="index-admin">
     <span>Go to <a href="{% url 'admin:index' %}">admin</a></span>
 </section>
