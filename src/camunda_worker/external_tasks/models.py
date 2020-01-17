@@ -8,6 +8,7 @@ import uuid
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from .constants import Statuses
@@ -62,6 +63,12 @@ class FetchedTask(models.Model):
 
     def __str__(self):
         return f"{self.topic_name} / {self.task_id}"
+
+    @property
+    def expired(self) -> bool:
+        if self.lock_expires_at is None:
+            return False
+        return self.lock_expires_at <= timezone.now()
 
     @property
     def flat_variables(self) -> dict:

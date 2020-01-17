@@ -38,15 +38,19 @@ def execute(task: FetchedTask, registry: TaskRegistry = register) -> None:
     task_mapping = TaskMapping.objects.filter(topic_name=task.topic_name).first()
     if task_mapping is None:
         raise NoCallback(
-            f"Could not find a topic/callback mapping for topic {task.topic_name}"
+            f"Could not find a topic/callback mapping for topic '{task.topic_name}'."
         )
 
     try:
         handler = registry[task_mapping.callback]
     except KeyError as exc:
         raise NoCallback(
-            f"Callback '{task_mapping.callback}' is not in the provided registry"
+            f"Callback '{task_mapping.callback}' is not in the provided registry."
         ) from exc
+
+    # check for expiry
+    if task.expired:
+        raise TaskExpired(f"The task {task} expired before it could be handled.")
 
     # actually call the task
     callback = handler.callback
