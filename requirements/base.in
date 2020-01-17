@@ -12,6 +12,7 @@ zgw-consumers
 # Framework libraries
 django < 3.0
 django-admin-index
+django-auth-adfs-db
 django-axes
 django-camunda
 django-choices

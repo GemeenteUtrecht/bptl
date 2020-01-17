@@ -15,12 +15,16 @@ black==19.10b0
 bumpversion==0.5.3
 celery==4.4.0
 certifi==2019.11.28
+cffi==1.13.2
 chardet==3.0.4
 click==7.0                # via black, pip-tools
 coverage==4.5.4
+cryptography==2.8
 cssselect==1.1.0
 django-admin-index==1.2.3
 django-appconf==1.0.3
+django-auth-adfs-db==0.1
+django-auth-adfs==1.3.1
 django-axes==5.2.2
 django-camunda==0.4.0
 django-choices==1.7.1
@@ -68,6 +72,7 @@ pip-tools==4.4.1
 polib==1.1.0
 psycopg2==2.8.4
 pycodestyle==2.5.0        # via flake8
+pycparser==2.19
 pyflakes==2.1.1           # via flake8
 pygments==2.5.2
 pyjwt==1.7.1
