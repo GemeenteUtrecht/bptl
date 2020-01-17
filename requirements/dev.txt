@@ -19,7 +19,7 @@ chardet==3.0.4
 click==7.0                # via black, pip-tools
 coverage==4.5.4
 cssselect==1.1.0
-django-admin-index==1.2.2
+django-admin-index==1.2.3
 django-appconf==1.0.3
 django-axes==5.2.2
 django-camunda==0.3.1
