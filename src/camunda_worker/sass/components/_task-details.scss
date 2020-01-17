@@ -1,0 +1,24 @@
+@import "../lib/colors";
+
+.task-details {
+  display: flex;
+  padding: 1em 2em;
+
+  &#{&}--header {
+    .task-details__topic,
+    .task-details__description {
+      color: $font-color;
+    }
+  }
+
+  & &__topic {
+    display: block;
+    width: 30%;
+    color: $theme-primary-color;
+  }
+
+  & &__description {
+    display: block;
+    width: 60%;
+  }
+}

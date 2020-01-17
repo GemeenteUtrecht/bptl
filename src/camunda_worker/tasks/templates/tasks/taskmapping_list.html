@@ -22,9 +22,10 @@
 {% block content %}
 <section class="list">
 
-    <header class="task-details">
+    <header class="task-details task-details--header">
         <div class="task-details__topic">
             <strong>{% trans "Topic" %}</strong>
+            <!--
             <span class="help-text">
             {% blocktrans trimmed %}
                 External tasks in Camunda get assigned to a particular topic, describing
@@ -32,6 +33,7 @@
                 the handler for a topic.
             {% endblocktrans %}
             </span>
+            -->
         </div>
 
         <div class="task-details__description">
@@ -43,11 +45,11 @@
         {% get_registry_task task_mapping as task %}
 
         <article class="task-details">
-            <div class="task-details__topic">
+            <code class="task-details__topic">
                 {{ task_mapping.topic_name }}
-            </div>
+            </code>
             <div class="task-details__description">
-                <code class="task-details__handler">{{ task.dotted_path }}</code>
+                <code class="task-details__handler" title="{% trans 'Responsible code' %}">{{ task.dotted_path }}</code>
                 <p class="task-details__description-text">{{ task.documentation|linebreaksbr }}</p>
             </div>
         </article>
