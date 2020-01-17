@@ -77,6 +77,15 @@ class TaskRegistry:
     def __getitem__(self, key: str):
         return self._registry[key]
 
+    def get_for(self, func_or_class: callable) -> str:
+        """
+        Retrieve the python dotted path for a given callable.
+        """
+        reverse = {
+            task.callback: dotted_path for dotted_path, task in self._registry.items()
+        }
+        return reverse[func_or_class]
+
     def autodiscover(self):
         autodiscover_modules("tasks", register_to=self)
 
