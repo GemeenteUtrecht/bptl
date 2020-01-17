@@ -1,3 +1,5 @@
+import os
+
 from django.test import TestCase
 
 from camunda_worker.external_tasks.models import FetchedTask
