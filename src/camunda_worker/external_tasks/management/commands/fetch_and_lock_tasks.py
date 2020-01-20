@@ -12,5 +12,5 @@ class Command(BaseCommand):
         )
 
     def handle(self, **options):
-        worker_id, amount = fetch_and_lock(options["max_tasks"])
+        worker_id, amount, tasks = fetch_and_lock(options["max_tasks"])
         self.stdout.write(f"{amount} task(s) saved with worker ID {worker_id}")

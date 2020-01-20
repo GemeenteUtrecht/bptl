@@ -16,7 +16,7 @@ TOPIC = "zaak-initialize"
 LOCK_DURATION = 60 * 10  # 10 minutes
 
 
-def fetch_and_lock(max_tasks: int) -> Tuple[str, int]:
+def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
     """
     Fetch and lock a number of external tasks.
 
@@ -53,9 +53,9 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int]:
             )
         )
 
-    FetchedTask.objects.bulk_create(fetched)
+    tasks = FetchedTask.objects.bulk_create(fetched)
 
-    return (worker_id, len(fetched))
+    return (worker_id, len(fetched), tasks)
 
 
 def complete_task(
