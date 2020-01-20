@@ -13,8 +13,13 @@
   text-align: center;
 
   &#{&}--submit {
+    display: block;
     background: $theme-button-color;
     color: $font-color;
+    text-decoration: none;
+  }
+
+  &#{&}--float-right {
     float: right;
   }
 
