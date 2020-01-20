@@ -1,0 +1,33 @@
+{% extends "master.html" %}
+{% load i18n tasks sniplates %}
+
+{% block content-header-subtitle %}{% trans "Configure a new topic listener" %}{% endblock %}
+{% block content-header-title %}{% trans "Add listener" %}{% endblock %}
+{% block content-header-explanation %}
+{% blocktrans trimmed %}
+    Connect an executable function to a topic name.
+    <br>
+    Topic names are defined in the Camunda process model - look for the External Tasks
+    and determine the configured topic.
+{% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+<form action="." method="post">
+    {% csrf_token %}
+
+    {% load_widgets form='tasks/sniplates/task_form.html' %}
+
+    {% form_field form.topic_name %}
+    {% form_field form.callback "form:CallbackSelect" %}
+
+    <div class="actions-row">
+        <button type="submit" class="button button--submit">
+            {% trans "Connect listener to topic" %}
+        </button>
+    </div>
+</form>
+
+
+{% endblock %}
