@@ -10,12 +10,14 @@ from camunda_worker.external_tasks.models import FetchedTask
 from .registry import register
 
 
-class Task:
+class PerformTask:
     def __init__(self, task: FetchedTask):
         self.task = task
 
     def perform(self) -> dict:
-        raise NotImplementedError("subclasses of Task must provide a perform() method")
+        raise NotImplementedError(
+            "subclasses of PerformTask must provide a perform() method"
+        )
 
     def save_result(self, result_data: dict):
         self.task.status = Statuses.completed
@@ -24,7 +26,7 @@ class Task:
 
 
 @register
-class CreateZaakTask(Task):
+class CreateZaakTask(PerformTask):
     """
     This task creates zaak in ZRC API and sets initial status for this zaak
 
@@ -81,7 +83,7 @@ class CreateZaakTask(Task):
 
 
 @register
-class CreateStatusTask(Task):
+class CreateStatusTask(PerformTask):
     """
     This task creates new status for particular zaak in ZRC API
 
@@ -111,7 +113,7 @@ class CreateStatusTask(Task):
 
 
 @register
-class CreateResultaatTask(Task):
+class CreateResultaatTask(PerformTask):
     """
         This task creates new resultaat for particular zaak in ZRC API
 
