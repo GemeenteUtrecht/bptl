@@ -1,7 +1,10 @@
 // THIS IS A GULP GENERATED FILE!!!
+
+// globals
 @import "body";
 @import "a";
 
+// generic components
 @import "base";
 @import "button";
 @import "content-header";
@@ -12,4 +15,7 @@
 @import "footer";
 @import "index";
 
+@import "concept-explanation";
+
+// application specific components
 @import "task-details";
