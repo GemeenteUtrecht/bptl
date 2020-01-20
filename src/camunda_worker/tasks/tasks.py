@@ -28,11 +28,19 @@ class PerformTask:
 @register
 class CreateZaakTask(PerformTask):
     """
-    This task creates zaak in ZRC API and sets initial status for this zaak
+    Create a ZAAK in the configured Zaken API and set the initial status.
+
+    The initial status is the STATUSTYPE with ``volgnummer`` equal to 1 for the
+    ZAAKTYPE.
 
     Required process variables:
-    * zaaktype
-    * organisatieRSIN
+
+    * zaaktype: the full URL of the ZAAKTYPE
+    * organisatieRSIN: RSIN of the organisation
+
+    The task sets the process variables:
+
+    * zaak: the full URL of the created ZAAK
     """
 
     def create_zaak(self) -> dict:
@@ -85,11 +93,16 @@ class CreateZaakTask(PerformTask):
 @register
 class CreateStatusTask(PerformTask):
     """
-    This task creates new status for particular zaak in ZRC API
+    Create a new STATUS for the ZAAK in the process.
 
     Required process variables:
-    * zaak
-    * statustype
+
+    * zaak: full URL of the ZAAK to create a new status for
+    * statustype: full URL of the STATUSTYPE to set
+
+    The task sets the process variables:
+
+    * status: the full URL of the created STATUS
     """
 
     def create_status(self) -> dict:
@@ -115,15 +128,24 @@ class CreateStatusTask(PerformTask):
 @register
 class CreateResultaatTask(PerformTask):
     """
-        This task creates new resultaat for particular zaak in ZRC API
+    Set the RESULTAAT for the ZAAK in the process.
 
-        Required process variables:
-        * zaak
-        * resultaattype
+    A resultaat is required to be able to close a zaak. A zaak can only have one
+    resultaat.
 
-        Optional process variables:
-        * toelichting
-        """
+    Required process variables:
+
+    * zaak: full URL of the ZAAK to set the RESULTAAT for
+    * resultaattype: full URL of the RESULTAATTYPE to set
+
+    Optional process variables:
+
+    * toelichting
+
+    The task sets the process variables:
+
+    * resultaat: the full URL of the created RESULTAAT
+    """
 
     def create_resultaat(self):
         zrc = Service.objects.get(api_type=APITypes.zrc)
