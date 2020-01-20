@@ -1,6 +1,9 @@
 from typing import Callable, List
-from tqdm import tqdm
+
+from django.conf import settings
 from django.core.management import BaseCommand
+
+from tqdm import tqdm
 
 from camunda_worker.tasks.api import complete, execute
 
@@ -28,7 +31,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Start '{name}' step", self.style.MIGRATE_LABEL)
 
         succeeded = []
-        for task in tqdm(tasks):
+        for task in tqdm(tasks, disable=settings.TQDM_DISABLED):
             try:
                 callback(task)
             except Exception as exc:
