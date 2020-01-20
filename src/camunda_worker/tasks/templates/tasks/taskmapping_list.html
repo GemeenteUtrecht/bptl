@@ -14,19 +14,6 @@
 
 
 {% block content %}
-<p class="concept-explanation">
-    <i class="concept-explanation__icon material-icons">help</i>
-    {% blocktrans trimmed %}
-        You can see which topics are handled by this application and what the handler
-        function does for each topic. Topics are unique, but the same handler may be
-        bound to different topics.
-        <br>
-        <br>
-        Task handlers often require some variables to be set in the process before they can
-        be invoked. The task documentation describes those requirements.
-    {% endblocktrans %}
-</p>
-
 <section class="list">
 
     <header class="task-details task-details--header">
@@ -63,4 +50,17 @@
     {% endfor %}
 
 </section>
+
+<p class="concept-explanation">
+    <i class="concept-explanation__icon material-icons">help</i>
+    {% blocktrans trimmed %}
+        You can see which topics are handled by this application and what the handler
+        function does for each topic. Topics are unique, but the same handler may be
+        bound to different topics.
+        <br>
+        <br>
+        Task handlers often require some variables to be set in the process before they can
+        be invoked. The task documentation describes those requirements.
+    {% endblocktrans %}
+</p>
 {% endblock %}
