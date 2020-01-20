@@ -1,0 +1,33 @@
+.task-callback-radio {
+  display: flex;
+  justify-content: space-between;
+
+  & &__choices {
+    width: 45%;
+
+    code {
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+  }
+
+  & &__description {
+    width: 50%;
+    padding-top: 0.5em;
+  }
+
+  & &__doc {
+    display: none;
+
+    &--selected {
+      display: block;
+    }
+
+    .task-name {
+      display: inline-block;
+      margin-bottom: .25em;
+      font-family: 'monospace';
+      font-weight: 600;
+    }
+  }
+}

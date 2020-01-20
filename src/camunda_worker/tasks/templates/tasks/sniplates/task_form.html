@@ -2,5 +2,33 @@
 {% load sniplates %}
 
 {% block CallbackSelect %}
-{% reuse "RadioSelect" %}
+<div class="form-field">
+    {% reuse '_label' %}
+
+    <div class="task-callback-radio">
+
+        <ul id="{{ id }}" class="radio-select task-callback-radio__choices">
+        {% for val, display in choices %}
+            <li class="radio-select__radio">
+                <label for="{{ id }}_{{ forloop.counter0 }}">
+                    <input name="{{ html_name }}" type="radio" id="{{ id }}_{{ forloop.counter0 }}" value="{{ val }}" {% if val == value|default:"" %}checked{% endif %}>
+                    <code>{{ val }}</code>
+                </label>
+            </li>
+        {% endfor %}
+        </ul>
+
+        <div class="task-callback-radio__description">
+            {% for val, display in choices %}
+                <div class="task-callback-radio__doc" id="{{ id }}_{{ forloop.counter0 }}-doc">
+                    {{ display }}
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    {% reuse '_help' %}
+    {% reuse '_errors' %}
+</div>
 {% endblock %}
