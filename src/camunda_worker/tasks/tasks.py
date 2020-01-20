@@ -108,3 +108,36 @@ class CreateStatusTask(Task):
         result_data = {"status": status["url"]}
         self.save_result(result_data)
         return result_data
+
+
+@register
+class CreateResultaatTask(Task):
+    """
+        This task creates new resultaat for particular zaak in ZRC API
+
+        Required process variables:
+        * zaak
+        * resultaattype
+
+        Optional process variables:
+        * toelichting
+        """
+
+    def create_resultaat(self):
+        zrc = Service.objects.get(api_type=APITypes.zrc)
+        zrc_client = zrc.build_client()
+        data = {
+            "zaak": self.task.flat_variables["zaak"],
+            "resultaattype": self.task.flat_variables["resultaattype"],
+            "toelichting": self.task.flat_variables.get("toelichting", ""),
+        }
+
+        resultaat = zrc_client.create("resultaat", data)
+        return resultaat
+
+    def perform(self):
+        resultaat = self.create_resultaat()
+
+        result_data = {"resultaat": resultaat["url"]}
+        self.save_result(result_data)
+        return result_data
