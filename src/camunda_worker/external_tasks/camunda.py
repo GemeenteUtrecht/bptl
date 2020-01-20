@@ -6,6 +6,7 @@ call.
 """
 from typing import List, Optional, Tuple
 
+from dateutil import parser
 from django_camunda.client import get_client_class
 
 from camunda_worker.utils.typing import Object, ProcessVariables
@@ -48,7 +49,7 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
                 topic_name=task["topic_name"],
                 priority=task["priority"],
                 task_id=task["id"],
-                lock_expires_at=task["lock_expiration_time"],
+                lock_expires_at=parser.parse(task["lock_expiration_time"]),
                 variables=task["variables"],
             )
         )
