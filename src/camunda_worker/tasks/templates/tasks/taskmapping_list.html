@@ -18,16 +18,7 @@
 
     <header class="task-details task-details--header">
         <div class="task-details__topic">
-            <strong>{% trans "Topic" %}</strong>
-            <!--
-            <span class="help-text">
-            {% blocktrans trimmed %}
-                External tasks in Camunda get assigned to a particular topic, describing
-                the unit of work that needs to be performed. This is where we match
-                the handler for a topic.
-            {% endblocktrans %}
-            </span>
-            -->
+            <strong>{% trans "Topics" %}</strong>
         </div>
 
         <div class="task-details__description">
@@ -36,12 +27,14 @@
     </header>
 
     {% for task_mapping in tasks %}
-        {% get_registry_task task_mapping as task %}
+        {% get_registry_task task_mapping.callback as task %}
 
         <article class="task-details">
-            <code class="task-details__topic">
-                {{ task_mapping.topic_name }}
-            </code>
+            <div class="task-details__topics">
+                {% for topic in task_mapping.topics %}
+                    <code class="task-details__topic">{{ topic }}</code>
+                {% endfor %}
+            </div>
             <div class="task-details__description">
                 <code class="task-details__handler" title="{% trans 'Responsible code' %}">{{ task.dotted_path }}</code>
                 <p class="task-details__description-text">{{ task.documentation|linebreaksbr }}</p>

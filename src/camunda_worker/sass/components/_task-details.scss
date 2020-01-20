@@ -4,22 +4,39 @@
   display: flex;
   justify-content: space-between;
   padding: 1em 2em;
+  border-bottom: solid 1px #eeeeee;
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   &#{&}--header {
+    border-bottom: none;
+
     .task-details__topic,
     .task-details__description {
       color: $font-color;
+      border-bottom: solid 2px $theme-primary-color;
     }
   }
 
-  & &__topic {
+  & &__topics {
     display: block;
     width: 33%;
     color: $theme-primary-color;
   }
 
+  & &__topic {
+    display: block;
+  }
+
   & &__description {
     display: block;
     width: 66%;
+  }
+
+  & &__handler {
+    font-weight: 600;
+    font-size: 1.2em;
   }
 }

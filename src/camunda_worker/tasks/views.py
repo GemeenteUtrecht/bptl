@@ -8,5 +8,5 @@ class TasksView(ListView):
     Display a list of active configured tasks.
     """
 
-    queryset = TaskMapping.objects.filter(active=True)
+    queryset = TaskMapping.objects.filter(active=True).annotate_topics()
     context_object_name = "tasks"

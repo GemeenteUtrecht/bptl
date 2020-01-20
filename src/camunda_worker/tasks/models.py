@@ -5,6 +5,8 @@ Database model to map task topics and python code objects to process related tas
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from .query import TaskQuerySet
+
 
 class TaskMapping(models.Model):
     topic_name = models.CharField(
@@ -19,6 +21,8 @@ class TaskMapping(models.Model):
         help_text=_("Python function or class to process a task"),
     )
     active = models.BooleanField(_("active flag"), default=True)
+
+    objects = TaskQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("task mapping")
