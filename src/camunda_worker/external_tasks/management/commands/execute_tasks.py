@@ -1,5 +1,5 @@
 from typing import Callable, List
-
+from tqdm import tqdm
 from django.core.management import BaseCommand
 
 from camunda_worker.tasks.api import complete, execute
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Start '{name}' step", self.style.MIGRATE_LABEL)
 
         succeeded = []
-        for task in tasks:
+        for task in tqdm(tasks):
             try:
                 callback(task)
             except Exception as exc:
