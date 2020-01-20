@@ -14,6 +14,16 @@
 {% endif %}
 {% endblock %}
 
+{% block _errors %}
+{% if errors %}
+<div class="errorlist">
+{% for error in errors %}
+    <div class="errorlist__error">{{ error }}</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
 {% block input %}
 {% with css_classes=css_classes|add:"form-field__input" %}
     {{ block.super }}
@@ -27,5 +37,6 @@ Widgets
     {% reuse '_label' %}
     {% reuse 'input' %}
     {% reuse '_help' %}
+    {% reuse '_errors' %}
 </div>
 {% endblock TextInput %}
