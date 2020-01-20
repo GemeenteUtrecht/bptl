@@ -2,6 +2,7 @@
 
 .task-details {
   display: flex;
+  justify-content: space-between;
   padding: 1em 2em;
 
   &#{&}--header {
@@ -13,12 +14,12 @@
 
   & &__topic {
     display: block;
-    width: 30%;
+    width: 33%;
     color: $theme-primary-color;
   }
 
   & &__description {
     display: block;
-    width: 60%;
+    width: 66%;
   }
 }
