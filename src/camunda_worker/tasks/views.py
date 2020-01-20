@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView
 
 from .forms import TaskMappingForm
@@ -17,3 +18,4 @@ class TasksView(ListView):
 class AddTaskView(LoginRequiredMixin, CreateView):
     model = TaskMapping
     form_class = TaskMappingForm
+    success_url = reverse_lazy("tasks:task-list")

@@ -14,7 +14,7 @@
 
 
 {% block content %}
-<form action="." method="post">
+<form action="." method="post" class="form">
     {% csrf_token %}
 
     {% load_widgets form='tasks/sniplates/task_form.html' %}
