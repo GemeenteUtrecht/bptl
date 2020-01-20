@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Callable, List
 
 from django.core.management import BaseCommand
@@ -57,18 +56,13 @@ class Command(BaseCommand):
         )
         self.stdout.write("\n")
 
-        # FIXME for test onlu - delete after
-        # task = FetchedTask.objects.order_by('-pk').first()
-        # task.status = 'initial'
-        # task.lock_expires_at = task.lock_expires_at + timedelta(days=10)
-        # task.save()
-        # fetched = [task]
-
         # execute task
         executed = []
         if fetched:
             executed = self.run_callback_for_tasks(fetched, execute, "execution")
 
         # complete task
-        # if executed:
-        #     completed = self.run_callback_for_tasks(executed, complete, "sending process")
+        if executed:
+            completed = self.run_callback_for_tasks(
+                executed, complete, "sending process"
+            )

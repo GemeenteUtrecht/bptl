@@ -4,7 +4,6 @@ import requests_mock
 from django_camunda.models import CamundaConfig
 from zgw_consumers.models import Service
 
-from camunda_worker.external_tasks.constants import Statuses
 from camunda_worker.external_tasks.models import FetchedTask
 
 from ..tasks import CreateStatusTask
