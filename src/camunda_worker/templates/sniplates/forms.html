@@ -1,0 +1,42 @@
+{% extends "sniplates/django.html" %}
+{% load sniplates i18n %}
+
+{% block _label %}
+<label class="form-field__label" for="{{ id_for_label }}">{{ label }}</label>
+{% endblock %}
+
+{% block _help %}
+{% if help_text %}
+    <span class="form-field__help">
+        <i class="material-icons">help</i>
+        {{ help_text }}
+    </span>
+{% endif %}
+{% endblock %}
+
+{% block _errors %}
+{% if errors %}
+<div class="errorlist">
+{% for error in errors %}
+    <div class="errorlist__error">{{ error }}</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block input %}
+{% with css_classes=css_classes|add:"form-field__input" %}
+    {{ block.super }}
+{% endwith %}
+{% endblock %}
+
+Widgets
+
+{% block TextInput %}
+<div class="form-field">
+    {% reuse '_label' %}
+    {% reuse 'input' %}
+    {% reuse '_help' %}
+    {% reuse '_errors' %}
+</div>
+{% endblock TextInput %}

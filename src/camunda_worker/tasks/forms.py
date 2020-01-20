@@ -28,9 +28,16 @@ class CallbackField(forms.ChoiceField):
         super().__init__(*args, **kwargs)
 
 
-class TaskMappingForm(forms.ModelForm):
+class AdminTaskMappingForm(forms.ModelForm):
     class Meta:
         model = TaskMapping
         fields = "__all__"
         field_classes = {"callback": CallbackField}
         widgets = {"callback": AdminRadioSelect}
+
+
+class TaskMappingForm(forms.ModelForm):
+    class Meta:
+        model = TaskMapping
+        fields = ("topic_name", "callback")
+        field_classes = {"callback": CallbackField}

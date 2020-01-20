@@ -1,0 +1,63 @@
+{% extends "master.html" %}
+{% load i18n tasks %}
+
+{% block content-header-subtitle %}{% trans "View configured topic listeners" %}{% endblock %}
+{% block content-header-title %}{% trans "Active listeners" %}{% endblock %}
+{% block content-header-explanation %}
+{% blocktrans trimmed %}
+    Inspect which topic listeners are configured.
+    <br>
+    A topic listener is an executable function that will only run for the configured
+    topic. External Tasks in Camunda get assigned to a topic.
+{% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+<section class="list">
+
+    <header class="task-details task-details--header">
+        <div class="task-details__topic">
+            <strong>{% trans "Topics" %}</strong>
+        </div>
+
+        <div class="task-details__description">
+            <strong>{% trans "Handler and description" %}</strong>
+        </div>
+    </header>
+
+    {% for task_mapping in tasks %}
+        {% get_registry_task task_mapping.callback as task %}
+
+        <article class="task-details">
+            <div class="task-details__topics">
+                {% for topic in task_mapping.topics %}
+                    <code class="task-details__topic">{{ topic }}</code>
+                {% endfor %}
+            </div>
+            <div class="task-details__description">
+                <code class="task-details__handler" title="{% trans 'Responsible code' %}">{{ task.dotted_path }}</code>
+                <p class="task-details__description-text">{{ task.documentation|linebreaksbr }}</p>
+            </div>
+        </article>
+    {% endfor %}
+
+</section>
+
+<div class="actions-row">
+    <a href="{% url 'tasks:task-create' %}" class="button button--submit">{% trans "Add listener" %}</a>
+</div>
+
+<p class="concept-explanation">
+    <i class="concept-explanation__icon material-icons">help</i>
+    {% blocktrans trimmed %}
+        You can see which topics are handled by this application and what the handler
+        function does for each topic. Topics are unique, but the same handler may be
+        bound to different topics.
+        <br>
+        <br>
+        Task handlers often require some variables to be set in the process before they can
+        be invoked. The task documentation describes those requirements.
+    {% endblocktrans %}
+</p>
+{% endblock %}

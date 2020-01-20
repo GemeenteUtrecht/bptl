@@ -1,0 +1,17 @@
+@import "../lib/colors";
+
+$concept-explanation-bg: $filter-background-color !default;
+
+.concept-explanation {
+  position: relative;
+  background: $concept-explanation-bg;
+  padding: 1em 2em;
+  max-width: 80%;
+  margin: 0 auto;
+
+  & &__icon {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+  }
+}

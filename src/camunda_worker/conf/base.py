@@ -266,6 +266,8 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
+LOGIN_URL = "admin:login"
+
 #
 # Custom settings
 #
