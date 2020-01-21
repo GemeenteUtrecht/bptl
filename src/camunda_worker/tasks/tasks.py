@@ -165,3 +165,39 @@ class CreateResultaatTask(PerformTask):
         result_data = {"resultaat": resultaat["url"]}
         self.save_result(result_data)
         return result_data
+
+
+@register
+class RelateDocumentToZaakTask(PerformTask):
+    """
+    Create relations between ZAAK and INFORMATIEOBJECT
+
+    Required process variables:
+
+    * zaak: full URL of the ZAAK
+    * informatieobject: full URL of the INFORMATIEOBJECT
+
+    The task sets the process variables:
+
+    * zaakinformatieobject: full URL of ZAAKINFORMATIEOBJECT
+    """
+
+    def relate_document(self) -> dict:
+        zrc = Service.objects.get(api_type=APITypes.zrc)
+        zrc_client = zrc.build_client()
+        data = {
+            "zaak": self.task.flat_variables["zaak"],
+            "informatieobject": self.task.flat_variables["informatieobject"],
+        }
+        zio = zrc_client.create("zaakinformatieobject", data)
+        return zio
+
+    def perform(self):
+        resultaat = self.relate_document()
+
+        result_data = {
+            "zaakinformatieobject": resultaat["url"],
+        }
+
+        self.save_result(result_data)
+        return result_data
