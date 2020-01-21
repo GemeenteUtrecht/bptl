@@ -203,10 +203,19 @@ class RelateDocumentToZaakTask(PerformTask):
 @register
 class CloseZaakTask(PerformTask):
     """
+    Close the ZAAK by setting the final STATUS.
 
-    * einddatum
-    * archiefnominatie
-    * archiefactiedatum
+    A ZAAK is required to have a RESULTAAT.
+
+    Required process variables:
+
+    * zaak: full URL of the ZAAK
+
+    The task sets the process variables:
+
+    * einddatum: date of closing the zaak
+    * archiefnominatie: shows if the zaak should be destroyed or stored permanently
+    * archiefactiedatum: date when the archived zaak should be destroyed or transferred to the archive
     """
 
     def close_zaak(self) -> dict:
