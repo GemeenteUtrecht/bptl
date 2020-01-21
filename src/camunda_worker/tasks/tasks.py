@@ -167,6 +167,7 @@ class CreateResultaatTask(PerformTask):
         return result_data
 
 
+@register
 class RelateDocumentToZaakTask(PerformTask):
     """
     Create relations between ZAAK and INFORMATIEOBJECT
