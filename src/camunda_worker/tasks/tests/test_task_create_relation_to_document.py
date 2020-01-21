@@ -4,7 +4,6 @@ import requests_mock
 from django_camunda.models import CamundaConfig
 from zgw_consumers.models import Service
 
-from camunda_worker.external_tasks.constants import Statuses
 from camunda_worker.external_tasks.models import FetchedTask
 
 from ..tasks import RelateDocumentToZaakTask
@@ -71,7 +70,6 @@ class CreateDocumentRelationTaskTests(TestCase):
         task.perform()
         self.fetched_task.refresh_from_db()
 
-        self.assertEqual(self.fetched_task.status, Statuses.completed)
         self.assertEqual(
             self.fetched_task.result_variables,
             {"zaakinformatieobject": ZAAKINFORMATIEOBJECT},
