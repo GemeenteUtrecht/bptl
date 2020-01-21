@@ -4,7 +4,6 @@ from django.utils import timezone
 
 from zgw_consumers.models import APITypes, Service
 
-from camunda_worker.external_tasks.constants import Statuses
 from camunda_worker.external_tasks.models import FetchedTask
 
 from .registry import register
@@ -20,7 +19,6 @@ class PerformTask:
         )
 
     def save_result(self, result_data: dict):
-        self.task.status = Statuses.completed
         self.task.result_variables = result_data
         self.task.save()
 

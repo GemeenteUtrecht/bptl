@@ -6,6 +6,7 @@ call.
 """
 from typing import List, Optional, Tuple
 
+from dateutil import parser
 from django_camunda.client import get_client_class
 
 from camunda_worker.utils.typing import Object, ProcessVariables
@@ -16,7 +17,7 @@ TOPIC = "zaak-initialize"
 LOCK_DURATION = 60 * 10  # 10 minutes
 
 
-def fetch_and_lock(max_tasks: int) -> Tuple[str, int]:
+def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
     """
     Fetch and lock a number of external tasks.
 
@@ -48,14 +49,14 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int]:
                 topic_name=task["topic_name"],
                 priority=task["priority"],
                 task_id=task["id"],
-                lock_expires_at=task["lock_expiration_time"],
+                lock_expires_at=parser.parse(task["lock_expiration_time"]),
                 variables=task["variables"],
             )
         )
 
-    FetchedTask.objects.bulk_create(fetched)
+    tasks = FetchedTask.objects.bulk_create(fetched)
 
-    return (worker_id, len(fetched))
+    return (worker_id, len(fetched), tasks)
 
 
 def complete_task(

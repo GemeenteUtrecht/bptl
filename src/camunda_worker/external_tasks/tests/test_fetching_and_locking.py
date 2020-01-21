@@ -13,6 +13,7 @@ from django_camunda.models import CamundaConfig
 
 from ..camunda import fetch_and_lock
 from ..models import FetchedTask
+from .utils import get_fetch_and_lock_response
 
 
 @requests_mock.Mocker()
@@ -28,29 +29,11 @@ class FetchAndLockTests(TestCase):
     def test_fetch_one(self, m):
         m.post(
             "https://some.camunda.com/engine-rest/external-task/fetchAndLock",
-            json=[
-                {
-                    "activityId": "anActivityId",
-                    "activityInstanceId": "anActivityInstanceId",
-                    "errorMessage": "anErrorMessage",
-                    "errorDetails": "anErrorDetails",
-                    "executionId": "anExecutionId",
-                    "id": "anExternalTaskId",
-                    "lockExpirationTime": "2015-10-06T16:34:42.00+0200",
-                    "processDefinitionId": "aProcessDefinitionId",
-                    "processDefinitionKey": "aProcessDefinitionKey",
-                    "processInstanceId": "aProcessInstanceId",
-                    "tenantId": "tenantOne",
-                    "retries": 3,
-                    "workerId": "aWorkerId",
-                    "priority": 4,
-                    "topicName": "createOrder",
-                    "businessKey": "aBusinessKey",
-                    "variables": {
-                        "orderId": {"type": "String", "value": "1234", "valueInfo": {}}
-                    },
+            json=get_fetch_and_lock_response(
+                variables={
+                    "orderId": {"type": "String", "value": "1234", "valueInfo": {}}
                 }
-            ],
+            ),
         )
 
         with patch(
