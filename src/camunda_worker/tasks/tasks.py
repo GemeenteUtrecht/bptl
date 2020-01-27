@@ -196,6 +196,61 @@ class RelateDocumentToZaakTask(PerformTask):
         result_data = {
             "zaakinformatieobject": resultaat["url"],
         }
+        self.save_result(result_data)
+        return result_data
+
+
+@register
+class CloseZaakTask(PerformTask):
+    """
+    Close the ZAAK by setting the final STATUS.
+
+    A ZAAK is required to have a RESULTAAT.
+
+    Required process variables:
+
+    * zaak: full URL of the ZAAK
+
+    The task sets the process variables:
+
+    * einddatum: date of closing the zaak
+    * archiefnominatie: shows if the zaak should be destroyed or stored permanently
+    * archiefactiedatum: date when the archived zaak should be destroyed or transferred to the archive
+    """
+
+    def close_zaak(self) -> dict:
+        # build clients
+        zrc = Service.objects.get(api_type=APITypes.zrc)
+        zrc_client = zrc.build_client()
+        ztc = Service.objects.get(api_type=APITypes.ztc)
+        ztc_client = ztc.build_client()
+
+        # get statustype to close zaak
+        zaak = self.task.flat_variables["zaak"]
+        zaaktype = zrc_client.retrieve("zaak", zaak)["zaaktype"]
+        statustypen = ztc_client.list("statustype", {"zaaktype": zaaktype})["results"]
+        statustype = next(filter(lambda x: x["isEindstatus"] is True, statustypen))
+
+        # create status to close zaak
+        data = {
+            "zaak": zaak,
+            "statustype": statustype,
+            "datumStatusGezet": timezone.now().isoformat(),
+        }
+        zrc_client.create("status", data)
+
+        # get zaak to receive calculated variables
+        zaak_closed = zrc_client.retrieve("zaak", zaak)
+        return zaak_closed
+
+    def perform(self):
+        resultaat = self.close_zaak()
+
+        result_data = {
+            "einddatum": resultaat["einddatum"],
+            "archiefnominatie": resultaat["archiefnominatie"],
+            "archiefactiedatum": resultaat["archiefactiedatum"],
+        }
 
         self.save_result(result_data)
         return result_data
