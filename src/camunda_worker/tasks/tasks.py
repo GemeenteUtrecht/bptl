@@ -2,8 +2,10 @@ from datetime import date
 
 from django.utils import timezone
 
+from zds_client.schema import get_operation_url
 from zgw_consumers.models import APITypes, Service
 
+from camunda_worker.external_tasks.constants import Statuses
 from camunda_worker.external_tasks.models import FetchedTask
 
 from .registry import register
@@ -19,6 +21,7 @@ class PerformTask:
         )
 
     def save_result(self, result_data: dict):
+        self.task.status = Statuses.completed
         self.task.result_variables = result_data
         self.task.save()
 
@@ -35,6 +38,9 @@ class CreateZaakTask(PerformTask):
 
     * zaaktype: the full URL of the ZAAKTYPE
     * organisatieRSIN: RSIN of the organisation
+
+    Optional process variables:
+    * NLXProcessId - a process id in NLX
 
     The task sets the process variables:
 
@@ -54,8 +60,21 @@ class CreateZaakTask(PerformTask):
             "registratiedatum": today,
             "startdatum": today,
         }
+        headers = {}
+        nlx_process_id = variables.get("NLXProcessId")
+        if nlx_process_id:
+            headers = {"X-NLX-Request-Process-Id": nlx_process_id}
 
-        zaak = client.create("zaak", data)
+        # use request() method since zds_client doesn't support extra headers in create()
+        url = get_operation_url(client.schema, "zaak_create", base_url=client.base_url)
+        zaak = client.request(
+            url,
+            "zaak_create",
+            method="POST",
+            json=data,
+            expected_status=201,
+            headers=headers,
+        )
         return zaak
 
     def create_status(self, zaak: dict) -> dict:
