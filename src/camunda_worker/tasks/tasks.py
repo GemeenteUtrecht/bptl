@@ -36,6 +36,11 @@ class CreateZaakTask(PerformTask):
     * zaaktype: the full URL of the ZAAKTYPE
     * organisatieRSIN: RSIN of the organisation
 
+    Optional process variables:
+
+    * NLXProcessId - a process id for purpose registration ("doelbinding")
+    * NLXSubjectIdentifier - a subject identifier for purpose registration ("doelbinding")
+
     The task sets the process variables:
 
     * zaak: the full URL of the created ZAAK
@@ -54,8 +59,15 @@ class CreateZaakTask(PerformTask):
             "registratiedatum": today,
             "startdatum": today,
         }
+        headers = {}
+        nlx_subject_identifier = variables.get("NLXSubjectIdentifier")
+        if nlx_subject_identifier:
+            headers["X-NLX-Request-Subject-Identifier"] = nlx_subject_identifier
+        nlx_process_id = variables.get("NLXProcessId")
+        if nlx_process_id:
+            headers["X-NLX-Request-Process-Id"] = nlx_process_id
 
-        zaak = client.create("zaak", data)
+        zaak = client.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
     def create_status(self, zaak: dict) -> dict:

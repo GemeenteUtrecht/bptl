@@ -45,6 +45,7 @@ class CreateZaakTaskTests(TestCase):
                     "value": "002220647",
                     "valueInfo": {},
                 },
+                "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
             },
         )
 
@@ -104,3 +105,11 @@ class CreateZaakTaskTests(TestCase):
         self.fetched_task.refresh_from_db()
 
         self.assertEqual(self.fetched_task.result_variables, {"zaak": ZAAK})
+
+        request_zaak = next(
+            filter(
+                lambda x: x.url == f"{ZRC_URL}zaken" and x.method == "POST",
+                m.request_history,
+            )
+        )
+        self.assertEqual(request_zaak.headers["X-NLX-Request-Process-Id"], "12345")

@@ -45,10 +45,9 @@ factory-boy==2.12.0
 faker==3.0.0
 flake8==3.7.9
 freezegun==0.3.12
-gemma-zds-client==0.13.0
+gemma-zds-client==0.13.1
 idna==2.8
 imagesize==1.2.0          # via sphinx
-importlib-metadata==1.4.0
 inflection==0.3.1
 isort==4.3.21
 jinja2==2.10.3            # via sphinx
@@ -56,7 +55,6 @@ kombu==4.6.7
 lxml==4.4.2
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
-more-itertools==8.1.0
 packaging==20.0           # via sphinx
 pathspec==0.7.0           # via black
 pillow==7.0.0
@@ -103,7 +101,6 @@ waitress==1.4.2
 webob==1.8.5
 webtest==2.0.33
 zgw-consumers==0.4.2
-zipp==2.0.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
