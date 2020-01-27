@@ -2,7 +2,6 @@ from datetime import date
 
 from django.utils import timezone
 
-from zds_client.schema import get_operation_url
 from zgw_consumers.models import APITypes, Service
 
 from camunda_worker.external_tasks.constants import Statuses
@@ -40,7 +39,9 @@ class CreateZaakTask(PerformTask):
     * organisatieRSIN: RSIN of the organisation
 
     Optional process variables:
-    * NLXProcessId - a process id in NLX
+
+    * NLXProcessId - a process id for purpose registration ("doelbinding")
+    * NLXSubjectIdentifier - a subject identifier for purpose registration ("doelbinding")
 
     The task sets the process variables:
 
@@ -61,20 +62,14 @@ class CreateZaakTask(PerformTask):
             "startdatum": today,
         }
         headers = {}
+        nlx_subject_identifier = variables.get("NLXSubjectIdentifier")
+        if nlx_subject_identifier:
+            headers["X-NLX-Request-Subject-Identifier"] = nlx_subject_identifier
         nlx_process_id = variables.get("NLXProcessId")
         if nlx_process_id:
-            headers = {"X-NLX-Request-Process-Id": nlx_process_id}
+            headers["X-NLX-Request-Process-Id"] = nlx_process_id
 
-        # use request() method since zds_client doesn't support extra headers in create()
-        url = get_operation_url(client.schema, "zaak_create", base_url=client.base_url)
-        zaak = client.request(
-            url,
-            "zaak_create",
-            method="POST",
-            json=data,
-            expected_status=201,
-            headers=headers,
-        )
+        zaak = client.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
     def create_status(self, zaak: dict) -> dict:
