@@ -13,6 +13,7 @@ django < 3.0
 django-admin-index
 django-axes
 django-camunda
+django_celery_beat
 django-hijack
 django-hijack-admin
 django-redis
