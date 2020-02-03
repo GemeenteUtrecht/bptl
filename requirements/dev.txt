@@ -23,7 +23,6 @@ django-admin-index==1.2.3
 django-appconf==1.0.3
 django-axes==5.2.2
 django-camunda==0.3.1
-django-celery-beat==1.5.0
 django-choices==1.7.1
 django-compat==1.0.15
 django-debug-toolbar==2.1
@@ -37,7 +36,6 @@ django-redis==4.11.0
 django-rosetta==0.9.3
 django-sniplates==0.6.0
 django-solo==1.1.3
-django-timezone-field==4.0
 django-webtest==1.9.7
 django==2.2.9
 docutils==0.16            # via sphinx
@@ -71,7 +69,6 @@ pygments==2.5.2           # via sphinx
 pyjwt==1.7.1
 pyparsing==2.4.6          # via packaging
 pyquery==1.4.1
-python-crontab==2.4.0
 python-dateutil==2.8.1
 python-decouple==3.3
 python-dotenv==0.10.3

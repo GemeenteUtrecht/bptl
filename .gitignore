@@ -26,6 +26,7 @@ local.py
 /log/*.log*
 /log/nginx/*.log*
 .env
+/celerybeat/
 
 # Doc builds
 doc/_build

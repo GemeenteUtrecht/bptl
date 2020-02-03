@@ -68,7 +68,6 @@ INSTALLED_APPS = [
     "solo",
     "django_camunda",
     "zgw_consumers",
-    "django_celery_beat",
     # Project applications.
     "camunda_worker.accounts",
     "camunda_worker.external_tasks",
@@ -360,6 +359,12 @@ ELASTIC_APM = {
 # Celery
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-
-# Silenced checks
-SILENCED_SYSTEM_CHECKS = ["utils.E001"]  # for django-celery-beat migrations
+# uncomment and modify beat example below when celery tasks are created
+# from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    # 'task-number-one': {
+    #     'task': 'app1.tasks.task_number_one',
+    #     'schedule': crontab(minute='*/15', hour='10-18'),
+    #     'args': (*args)
+    # },
+}
