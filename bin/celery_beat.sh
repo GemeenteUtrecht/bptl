@@ -4,8 +4,11 @@ set -e
 
 LOGLEVEL=${CELERY_LOGLEVEL:-INFO}
 
-echo "Starting celery worker"
-celery worker \
+mkdir -p ../celerybeat
+
+echo "Starting celery beat"
+celery beat \
     --app camunda_worker \
     -l $LOGLEVEL \
     --workdir src \
+    -s ../celerybeat/beat
