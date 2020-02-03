@@ -355,3 +355,16 @@ ELASTIC_APM = {
     "SECRET_TOKEN": os.getenv("ELASTIC_APM_SECRET_TOKEN", "default"),
     "SERVER_URL": os.getenv("ELASTIC_APM_SERVER_URL", "http://example.com"),
 }
+
+# Celery
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+# uncomment and modify beat example below when celery tasks are created
+# from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    # 'task-number-one': {
+    #     'task': 'app1.tasks.task_number_one',
+    #     'schedule': crontab(minute='*/15', hour='10-18'),
+    #     'args': (*args)
+    # },
+}
