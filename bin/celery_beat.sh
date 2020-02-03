@@ -4,7 +4,7 @@ set -e
 
 LOGLEVEL=${CELERY_LOGLEVEL:-INFO}
 
-mkdir -p ../celerybeat
+mkdir celerybeat
 
 echo "Starting celery beat"
 celery beat \
