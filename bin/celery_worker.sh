@@ -9,3 +9,4 @@ celery worker \
     --app camunda_worker \
     -l $LOGLEVEL \
     --workdir src \
+    -B

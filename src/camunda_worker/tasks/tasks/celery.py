@@ -11,6 +11,8 @@ from ..api import complete, execute
 
 logger = get_task_logger(__name__)
 
+__all__ = ("task_fetch_and_lock", "task_execute_and_complete")
+
 
 @app.task()
 def task_fetch_and_lock():
