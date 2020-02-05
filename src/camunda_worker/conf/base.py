@@ -3,6 +3,7 @@ import os
 # Django-hijack (and Django-hijack-admin)
 from django.urls import reverse_lazy
 
+from celery.schedules import crontab
 from sentry_sdk.integrations import django, redis
 
 try:
@@ -359,12 +360,14 @@ ELASTIC_APM = {
 # Celery
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-# uncomment and modify beat example below when celery tasks are created
-# from celery.schedules import crontab
+# Add a 10 minutes timeout to all Celery tasks.
+CELERY_TASK_SOFT_TIME_LIMIT = 600
 CELERY_BEAT_SCHEDULE = {
-    # 'task-number-one': {
-    #     'task': 'app1.tasks.task_number_one',
-    #     'schedule': crontab(minute='*/15', hour='10-18'),
-    #     'args': (*args)
-    # },
+    "task-pull": {
+        "task": "camunda_worker.tasks.tasks.celery.task_fetch_and_lock",
+        "schedule": crontab(minute="*", hour="10-18"),
+    },
 }
+
+# project application settings
+MAX_TASKS = 10
