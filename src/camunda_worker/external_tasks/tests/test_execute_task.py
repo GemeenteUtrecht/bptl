@@ -42,7 +42,7 @@ class ExecuteCommandTests(TestCase):
         )
         TaskMapping.objects.create(
             topic_name="zaak-initialize",
-            callback="camunda_worker.tasks.tasks.CreateZaakTask",
+            callback="camunda_worker.tasks.tasks.worker.CreateZaakTask",
         )
 
     def test_execute_one(self, m):
