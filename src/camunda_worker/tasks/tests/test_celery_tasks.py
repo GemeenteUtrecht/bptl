@@ -8,7 +8,7 @@ from ..tasks.celery import task_execute_and_complete, task_fetch_and_lock
 
 
 class RouteTaskTests(TestCase):
-    @patch("camunda_worker.tasks.tasks.celery.task_execute_and_complete")
+    @patch("camunda_worker.tasks.tasks.celery.task_execute_and_complete.delay")
     def test_task_fetch_and_lock(self, m_test_execute):
         task1, task2 = FetchedTaskFactory.create_batch(2, worker_id="aWorkerId")
 

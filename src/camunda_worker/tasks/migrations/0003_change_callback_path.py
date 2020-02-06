@@ -20,6 +20,4 @@ class Migration(migrations.Migration):
 
     dependencies = [("tasks", "0002_auto_20200120_1240")]
 
-    operations = [
-        migrations.RunPython(rewrite_callback_paths, migrations.RunPython.noop)
-    ]
+    operations = [migrations.RunPython(rewrite_callback_paths)]

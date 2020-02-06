@@ -36,7 +36,12 @@ def task_execute_and_complete(fetched_task_id):
     try:
         execute(fetched_task)
     except Exception as exc:
-        logger.debug("Task %r has failed with error: %r", fetched_task_id, exc, exc_info=True)
+        logger.warning(
+            "Task %r has failed during execution with error: %r",
+            fetched_task_id,
+            exc,
+            exc_info=True,
+        )
 
         fetched_task.status = Statuses.failed
         fetched_task.save()
@@ -49,7 +54,12 @@ def task_execute_and_complete(fetched_task_id):
     try:
         complete(fetched_task)
     except Exception as exc:
-        logger.debug("Task %r has failed with error: %r", fetched_task_id, exc)
+        logger.warning(
+            "Task %r has failed during sending process with error: %r",
+            fetched_task_id,
+            exc,
+            exc_info=True,
+        )
 
         fetched_task.status = Statuses.failed
         fetched_task.save()
