@@ -21,7 +21,7 @@ def task_fetch_and_lock():
     logger.info("fetched %r tasks with %r", num_tasks, worker_id)
 
     for task in tasks:
-        task_execute_and_complete(task.id)
+        task_execute_and_complete.delay(task.id)
     return num_tasks
 
 
@@ -36,7 +36,7 @@ def task_execute_and_complete(fetched_task_id):
     try:
         execute(fetched_task)
     except Exception as exc:
-        logger.debug("Task %r has failed with error: %r", fetched_task_id, exc)
+        logger.debug("Task %r has failed with error: %r", fetched_task_id, exc, exc_info=True)
 
         fetched_task.status = Statuses.failed
         fetched_task.save()
