@@ -6,7 +6,16 @@ from zgw_consumers.models import APITypes, Service
 
 from camunda_worker.external_tasks.models import FetchedTask
 
-from .registry import register
+from ..registry import register
+
+__all__ = (
+    "PerformTask",
+    "CreateZaakTask",
+    "CreateStatusTask",
+    "CreateResultaatTask",
+    "RelateDocumentToZaakTask",
+    "CloseZaakTask",
+)
 
 
 class PerformTask:
