@@ -1,8 +1,8 @@
 {
-  "name": "camunda_worker",
+  "name": "bptl",
   "version": "0.1.0",
   "description": "Frontend for the Camunda Worker project",
-  "main": "src/static/camunda_worker/js/camunda_worker.js",
+  "main": "src/static/bptl/js/bptl.js",
   "directories": {
     "doc": "doc"
   },

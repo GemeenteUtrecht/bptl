@@ -44,8 +44,8 @@ development machine.
 
    .. code-block:: bash
 
-       $ git clone git@bitbucket.org:maykinmedia/camunda_worker.git
-       $ cd camunda_worker
+       $ git clone git@github.com:GemeenteUtrecht/camunda-worker.git bptl
+       $ cd bptl
 
 3. Install all required libraries.
    **Tip:** You can use the ``bootstrap.py`` script to install the requiments
@@ -94,7 +94,7 @@ development machine.
 
 
 **Note:** If you are making local, machine specific, changes, add them to
-``src/camunda_worker/conf/local.py``. You can base this file on the
+``src/bptl/conf/local.py``. You can base this file on the
 example file included in the same directory.
 
 **Note:** You can run watch-tasks to compile `Sass`_ to CSS and `ECMA`_ to JS
@@ -114,7 +114,7 @@ When updating an existing installation:
 
    .. code-block:: bash
 
-       $ cd camunda_worker
+       $ cd bptl
        $ source env/bin/activate
 
 2. Update the code and libraries:
@@ -141,7 +141,7 @@ To run the test suite:
 
 .. code-block:: bash
 
-    $ python src/manage.py test camunda_worker
+    $ python src/manage.py test bptl
 
 Configuration via environment variables
 ---------------------------------------
@@ -152,9 +152,9 @@ file or as part of the ``(post)activate`` of your virtualenv.
 
 * ``SECRET_KEY``: the secret key to use. A default is set in ``dev.py``
 
-* ``DB_NAME``: name of the database for the project. Defaults to ``camunda_worker``.
-* ``DB_USER``: username to connect to the database with. Defaults to ``camunda_worker``.
-* ``DB_PASSWORD``: password to use to connect to the database. Defaults to ``camunda_worker``.
+* ``DB_NAME``: name of the database for the project. Defaults to ``bptl``.
+* ``DB_USER``: username to connect to the database with. Defaults to ``bptl``.
+* ``DB_PASSWORD``: password to use to connect to the database. Defaults to ``bptl``.
 * ``DB_HOST``: database host. Defaults to ``localhost``
 * ``DB_PORT``: database port. Defaults to ``5432``.
 
@@ -168,23 +168,23 @@ Docker
 The easiest way to get the project started is by using `Docker Compose`_.
 
 1. Clone or download the code from `Github`_ in a folder like
-   ``camunda_worker``:
+   ``bptl``:
 
    .. code-block:: bash
 
-       $ git clone git@bitbucket.org:maykinmedia/camunda_worker.git
-       Cloning into 'camunda_worker'...
+       $ git clone  git@github.com:GemeenteUtrecht/camunda-worker.git bptl
+       Cloning into 'bptl'...
        ...
 
-       $ cd camunda_worker
+       $ cd bptl
 
 2. Start the database and web services:
 
    .. code-block:: bash
 
        $ docker-compose up -d
-       Starting camunda_worker_db_1 ... done
-       Starting camunda_worker_web_1 ... done
+       Starting bptl_db_1 ... done
+       Starting bptl_web_1 ... done
 
    It can take a while before everything is done. Even after starting the web
    container, the database might still be migrating. You can always check the
@@ -192,19 +192,19 @@ The easiest way to get the project started is by using `Docker Compose`_.
 
    .. code-block:: bash
 
-       $ docker logs -f camunda_worker_web_1
+       $ docker logs -f bptl_web_1
 
 3. Create an admin user and load initial data. If different container names
    are shown above, use the container name ending with ``_web_1``:
 
    .. code-block:: bash
 
-       $ docker exec -it camunda_worker_web_1 /app/src/manage.py createsuperuser
+       $ docker exec -it bptl_web_1 /app/src/manage.py createsuperuser
        Username: admin
        ...
        Superuser created successfully.
 
-       $ docker exec -it camunda_worker_web_1 /app/src/manage.py loaddata admin_index groups
+       $ docker exec -it bptl_web_1 /app/src/manage.py loaddata admin_index groups
        Installed 5 object(s) from 2 fixture(s)
 
 4. Point your browser to ``http://localhost:8000/`` to access the project's
@@ -226,7 +226,7 @@ The easiest way to get the project started is by using `Docker Compose`_.
    system you can run ``docker system prune``.
 
 .. _Docker Compose: https://docs.docker.com/compose/install/
-.. _Github: https://github.com/maykinmedia/camunda_worker/
+.. _Github: https://github.com/GemeenteUtrecht/camunda-worker/
 
 
 More Docker
@@ -234,21 +234,21 @@ More Docker
 
 If you just want to run the project as a Docker container and connect to an
 external database, you can build and run the ``Dockerfile`` and pass several
-environment variables. See ``src/camunda_worker/conf/docker.py`` for
+environment variables. See ``src/bptl/conf/docker.py`` for
 all settings.
 
 .. code-block:: bash
 
-    $ docker build -t camunda_worker
+    $ docker build -t bptl
     $ docker run \
         -p 8000:8000 \
         -e DATABASE_USERNAME=... \
         -e DATABASE_PASSWORD=... \
         -e DATABASE_HOST=... \
-        --name camunda_worker \
-        camunda_worker
+        --name bptl \
+        bptl
 
-    $ docker exec -it camunda_worker /app/src/manage.py createsuperuser
+    $ docker exec -it bptl /app/src/manage.py createsuperuser
 
 Building and publishing the image
 ---------------------------------
@@ -308,7 +308,7 @@ Settings
 ========
 
 All settings for the project can be found in
-``src/camunda_worker/conf``.
+``src/bptl/conf``.
 The file ``local.py`` overwrites settings from the base configuration.
 
 

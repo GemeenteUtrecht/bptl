@@ -13,7 +13,7 @@ description = """
 Set up my development environment for me!
 """
 
-project_name = "camunda_worker"
+project_name = "bptl"
 
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument(

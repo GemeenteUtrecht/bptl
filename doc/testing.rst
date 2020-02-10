@@ -70,36 +70,4 @@ To trigger a test run on file change (source file or test file), run::
     $ karma start karma.conf.js --single-run=false --browsers=PhantomJS
 
 
-Jenkins
--------
 
-On Jenkins, the tests are run against PhantomJS and Chrome. Therefore, ``xfvb``
-needs to be available.
-
-Run the tests by invoking ``./bin/jenkins_js.sh``.
-
-
-Jenkins jobs
-============
-
-It is recommended to set up the following Jenkins jobs for a project:
-
-**master** branch
------------------
-
-1. ``camunda_worker-django``: backend tests, runs ``./bin/jenkins_django.sh``.
-2. ``camunda_worker-js``: frontend tests, runs ``./bin/jenkins_js.sh``.
-
-**develop** branch
-------------------
-
-1. ``camunda_worker-django-develop``: backend tests, runs ``./bin/jenkins_django.sh``.
-2. ``camunda_worker-django-develop-js``: frontend tests, runs ``./bin/jenkins_js.sh``.
-
-pull requests
--------------
-1. ``camunda_worker-pr-django``: backend tests, runs ``./bin/jenkins_django_pr.sh``.
-2. ``camunda_worker-pr-js``: frontend tests, runs ``./bin/jenkins_js.sh``.
-3. ``camunda_worker-pr-sass``: checks that sass compiles, runs ``./bin/jenkins_sass.sh``.
-4. ``camunda_worker-pr-isort``: checks that imports are correctly
-   sorted, runs ``./bin/jenkins_isort.sh``.

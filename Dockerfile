@@ -70,7 +70,7 @@ COPY --from=backend-build /usr/local/bin/celery /usr/local/bin/celery
 COPY --from=backend-build /app/src/ /app/src/
 
 # copy frontend build statics
-COPY --from=frontend-build /app/src/camunda_worker/static /app/src/camunda_worker/static
+COPY --from=frontend-build /app/src/bptl/static /app/src/bptl/static
 
 # copy source code
 COPY ./src /app/src
@@ -83,7 +83,7 @@ USER maykin
 
 ARG COMMIT_HASH
 ENV GIT_SHA=${COMMIT_HASH}
-ENV DJANGO_SETTINGS_MODULE=camunda_worker.conf.docker
+ENV DJANGO_SETTINGS_MODULE=bptl.conf.docker
 
 ARG SECRET_KEY=dummy
 

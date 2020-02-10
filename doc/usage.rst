@@ -35,7 +35,7 @@ Example:
 
     python src/manage.py show_task_registry
 
-    camunda_worker.dummy.tasks.dummy
+    bptl.dummy.tasks.dummy
 
       A dummy task to demonstrate the registry machinery.
 
@@ -54,7 +54,7 @@ Complete tasks
 Whenever an external task for a certain topic is done/performed, the task itself
 needs to be completed and updated with resulting process variables.
 
-For this purpose, ``camunda_worker.external_tasks.camunda.complete_task`` exists. Pass
+For this purpose, ``bptl.external_tasks.camunda.complete_task`` exists. Pass
 the ``FetchedTask`` instance and a dict of ``variable_name: value`` to update
 process variables. If no process variables need to be updated, you can leave the
 ``variables`` off.

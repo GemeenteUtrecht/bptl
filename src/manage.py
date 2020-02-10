@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 
-from camunda_worker.setup import setup_env
+from bptl.setup import setup_env
 
 if __name__ == "__main__":
     setup_env()
