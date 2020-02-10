@@ -2,9 +2,9 @@ from django.conf import settings
 
 from celery.utils.log import get_task_logger
 
-from bptl.external_tasks.camunda import fetch_and_lock
-from bptl.external_tasks.constants import Statuses
-from bptl.external_tasks.models import FetchedTask
+from bptl.camunda.constants import Statuses
+from bptl.camunda.models import ExternalTask
+from bptl.camunda.utils import fetch_and_lock
 
 from ...celery import app
 from ..api import complete, execute
@@ -27,7 +27,7 @@ def task_fetch_and_lock():
 
 @app.task()
 def task_execute_and_complete(fetched_task_id):
-    fetched_task = FetchedTask.objects.get(id=fetched_task_id)
+    fetched_task = ExternalTask.objects.get(id=fetched_task_id)
 
     fetched_task.status = Statuses.in_progress
     fetched_task.save()

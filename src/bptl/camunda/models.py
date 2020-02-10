@@ -20,7 +20,7 @@ def get_worker_id() -> str:
     return f"{prefix}-{guid}"
 
 
-class FetchedTask(models.Model):
+class ExternalTask(models.Model):
     """
     A single task that was retrieved by the worker.
 

@@ -3,9 +3,9 @@ Expose the public API to manage tasks.
 """
 import inspect
 
-from bptl.external_tasks.camunda import complete_task
-from bptl.external_tasks.constants import Statuses
-from bptl.external_tasks.models import FetchedTask
+from bptl.camunda.constants import Statuses
+from bptl.camunda.models import ExternalTask
+from bptl.camunda.utils import complete_task
 
 from .models import TaskMapping
 from .registry import TaskRegistry, register
@@ -36,14 +36,14 @@ class TaskNotPerformed(Exception):
     pass
 
 
-def execute(task: FetchedTask, registry: TaskRegistry = register) -> None:
+def execute(task: ExternalTask, registry: TaskRegistry = register) -> None:
     """
     Execute the appropriate task for a fetched external task.
 
     This function takes care of looking up the appropriate handler for a task from the
     registry, and then calls it, passing the fetched task argument.
 
-    :param task: A :class:`FetchedTask` instance, that may not have expired yet.
+    :param task: A :class:`ExternalTask` instance, that may not have expired yet.
     :param registry: A :class:`bptl.tasks.registry.TaskRegistry` instance.
       This is the registry that will be used to find the corresponding callback for the
       topic name. Defaults to the default sentinel registry, mostly useful for tests.
@@ -87,11 +87,11 @@ def execute(task: FetchedTask, registry: TaskRegistry = register) -> None:
     task.save()
 
 
-def complete(task: FetchedTask):
+def complete(task: ExternalTask):
     """
     Send the result of a fetched task into Camunda.
 
-    :param task: A :class:`FetchedTask` instance, that has been already performed.
+    :param task: A :class:`ExternalTask` instance, that has been already performed.
     :raises: :class:`TaskNotPerformed` if the task status is not "performed", this exception is
       raised.
     """

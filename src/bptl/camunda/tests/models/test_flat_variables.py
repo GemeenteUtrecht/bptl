@@ -2,12 +2,12 @@ import os
 
 from django.test import TestCase
 
-from bptl.external_tasks.models import FetchedTask
+from bptl.camunda.models import ExternalTask
 
 
 class FlatVariablesTests(TestCase):
     def test_process_flat_variables(self):
-        task = FetchedTask.objects.create(
+        task = ExternalTask.objects.create(
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
@@ -33,7 +33,7 @@ class FlatVariablesTests(TestCase):
         )
 
     def test_process_flat_variables_none(self):
-        task = FetchedTask.objects.create(
+        task = ExternalTask.objects.create(
             worker_id="test-worker-id", task_id="test-task-id", variables={},
         )
 

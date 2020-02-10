@@ -1,7 +1,7 @@
 from django.test import TestCase, tag
 from django.utils import timezone
 
-from bptl.external_tasks.tests.factories import FetchedTaskFactory
+from bptl.camunda.tests.factories import ExternalTaskFactory
 
 from ..api import NoCallback, TaskExpired, execute
 from ..registry import TaskRegistry
@@ -33,8 +33,8 @@ class RouteTaskTests(TestCase):
             topic_name="task-2", callback=register.get_for(task_2)
         )
         # set up fetched tasks
-        task1 = FetchedTaskFactory.create(topic_name="task-1")
-        task2 = FetchedTaskFactory.create(topic_name="task-2")
+        task1 = ExternalTaskFactory.create(topic_name="task-1")
+        task2 = ExternalTaskFactory.create(topic_name="task-2")
 
         execute(task1, registry=register)
         execute(task2, registry=register)
@@ -46,14 +46,14 @@ class RouteTaskTests(TestCase):
         self.assertEqual(task2.result_variables, {"task_run": "task_2"})
 
     def test_no_mapping_configured(self):
-        task = FetchedTaskFactory.create(topic_name="task-1")
+        task = ExternalTaskFactory.create(topic_name="task-1")
 
         with self.assertRaises(NoCallback):
             execute(task, registry=register)
 
     def test_mapping_configured_invalid_callback(self):
         TaskMappingFactory.create(topic_name="task-1", callback="foo.bar")
-        task = FetchedTaskFactory.create(topic_name="task-1")
+        task = ExternalTaskFactory.create(topic_name="task-1")
 
         with self.assertRaises(NoCallback):
             execute(task, registry=register)
@@ -62,7 +62,7 @@ class RouteTaskTests(TestCase):
         TaskMappingFactory.create(
             topic_name="task-1", callback=register.get_for(task_1)
         )
-        task1 = FetchedTaskFactory.create(
+        task1 = ExternalTaskFactory.create(
             topic_name="task-1", lock_expires_at=timezone.now()
         )
 

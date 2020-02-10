@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from ...camunda import fetch_and_lock
+from ...utils import fetch_and_lock
 
 
 class Command(BaseCommand):

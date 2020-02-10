@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("external_tasks", "0002_fetchedtask_lock_expires_at"),
+        ("camunda", "0002_fetchedtask_lock_expires_at"),
     ]
 
     operations = [

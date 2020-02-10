@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     "zgw_consumers",
     # Project applications.
     "bptl.accounts",
-    "bptl.external_tasks",
+    "bptl.camunda",
     "bptl.tasks",
     "bptl.dummy",
     "bptl.utils",

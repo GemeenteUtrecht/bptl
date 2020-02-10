@@ -7,9 +7,9 @@ from tqdm import tqdm
 
 from bptl.tasks.api import complete, execute
 
-from ...camunda import fetch_and_lock
 from ...constants import Statuses
-from ...models import FetchedTask
+from ...models import ExternalTask
+from ...utils import fetch_and_lock
 
 
 class Command(BaseCommand):
@@ -26,8 +26,8 @@ class Command(BaseCommand):
         )
 
     def run_callback_for_tasks(
-        self, tasks: List[FetchedTask], callback: Callable, name: str
-    ) -> List[FetchedTask]:
+        self, tasks: List[ExternalTask], callback: Callable, name: str
+    ) -> List[ExternalTask]:
         self.stdout.write(f"Start '{name}' step", self.style.MIGRATE_LABEL)
 
         succeeded = []

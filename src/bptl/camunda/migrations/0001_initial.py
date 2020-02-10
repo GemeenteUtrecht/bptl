@@ -3,7 +3,7 @@
 import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 
-import bptl.external_tasks.models
+import bptl.camunda.models
 
 
 class Migration(migrations.Migration):
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 (
                     "worker_id",
                     models.CharField(
-                        default=bptl.external_tasks.models.get_worker_id,
+                        default=bptl.camunda.models.get_worker_id,
                         help_text="The worker ID that picked up the task. Only the same worker ID is allowed to unlock/modify the task. Used as a lock.",
                         max_length=255,
                     ),

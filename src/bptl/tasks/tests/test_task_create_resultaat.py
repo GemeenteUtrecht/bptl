@@ -4,7 +4,7 @@ import requests_mock
 from django_camunda.models import CamundaConfig
 from zgw_consumers.models import Service
 
-from bptl.external_tasks.models import FetchedTask
+from bptl.camunda.models import ExternalTask
 
 from ..tasks import CreateResultaatTask
 from .utils import mock_service_oas_get
@@ -34,7 +34,7 @@ class CreateResultaatTaskTests(TestCase):
             api_root=ZTC_URL, api_type="ztc", label="ztc_local",
         )
 
-        cls.fetched_task = FetchedTask.objects.create(
+        cls.fetched_task = ExternalTask.objects.create(
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={

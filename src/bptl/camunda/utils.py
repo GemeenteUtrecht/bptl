@@ -11,7 +11,7 @@ from django_camunda.client import get_client_class
 
 from bptl.utils.typing import Object, ProcessVariables
 
-from .models import FetchedTask, get_worker_id
+from .models import ExternalTask, get_worker_id
 
 TOPIC = "zaak-initialize"
 LOCK_DURATION = 60 * 10  # 10 minutes
@@ -44,7 +44,7 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
     fetched = []
     for task in external_tasks:
         fetched.append(
-            FetchedTask(
+            ExternalTask(
                 worker_id=worker_id,
                 topic_name=task["topic_name"],
                 priority=task["priority"],
@@ -54,13 +54,13 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
             )
         )
 
-    tasks = FetchedTask.objects.bulk_create(fetched)
+    tasks = ExternalTask.objects.bulk_create(fetched)
 
     return (worker_id, len(fetched), tasks)
 
 
 def complete_task(
-    task: FetchedTask, variables: Optional[ProcessVariables] = None
+    task: ExternalTask, variables: Optional[ProcessVariables] = None
 ) -> None:
     """
     Complete an External Task, while optionally setting process variables.

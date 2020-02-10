@@ -1,18 +1,18 @@
 import logging
 
-from bptl.external_tasks.camunda import complete_task
-from bptl.external_tasks.models import FetchedTask
+from bptl.camunda.models import ExternalTask
+from bptl.camunda.utils import complete_task
 from bptl.tasks.registry import register
 
 logger = logging.getLogger(__name__)
 
 
 @register
-def dummy(task: FetchedTask) -> None:
+def dummy(task: ExternalTask) -> None:
     """
     A dummy task to demonstrate the registry machinery.
 
-    The task receives the :class:`FetchedTask` instance and logs some information,
+    The task receives the :class:`ExternalTask` instance and logs some information,
     after which it completes the task.
     """
     logger.info("Received external task: %s", task.task_id)

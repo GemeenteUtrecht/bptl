@@ -13,7 +13,7 @@ from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.utils import mock_service_oas_get
 
 from ..constants import Statuses
-from ..models import FetchedTask
+from ..models import ExternalTask
 from .utils import get_fetch_and_lock_response
 
 ZTC_URL = "https://some.ztc.nl/api/v1/"
@@ -117,14 +117,14 @@ class ExecuteCommandTests(TestCase):
         )
 
         with patch(
-            "bptl.external_tasks.camunda.get_worker_id", return_value="aWorkerId",
+            "bptl.camunda.utils.get_worker_id", return_value="aWorkerId",
         ) as m_get_worker_id:
 
             # execute command
             stdout = StringIO()
             call_command("execute_tasks", 1, stdout=stdout)
 
-        task = FetchedTask.objects.get()
+        task = ExternalTask.objects.get()
         self.assertEqual(task.status, Statuses.completed)
 
         stdout.seek(0)
@@ -168,13 +168,13 @@ class ExecuteCommandTests(TestCase):
         m.post(f"{ZRC_URL}zaken", exc=ConnectionError("some connection error"))
 
         with patch(
-            "bptl.external_tasks.camunda.get_worker_id", return_value="aWorkerId",
+            "bptl.camunda.utils.get_worker_id", return_value="aWorkerId",
         ) as m_get_worker_id:
             # execute command
             stdout = StringIO()
             call_command("execute_tasks", 1, stdout=stdout)
 
-        task = FetchedTask.objects.get()
+        task = ExternalTask.objects.get()
         self.assertEqual(task.status, Statuses.failed)
 
         stdout.seek(0)

@@ -11,8 +11,8 @@ from django.test import TestCase
 import requests_mock
 from django_camunda.models import CamundaConfig
 
-from ..camunda import fetch_and_lock
-from ..models import FetchedTask
+from ..models import ExternalTask
+from ..utils import fetch_and_lock
 from .utils import get_fetch_and_lock_response
 
 
@@ -37,13 +37,13 @@ class FetchAndLockTests(TestCase):
         )
 
         with patch(
-            "bptl.external_tasks.camunda.get_worker_id", return_value="aWorkerId",
+            "bptl.camunda.utils.get_worker_id", return_value="aWorkerId",
         ) as m_get_worker_id:
             fetch_and_lock(max_tasks=1)
 
         m_get_worker_id.assert_called_once()
 
-        qs = FetchedTask.objects.all()
+        qs = ExternalTask.objects.all()
         self.assertEqual(qs.count(), 1)
         fetched_task = qs.get()
         self.assertEqual(fetched_task.worker_id, "aWorkerId")

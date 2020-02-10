@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("external_tasks", "0001_initial"),
+        ("camunda", "0001_initial"),
     ]
 
     operations = [

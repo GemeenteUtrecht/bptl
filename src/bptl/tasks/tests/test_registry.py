@@ -3,7 +3,7 @@ Test the expected implementation of the registry.
 """
 from django.test import SimpleTestCase
 
-from bptl.external_tasks.models import FetchedTask
+from bptl.camunda.models import ExternalTask
 
 from ..registry import TaskRegistry
 
@@ -43,7 +43,7 @@ class FunctionRegistryTests(SimpleTestCase):
             register(task)
 
     def test_correct_typehint(self):
-        def task(task: FetchedTask):
+        def task(task: ExternalTask):
             pass
 
         try:
@@ -91,7 +91,7 @@ class ClassRegistryTests(SimpleTestCase):
 
     def test_correct_typehint(self):
         class Task:
-            def __init__(self, task: FetchedTask):
+            def __init__(self, task: ExternalTask):
                 self.task = task
 
             def perform(self):

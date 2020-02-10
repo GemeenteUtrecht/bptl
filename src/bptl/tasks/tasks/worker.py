@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from zgw_consumers.models import APITypes, Service
 
-from bptl.external_tasks.models import FetchedTask
+from bptl.camunda.models import ExternalTask
 
 from ..registry import register
 
@@ -19,7 +19,7 @@ __all__ = (
 
 
 class PerformTask:
-    def __init__(self, task: FetchedTask):
+    def __init__(self, task: ExternalTask):
         self.task = task
 
     def perform(self) -> dict:

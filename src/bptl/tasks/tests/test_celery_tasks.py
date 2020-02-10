@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from bptl.external_tasks.tests.factories import FetchedTaskFactory
+from bptl.camunda.tests.factories import ExternalTaskFactory
 
 from ..tasks.celery import task_execute_and_complete, task_fetch_and_lock
 
@@ -10,7 +10,7 @@ from ..tasks.celery import task_execute_and_complete, task_fetch_and_lock
 class RouteTaskTests(TestCase):
     @patch("bptl.tasks.tasks.celery.task_execute_and_complete.delay")
     def test_task_fetch_and_lock(self, m_test_execute):
-        task1, task2 = FetchedTaskFactory.create_batch(2, worker_id="aWorkerId")
+        task1, task2 = ExternalTaskFactory.create_batch(2, worker_id="aWorkerId")
 
         with patch(
             "bptl.tasks.tasks.celery.fetch_and_lock",
@@ -28,7 +28,7 @@ class RouteTaskTests(TestCase):
     @patch("bptl.tasks.tasks.celery.complete")
     @patch("bptl.tasks.tasks.celery.execute")
     def test_task_execute_and_complete_success(self, m_execute, m_complete):
-        task = FetchedTaskFactory.create()
+        task = ExternalTaskFactory.create()
 
         task_execute_and_complete(task.id)
 
@@ -38,7 +38,7 @@ class RouteTaskTests(TestCase):
     @patch("bptl.tasks.tasks.celery.complete")
     @patch("bptl.tasks.tasks.celery.execute", side_effect=Exception)
     def test_task_execute_and_complete_fail_execute(self, m_execute, m_complete):
-        task = FetchedTaskFactory.create()
+        task = ExternalTaskFactory.create()
 
         task_execute_and_complete(task.id)
 
@@ -51,7 +51,7 @@ class RouteTaskTests(TestCase):
     @patch("bptl.tasks.tasks.celery.complete", side_effect=Exception)
     @patch("bptl.tasks.tasks.celery.execute")
     def test_task_execute_and_complete_fail_complete(self, m_execute, m_complete):
-        task = FetchedTaskFactory.create()
+        task = ExternalTaskFactory.create()
 
         task_execute_and_complete(task.id)
 

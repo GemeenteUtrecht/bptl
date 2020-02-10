@@ -9,8 +9,8 @@ from django.test import TestCase
 import requests_mock
 from django_camunda.models import CamundaConfig
 
-from ..camunda import complete_task
-from ..models import FetchedTask
+from ..models import ExternalTask
+from ..utils import complete_task
 
 
 @requests_mock.Mocker()
@@ -23,7 +23,7 @@ class CompleteTests(TestCase):
         config.rest_api_path = "engine-rest/"
         config.save()
 
-        cls.task = FetchedTask.objects.create(
+        cls.task = ExternalTask.objects.create(
             worker_id="test-worker-id", task_id="test-task-id",
         )
 
