@@ -235,11 +235,7 @@ LOGGING = {
         },
     },
     "loggers": {
-        "bptl": {
-            "handlers": ["project"],
-            "level": "INFO",
-            "propagate": True,
-        },
+        "bptl": {"handlers": ["project"], "level": "INFO", "propagate": True,},
         "django.request": {
             "handlers": ["django"],
             "level": "ERROR",

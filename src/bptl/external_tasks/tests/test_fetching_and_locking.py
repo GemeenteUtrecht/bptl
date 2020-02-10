@@ -37,8 +37,7 @@ class FetchAndLockTests(TestCase):
         )
 
         with patch(
-            "bptl.external_tasks.camunda.get_worker_id",
-            return_value="aWorkerId",
+            "bptl.external_tasks.camunda.get_worker_id", return_value="aWorkerId",
         ) as m_get_worker_id:
             fetch_and_lock(max_tasks=1)
 

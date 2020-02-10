@@ -49,9 +49,7 @@ class TaskMappingCreateTests(WebTest):
 
         add_page.form["topic_name"] = "foo"
         callback_field = add_page.form["callback"]
-        callback_field.select(
-            "bptl.tasks.tests.test_task_mapping_admin.task2"
-        )
+        callback_field.select("bptl.tasks.tests.test_task_mapping_admin.task2")
 
         submitted = add_page.form.submit()
         self.assertEqual(submitted.status_code, 302)
