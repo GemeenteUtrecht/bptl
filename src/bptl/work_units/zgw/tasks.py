@@ -4,12 +4,10 @@ from django.utils import timezone
 
 from zgw_consumers.models import APITypes, Service
 
-from bptl.camunda.models import ExternalTask
-
-from ..registry import register
+from bptl.tasks.base import WorkUnit
+from bptl.tasks.registry import register
 
 __all__ = (
-    "PerformTask",
     "CreateZaakTask",
     "CreateStatusTask",
     "CreateResultaatTask",
@@ -18,22 +16,8 @@ __all__ = (
 )
 
 
-class PerformTask:
-    def __init__(self, task: ExternalTask):
-        self.task = task
-
-    def perform(self) -> dict:
-        raise NotImplementedError(
-            "subclasses of PerformTask must provide a perform() method"
-        )
-
-    def save_result(self, result_data: dict):
-        self.task.result_variables = result_data
-        self.task.save()
-
-
 @register
-class CreateZaakTask(PerformTask):
+class CreateZaakTask(WorkUnit):
     """
     Create a ZAAK in the configured Zaken API and set the initial status.
 
@@ -110,7 +94,7 @@ class CreateZaakTask(PerformTask):
 
 
 @register
-class CreateStatusTask(PerformTask):
+class CreateStatusTask(WorkUnit):
     """
     Create a new STATUS for the ZAAK in the process.
 
@@ -145,7 +129,7 @@ class CreateStatusTask(PerformTask):
 
 
 @register
-class CreateResultaatTask(PerformTask):
+class CreateResultaatTask(WorkUnit):
     """
     Set the RESULTAAT for the ZAAK in the process.
 
@@ -187,7 +171,7 @@ class CreateResultaatTask(PerformTask):
 
 
 @register
-class RelateDocumentToZaakTask(PerformTask):
+class RelateDocumentToZaakTask(WorkUnit):
     """
     Create relations between ZAAK and INFORMATIEOBJECT
 
@@ -222,7 +206,7 @@ class RelateDocumentToZaakTask(PerformTask):
 
 
 @register
-class CloseZaakTask(PerformTask):
+class CloseZaakTask(WorkUnit):
     """
     Close the ZAAK by setting the final STATUS.
 

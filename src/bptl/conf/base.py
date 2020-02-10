@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "bptl.tasks",
     "bptl.dummy",
     "bptl.utils",
+    "bptl.work_units.zgw",
 ]
 
 MIDDLEWARE = [

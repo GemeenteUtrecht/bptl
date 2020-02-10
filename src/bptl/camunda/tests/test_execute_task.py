@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 from zgw_consumers.models import Service
 
 from bptl.tasks.models import TaskMapping
-from bptl.tasks.tests.utils import mock_service_oas_get
+from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
 from ..constants import Statuses
 from ..models import ExternalTask
@@ -42,7 +42,7 @@ class ExecuteCommandTests(TestCase):
         )
         TaskMapping.objects.create(
             topic_name="zaak-initialize",
-            callback="bptl.tasks.tasks.worker.CreateZaakTask",
+            callback="bptl.work_units.zgw.tasks.CreateZaakTask",
         )
 
     def test_execute_one(self, m):

@@ -6,10 +6,10 @@ from django_webtest import WebTest
 
 from bptl.accounts.models import User
 
-from ..registry import TaskRegistry
+from ..registry import WorkUnitRegistry
 
 # Set up an isolated registry for tests
-test_register = TaskRegistry()
+test_register = WorkUnitRegistry()
 
 
 @test_register

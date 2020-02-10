@@ -5,10 +5,10 @@ from django.test import SimpleTestCase
 
 from bptl.camunda.models import ExternalTask
 
-from ..registry import TaskRegistry
+from ..registry import WorkUnitRegistry
 
 # isolated registry for tests
-register = TaskRegistry()
+register = WorkUnitRegistry()
 
 
 class FunctionRegistryTests(SimpleTestCase):
@@ -36,7 +36,7 @@ class FunctionRegistryTests(SimpleTestCase):
             self.fail("Task should have been registered")
 
     def test_wrong_typehint(self):
-        def task(task: TaskRegistry):
+        def task(task: WorkUnitRegistry):
             pass
 
         with self.assertRaises(TypeError):
@@ -83,7 +83,7 @@ class ClassRegistryTests(SimpleTestCase):
 
     def test_wrong_typehint(self):
         class Task:
-            def __init__(self, task: TaskRegistry):
+            def __init__(self, task: WorkUnitRegistry):
                 self.task = task
 
         with self.assertRaises(TypeError):

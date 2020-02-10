@@ -1,13 +1,16 @@
+""" celery tasks to process camunda external tasks"""
+
 from django.conf import settings
 
 from celery.utils.log import get_task_logger
 
+from bptl.camunda.api import complete
 from bptl.camunda.constants import Statuses
 from bptl.camunda.models import ExternalTask
 from bptl.camunda.utils import fetch_and_lock
+from bptl.tasks.api import execute
 
-from ...celery import app
-from ..api import complete, execute
+from ..celery import app
 
 logger = get_task_logger(__name__)
 

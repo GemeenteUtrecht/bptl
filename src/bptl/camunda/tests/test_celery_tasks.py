@@ -4,16 +4,16 @@ from django.test import TestCase
 
 from bptl.camunda.tests.factories import ExternalTaskFactory
 
-from ..tasks.celery import task_execute_and_complete, task_fetch_and_lock
+from ..tasks import task_execute_and_complete, task_fetch_and_lock
 
 
 class RouteTaskTests(TestCase):
-    @patch("bptl.tasks.tasks.celery.task_execute_and_complete.delay")
+    @patch("bptl.camunda.tasks.task_execute_and_complete.delay")
     def test_task_fetch_and_lock(self, m_test_execute):
         task1, task2 = ExternalTaskFactory.create_batch(2, worker_id="aWorkerId")
 
         with patch(
-            "bptl.tasks.tasks.celery.fetch_and_lock",
+            "bptl.camunda.tasks.fetch_and_lock",
             return_value=("aWorkerId", 2, [task1, task2]),
         ) as m_fetch_and_lock:
 
@@ -25,8 +25,8 @@ class RouteTaskTests(TestCase):
         m_test_execute.assert_any_call(task1.id)
         m_test_execute.assert_any_call(task2.id)
 
-    @patch("bptl.tasks.tasks.celery.complete")
-    @patch("bptl.tasks.tasks.celery.execute")
+    @patch("bptl.camunda.tasks.complete")
+    @patch("bptl.camunda.tasks.execute")
     def test_task_execute_and_complete_success(self, m_execute, m_complete):
         task = ExternalTaskFactory.create()
 
@@ -35,8 +35,8 @@ class RouteTaskTests(TestCase):
         m_execute.assert_called_once_with(task)
         m_complete.assert_called_once_with(task)
 
-    @patch("bptl.tasks.tasks.celery.complete")
-    @patch("bptl.tasks.tasks.celery.execute", side_effect=Exception)
+    @patch("bptl.camunda.tasks.complete")
+    @patch("bptl.camunda.tasks.execute", side_effect=Exception)
     def test_task_execute_and_complete_fail_execute(self, m_execute, m_complete):
         task = ExternalTaskFactory.create()
 
@@ -48,8 +48,8 @@ class RouteTaskTests(TestCase):
         m_execute.assert_called_once_with(task)
         m_complete.assert_not_called()
 
-    @patch("bptl.tasks.tasks.celery.complete", side_effect=Exception)
-    @patch("bptl.tasks.tasks.celery.execute")
+    @patch("bptl.camunda.tasks.complete", side_effect=Exception)
+    @patch("bptl.camunda.tasks.execute")
     def test_task_execute_and_complete_fail_complete(self, m_execute, m_complete):
         task = ExternalTaskFactory.create()
 

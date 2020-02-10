@@ -5,18 +5,15 @@ import inspect
 
 from bptl.camunda.constants import Statuses
 from bptl.camunda.models import ExternalTask
-from bptl.camunda.utils import complete_task
 
 from .models import TaskMapping
-from .registry import TaskRegistry, register
+from .registry import WorkUnitRegistry, register
 
 __all__ = [
     "TaskExpired",
     "NoCallback",
     "TaskPerformed",
-    "TaskNotPerformed",
     "execute",
-    "complete",
 ]
 
 
@@ -32,11 +29,7 @@ class TaskPerformed(Exception):
     pass
 
 
-class TaskNotPerformed(Exception):
-    pass
-
-
-def execute(task: ExternalTask, registry: TaskRegistry = register) -> None:
+def execute(task: ExternalTask, registry: WorkUnitRegistry = register) -> None:
     """
     Execute the appropriate task for a fetched external task.
 
@@ -84,23 +77,4 @@ def execute(task: ExternalTask, registry: TaskRegistry = register) -> None:
 
     # set complete status
     task.status = Statuses.performed
-    task.save()
-
-
-def complete(task: ExternalTask):
-    """
-    Send the result of a fetched task into Camunda.
-
-    :param task: A :class:`ExternalTask` instance, that has been already performed.
-    :raises: :class:`TaskNotPerformed` if the task status is not "performed", this exception is
-      raised.
-    """
-    if task.status != Statuses.performed:
-        raise TaskNotPerformed(
-            f"The task {task} is {task.status}. The task should be performed before sending results"
-        )
-
-    complete_task(task)
-
-    task.status = Statuses.completed
     task.save()

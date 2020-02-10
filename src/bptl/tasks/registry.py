@@ -19,7 +19,7 @@ class Task:
     callback: callable
 
 
-class TaskRegistry:
+class WorkUnitRegistry:
     def __init__(self):
         self._registry = {}
 
@@ -91,4 +91,4 @@ class TaskRegistry:
 
 
 # Sentinel to hold all tasks
-register = TaskRegistry()
+register = WorkUnitRegistry()

@@ -4,10 +4,10 @@ from django.utils import timezone
 from bptl.camunda.tests.factories import ExternalTaskFactory
 
 from ..api import NoCallback, TaskExpired, execute
-from ..registry import TaskRegistry
+from ..registry import WorkUnitRegistry
 from .factories import TaskMappingFactory
 
-register = TaskRegistry()
+register = WorkUnitRegistry()
 
 
 @register
