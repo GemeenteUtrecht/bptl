@@ -12,7 +12,7 @@ addons:
 
 env:
   global:
-  - DJANGO_SETTINGS_MODULE=camunda_worker.conf.dev
+  - DJANGO_SETTINGS_MODULE=bptl.conf.dev
   - SECRET_KEY=dummy
   - DB_USER=postgres
   - DB_PASSWORD=

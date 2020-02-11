@@ -287,7 +287,7 @@ Selectors
 
   .. code-block:: scss
 
-    // file src/camunda_worker/sass/components/blocks/_block.scss
+    // file src/bptl/sass/components/blocks/_block.scss
 
     .block {  // That's it, no more blocks in this file
       // ...

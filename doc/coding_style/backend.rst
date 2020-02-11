@@ -35,7 +35,7 @@ Example:
 
     import django.contrib.admin
 
-    import camunda_worker.other_app.models
+    import bptl.other_app.models
 
     from .models import SomeModel
 
@@ -50,7 +50,7 @@ Example:
 
 .. code-block::
 
-    from camunda_worker.accounts.models import Account
+    from bptl.accounts.models import Account
 
     class Idea(models.Model):
         pass

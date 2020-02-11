@@ -8,7 +8,7 @@ mkdir -p celerybeat
 
 echo "Starting celery beat"
 celery beat \
-    --app camunda_worker \
+    --app bptl \
     -l $LOGLEVEL \
     --workdir src \
     -s ../celerybeat/beat

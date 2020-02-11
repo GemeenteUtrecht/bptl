@@ -6,6 +6,6 @@ LOGLEVEL=${CELERY_LOGLEVEL:-INFO}
 
 echo "Starting celery worker"
 celery worker \
-    --app camunda_worker \
+    --app bptl \
     -l $LOGLEVEL \
     --workdir src \
