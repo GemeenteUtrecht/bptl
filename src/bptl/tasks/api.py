@@ -3,8 +3,8 @@ Expose the public API to manage tasks.
 """
 import inspect
 
-from bptl.camunda.constants import Statuses
 from bptl.camunda.models import ExternalTask
+from bptl.utils.constants import Statuses
 
 from .models import TaskMapping
 from .registry import WorkUnitRegistry, register

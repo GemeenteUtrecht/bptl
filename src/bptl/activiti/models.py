@@ -1,12 +1,17 @@
 from urllib.parse import urljoin
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from solo.models import SingletonModel
 
+from bptl.utils.constants import Statuses
+
 
 class ActivitiConfig(SingletonModel):
+    """ configuration of Activiti service, including base url and credentials """
+
     root_url = models.URLField(
         _("camunda root"),
         help_text=_(
@@ -46,3 +51,27 @@ class ActivitiConfig(SingletonModel):
         assert not self.rest_api_path.startswith("/")
         assert self.rest_api_path.endswith("/")
         return urljoin(self.root_url, self.rest_api_path)
+
+
+class ServiceTask(models.Model):
+    """
+    A single task which request bptl API
+    """
+
+    topic_name = models.CharField(
+        _("topic name"),
+        max_length=255,
+        help_text=_("Topics determine which functions need to run for a task."),
+    )
+    variables = JSONField(default=dict)
+    status = models.CharField(
+        _("status"),
+        max_length=50,
+        choices=Statuses.choices,
+        default=Statuses.initial,
+        help_text=_("The current status of task processing"),
+    )
+    result_variables = JSONField(default=dict)
+
+    def __str__(self):
+        return f"{self.topic_name} / {self.id}"

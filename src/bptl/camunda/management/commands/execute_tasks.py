@@ -6,9 +6,9 @@ from django.core.management import BaseCommand
 from tqdm import tqdm
 
 from bptl.tasks.api import execute
+from bptl.utils.constants import Statuses
 
 from ...api import complete
-from ...constants import Statuses
 from ...models import ExternalTask
 from ...utils import fetch_and_lock
 

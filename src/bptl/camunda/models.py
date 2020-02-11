@@ -11,7 +11,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from .constants import Statuses
+from bptl.utils.constants import Statuses
 
 
 def get_worker_id() -> str:
@@ -58,8 +58,8 @@ class ExternalTask(models.Model):
     result_variables = JSONField(default=dict)
 
     class Meta:
-        verbose_name = _("fetched task")
-        verbose_name_plural = _("fetched tasks")
+        verbose_name = _("external task")
+        verbose_name_plural = _("external tasks")
 
     def __str__(self):
         return f"{self.topic_name} / {self.task_id}"
