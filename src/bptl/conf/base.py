@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "django_docutils",
     # Project applications.
     "bptl.accounts",
+    "bptl.activiti",
     "bptl.camunda",
     "bptl.tasks",
     "bptl.dummy",
