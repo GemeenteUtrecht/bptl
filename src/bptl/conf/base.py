@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "django_camunda",
     "zgw_consumers",
     "django_docutils",
+    "rest_framework",
     # Project applications.
     "bptl.accounts",
     "bptl.activiti",
@@ -371,3 +372,31 @@ CELERY_ACKS_LATE = True
 
 # project application settings
 MAX_TASKS = 10
+
+
+# api settings
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": (
+        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        # 'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication'
+    ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'oauth2_provider.contrib.rest_framework.TokenHasReadWriteScope',
+    #     # 'rest_framework.permissions.IsAuthenticated',
+    #     # 'rest_framework.permissions.AllowAny',
+    # ),
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
+    # Versioning
+    "DEFAULT_VERSION": "1",  # NOT to be confused with API_VERSION - it's the major version part
+    "ALLOWED_VERSIONS": ("1",),
+    "VERSION_PARAM": "version",
+    # test
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+}
