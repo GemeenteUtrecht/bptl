@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "zgw_consumers",
     "django_docutils",
     "rest_framework",
+    "rest_framework.authtoken",
     # Project applications.
     "bptl.accounts",
     "bptl.activiti",
@@ -383,15 +384,9 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseJSONParser",
     ),
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        # 'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication'
+        "rest_framework.authentication.TokenAuthentication",
     ),
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'oauth2_provider.contrib.rest_framework.TokenHasReadWriteScope',
-    #     # 'rest_framework.permissions.IsAuthenticated',
-    #     # 'rest_framework.permissions.AllowAny',
-    # ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
     # Versioning
     "DEFAULT_VERSION": "1",  # NOT to be confused with API_VERSION - it's the major version part

@@ -10,9 +10,10 @@ from bptl.tasks.models import TaskMapping
 from bptl.utils.constants import Statuses
 
 from ..models import ServiceTask
+from .utils import TokenAuthMixin
 
 
-class WorkUnitTestCase(APITestCase):
+class WorkUnitTestCase(TokenAuthMixin, APITestCase):
     @patch(
         "bptl.work_units.zgw.tasks.CreateZaakTask.create_zaak",
         return_value={"url": "zaak_url"},
@@ -26,6 +27,7 @@ class WorkUnitTestCase(APITestCase):
 
         data = {"topic": "zaak-initialize", "vars": {"someOtherVar": 123}}
         url = reverse("work-unit", args=(settings.REST_FRAMEWORK["DEFAULT_VERSION"],))
+
         response = self.client.post(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
