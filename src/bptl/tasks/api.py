@@ -2,7 +2,9 @@
 Expose the public API to manage tasks.
 """
 import inspect
+from typing import Union
 
+from bptl.activiti.models import ServiceTask
 from bptl.camunda.models import ExternalTask
 from bptl.utils.constants import Statuses
 
@@ -29,14 +31,16 @@ class TaskPerformed(Exception):
     pass
 
 
-def execute(task: ExternalTask, registry: WorkUnitRegistry = register) -> None:
+def execute(
+    task: Union[ExternalTask, ServiceTask], registry: WorkUnitRegistry = register
+) -> None:
     """
     Execute the appropriate task for a fetched external task.
 
     This function takes care of looking up the appropriate handler for a task from the
     registry, and then calls it, passing the fetched task argument.
 
-    :param task: A :class:`ExternalTask` instance, that may not have expired yet.
+    :param task: A :class:`ExternalTask` or :class:`ServiceTask` instance, that may not have expired yet.
     :param registry: A :class:`bptl.tasks.registry.TaskRegistry` instance.
       This is the registry that will be used to find the corresponding callback for the
       topic name. Defaults to the default sentinel registry, mostly useful for tests.
@@ -65,7 +69,7 @@ def execute(task: ExternalTask, registry: WorkUnitRegistry = register) -> None:
         raise TaskPerformed(f"The task {task} has been already performed.")
 
     # check for expiry
-    if task.expired:
+    if hasattr(task, "expired") and task.expired:
         raise TaskExpired(f"The task {task} expired before it could be handled.")
 
     # actually call the task

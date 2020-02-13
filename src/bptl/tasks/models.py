@@ -14,7 +14,7 @@ class TaskMapping(models.Model):
         max_length=255,
         unique=True,
         help_text=_(
-            "Topic as defined in the Camunda External Task. Topics are used "
+            "Topic as defined in the Task of external Business Process engine. Topics are used "
             "to decide which listener to run for a task."
         ),
     )
