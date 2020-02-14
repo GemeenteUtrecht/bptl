@@ -12,5 +12,5 @@ class ActivitiConfigAdmin(SingletonModelAdmin):
 
 @admin.register(ServiceTask)
 class ServiceTaskAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "status")
+    list_display = ("topic_name", "status")
     list_filter = ("topic_name", "status")

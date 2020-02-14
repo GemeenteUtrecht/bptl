@@ -34,13 +34,23 @@ class WorkUnitRegistry:
 
         TODO: render docstring with sphinx
         """
+        from .models import BaseTask
 
         # check that there's one and only one expected argument
         sig = inspect.signature(func_or_class)
         if len(sig.parameters) != 1:
             raise TypeError(
                 "A task must take exactly one argument - an instance of "
-                "camunda.ExternalTask or activity.ServiceTask."
+                "tasks.BaseTask child class"
+            )
+
+        # check the expected type hint
+        param = list(sig.parameters.values())[0]
+        if param.annotation is not inspect._empty and not issubclass(
+            param.annotation, BaseTask
+        ):
+            raise TypeError(
+                f"The '{param.name}' typehint does not appear to be a BaseTask"
             )
 
         # check that classes have a perform method

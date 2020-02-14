@@ -2,8 +2,13 @@
 Database model to map task topics and python code objects to process related tasks
 """
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from solo.models import SingletonModel
+
+from bptl.utils.constants import Statuses
 
 from .query import TaskQuerySet
 
@@ -36,3 +41,31 @@ class TaskMapping(models.Model):
 
     def __str__(self):
         return f"{self.topic_name} / {self.callback}"
+
+
+class BaseTask(models.Model):
+    """ en external task which can be processed by work_units"""
+
+    topic_name = models.CharField(
+        _("topic name"),
+        max_length=255,
+        help_text=_("Topics determine which functions need to run for a task."),
+    )
+    variables = JSONField(default=dict)
+    status = models.CharField(
+        _("status"),
+        max_length=50,
+        choices=Statuses.choices,
+        default=Statuses.initial,
+        help_text=_("The current status of task processing"),
+    )
+    result_variables = JSONField(default=dict)
+
+    class Meta:
+        abstract = True
+
+    def get_variables(self) -> dict:
+        """
+        return input variables formatted for work_unit
+        """
+        return self.variables

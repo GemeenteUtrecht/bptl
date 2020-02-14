@@ -35,6 +35,13 @@ class FunctionRegistryTests(SimpleTestCase):
         except TypeError:
             self.fail("Task should have been registered")
 
+    def test_wrong_typehint(self):
+        def task(task: WorkUnitRegistry):
+            pass
+
+        with self.assertRaises(TypeError):
+            register(task)
+
     def test_correct_typehint(self):
         def task(task: ExternalTask):
             pass

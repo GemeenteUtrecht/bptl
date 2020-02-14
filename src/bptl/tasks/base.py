@@ -1,11 +1,8 @@
-from typing import Union
-
-from bptl.activiti.models import ServiceTask
-from bptl.camunda.models import ExternalTask
+from .models import BaseTask
 
 
 class WorkUnit:
-    def __init__(self, task: Union[ExternalTask, ServiceTask]):
+    def __init__(self, task: BaseTask):
         self.task = task
 
     def perform(self) -> dict:
