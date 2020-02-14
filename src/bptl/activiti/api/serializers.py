@@ -6,9 +6,9 @@ from ..models import ServiceTask
 class WorkUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceTask
-        fields = ("topic", "vars", "result_variables")
+        fields = ("topic", "vars", "resultVars")
         extra_kwargs = {
             "topic": {"source": "topic_name"},
             "vars": {"source": "variables"},
-            "result_variables": {"read_only": True},
+            "resultVars": {"source": "result_variables", "read_only": True},
         }

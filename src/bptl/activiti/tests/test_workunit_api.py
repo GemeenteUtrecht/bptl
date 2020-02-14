@@ -39,7 +39,7 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
 
         data_response = response.json()
         expected_response = data.copy()
-        expected_response["resultVariables"] = {"zaak": "zaak_url"}
+        expected_response["resultVars"] = {"zaak": "zaak_url"}
         self.assertEqual(data_response, expected_response)
 
     @patch("bptl.activiti.api.views.execute", side_effect=Exception)

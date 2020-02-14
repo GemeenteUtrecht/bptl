@@ -57,9 +57,9 @@ class ServiceTask(BaseTask):
     A single activiti task which request bptl API
     """
 
-    def __str__(self):
-        return f"{self.topic_name} / {self.id}"
-
     class Meta:
         verbose_name = _("aervice task")
         verbose_name_plural = _("service tasks")
+
+    def __str__(self):
+        return f"{self.topic_name} / {self.id}"
