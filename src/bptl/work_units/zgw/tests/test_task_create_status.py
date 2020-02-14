@@ -56,7 +56,6 @@ class CreateStatusTaskTests(TestCase):
 
         task = CreateStatusTask(self.fetched_task)
 
-        task.perform()
-        self.fetched_task.refresh_from_db()
+        result = task.perform()
 
-        self.assertEqual(self.fetched_task.result_variables, {"status": STATUS})
+        self.assertEqual(result, {"status": STATUS})

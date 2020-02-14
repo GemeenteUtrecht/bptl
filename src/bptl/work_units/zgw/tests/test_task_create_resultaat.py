@@ -63,7 +63,6 @@ class CreateResultaatTaskTests(TestCase):
 
         task = CreateResultaatTask(self.fetched_task)
 
-        task.perform()
-        self.fetched_task.refresh_from_db()
+        result = task.perform()
 
-        self.assertEqual(self.fetched_task.result_variables, {"resultaat": RESULTAAT})
+        self.assertEqual(result, {"resultaat": RESULTAAT})

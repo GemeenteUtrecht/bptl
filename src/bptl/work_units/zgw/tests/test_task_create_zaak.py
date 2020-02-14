@@ -101,10 +101,8 @@ class CreateZaakTaskTests(TestCase):
 
         task = CreateZaakTask(self.fetched_task)
 
-        task.perform()
-        self.fetched_task.refresh_from_db()
-
-        self.assertEqual(self.fetched_task.result_variables, {"zaak": ZAAK})
+        result = task.perform()
+        self.assertEqual(result, {"zaak": ZAAK})
 
         request_zaak = next(
             filter(

@@ -109,11 +109,7 @@ class CreateZaakTask(ZGWWorkUnit):
     def perform(self):
         zaak = self.create_zaak()
         self.create_status(zaak)
-
-        # save result
-        result_data = {"zaak": zaak["url"]}
-        self.save_result(result_data)
-        return result_data
+        return {"zaak": zaak["url"]}
 
 
 @register
@@ -147,11 +143,7 @@ class CreateStatusTask(ZGWWorkUnit):
 
     def perform(self):
         status = self.create_status()
-
-        # save result
-        result_data = {"status": status["url"]}
-        self.save_result(result_data)
-        return result_data
+        return {"status": status["url"]}
 
 
 @register
@@ -192,10 +184,7 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     def perform(self):
         resultaat = self.create_resultaat()
-
-        result_data = {"resultaat": resultaat["url"]}
-        self.save_result(result_data)
-        return result_data
+        return {"resultaat": resultaat["url"]}
 
 
 @register
@@ -227,12 +216,7 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
 
     def perform(self):
         resultaat = self.relate_document()
-
-        result_data = {
-            "zaakinformatieobject": resultaat["url"],
-        }
-        self.save_result(result_data)
-        return result_data
+        return {"zaakinformatieobject": resultaat["url"]}
 
 
 @register
@@ -285,11 +269,8 @@ class CloseZaakTask(ZGWWorkUnit):
     def perform(self):
         resultaat = self.close_zaak()
 
-        result_data = {
+        return {
             "einddatum": resultaat["einddatum"],
             "archiefnominatie": resultaat["archiefnominatie"],
             "archiefactiedatum": resultaat["archiefactiedatum"],
         }
-
-        self.save_result(result_data)
-        return result_data

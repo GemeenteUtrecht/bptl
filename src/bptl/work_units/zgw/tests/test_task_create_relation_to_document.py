@@ -66,10 +66,6 @@ class CreateDocumentRelationTaskTests(TestCase):
 
         task = RelateDocumentToZaakTask(self.fetched_task)
 
-        task.perform()
-        self.fetched_task.refresh_from_db()
+        result = task.perform()
 
-        self.assertEqual(
-            self.fetched_task.result_variables,
-            {"zaakinformatieobject": ZAAKINFORMATIEOBJECT},
-        )
+        self.assertEqual(result, {"zaakinformatieobject": ZAAKINFORMATIEOBJECT})
