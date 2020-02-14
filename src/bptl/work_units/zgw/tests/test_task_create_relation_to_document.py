@@ -2,7 +2,6 @@ from django.test import TestCase
 
 import requests_mock
 from django_camunda.models import CamundaConfig
-from zgw_consumers.models import Service
 
 from bptl.camunda.models import ExternalTask
 
@@ -31,10 +30,6 @@ class CreateDocumentRelationTaskTests(TestCase):
         config.rest_api_path = "engine-rest/"
         config.save()
 
-        Service.objects.create(
-            api_root=ZRC_URL, api_type="zrc", label="zrc",
-        )
-
         cls.fetched_task = ExternalTask.objects.create(
             worker_id="test-worker-id",
             task_id="test-task-id",
@@ -44,6 +39,10 @@ class CreateDocumentRelationTaskTests(TestCase):
                     "type": "String",
                     "value": INFORMATIEOBJECT,
                     "valueInfo": {},
+                },
+                "ZRC": {
+                    "type": "Object",
+                    "value": {"apiRoot": ZRC_URL, "jwt": "Bearer 12345"},
                 },
             },
         )

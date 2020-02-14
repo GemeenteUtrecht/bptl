@@ -4,7 +4,6 @@ from django.urls import reverse
 import requests_mock
 from rest_framework import status
 from rest_framework.test import APITestCase
-from zgw_consumers.models import Service
 
 from bptl.tasks.models import TaskMapping
 from bptl.utils.constants import Statuses
@@ -28,16 +27,15 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
             topic_name="zaak-initialize",
             callback="bptl.work_units.zgw.tasks.CreateZaakTask",
         )
-        Service.objects.create(
-            api_root=ZRC_URL, api_type="zrc", label="zrc",
-        )
-        Service.objects.create(
-            api_root=ZTC_URL, api_type="ztc", label="ztc_local",
-        )
 
         data = {
             "topic": "zaak-initialize",
-            "vars": {"zaaktype": ZAAKTYPE, "organisatieRSIN": "002220647"},
+            "vars": {
+                "zaaktype": ZAAKTYPE,
+                "organisatieRSIN": "002220647",
+                "ZRC": {"apiRoot": ZRC_URL, "jwt": "Bearer 12345"},
+                "ZTC": {"apiRoot": ZTC_URL, "jwt": "Bearer 789"},
+            },
         }
         url = reverse("work-unit", args=(settings.REST_FRAMEWORK["DEFAULT_VERSION"],))
 

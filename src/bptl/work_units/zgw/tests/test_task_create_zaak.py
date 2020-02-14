@@ -2,7 +2,6 @@ from django.test import TestCase
 
 import requests_mock
 from django_camunda.models import CamundaConfig
-from zgw_consumers.models import Service
 
 from bptl.camunda.models import ExternalTask
 
@@ -28,13 +27,6 @@ class CreateZaakTaskTests(TestCase):
         config.rest_api_path = "engine-rest/"
         config.save()
 
-        Service.objects.create(
-            api_root=ZRC_URL, api_type="zrc", label="zrc",
-        )
-        Service.objects.create(
-            api_root=ZTC_URL, api_type="ztc", label="ztc_local",
-        )
-
         cls.fetched_task = ExternalTask.objects.create(
             worker_id="test-worker-id",
             task_id="test-task-id",
@@ -46,6 +38,14 @@ class CreateZaakTaskTests(TestCase):
                     "valueInfo": {},
                 },
                 "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
+                "ZRC": {
+                    "type": "Object",
+                    "value": {"apiRoot": ZRC_URL, "jwt": "Bearer 12345"},
+                },
+                "ZTC": {
+                    "type": "Object",
+                    "value": {"apiRoot": ZTC_URL, "jwt": "Bearer 789"},
+                },
             },
         )
 

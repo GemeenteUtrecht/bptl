@@ -7,7 +7,6 @@ from django.test import TestCase
 import requests_mock
 from django_camunda.models import CamundaConfig
 from requests.exceptions import ConnectionError
-from zgw_consumers.models import Service
 
 from bptl.tasks.models import TaskMapping
 from bptl.utils.constants import Statuses
@@ -35,12 +34,6 @@ class ExecuteCommandTests(TestCase):
         config.rest_api_path = "engine-rest/"
         config.save()
 
-        Service.objects.create(
-            api_root=ZRC_URL, api_type="zrc", label="zrc",
-        )
-        Service.objects.create(
-            api_root=ZTC_URL, api_type="ztc", label="ztc_local",
-        )
         TaskMapping.objects.create(
             topic_name="zaak-initialize",
             callback="bptl.work_units.zgw.tasks.CreateZaakTask",
