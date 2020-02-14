@@ -5,7 +5,7 @@ pytz  # handle timezones
 python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
 celery
-zgw-consumers
+gemma-zds-client
 
 # Framework libraries
 django < 3.0

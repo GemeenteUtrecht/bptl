@@ -17,7 +17,6 @@ django-admin-index==1.2.3
 django-appconf==1.0.3
 django-axes==5.2.2
 django-camunda==0.3.1
-django-choices==1.7.1
 django-compat==1.0.15
 django-docutils==0.4.0
 django-hijack-admin==2.1.10
@@ -69,4 +68,4 @@ waitress==1.4.2           # via webtest
 webob==1.8.5              # via webtest
 webtest==2.0.33           # via django-webtest
 wheel==0.29.0
-zgw-consumers==0.4.2
+zipp==2.1.0
