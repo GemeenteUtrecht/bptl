@@ -113,3 +113,4 @@ class CreateZaakTaskTests(TestCase):
             )
         )
         self.assertEqual(request_zaak.headers["X-NLX-Request-Process-Id"], "12345")
+        self.assertEqual(request_zaak.headers["Authorization"], "Bearer 12345")

@@ -7,7 +7,9 @@ from zds_client.client import Client
 
 
 def get_client_class() -> type:
-    client_class = getattr(settings, "ZGW_CLIENT_CLASS", "zds_client.Client")
+    client_class = getattr(
+        settings, "ZGW_CLIENT_CLASS", "bptl.work_units.zgw.client.ZGWClient"
+    )
     Client = import_string(client_class)
     return Client
 
@@ -20,6 +22,7 @@ class ZGWClient(Client):
         Add authorization header to requests
         """
         if self.auth_value:
-            kwargs["Authorization"] = self.auth_value
+            headers = kwargs.get("headers", {})
+            headers["Authorization"] = self.auth_value
 
         return super().pre_request(method, url, **kwargs)
