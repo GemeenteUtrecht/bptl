@@ -23,6 +23,7 @@ django-admin-index==1.2.3
 django-appconf==1.0.3
 django-axes==5.2.2
 django-camunda==0.3.1
+django-choices==1.7.1
 django-compat==1.0.15
 django-debug-toolbar==2.1
 django-docutils==0.4.0

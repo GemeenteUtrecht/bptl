@@ -14,6 +14,7 @@ django-admin-index==1.2.3
 django-appconf==1.0.3     # via django-axes
 django-axes==5.2.2
 django-camunda==0.3.1
+django-choices==1.7.1
 django-compat==1.0.15     # via django-hijack, django-hijack-admin
 django-docutils==0.4.0
 django-hijack-admin==2.1.10
@@ -50,7 +51,7 @@ pyyaml==5.3               # via gemma-zds-client
 redis==3.3.11             # via django-redis
 requests==2.22.0          # via django-camunda, django-rosetta, gemma-zds-client
 sentry-sdk==0.14.0
-six==1.13.0               # via django-appconf, django-compat, django-rosetta, python-dateutil
+six==1.13.0               # via django-appconf, django-choices, django-compat, django-rosetta, python-dateutil
 sqlparse==0.3.0           # via django
 tornado==5.1.1            # via flower
 urllib3==1.25.7           # via elastic-apm, requests, sentry-sdk
