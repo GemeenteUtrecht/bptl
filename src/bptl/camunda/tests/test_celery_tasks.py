@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
+from bptl.camunda.constants import Statuses
 from bptl.camunda.tests.factories import ExternalTaskFactory
 
 from ..tasks import task_execute_and_complete, task_fetch_and_lock
@@ -60,3 +61,14 @@ class RouteTaskTests(TestCase):
 
         m_execute.assert_called_once_with(task)
         m_complete.assert_called_once_with(task)
+
+    @patch("bptl.camunda.tasks.logger.warning")
+    def test_task_execute_alreaty_run(self, m_logger):
+        task = ExternalTaskFactory.create(status=Statuses.in_progress)
+
+        task_execute_and_complete(task.id)
+
+        task.refresh_from_db()
+        self.assertEqual(task.status, Statuses.in_progress)
+
+        m_logger.assert_called_once_with("Task %r has been already run", task.id)

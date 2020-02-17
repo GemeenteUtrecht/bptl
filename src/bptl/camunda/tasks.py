@@ -32,6 +32,11 @@ def task_fetch_and_lock():
 def task_execute_and_complete(fetched_task_id):
     fetched_task = ExternalTask.objects.get(id=fetched_task_id)
 
+    # make task idempotent
+    if fetched_task.status != Statuses.initial:
+        logger.warning("Task %r has been already run", fetched_task_id)
+        return
+
     fetched_task.status = Statuses.in_progress
     fetched_task.save()
 
