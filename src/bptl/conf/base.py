@@ -361,7 +361,7 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:63
 CELERY_TASK_SOFT_TIME_LIMIT = 600
 CELERY_BEAT_SCHEDULE = {
     "task-pull": {
-        "task": "bptl.tasks.tasks.celery.task_fetch_and_lock",
+        "task": "bptl.camunda.tasks.task_fetch_and_lock",
         "schedule": crontab(minute="*", hour="10-18"),
     },
 }
