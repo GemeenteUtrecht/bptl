@@ -365,6 +365,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute="*", hour="10-18"),
     },
 }
+CELERY_ACKS_LATE = True
 
 # project application settings
 MAX_TASKS = 10
