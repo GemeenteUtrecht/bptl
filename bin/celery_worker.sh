@@ -9,3 +9,4 @@ celery worker \
     --app bptl \
     -l $LOGLEVEL \
     --workdir src \
+    -O fair \
