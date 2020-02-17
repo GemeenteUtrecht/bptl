@@ -43,7 +43,7 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
         expected_response["resultVars"] = {"zaak": "zaak_url"}
         self.assertEqual(data_response, expected_response)
 
-    @patch("bptl.activiti.api.views.execute", side_effect=Exception)
+    @patch("bptl.activiti.api.views.execute", side_effect=Exception("This is fine"))
     def test_post_workunit_fail_execute(self, m):
         data = {"topic": "zaak-initialize", "vars": {"someOtherVar": 123}}
         url = reverse("work-unit", args=(settings.REST_FRAMEWORK["DEFAULT_VERSION"],))
@@ -51,3 +51,8 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
         response = self.client.post(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        service_task = ServiceTask.objects.get()
+
+        self.assertEqual(service_task.status, Statuses.failed)
+        self.assertEqual(service_task.error_description, "This is fine")

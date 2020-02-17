@@ -52,7 +52,8 @@ def task_execute_and_complete(fetched_task_id):
         )
 
         fetched_task.status = Statuses.failed
-        fetched_task.save(update_fields=["status"])
+        fetched_task.error_description = str(exc)
+        fetched_task.save(update_fields=["status", "error_description"])
 
         return
 
@@ -70,7 +71,8 @@ def task_execute_and_complete(fetched_task_id):
         )
 
         fetched_task.status = Statuses.failed
-        fetched_task.save(update_fields=["status"])
+        fetched_task.error_description = str(exc)
+        fetched_task.save(update_fields=["status", "error_description"])
 
         return
 

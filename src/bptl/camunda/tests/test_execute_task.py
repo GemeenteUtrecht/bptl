@@ -132,3 +132,4 @@ class ExecuteCommandTests(TestCase):
 
         task.refresh_from_db()
         self.assertEqual(task.status, Statuses.failed)
+        self.assertEqual(task.error_description, "some connection error")
