@@ -57,9 +57,8 @@ services:
       - db
       - redis
 
-
   celery-flower:
-    build: .
+    image: mher/flower
     environment: *web_env
     command: /celery_flower.sh
     ports:
@@ -67,5 +66,5 @@ services:
     volumes:
       - ./bin/celery_flower.sh:/celery_flower.sh
     depends_on:
-      - db
       - redis
+      - celery

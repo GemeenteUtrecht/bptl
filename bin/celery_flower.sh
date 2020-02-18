@@ -3,6 +3,6 @@
 set -e
 
 echo "Starting flower"
-celery flower \
+flower \
     --app bptl \
     --workdir src \
