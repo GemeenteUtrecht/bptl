@@ -56,3 +56,16 @@ services:
     depends_on:
       - db
       - redis
+
+
+  celery-flower:
+    build: .
+    environment: *web_env
+    command: /celery_flower.sh
+    ports:
+      - 5555:5555
+    volumes:
+      - ./bin/celery_flower.sh:/celery_flower.sh
+    depends_on:
+      - db
+      - redis
