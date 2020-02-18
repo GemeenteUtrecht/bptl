@@ -362,7 +362,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = 600
 CELERY_BEAT_SCHEDULE = {
     "task-pull": {
         "task": "bptl.camunda.tasks.task_fetch_and_lock",
-        "schedule": crontab(minute="*", hour="10-18"),
+        "schedule": crontab(minute="*"),
     },
 }
 CELERY_ACKS_LATE = True
