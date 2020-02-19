@@ -10,7 +10,7 @@ Business Process Task Library (BPTL)
 |build-status| |black|
 
 A webapplication to configure and run worker units to process tasks from external
-engines.
+engines. Currently it supports Camunda `external tasks`_ .
 
 Developed by `Maykin Media B.V.`_ for Gemeente Utrecht.
 
@@ -40,6 +40,7 @@ Usage
    :maxdepth: 2
 
    usage
+   camunda
    api
 
 
