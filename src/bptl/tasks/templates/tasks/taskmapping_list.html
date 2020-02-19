@@ -1,5 +1,5 @@
 {% extends "master.html" %}
-{% load i18n tasks %}
+{% load i18n tasks django_docutils %}
 
 {% block content-header-subtitle %}{% trans "View configured topic listeners" %}{% endblock %}
 {% block content-header-title %}{% trans "Active listeners" %}{% endblock %}
@@ -35,7 +35,11 @@
         </div>
         <div class="task-details__description">
             <code class="task-details__handler" title="{% trans 'Responsible code' %}">{{ task.dotted_path }}</code>
-            <p class="task-details__description-text">{{ task.documentation|linebreaksbr }}</p>
+            <div class="task-details__description-text">
+                {% filter restructuredtext %}
+                    {{ task.documentation|safe }}
+                {% endfilter %}
+            </div>
         </div>
     </article>
 {% endfor %}
