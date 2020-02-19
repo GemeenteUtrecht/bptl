@@ -11,5 +11,5 @@ Tasks and task registry
 External tasks
 ==============
 
-.. automodule:: bptl.external_tasks.camunda
+.. automodule:: bptl.camunda.utils
     :members:

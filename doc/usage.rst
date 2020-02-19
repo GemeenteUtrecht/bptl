@@ -54,7 +54,7 @@ Complete tasks
 Whenever an external task for a certain topic is done/performed, the task itself
 needs to be completed and updated with resulting process variables.
 
-For this purpose, ``bptl.external_tasks.camunda.complete_task`` exists. Pass
+For this purpose, ``bptl.camunda.utils.complete_task`` exists. Pass
 the ``FetchedTask`` instance and a dict of ``variable_name: value`` to update
 process variables. If no process variables need to be updated, you can leave the
 ``variables`` off.
