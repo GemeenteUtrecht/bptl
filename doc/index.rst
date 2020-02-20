@@ -3,7 +3,7 @@ Business Process Task Library (BPTL)
 ====================================
 
 :Version: 0.1.0
-:Source: https://github.com/GemeenteUtrecht/camunda-worker
+:Source: https://github.com/GemeenteUtrecht/bptl
 :Keywords: bpmn, camunda, external tasks, process engine, VNG, Common Ground
 :PythonVersion: 3.8
 
@@ -62,9 +62,9 @@ Indices and tables
 * :ref:`search`
 
 
-.. |build-status| image:: https://travis-ci.org/GemeenteUtrecht/camunda-worker.svg?branch=master
+.. |build-status| image:: https://travis-ci.org/GemeenteUtrecht/bptl.svg?branch=master
     :alt: Build status
-    :target: https://travis-ci.org/GemeenteUtrecht/camunda-worker
+    :target: https://travis-ci.org/GemeenteUtrecht/bptl
 
 .. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black

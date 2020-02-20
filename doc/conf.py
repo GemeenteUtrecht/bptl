@@ -25,7 +25,7 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = "Camunda Worker"
+project = "Business Process Task Library"
 copyright = "2020, Maykin Media"
 author = "Maykin Media"
 

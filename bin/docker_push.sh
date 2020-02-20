@@ -15,7 +15,7 @@ echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 # Echo script commands
 set -x
 
-REPO=scrumteamzgw/camunda-worker
+REPO=scrumteamzgw/bptl
 TAG=${1:-latest}
 
 # Build the image
