@@ -47,7 +47,7 @@ class CreateZaakTask(ZGWWorkUnit):
     * **ZRC**: JSON Object of connection details for ZRC such as:
         * **apiRoot**: url to api root of ZRC
         * **jwt**: value for Authorization header in the api
-    * ZTC: JSON Object of connection details for ZTC such as:
+    * **ZTC**: JSON Object of connection details for ZTC such as:
         * **apiRoot**: url to api root of ZTC
         * **jwt**: value for Authorization header in the api
 
@@ -232,7 +232,7 @@ class CloseZaakTask(ZGWWorkUnit):
     * **ZRC**: JSON Object of connection details for ZRC such as:
         * **apiRoot**: url to api root of ZRC
         * **jwt**: value for Authorization header in the api
-    * ZTC: JSON Object of connection details for ZTC such as:
+    * **ZTC**: JSON Object of connection details for ZTC such as:
         * **apiRoot**: url to api root of ZTC
         * **jwt**: value for Authorization header in the api
 

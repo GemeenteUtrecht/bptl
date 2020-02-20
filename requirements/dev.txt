@@ -51,6 +51,7 @@ freezegun==0.3.12
 gemma-zds-client==0.13.1
 idna==2.8
 imagesize==1.2.0          # via sphinx
+importlib-metadata==1.5.0
 inflection==0.3.1
 isort==4.3.21
 jinja2==2.10.3            # via sphinx
