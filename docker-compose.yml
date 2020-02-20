@@ -56,3 +56,12 @@ services:
     depends_on:
       - db
       - redis
+
+  celery-flower:
+    image: mher/flower
+    environment: *web_env
+    ports:
+      - 5555:5555
+    depends_on:
+      - redis
+      - celery
