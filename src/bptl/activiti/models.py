@@ -19,9 +19,6 @@ class ActivitiConfig(SingletonModel):
         ),
         default="https://activiti.utrechtproeftuin.nl/activiti-app/api/",
     )
-    rest_api_path = models.CharField(
-        _("REST api path"), max_length=255, default="management/engine"
-    )
     auth_header = models.TextField(
         _("authorization header"),
         blank=True,
@@ -29,27 +26,17 @@ class ActivitiConfig(SingletonModel):
             "HTTP Authorization header value, required if the API is not open."
         ),
     )
+    enterprise = models.BooleanField(
+        _("is enterprise"),
+        default=True,
+        help_text=_("Boolean indicating if the enterprise edition of Activiti is used"),
+    )
 
     class Meta:
         verbose_name = _("Activiti configuration")
 
     def __str__(self):
-        return self.api_root
-
-    def save(self, *args, **kwargs):
-        if self.rest_api_path.startswith("/"):
-            self.rest_api_path = self.rest_api_path[1:]
-
-        if not self.rest_api_path.endswith("/"):
-            self.rest_api_path = f"{self.rest_api_path}/"
-
-        super().save(*args, **kwargs)
-
-    @property
-    def api_root(self) -> str:
-        assert not self.rest_api_path.startswith("/")
-        assert self.rest_api_path.endswith("/")
-        return urljoin(self.root_url, self.rest_api_path)
+        return self.root_url
 
 
 class ServiceTask(BaseTask):
@@ -58,7 +45,7 @@ class ServiceTask(BaseTask):
     """
 
     class Meta:
-        verbose_name = _("aervice task")
+        verbose_name = _("service task")
         verbose_name_plural = _("service tasks")
 
     def __str__(self):

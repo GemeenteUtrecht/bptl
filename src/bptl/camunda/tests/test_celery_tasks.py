@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from bptl.camunda.constants import Statuses
 from bptl.camunda.tests.factories import ExternalTaskFactory
+from bptl.utils.constants import Statuses
 
 from ..tasks import task_execute_and_complete, task_fetch_and_lock
 
