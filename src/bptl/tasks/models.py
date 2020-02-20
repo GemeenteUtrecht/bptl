@@ -6,8 +6,6 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from solo.models import SingletonModel
-
 from bptl.utils.constants import Statuses
 
 from .query import TaskQuerySet
@@ -46,7 +44,7 @@ class TaskMapping(models.Model):
 class BaseTask(models.Model):
     """
     An external task to be processed by work units.
-    
+
     Use this as the base class for process-engine specific task definitions.
     """
 
