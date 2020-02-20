@@ -9,11 +9,11 @@ from typing import List, Optional, Tuple
 from dateutil import parser
 from django_camunda.client import get_client_class
 
+from bptl.tasks.models import TaskMapping
 from bptl.utils.typing import Object, ProcessVariables
 
 from .models import ExternalTask, get_worker_id
 
-TOPIC = "zaak-initialize"
 LOCK_DURATION = 60 * 10  # 10 minutes
 
 
@@ -25,20 +25,21 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
     """
     camunda = get_client_class()()
 
+    # Fetch the topics that are known (and active!) in this configured instance only
+    mappings = TaskMapping.objects.filter(active=True)
+    topics = [
+        {
+            "topicName": mapping.topic_name,
+            "lockDuration": LOCK_DURATION * 1000,  # API expects miliseconds
+        }
+        for mapping in mappings
+    ]
+
     worker_id = get_worker_id()
     external_tasks: List[Object] = camunda.request(
         "external-task/fetchAndLock",
         method="POST",
-        json={
-            "workerId": worker_id,
-            "maxTasks": max_tasks,
-            "topics": [
-                {
-                    "topicName": TOPIC,
-                    "lockDuration": LOCK_DURATION * 1000,  # API expects miliseconds
-                }
-            ],
-        },
+        json={"workerId": worker_id, "maxTasks": max_tasks, "topics": topics,},
     )
 
     fetched = []
