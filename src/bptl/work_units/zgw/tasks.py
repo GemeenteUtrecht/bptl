@@ -44,12 +44,12 @@ class CreateZaakTask(ZGWWorkUnit):
 
     * **zaaktype**: the full URL of the ZAAKTYPE
     * **organisatieRSIN**: RSIN of the organisation
-    * ZRC: JSON Object of connection details for ZRC such as:
-        * apiRoot: url to api root of ZRC
-        * jwt: value for Authorization header in the api
+    * **ZRC**: JSON Object of connection details for ZRC such as:
+        * **apiRoot**: url to api root of ZRC
+        * **jwt**: value for Authorization header in the api
     * ZTC: JSON Object of connection details for ZTC such as:
-        * apiRoot
-        * jwt: value for Authorization header in the api
+        * **apiRoot**: url to api root of ZTC
+        * **jwt**: value for Authorization header in the api
 
     Optional process variables:
 
@@ -121,9 +121,9 @@ class CreateStatusTask(ZGWWorkUnit):
 
     * **zaak**: full URL of the ZAAK to create a new status for
     * **statustype**: full URL of the STATUSTYPE to set
-    * ZRC: JSON Object of connection details for ZRC such as:
-        * apiRoot: url to api root of ZRC
-        * jwt: value for Authorization header in the api
+    * **ZRC**: JSON Object of connection details for ZRC such as:
+        * **apiRoot**: url to api root of ZRC
+        * **jwt**: value for Authorization header in the api
 
     The task sets the process variables:
 
@@ -158,9 +158,9 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     * **zaak**: full URL of the ZAAK to set the RESULTAAT for
     * **resultaattype**: full URL of the RESULTAATTYPE to set
-    * ZRC: JSON Object of connection details for ZRC such as:
-        * apiRoot: url to api root of ZRC
-        * jwt: value for Authorization header in the api
+    * **ZRC**: JSON Object of connection details for ZRC such as:
+        * **apiRoot**: url to api root of ZRC
+        * **jwt**: value for Authorization header in the api
 
     Optional process variables:
 
@@ -196,9 +196,9 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
 
     * **zaak**: full URL of the ZAAK
     * **informatieobject**: full URL of the INFORMATIEOBJECT
-    * ZRC: JSON Object of connection details for ZRC such as:
-        * apiRoot: url to api root of ZRC
-        * jwt: value for Authorization header in the api
+    * **ZRC**: JSON Object of connection details for ZRC such as:
+        * **apiRoot**: url to api root of ZRC
+        * **jwt**: value for Authorization header in the api
 
     The task sets the process variables:
 
@@ -229,12 +229,12 @@ class CloseZaakTask(ZGWWorkUnit):
     Required process variables:
 
     * **zaak**: full URL of the ZAAK
-    * ZRC: JSON Object of connection details for ZRC such as:
-        * apiRoot: url to api root of ZRC
-        * jwt: value for Authorization header in the api
+    * **ZRC**: JSON Object of connection details for ZRC such as:
+        * **apiRoot**: url to api root of ZRC
+        * **jwt**: value for Authorization header in the api
     * ZTC: JSON Object of connection details for ZTC such as:
-        * apiRoot
-        * jwt: value for Authorization header in the api
+        * **apiRoot**: url to api root of ZTC
+        * **jwt**: value for Authorization header in the api
 
     The task sets the process variables:
 
