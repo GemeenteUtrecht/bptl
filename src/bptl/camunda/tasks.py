@@ -38,7 +38,7 @@ def task_execute_and_complete(fetched_task_id):
         return
 
     fetched_task.status = Statuses.in_progress
-    fetched_task.save()
+    fetched_task.save(update_fields=["status"])
 
     # execute
     try:
@@ -52,7 +52,7 @@ def task_execute_and_complete(fetched_task_id):
         )
 
         fetched_task.status = Statuses.failed
-        fetched_task.save()
+        fetched_task.save(update_fields=["status"])
 
         return
 
@@ -70,7 +70,7 @@ def task_execute_and_complete(fetched_task_id):
         )
 
         fetched_task.status = Statuses.failed
-        fetched_task.save()
+        fetched_task.save(update_fields=["status"])
 
         return
 

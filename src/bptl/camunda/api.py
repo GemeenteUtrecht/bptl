@@ -30,7 +30,7 @@ def complete(task: ExternalTask):
             f"The task {task} is {task.status}. The task should be performed before sending results"
         )
 
-    complete_task(task)
+    complete_task(task, variables=task.result_variables)
 
     task.status = Statuses.completed
     task.save()
