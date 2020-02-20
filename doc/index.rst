@@ -1,6 +1,6 @@
-==============
-Camunda Worker
-==============
+====================================
+Business Process Task Library (BPTL)
+====================================
 
 :Version: 0.1.0
 :Source: https://github.com/GemeenteUtrecht/camunda-worker
@@ -9,7 +9,8 @@ Camunda Worker
 
 |build-status| |black|
 
-A webapplication to configure and run workers to process Camunda `external tasks`_.
+A webapplication to configure and run worker units to process tasks from external
+engines. Currently it supports Camunda `external tasks`_ .
 
 Developed by `Maykin Media B.V.`_ for Gemeente Utrecht.
 
@@ -20,11 +21,11 @@ Introduction
 het 5-lagen model van Common Ground worden gegevens gescheiden van Interactie en proces,
 waarbij gegevens via Services/APIs ontsloten worden.
 
-Camunda Worker zet hierbij in op de Integratielaag. Vaak leiden stappen in een proces
+BPTL zet hierbij in op de Integratielaag. Vaak leiden stappen in een proces
 (wat leeft in een proces-engine zoals Camunda) tot bepaalde taken die uitgevoerd dienen
 te worden tegen deze specifieke services/APIs.
 
-In eerste instantie focust Camunda Worker op de integratie met de
+In eerste instantie focust BPTL op de integratie met de
 `API's voor zaakgericht werken`_ - stappen in het Camunda proces leiden tot het aanmaken
 en bijwerken van Zaken, waarbij generieke bouwstenen opnieuw gebruikt kunnen worden
 voor verschillende processen.
@@ -39,6 +40,7 @@ Usage
    :maxdepth: 2
 
    usage
+   camunda
    api
 
 

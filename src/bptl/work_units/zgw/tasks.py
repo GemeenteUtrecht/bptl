@@ -21,22 +21,22 @@ class CreateZaakTask(WorkUnit):
     """
     Create a ZAAK in the configured Zaken API and set the initial status.
 
-    The initial status is the STATUSTYPE with ``volgnummer`` equal to 1 for the
+    The initial status is the STATUSTYPE with **volgnummer** equal to 1 for the
     ZAAKTYPE.
 
     Required process variables:
 
-    * zaaktype: the full URL of the ZAAKTYPE
-    * organisatieRSIN: RSIN of the organisation
+    * **zaaktype**: the full URL of the ZAAKTYPE
+    * **organisatieRSIN**: RSIN of the organisation
 
     Optional process variables:
 
-    * NLXProcessId - a process id for purpose registration ("doelbinding")
-    * NLXSubjectIdentifier - a subject identifier for purpose registration ("doelbinding")
+    * **NLXProcessId** - a process id for purpose registration ("doelbinding")
+    * **NLXSubjectIdentifier** - a subject identifier for purpose registration ("doelbinding")
 
     The task sets the process variables:
 
-    * zaak: the full URL of the created ZAAK
+    * **zaak**: the full URL of the created ZAAK
     """
 
     def create_zaak(self) -> dict:
@@ -100,12 +100,12 @@ class CreateStatusTask(WorkUnit):
 
     Required process variables:
 
-    * zaak: full URL of the ZAAK to create a new status for
-    * statustype: full URL of the STATUSTYPE to set
+    * **zaak**: full URL of the ZAAK to create a new status for
+    * **statustype**: full URL of the STATUSTYPE to set
 
     The task sets the process variables:
 
-    * status: the full URL of the created STATUS
+    * **status**: the full URL of the created STATUS
     """
 
     def create_status(self) -> dict:
@@ -138,16 +138,16 @@ class CreateResultaatTask(WorkUnit):
 
     Required process variables:
 
-    * zaak: full URL of the ZAAK to set the RESULTAAT for
-    * resultaattype: full URL of the RESULTAATTYPE to set
+    * **zaak**: full URL of the ZAAK to set the RESULTAAT for
+    * **resultaattype**: full URL of the RESULTAATTYPE to set
 
     Optional process variables:
 
-    * toelichting
+    * **toelichting**
 
     The task sets the process variables:
 
-    * resultaat: the full URL of the created RESULTAAT
+    * **resultaat**: the full URL of the created RESULTAAT
     """
 
     def create_resultaat(self):
@@ -177,12 +177,12 @@ class RelateDocumentToZaakTask(WorkUnit):
 
     Required process variables:
 
-    * zaak: full URL of the ZAAK
-    * informatieobject: full URL of the INFORMATIEOBJECT
+    * **zaak**: full URL of the ZAAK
+    * **informatieobject**: full URL of the INFORMATIEOBJECT
 
     The task sets the process variables:
 
-    * zaakinformatieobject: full URL of ZAAKINFORMATIEOBJECT
+    * **zaakinformatieobject**: full URL of ZAAKINFORMATIEOBJECT
     """
 
     def relate_document(self) -> dict:
@@ -214,13 +214,13 @@ class CloseZaakTask(WorkUnit):
 
     Required process variables:
 
-    * zaak: full URL of the ZAAK
+    * **zaak**: full URL of the ZAAK
 
     The task sets the process variables:
 
-    * einddatum: date of closing the zaak
-    * archiefnominatie: shows if the zaak should be destroyed or stored permanently
-    * archiefactiedatum: date when the archived zaak should be destroyed or transferred to the archive
+    * **einddatum**: date of closing the zaak
+    * **archiefnominatie**: shows if the zaak should be destroyed or stored permanently
+    * **archiefactiedatum**: date when the archived zaak should be destroyed or transferred to the archive
     """
 
     def close_zaak(self) -> dict:

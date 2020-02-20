@@ -33,6 +33,11 @@
   & &__description {
     display: block;
     width: 66%;
+    // not BEM since it's a docutil generation result
+    blockquote {
+      margin: 0;
+    }
+
   }
 
   & &__handler {

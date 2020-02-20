@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "solo",
     "django_camunda",
     "zgw_consumers",
+    "django_docutils",
     # Project applications.
     "bptl.accounts",
     "bptl.camunda",
