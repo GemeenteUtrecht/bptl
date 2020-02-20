@@ -16,6 +16,6 @@ def dummy(task: ExternalTask) -> None:
     after which it completes the task.
     """
     logger.info("Received external task: %s", task.task_id)
-    logger.info("External task currently hsa the variables: %r", task.get_variables())
+    logger.info("External task currently has the variables: %r", task.get_variables())
     logger.info("Marking task as completed...")
     complete_task(task)

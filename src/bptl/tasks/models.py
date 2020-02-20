@@ -44,7 +44,11 @@ class TaskMapping(models.Model):
 
 
 class BaseTask(models.Model):
-    """ en external task which can be processed by work_units"""
+    """
+    An external task to be processed by work units.
+    
+    Use this as the base class for process-engine specific task definitions.
+    """
 
     topic_name = models.CharField(
         _("topic name"),

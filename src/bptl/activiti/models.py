@@ -12,7 +12,7 @@ class ActivitiConfig(SingletonModel):
     """ configuration of Activiti service, including base url and credentials """
 
     root_url = models.URLField(
-        _("camunda root"),
+        _("activiti root"),
         help_text=_(
             "Root URL where activiti is installed. The REST api "
             "path is appended to this."

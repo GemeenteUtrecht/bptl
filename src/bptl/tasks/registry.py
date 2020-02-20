@@ -41,7 +41,7 @@ class WorkUnitRegistry:
         if len(sig.parameters) != 1:
             raise TypeError(
                 "A task must take exactly one argument - an instance of "
-                "tasks.BaseTask child class"
+                "tasks.BaseTask child class."
             )
 
         # check the expected type hint
@@ -50,7 +50,7 @@ class WorkUnitRegistry:
             param.annotation, BaseTask
         ):
             raise TypeError(
-                f"The '{param.name}' typehint does not appear to be a BaseTask"
+                f"The '{param.name}' typehint does not appear to be a BaseTask."
             )
 
         # check that classes have a perform method
