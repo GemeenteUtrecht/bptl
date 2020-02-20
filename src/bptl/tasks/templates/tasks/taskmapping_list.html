@@ -36,9 +36,7 @@
         <div class="task-details__description">
             <code class="task-details__handler" title="{% trans 'Responsible code' %}">{{ task.dotted_path }}</code>
             <div class="task-details__description-text">
-                {% filter restructuredtext %}
-                    {{ task.documentation|safe }}
-                {% endfilter %}
+                {{ task.documentation|restructuredtext }}
             </div>
         </div>
     </article>
