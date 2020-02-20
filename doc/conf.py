@@ -12,6 +12,7 @@
 #
 import os
 import sys
+
 import django
 
 src_dir = os.path.join(os.path.dirname(os.path.abspath(".")), "src")
