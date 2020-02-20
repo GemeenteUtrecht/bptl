@@ -1,8 +1,2 @@
 #!/bin/bash
-
-set -e
-
-echo "Starting flower"
-flower \
-    --app bptl \
-    --workdir src \
+celery flower --app bptl --workdir src
