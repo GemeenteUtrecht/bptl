@@ -49,7 +49,6 @@ sentry-sdk==0.14.0
 six==1.13.0               # via django-appconf, django-choices, django-compat, django-rosetta, python-dateutil
 sqlparse==0.3.0           # via django
 tornado==5.1.1            # via flower
-tqdm==4.41.1
 urllib3==1.25.7           # via elastic-apm, requests, sentry-sdk
 uwsgi==2.0.18
 vine==1.3.0               # via amqp, celery

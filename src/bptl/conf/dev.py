@@ -115,8 +115,3 @@ try:
     from .local import *  # noqa
 except ImportError:
     pass
-
-
-TQDM_DISABLED = False
-if "test" in sys.argv:
-    TQDM_DISABLED = True
