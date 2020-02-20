@@ -1,3 +1,5 @@
+import traceback
+
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework.exceptions import ValidationError
@@ -22,7 +24,8 @@ class WorkUnitView(CreateAPIView):
             execute(task)
         except Exception as exc:
             task.status = Statuses.failed
-            task.save()
+            task.execution_error = traceback.format_exc()
+            task.save(update_fields=["status", "execution_error"])
 
             raise ValidationError(
                 {

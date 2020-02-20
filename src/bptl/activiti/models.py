@@ -1,5 +1,3 @@
-from urllib.parse import urljoin
-
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -43,6 +41,12 @@ class ServiceTask(BaseTask):
     """
     A single activiti task which request bptl API
     """
+
+    execution_error = models.TextField(
+        _("execution error"),
+        blank=True,
+        help_text=_("The error that occurred during execution."),
+    )
 
     class Meta:
         verbose_name = _("service task")
