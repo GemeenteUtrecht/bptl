@@ -13,15 +13,15 @@
 import os
 import sys
 
-import django
+# import django
 
 src_dir = os.path.join(os.path.dirname(os.path.abspath(".")), "src")
 sys.path.insert(0, src_dir)
 
-from bptl.setup import setup_env  # noqa isort:skip
+# from bptl.setup import setup_env  # noqa isort:skip
 
-setup_env()
-django.setup()
+# setup_env()
+# django.setup()
 
 # -- Project information -----------------------------------------------------
 
