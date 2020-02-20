@@ -42,7 +42,7 @@ class CreateZaakTask(WorkUnit):
     def create_zaak(self) -> dict:
         zrc = Service.objects.get(api_type=APITypes.zrc)
         client = zrc.build_client()
-        variables = self.task.flat_variables
+        variables = self.task.get_variables()
         today = date.today().strftime("%Y-%m-%d")
         data = {
             "zaaktype": variables["zaaktype"],
@@ -68,7 +68,7 @@ class CreateZaakTask(WorkUnit):
         ztc = Service.objects.get(api_type=APITypes.ztc)
         ztc_client = ztc.build_client()
         statustypen = ztc_client.list(
-            "statustype", {"zaaktype": self.task.flat_variables["zaaktype"]}
+            "statustype", {"zaaktype": self.task.get_variables()["zaaktype"]}
         )["results"]
         statustype = next(filter(lambda x: x["volgnummer"] == 1, statustypen))
 
@@ -112,8 +112,8 @@ class CreateStatusTask(WorkUnit):
         zrc = Service.objects.get(api_type=APITypes.zrc)
         zrc_client = zrc.build_client()
         data = {
-            "zaak": self.task.flat_variables["zaak"],
-            "statustype": self.task.flat_variables["statustype"],
+            "zaak": self.task.get_variables()["zaak"],
+            "statustype": self.task.get_variables()["statustype"],
             "datumStatusGezet": timezone.now().isoformat(),
         }
         status = zrc_client.create("status", data)
@@ -154,9 +154,9 @@ class CreateResultaatTask(WorkUnit):
         zrc = Service.objects.get(api_type=APITypes.zrc)
         zrc_client = zrc.build_client()
         data = {
-            "zaak": self.task.flat_variables["zaak"],
-            "resultaattype": self.task.flat_variables["resultaattype"],
-            "toelichting": self.task.flat_variables.get("toelichting", ""),
+            "zaak": self.task.get_variables()["zaak"],
+            "resultaattype": self.task.get_variables()["resultaattype"],
+            "toelichting": self.task.get_variables().get("toelichting", ""),
         }
 
         resultaat = zrc_client.create("resultaat", data)
@@ -189,8 +189,8 @@ class RelateDocumentToZaakTask(WorkUnit):
         zrc = Service.objects.get(api_type=APITypes.zrc)
         zrc_client = zrc.build_client()
         data = {
-            "zaak": self.task.flat_variables["zaak"],
-            "informatieobject": self.task.flat_variables["informatieobject"],
+            "zaak": self.task.get_variables()["zaak"],
+            "informatieobject": self.task.get_variables()["informatieobject"],
         }
         zio = zrc_client.create("zaakinformatieobject", data)
         return zio
@@ -231,7 +231,7 @@ class CloseZaakTask(WorkUnit):
         ztc_client = ztc.build_client()
 
         # get statustype to close zaak
-        zaak = self.task.flat_variables["zaak"]
+        zaak = self.task.get_variables()["zaak"]
         zaaktype = zrc_client.retrieve("zaak", zaak)["zaaktype"]
         statustypen = ztc_client.list("statustype", {"zaaktype": zaaktype})["results"]
         statustype = next(filter(lambda x: x["isEindstatus"] is True, statustypen))

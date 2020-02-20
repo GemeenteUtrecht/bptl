@@ -2,7 +2,8 @@
 Expose the public API to manage camunda external tasks.
 """
 
-from .constants import Statuses
+from bptl.utils.constants import Statuses
+
 from .models import ExternalTask
 from .utils import complete_task
 

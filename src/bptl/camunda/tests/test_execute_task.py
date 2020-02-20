@@ -10,9 +10,9 @@ from requests.exceptions import ConnectionError
 from zgw_consumers.models import Service
 
 from bptl.tasks.models import TaskMapping
+from bptl.utils.constants import Statuses
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
-from ..constants import Statuses
 from ..models import ExternalTask
 from .utils import get_fetch_and_lock_response
 

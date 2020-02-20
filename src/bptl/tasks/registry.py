@@ -1,8 +1,7 @@
 """
 Manage a registry of tasks that can be used as callbacks.
 
-A Task is a callable which takes a
-:class:`bptl.camunda.models.ExternalTask` instance as sole argument and
+A Task is a callable which takes an external task instance as sole argument and
 performs a unit of work.
 """
 import inspect
@@ -35,23 +34,23 @@ class WorkUnitRegistry:
 
         TODO: render docstring with sphinx
         """
-        from bptl.camunda.models import ExternalTask
+        from .models import BaseTask
 
         # check that there's one and only one expected argument
         sig = inspect.signature(func_or_class)
         if len(sig.parameters) != 1:
             raise TypeError(
                 "A task must take exactly one argument - an instance of "
-                "camunda.ExternalTask."
+                "tasks.BaseTask child class."
             )
 
         # check the expected type hint
         param = list(sig.parameters.values())[0]
         if param.annotation is not inspect._empty and not issubclass(
-            param.annotation, ExternalTask
+            param.annotation, BaseTask
         ):
             raise TypeError(
-                f"The '{param.name}' typehint does not appear to be a ExternalTask"
+                f"The '{param.name}' typehint does not appear to be a BaseTask."
             )
 
         # check that classes have a perform method

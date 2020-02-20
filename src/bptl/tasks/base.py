@@ -1,8 +1,8 @@
-from bptl.camunda.models import ExternalTask
+from .models import BaseTask
 
 
 class WorkUnit:
-    def __init__(self, task: ExternalTask):
+    def __init__(self, task: BaseTask):
         self.task = task
 
     def perform(self) -> dict:
