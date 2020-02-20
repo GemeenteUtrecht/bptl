@@ -36,6 +36,7 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
 
         self.assertEqual(service_task.topic_name, "zaak-initialize")
         self.assertEqual(service_task.status, Statuses.performed)
+        self.assertEqual(service_task.variables, {"someOtherVar": 123})
 
         data_response = response.json()
         expected_response = data.copy()
