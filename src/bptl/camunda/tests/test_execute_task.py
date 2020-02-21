@@ -14,6 +14,7 @@ from bptl.utils.constants import Statuses
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
 from ..models import ExternalTask
+from .factories import ExternalTaskFactory
 from .utils import get_fetch_and_lock_response
 
 ZTC_URL = "https://some.ztc.nl/api/v1/"
@@ -46,23 +47,16 @@ class ExecuteCommandTests(TestCase):
         )
 
     def test_execute_one(self, m):
+        task = ExternalTaskFactory.create(
+            topic_name="zaak-initialize",
+            variables={
+                "zaaktype": {"value": ZAAKTYPE},
+                "organisatieRSIN": {"value": "123456788"},
+            },
+        )
         # mock camunda
         m.post(
-            "https://some.camunda.com/engine-rest/external-task/fetchAndLock",
-            json=get_fetch_and_lock_response(
-                topic="zaak-initialize",
-                variables={
-                    "zaaktype": {"type": "String", "value": ZAAKTYPE, "valueInfo": {}},
-                    "organisatieRSIN": {
-                        "type": "String",
-                        "value": "002220647",
-                        "valueInfo": {},
-                    },
-                },
-            ),
-        )
-        m.post(
-            "https://some.camunda.com/engine-rest/external-task/anExternalTaskId/complete",
+            f"https://some.camunda.com/engine-rest/external-task/{task.task_id}/complete",
             status_code=204,
         )
 
@@ -116,81 +110,32 @@ class ExecuteCommandTests(TestCase):
             },
         )
 
-        with patch(
-            "bptl.camunda.utils.get_worker_id", return_value="aWorkerId",
-        ) as m_get_worker_id:
+        # execute command
+        stdout = StringIO()
+        call_command("execute_task", task.id, stdout=stdout)
 
-            # execute command
-            stdout = StringIO()
-            call_command("execute_tasks", 1, stdout=stdout)
-
-        task = ExternalTask.objects.get()
+        task.refresh_from_db()
         self.assertEqual(task.status, Statuses.completed)
 
-        stdout.seek(0)
-        # remove escape characters for pretty print
-        lines = (
-            line.strip().replace("\x1b[1m", "").replace("\x1b[0m", "")
-            for line in stdout.readlines()
-        )
-        self.assertEqual(next(lines), "Start 'fetch and lock' step")
-        self.assertEqual(next(lines), "1 task(s) fetched with worker ID aWorkerId")
-        self.assertEqual(next(lines), "")
-        self.assertEqual(next(lines), "Start 'execution' step")
-        self.assertEqual(next(lines), "1 task(s) succeeded during execution")
-        self.assertEqual(next(lines), "0 task(s) failed during execution")
-        self.assertEqual(next(lines), "")
-        self.assertEqual(next(lines), "Start 'sending process' step")
-        self.assertEqual(next(lines), "1 task(s) succeeded during sending process")
-        self.assertEqual(next(lines), "0 task(s) failed during sending process")
-        self.assertEqual(next(lines), "")
+        request_body = m.last_request.json()
+        self.assertEqual(request_body["workerId"], task.worker_id)
+        self.assertEqual(request_body["variables"], {"zaak": {"value": ZAAK},})
 
     def test_execute_fail(self, m):
-        # mock camunda
-        m.post(
-            "https://some.camunda.com/engine-rest/external-task/fetchAndLock",
-            json=get_fetch_and_lock_response(
-                topic="zaak-initialize",
-                variables={
-                    "zaaktype": {"type": "String", "value": ZAAKTYPE, "valueInfo": {}},
-                    "organisatieRSIN": {
-                        "type": "String",
-                        "value": "002220647",
-                        "valueInfo": {},
-                    },
-                },
-            ),
+        task = ExternalTaskFactory.create(
+            topic_name="zaak-initialize",
+            variables={
+                "zaaktype": {"value": ZAAKTYPE},
+                "organisatieRSIN": {"value": "123456788"},
+            },
         )
-
         # mock openzaak services
         mock_service_oas_get(m, ZTC_URL, "ztc")
         mock_service_oas_get(m, ZRC_URL, "zrc")
         m.post(f"{ZRC_URL}zaken", exc=ConnectionError("some connection error"))
 
-        with patch(
-            "bptl.camunda.utils.get_worker_id", return_value="aWorkerId",
-        ) as m_get_worker_id:
-            # execute command
-            stdout = StringIO()
-            call_command("execute_tasks", 1, stdout=stdout)
+        stdout = StringIO()
+        call_command("execute_task", task.id, stdout=stdout)
 
-        task = ExternalTask.objects.get()
+        task.refresh_from_db()
         self.assertEqual(task.status, Statuses.failed)
-
-        stdout.seek(0)
-        # remove escape characters for pretty print
-        lines = (
-            line.strip().replace("\x1b[1m", "").replace("\x1b[0m", "")
-            for line in stdout.readlines()
-        )
-        self.assertEqual(next(lines), "Start 'fetch and lock' step")
-        self.assertEqual(next(lines), "1 task(s) fetched with worker ID aWorkerId")
-        self.assertEqual(next(lines), "")
-        self.assertEqual(next(lines), "Start 'execution' step")
-        self.assertEqual(
-            next(lines),
-            f"Task {task} has failed during execution: some connection error",
-        )
-        self.assertEqual(next(lines), "0 task(s) succeeded during execution")
-        self.assertEqual(next(lines), "1 task(s) failed during execution")
-        self.assertEqual(next(lines), "")

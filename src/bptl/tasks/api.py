@@ -76,4 +76,4 @@ def execute(task: BaseTask, registry: WorkUnitRegistry = register) -> None:
 
     # set complete status
     task.status = Statuses.performed
-    task.save()
+    task.save(update_fields=["status"])
