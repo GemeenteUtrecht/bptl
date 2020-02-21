@@ -9,6 +9,7 @@ from django_camunda.models import CamundaConfig
 from requests.exceptions import ConnectionError
 
 from bptl.tasks.models import TaskMapping
+from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.utils.constants import Statuses
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
@@ -34,9 +35,21 @@ class ExecuteCommandTests(TestCase):
         config.rest_api_path = "engine-rest/"
         config.save()
 
-        TaskMapping.objects.create(
+        mapping = TaskMapping.objects.create(
             topic_name="zaak-initialize",
             callback="bptl.work_units.zgw.tasks.CreateZaakTask",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZRC_URL,
+            service__api_type="zrc",
+            alias="ZRC",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZTC_URL,
+            service__api_type="ztc",
+            alias="ZTC",
         )
 
     def test_execute_one(self, m):
@@ -45,6 +58,13 @@ class ExecuteCommandTests(TestCase):
             variables={
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
+                "services": {
+                    "type": "Object",
+                    "value": {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    },
+                },
             },
         )
         # mock camunda
@@ -120,6 +140,13 @@ class ExecuteCommandTests(TestCase):
             variables={
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
+                "services": {
+                        "type": "Object",
+                        "value": {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        },
+                    },
             },
         )
         # mock openzaak services

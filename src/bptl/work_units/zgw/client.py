@@ -1,21 +1,13 @@
 from typing import Any
 
-from django.conf import settings
-from django.utils.module_loading import import_string
-
 from zds_client.client import Client
-
-
-def get_client_class() -> type:
-    client_class = getattr(
-        settings, "ZGW_CLIENT_CLASS", "bptl.work_units.zgw.client.ZGWClient"
-    )
-    Client = import_string(client_class)
-    return Client
 
 
 class ZGWClient(Client):
     auth_value = None
+
+    def set_auth_value(self, auth_value):
+        self.auth_value = auth_value
 
     def pre_request(self, method: str, url: str, **kwargs) -> Any:
         """

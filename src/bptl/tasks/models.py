@@ -60,7 +60,7 @@ class DefaultService(models.Model):
     class Meta:
         verbose_name = _("default service")
         verbose_name_plural = _("default services")
-        unique_together = ("task_mapping", "alias")
+        unique_together = ("task_mapping", "service")
 
     def __str__(self):
         return f"{self.task_mapping} / {self.alias}"

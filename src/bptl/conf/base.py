@@ -373,7 +373,7 @@ CELERY_ACKS_LATE = True
 
 # project application settings
 MAX_TASKS = 10
-
+ZGW_CONSUMERS_CLIENT_CLASS = "bptl.work_units.zgw.client.ZGWClient"
 
 # api settings
 REST_FRAMEWORK = {

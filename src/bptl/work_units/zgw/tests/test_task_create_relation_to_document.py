@@ -1,9 +1,9 @@
 from django.test import TestCase
 
 import requests_mock
-from django_camunda.models import CamundaConfig
 
 from bptl.camunda.models import ExternalTask
+from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks import RelateDocumentToZaakTask
 from .utils import mock_service_oas_get
@@ -25,12 +25,15 @@ class CreateDocumentRelationTaskTests(TestCase):
     def setUpTestData(cls):
         super().setUpTestData()
 
-        config = CamundaConfig.get_solo()
-        config.root_url = "https://some.camunda.com"
-        config.rest_api_path = "engine-rest/"
-        config.save()
-
+        mapping = TaskMappingFactory.create(topic_name="some-topic")
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZRC_URL,
+            service__api_type="zrc",
+            alias="ZRC",
+        )
         cls.fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
@@ -40,9 +43,9 @@ class CreateDocumentRelationTaskTests(TestCase):
                     "value": INFORMATIEOBJECT,
                     "valueInfo": {},
                 },
-                "ZRC": {
+                "services": {
                     "type": "Object",
-                    "value": {"apiRoot": ZRC_URL, "jwt": "Bearer 12345"},
+                    "value": {"ZRC": {"jwt": "Bearer 12345"},},
                 },
             },
         )
