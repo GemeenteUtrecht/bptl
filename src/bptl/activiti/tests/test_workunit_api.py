@@ -55,4 +55,4 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
         service_task = ServiceTask.objects.get()
 
         self.assertEqual(service_task.status, Statuses.failed)
-        self.assertEqual(service_task.error_description, "This is fine")
+        self.assertTrue(service_task.execution_error.strip().endswith("This is fine"))

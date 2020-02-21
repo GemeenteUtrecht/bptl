@@ -141,12 +141,12 @@ class ExecuteCommandTests(TestCase):
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
                 "services": {
-                        "type": "Object",
-                        "value": {
-                            "ZRC": {"jwt": "Bearer 12345"},
-                            "ZTC": {"jwt": "Bearer 789"},
-                        },
+                    "type": "Object",
+                    "value": {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
                     },
+                },
             },
         )
         # mock openzaak services
@@ -159,4 +159,4 @@ class ExecuteCommandTests(TestCase):
 
         task.refresh_from_db()
         self.assertEqual(task.status, Statuses.failed)
-        self.assertEqual(task.error_description, "some connection error")
+        self.assertTrue(task.execution_error.strip().endswith("some connection error"))

@@ -45,7 +45,7 @@ class RouteTaskTests(TestCase):
 
         task.refresh_from_db()
         self.assertEqual(task.status, "failed")
-        self.assertEqual(task.error_description, "execution is failed")
+        self.assertTrue(task.execution_error.strip().endswith("execution is failed"))
 
         m_execute.assert_called_once_with(task)
         m_complete.assert_not_called()
@@ -59,7 +59,7 @@ class RouteTaskTests(TestCase):
 
         task.refresh_from_db()
         self.assertEqual(task.status, "failed")
-        self.assertEqual(task.error_description, "sending is failed")
+        self.assertTrue(task.execution_error.strip().endswith("sending is failed"))
 
         m_execute.assert_called_once_with(task)
         m_complete.assert_called_once_with(task)

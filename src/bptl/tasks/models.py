@@ -87,11 +87,10 @@ class BaseTask(models.Model):
         help_text=_("The current status of task processing"),
     )
     result_variables = JSONField(default=dict)
-    error_description = models.CharField(
-        _("error description"),
-        max_length=1000,
+    execution_error = models.TextField(
+        _("execution error"),
         blank=True,
-        help_text=_("Description of why the task failed"),
+        help_text=_("The error that occurred during execution."),
     )
 
     class Meta:
