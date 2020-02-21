@@ -18,7 +18,7 @@ class Command(BaseCommand):
         if task is None:
             raise CommandError("Could not find this task.")
 
-        try:
-            task_execute_and_complete(task_id)
-        except Exception as exc:
-            raise CommandError(exc) from exc
+        self.stdout.write("Executing task %s" % task)
+        task_execute_and_complete(task_id)
+        task.refresh_from_db()
+        self.stdout.write("Task status: %s" % task.get_status_display())
