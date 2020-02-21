@@ -105,6 +105,7 @@ waitress==1.4.2
 webob==1.8.5
 webtest==2.0.33
 wheel==0.29.0
+zgw-consumers==0.5.1
 zipp==2.1.0
 
 # The following packages are considered to be unsafe in a requirements file:

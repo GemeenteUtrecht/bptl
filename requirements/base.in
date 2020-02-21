@@ -6,6 +6,7 @@ python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
 celery
 gemma-zds-client
+zgw-consumers
 
 # Framework libraries
 django < 3.0

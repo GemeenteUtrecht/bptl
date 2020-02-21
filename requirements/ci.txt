@@ -71,4 +71,5 @@ waitress==1.4.2           # via webtest
 webob==1.8.5              # via webtest
 webtest==2.0.33           # via django-webtest
 wheel==0.29.0
+zgw-consumers==0.5.1
 zipp==2.1.0

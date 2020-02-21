@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "django_docutils",
     "rest_framework",
     "rest_framework.authtoken",
+    "zgw_consumers",
     # Project applications.
     "bptl.accounts",
     "bptl.activiti",
