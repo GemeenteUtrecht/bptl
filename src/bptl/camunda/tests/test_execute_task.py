@@ -141,7 +141,7 @@ class ExecuteCommandTests(TestCase):
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
                 "services": {
-                    "type": "Object",
+                    "type": "json",
                     "value": {
                         "ZRC": {"jwt": "Bearer 12345"},
                         "ZTC": {"jwt": "Bearer 789"},

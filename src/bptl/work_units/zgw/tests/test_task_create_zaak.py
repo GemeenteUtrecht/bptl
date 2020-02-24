@@ -48,7 +48,7 @@ class CreateZaakTaskTests(TestCase):
                 },
                 "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
                 "services": {
-                    "type": "Object",
+                    "type": "json",
                     "value": {
                         "ZRC": {"jwt": "Bearer 12345"},
                         "ZTC": {"jwt": "Bearer 789"},

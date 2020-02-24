@@ -42,7 +42,7 @@ class CloseZaakTaskTests(TestCase):
             variables={
                 "zaak": {"type": "String", "value": ZAAK, "valueInfo": {}},
                 "services": {
-                    "type": "Object",
+                    "type": "json",
                     "value": {
                         "ZRC": {"jwt": "Bearer 12345"},
                         "ZTC": {"jwt": "Bearer 789"},

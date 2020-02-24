@@ -36,7 +36,7 @@ class CreateStatusTaskTests(TestCase):
                 "zaak": {"type": "String", "value": ZAAK, "valueInfo": {}},
                 "statustype": {"type": "String", "value": STATUSTYPE, "valueInfo": {}},
                 "services": {
-                    "type": "Object",
+                    "type": "json",
                     "value": {"ZRC": {"jwt": "Bearer 12345"}},
                 },
             },
