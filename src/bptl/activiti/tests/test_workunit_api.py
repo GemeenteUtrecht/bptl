@@ -46,13 +46,12 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
     @patch("bptl.activiti.api.views.execute", side_effect=Exception("This is fine"))
     def test_post_workunit_fail_execute(self, m):
         data = {"topic": "zaak-initialize", "vars": {"someOtherVar": 123}}
-        url = reverse("work-unit", args=(settings.REST_FRAMEWORK["DEFAULT_VERSION"],))
+        url = reverse("work-unit", args=(settings.REST_FRAMEWORK["DEFAULT_VERSION"]))
 
         response = self.client.post(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        service_task = ServiceTask.objects.get()
+        data = response.json()
 
-        self.assertEqual(service_task.status, Statuses.failed)
-        self.assertTrue(service_task.execution_error.strip().endswith("This is fine"))
+        self.assertTrue(data["non_field_errors"].strip().endswith("This is fine"))
