@@ -1,7 +1,9 @@
 from django.contrib import admin
 
+from bptl.work_units.zgw.models import DefaultService
+
 from .forms import AdminTaskMappingForm
-from .models import DefaultService, TaskMapping
+from .models import TaskMapping
 
 
 class DefaultServiceInline(admin.TabularInline):

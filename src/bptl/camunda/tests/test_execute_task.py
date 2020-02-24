@@ -1,5 +1,4 @@
 from io import StringIO
-from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -9,13 +8,11 @@ from django_camunda.models import CamundaConfig
 from requests.exceptions import ConnectionError
 
 from bptl.tasks.models import TaskMapping
-from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.utils.constants import Statuses
+from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
-from ..models import ExternalTask
 from .factories import ExternalTaskFactory
-from .utils import get_fetch_and_lock_response
 
 ZTC_URL = "https://some.ztc.nl/api/v1/"
 ZRC_URL = "https://some.zrc.nl/api/v1/"

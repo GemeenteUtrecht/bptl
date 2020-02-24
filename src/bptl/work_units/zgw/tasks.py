@@ -6,8 +6,9 @@ from django.utils import timezone
 from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import WorkUnit
-from bptl.tasks.models import DefaultService, TaskMapping
+from bptl.tasks.models import TaskMapping
 from bptl.tasks.registry import register
+from bptl.work_units.zgw.models import DefaultService
 
 from .client import MultipleServices, NoAuth, NoService
 

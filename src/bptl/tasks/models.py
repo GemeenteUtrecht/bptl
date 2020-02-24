@@ -33,7 +33,7 @@ class TaskMapping(models.Model):
     default_services = models.ManyToManyField(
         "zgw_consumers.Service",
         related_name="task_mappings",
-        through="tasks.DefaultService",
+        through="zgw.DefaultService",
     )
 
     objects = TaskQuerySet.as_manager()
@@ -44,26 +44,6 @@ class TaskMapping(models.Model):
 
     def __str__(self):
         return f"{self.topic_name} / {self.callback}"
-
-
-class DefaultService(models.Model):
-    """default ZGW services for particular tasks"""
-
-    task_mapping = models.ForeignKey(TaskMapping, on_delete=models.CASCADE)
-    service = models.ForeignKey("zgw_consumers.Service", on_delete=models.CASCADE)
-    alias = models.CharField(
-        _("alias"),
-        max_length=100,
-        help_text="Alias for the service used in the particular task",
-    )
-
-    class Meta:
-        verbose_name = _("default service")
-        verbose_name_plural = _("default services")
-        unique_together = ("task_mapping", "service")
-
-    def __str__(self):
-        return f"{self.task_mapping} / {self.alias}"
 
 
 class BaseTask(models.Model):

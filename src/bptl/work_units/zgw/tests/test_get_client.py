@@ -4,7 +4,8 @@ from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
 
 from bptl.camunda.tests.factories import ExternalTaskFactory
-from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.tasks.tests.factories import TaskMappingFactory
+from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
 from ..client import MultipleServices, NoAuth, NoService
 from ..tasks import ZGWWorkUnit
