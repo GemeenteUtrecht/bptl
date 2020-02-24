@@ -3,6 +3,18 @@ from typing import Any
 from zds_client.client import Client
 
 
+class NoService(Exception):
+    pass
+
+
+class MultipleServices(Exception):
+    pass
+
+
+class NoAuth(Exception):
+    pass
+
+
 class ZGWClient(Client):
     auth_value = None
 

@@ -1,14 +1,18 @@
 from datetime import date
 
+from django.conf import settings
 from django.utils import timezone
 
 from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import WorkUnit
-from bptl.tasks.models import TaskMapping
+from bptl.tasks.models import DefaultService, TaskMapping
 from bptl.tasks.registry import register
 
+from .client import MultipleServices, NoAuth, NoService
+
 __all__ = (
+    "ZGWWorkUnit",
     "CreateZaakTask",
     "CreateStatusTask",
     "CreateResultaatTask",
@@ -22,19 +26,44 @@ class ZGWWorkUnit(WorkUnit):
         """
         create ZGW client with requested parameters
         """
-        # TODO catch all exceptions
-        services_vars = self.task.get_variables()["services"]
-        aliases_vars = list(services_vars.keys())
         default_services = TaskMapping.objects.get(
             topic_name=self.task.topic_name
-        ).defaultservice_set
-        default_service = default_services.get(
-            service__api_type=service_type, alias__in=aliases_vars
-        )
+        ).defaultservice_set.filter(service__api_type=service_type)
+        if default_services.count() == 0:
+            raise NoService(
+                f"No {service_type} service is configured for topic {self.task.topic_name}"
+            )
+
+        services_vars = self.task.get_variables().get("services", {})
+
+        if not services_vars and not settings.DEBUG:
+            raise NoService(f"Expected service aliases in process variables")
+
+        aliases_vars = list(services_vars.keys())
+        if aliases_vars:
+            default_services = default_services.filter(alias__in=aliases_vars)
+
+        try:
+            default_service = default_services.get()
+        except DefaultService.DoesNotExist:
+            raise NoService(
+                f"No {service_type} service with aliases {aliases_vars} is configured for topic {self.task.topic_name}"
+            )
+        except DefaultService.MultipleObjectsReturned:
+            raise MultipleServices(
+                f"More than one {service_type} service with aliases {aliases_vars} is configured for topic {self.task.topic_name}"
+            )
 
         client = default_service.service.build_client()
-        # TODO if debug - use default auth
-        client.set_auth_value(services_vars[default_service.alias]["jwt"])
+
+        # add authorization header
+        jwt = services_vars.get(default_service.alias, {}).get("jwt")
+        if not jwt and not settings.DEBUG:
+            raise NoAuth(
+                f"Expected 'jwt' variable for {default_service.alias} in process variables"
+            )
+
+        client.set_auth_value(jwt)
 
         return client
 
