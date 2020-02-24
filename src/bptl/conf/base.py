@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "zgw_consumers",
+    "timeline_logger",
     # Project applications.
     "bptl.accounts",
     "bptl.activiti",

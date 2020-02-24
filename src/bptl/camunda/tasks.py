@@ -2,6 +2,7 @@
 from django.conf import settings
 
 from celery.utils.log import get_task_logger
+from timeline_logger.models import TimelineLog
 
 from bptl.camunda.api import complete
 from bptl.camunda.models import ExternalTask
@@ -23,6 +24,11 @@ def task_fetch_and_lock():
     logger.info("fetched %r tasks with %r", num_tasks, worker_id)
 
     for task in tasks:
+        # initial logging
+        TimelineLog.objects.create(
+            content_object=task, extra_data={"status": task.status}
+        )
+
         task_execute_and_complete.delay(task.id)
     return num_tasks
 

@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView
 from rest_framework.settings import api_settings
+from timeline_logger.models import TimelineLog
 
 from bptl.tasks.api import execute
 
@@ -33,5 +34,10 @@ class WorkUnitView(CreateAPIView):
 
     def perform_create(self, serializer):
         task = serializer.save()
+
+        # initial logging
+        TimelineLog.objects.create(
+            content_object=task, extra_data={"status": task.status}
+        )
 
         self.execute_task(task)
