@@ -1,5 +1,4 @@
 from io import StringIO
-from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -7,15 +6,13 @@ from django.test import TestCase
 import requests_mock
 from django_camunda.models import CamundaConfig
 from requests.exceptions import ConnectionError
-from zgw_consumers.models import Service
 
 from bptl.tasks.models import TaskMapping
 from bptl.utils.constants import Statuses
+from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
-from ..models import ExternalTask
 from .factories import ExternalTaskFactory
-from .utils import get_fetch_and_lock_response
 
 ZTC_URL = "https://some.ztc.nl/api/v1/"
 ZRC_URL = "https://some.zrc.nl/api/v1/"
@@ -35,15 +32,21 @@ class ExecuteCommandTests(TestCase):
         config.rest_api_path = "engine-rest/"
         config.save()
 
-        Service.objects.create(
-            api_root=ZRC_URL, api_type="zrc", label="zrc",
-        )
-        Service.objects.create(
-            api_root=ZTC_URL, api_type="ztc", label="ztc_local",
-        )
-        TaskMapping.objects.create(
+        mapping = TaskMapping.objects.create(
             topic_name="zaak-initialize",
             callback="bptl.work_units.zgw.tasks.CreateZaakTask",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZRC_URL,
+            service__api_type="zrc",
+            alias="ZRC",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZTC_URL,
+            service__api_type="ztc",
+            alias="ZTC",
         )
 
     def test_execute_one(self, m):
@@ -52,6 +55,13 @@ class ExecuteCommandTests(TestCase):
             variables={
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
+                "services": {
+                    "type": "json",
+                    "value": {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    },
+                },
             },
         )
         # mock camunda
@@ -127,6 +137,13 @@ class ExecuteCommandTests(TestCase):
             variables={
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
+                "services": {
+                    "type": "json",
+                    "value": {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    },
+                },
             },
         )
         # mock openzaak services
@@ -139,3 +156,4 @@ class ExecuteCommandTests(TestCase):
 
         task.refresh_from_db()
         self.assertEqual(task.status, Statuses.failed)
+        self.assertTrue(task.execution_error.strip().endswith("some connection error"))

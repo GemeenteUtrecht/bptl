@@ -30,6 +30,11 @@ class TaskMapping(models.Model):
         ),
     )
     active = models.BooleanField(_("active flag"), default=True)
+    default_services = models.ManyToManyField(
+        "zgw_consumers.Service",
+        related_name="task_mappings",
+        through="zgw.DefaultService",
+    )
 
     objects = TaskQuerySet.as_manager()
 
@@ -62,6 +67,11 @@ class BaseTask(models.Model):
         help_text=_("The current status of task processing"),
     )
     result_variables = JSONField(default=dict)
+    execution_error = models.TextField(
+        _("execution error"),
+        blank=True,
+        help_text=_("The error that occurred during execution."),
+    )
 
     class Meta:
         abstract = True

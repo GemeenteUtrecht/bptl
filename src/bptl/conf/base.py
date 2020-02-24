@@ -68,10 +68,10 @@ INSTALLED_APPS = [
     "hijack_admin",
     "solo",
     "django_camunda",
-    "zgw_consumers",
     "django_docutils",
     "rest_framework",
     "rest_framework.authtoken",
+    "zgw_consumers",
     # Project applications.
     "bptl.accounts",
     "bptl.activiti",
@@ -373,7 +373,7 @@ CELERY_ACKS_LATE = True
 
 # project application settings
 MAX_TASKS = 10
-
+ZGW_CONSUMERS_CLIENT_CLASS = "bptl.work_units.zgw.client.ZGWClient"
 
 # api settings
 REST_FRAMEWORK = {

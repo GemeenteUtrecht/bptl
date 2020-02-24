@@ -4,10 +4,10 @@ from django.urls import reverse
 import requests_mock
 from rest_framework import status
 from rest_framework.test import APITestCase
-from zgw_consumers.models import Service
 
 from bptl.tasks.models import TaskMapping
 from bptl.utils.constants import Statuses
+from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
 from ..models import ServiceTask
@@ -24,20 +24,33 @@ STATUS = f"{ZRC_URL}statussen/b7218c76-7478-41e9-a088-54d2f914a713"
 class WorkUnitTestCase(TokenAuthMixin, APITestCase):
     @requests_mock.Mocker()
     def test_full_process(self, m):
-        TaskMapping.objects.create(
+        mapping = TaskMapping.objects.create(
             topic_name="zaak-initialize",
             callback="bptl.work_units.zgw.tasks.CreateZaakTask",
         )
-        Service.objects.create(
-            api_root=ZRC_URL, api_type="zrc", label="zrc",
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZRC_URL,
+            service__api_type="zrc",
+            alias="ZRC",
         )
-        Service.objects.create(
-            api_root=ZTC_URL, api_type="ztc", label="ztc_local",
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZTC_URL,
+            service__api_type="ztc",
+            alias="ZTC",
         )
 
         data = {
             "topic": "zaak-initialize",
-            "vars": {"zaaktype": ZAAKTYPE, "organisatieRSIN": "002220647"},
+            "vars": {
+                "zaaktype": ZAAKTYPE,
+                "organisatieRSIN": "002220647",
+                "services": {
+                    "ZRC": {"jwt": "Bearer 12345"},
+                    "ZTC": {"jwt": "Bearer 789"},
+                },
+            },
         }
         url = reverse("work-unit", args=(settings.REST_FRAMEWORK["DEFAULT_VERSION"],))
 

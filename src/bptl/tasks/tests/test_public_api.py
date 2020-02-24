@@ -12,14 +12,12 @@ register = WorkUnitRegistry()
 
 @register
 def task_1(task):
-    task.result_variables = {"task_run": "task_1"}
-    task.save()
+    return {"task_run": "task_1"}
 
 
 @register
 def task_2(task):
-    task.result_variables = {"task_run": "task_2"}
-    task.save()
+    return {"task_run": "task_2"}
 
 
 @tag("public-api")

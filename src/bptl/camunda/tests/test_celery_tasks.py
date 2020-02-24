@@ -37,7 +37,7 @@ class RouteTaskTests(TestCase):
         m_complete.assert_called_once_with(task)
 
     @patch("bptl.camunda.tasks.complete")
-    @patch("bptl.camunda.tasks.execute", side_effect=Exception)
+    @patch("bptl.camunda.tasks.execute", side_effect=Exception("execution is failed"))
     def test_task_execute_and_complete_fail_execute(self, m_execute, m_complete):
         task = ExternalTaskFactory.create()
 
@@ -45,11 +45,12 @@ class RouteTaskTests(TestCase):
 
         task.refresh_from_db()
         self.assertEqual(task.status, "failed")
+        self.assertTrue(task.execution_error.strip().endswith("execution is failed"))
 
         m_execute.assert_called_once_with(task)
         m_complete.assert_not_called()
 
-    @patch("bptl.camunda.tasks.complete", side_effect=Exception)
+    @patch("bptl.camunda.tasks.complete", side_effect=Exception("sending is failed"))
     @patch("bptl.camunda.tasks.execute")
     def test_task_execute_and_complete_fail_complete(self, m_execute, m_complete):
         task = ExternalTaskFactory.create()
@@ -58,6 +59,7 @@ class RouteTaskTests(TestCase):
 
         task.refresh_from_db()
         self.assertEqual(task.status, "failed")
+        self.assertTrue(task.execution_error.strip().endswith("sending is failed"))
 
         m_execute.assert_called_once_with(task)
         m_complete.assert_called_once_with(task)

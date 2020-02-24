@@ -5,6 +5,7 @@ pytz  # handle timezones
 python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
 celery
+gemma-zds-client
 zgw-consumers
 
 # Framework libraries
@@ -13,6 +14,7 @@ django-admin-index
 django-axes
 django-camunda
 django-docutils
+django-choices
 django-hijack
 django-hijack-admin
 django-redis

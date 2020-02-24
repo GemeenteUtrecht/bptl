@@ -51,6 +51,7 @@ freezegun==0.3.12
 gemma-zds-client==0.13.1
 idna==2.8
 imagesize==1.2.0          # via sphinx
+importlib-metadata==1.5.0
 inflection==0.3.1
 isort==4.3.21
 jinja2==2.10.3            # via sphinx
@@ -104,7 +105,8 @@ waitress==1.4.2
 webob==1.8.5
 webtest==2.0.33
 wheel==0.29.0
-zgw-consumers==0.4.2
+zgw-consumers==0.5.1
+zipp==2.1.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

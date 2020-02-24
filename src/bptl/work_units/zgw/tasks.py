@@ -1,13 +1,19 @@
 from datetime import date
 
+from django.conf import settings
 from django.utils import timezone
 
-from zgw_consumers.models import APITypes, Service
+from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import WorkUnit
+from bptl.tasks.models import TaskMapping
 from bptl.tasks.registry import register
+from bptl.work_units.zgw.models import DefaultService
+
+from .client import MultipleServices, NoAuth, NoService
 
 __all__ = (
+    "ZGWWorkUnit",
     "CreateZaakTask",
     "CreateStatusTask",
     "CreateResultaatTask",
@@ -16,8 +22,55 @@ __all__ = (
 )
 
 
+class ZGWWorkUnit(WorkUnit):
+    def get_client(self, service_type):
+        """
+        create ZGW client with requested parameters
+        """
+        default_services = TaskMapping.objects.get(
+            topic_name=self.task.topic_name
+        ).defaultservice_set.filter(service__api_type=service_type)
+        if default_services.count() == 0:
+            raise NoService(
+                f"No {service_type} service is configured for topic {self.task.topic_name}"
+            )
+
+        services_vars = self.task.get_variables().get("services", {})
+
+        if not services_vars and not settings.DEBUG:
+            raise NoService(f"Expected service aliases in process variables")
+
+        aliases_vars = list(services_vars.keys())
+        if aliases_vars:
+            default_services = default_services.filter(alias__in=aliases_vars)
+
+        try:
+            default_service = default_services.get()
+        except DefaultService.DoesNotExist:
+            raise NoService(
+                f"No {service_type} service with aliases {aliases_vars} is configured for topic {self.task.topic_name}"
+            )
+        except DefaultService.MultipleObjectsReturned:
+            raise MultipleServices(
+                f"More than one {service_type} service with aliases {aliases_vars} is configured for topic {self.task.topic_name}"
+            )
+
+        client = default_service.service.build_client()
+
+        # add authorization header
+        jwt = services_vars.get(default_service.alias, {}).get("jwt")
+        if not jwt and not settings.DEBUG:
+            raise NoAuth(
+                f"Expected 'jwt' variable for {default_service.alias} in process variables"
+            )
+
+        client.set_auth_value(jwt)
+
+        return client
+
+
 @register
-class CreateZaakTask(WorkUnit):
+class CreateZaakTask(ZGWWorkUnit):
     """
     Create a ZAAK in the configured Zaken API and set the initial status.
 
@@ -28,6 +81,9 @@ class CreateZaakTask(WorkUnit):
 
     * **zaaktype**: the full URL of the ZAAKTYPE
     * **organisatieRSIN**: RSIN of the organisation
+    * **services**: JSON Object of connection details for ZGW services:
+        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
+        * "<ZTC service name>": {"jwt": value for Authorization header in the api}
 
     Optional process variables:
 
@@ -40,9 +96,9 @@ class CreateZaakTask(WorkUnit):
     """
 
     def create_zaak(self) -> dict:
-        zrc = Service.objects.get(api_type=APITypes.zrc)
-        client = zrc.build_client()
         variables = self.task.get_variables()
+
+        client_zrc = self.get_client(APITypes.zrc)
         today = date.today().strftime("%Y-%m-%d")
         data = {
             "zaaktype": variables["zaaktype"],
@@ -52,6 +108,7 @@ class CreateZaakTask(WorkUnit):
             "registratiedatum": today,
             "startdatum": today,
         }
+
         headers = {}
         nlx_subject_identifier = variables.get("NLXSubjectIdentifier")
         if nlx_subject_identifier:
@@ -60,21 +117,21 @@ class CreateZaakTask(WorkUnit):
         if nlx_process_id:
             headers["X-NLX-Request-Process-Id"] = nlx_process_id
 
-        zaak = client.create("zaak", data, request_kwargs={"headers": headers})
+        zaak = client_zrc.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
     def create_status(self, zaak: dict) -> dict:
+        variables = self.task.get_variables()
+
         # get statustype for initial status
-        ztc = Service.objects.get(api_type=APITypes.ztc)
-        ztc_client = ztc.build_client()
+        ztc_client = self.get_client(APITypes.ztc)
         statustypen = ztc_client.list(
-            "statustype", {"zaaktype": self.task.get_variables()["zaaktype"]}
+            "statustype", {"zaaktype": variables["zaaktype"]}
         )["results"]
         statustype = next(filter(lambda x: x["volgnummer"] == 1, statustypen))
 
         # create status
-        zrc = Service.objects.get(api_type=APITypes.zrc)
-        zrc_client = zrc.build_client()
+        zrc_client = self.get_client(APITypes.zrc)
         data = {
             "zaak": zaak["url"],
             "statustype": statustype["url"],
@@ -86,15 +143,11 @@ class CreateZaakTask(WorkUnit):
     def perform(self):
         zaak = self.create_zaak()
         self.create_status(zaak)
-
-        # save result
-        result_data = {"zaak": zaak["url"]}
-        self.save_result(result_data)
-        return result_data
+        return {"zaak": zaak["url"]}
 
 
 @register
-class CreateStatusTask(WorkUnit):
+class CreateStatusTask(ZGWWorkUnit):
     """
     Create a new STATUS for the ZAAK in the process.
 
@@ -102,6 +155,9 @@ class CreateStatusTask(WorkUnit):
 
     * **zaak**: full URL of the ZAAK to create a new status for
     * **statustype**: full URL of the STATUSTYPE to set
+    * **services**: JSON Object of connection details for ZGW services:
+        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
+        * "<ZTC service name>": {"jwt": value for Authorization header in the api}
 
     The task sets the process variables:
 
@@ -109,11 +165,11 @@ class CreateStatusTask(WorkUnit):
     """
 
     def create_status(self) -> dict:
-        zrc = Service.objects.get(api_type=APITypes.zrc)
-        zrc_client = zrc.build_client()
+        variables = self.task.get_variables()
+        zrc_client = self.get_client(APITypes.zrc)
         data = {
-            "zaak": self.task.get_variables()["zaak"],
-            "statustype": self.task.get_variables()["statustype"],
+            "zaak": variables["zaak"],
+            "statustype": variables["statustype"],
             "datumStatusGezet": timezone.now().isoformat(),
         }
         status = zrc_client.create("status", data)
@@ -121,15 +177,11 @@ class CreateStatusTask(WorkUnit):
 
     def perform(self):
         status = self.create_status()
-
-        # save result
-        result_data = {"status": status["url"]}
-        self.save_result(result_data)
-        return result_data
+        return {"status": status["url"]}
 
 
 @register
-class CreateResultaatTask(WorkUnit):
+class CreateResultaatTask(ZGWWorkUnit):
     """
     Set the RESULTAAT for the ZAAK in the process.
 
@@ -140,6 +192,8 @@ class CreateResultaatTask(WorkUnit):
 
     * **zaak**: full URL of the ZAAK to set the RESULTAAT for
     * **resultaattype**: full URL of the RESULTAATTYPE to set
+    * **services**: JSON Object of connection details for ZGW services:
+        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
 
     Optional process variables:
 
@@ -151,8 +205,7 @@ class CreateResultaatTask(WorkUnit):
     """
 
     def create_resultaat(self):
-        zrc = Service.objects.get(api_type=APITypes.zrc)
-        zrc_client = zrc.build_client()
+        zrc_client = self.get_client(APITypes.zrc)
         data = {
             "zaak": self.task.get_variables()["zaak"],
             "resultaattype": self.task.get_variables()["resultaattype"],
@@ -164,14 +217,11 @@ class CreateResultaatTask(WorkUnit):
 
     def perform(self):
         resultaat = self.create_resultaat()
-
-        result_data = {"resultaat": resultaat["url"]}
-        self.save_result(result_data)
-        return result_data
+        return {"resultaat": resultaat["url"]}
 
 
 @register
-class RelateDocumentToZaakTask(WorkUnit):
+class RelateDocumentToZaakTask(ZGWWorkUnit):
     """
     Create relations between ZAAK and INFORMATIEOBJECT
 
@@ -179,6 +229,8 @@ class RelateDocumentToZaakTask(WorkUnit):
 
     * **zaak**: full URL of the ZAAK
     * **informatieobject**: full URL of the INFORMATIEOBJECT
+    * **services**: JSON Object of connection details for ZGW services:
+        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
 
     The task sets the process variables:
 
@@ -186,8 +238,7 @@ class RelateDocumentToZaakTask(WorkUnit):
     """
 
     def relate_document(self) -> dict:
-        zrc = Service.objects.get(api_type=APITypes.zrc)
-        zrc_client = zrc.build_client()
+        zrc_client = self.get_client(APITypes.zrc)
         data = {
             "zaak": self.task.get_variables()["zaak"],
             "informatieobject": self.task.get_variables()["informatieobject"],
@@ -197,16 +248,11 @@ class RelateDocumentToZaakTask(WorkUnit):
 
     def perform(self):
         resultaat = self.relate_document()
-
-        result_data = {
-            "zaakinformatieobject": resultaat["url"],
-        }
-        self.save_result(result_data)
-        return result_data
+        return {"zaakinformatieobject": resultaat["url"]}
 
 
 @register
-class CloseZaakTask(WorkUnit):
+class CloseZaakTask(ZGWWorkUnit):
     """
     Close the ZAAK by setting the final STATUS.
 
@@ -215,6 +261,9 @@ class CloseZaakTask(WorkUnit):
     Required process variables:
 
     * **zaak**: full URL of the ZAAK
+    * **services**: JSON Object of connection details for ZGW services:
+        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
+        * "<ZTC service name>": {"jwt": value for Authorization header in the api}
 
     The task sets the process variables:
 
@@ -225,10 +274,8 @@ class CloseZaakTask(WorkUnit):
 
     def close_zaak(self) -> dict:
         # build clients
-        zrc = Service.objects.get(api_type=APITypes.zrc)
-        zrc_client = zrc.build_client()
-        ztc = Service.objects.get(api_type=APITypes.ztc)
-        ztc_client = ztc.build_client()
+        zrc_client = self.get_client(APITypes.zrc)
+        ztc_client = self.get_client(APITypes.ztc)
 
         # get statustype to close zaak
         zaak = self.task.get_variables()["zaak"]
@@ -251,11 +298,8 @@ class CloseZaakTask(WorkUnit):
     def perform(self):
         resultaat = self.close_zaak()
 
-        result_data = {
+        return {
             "einddatum": resultaat["einddatum"],
             "archiefnominatie": resultaat["archiefnominatie"],
             "archiefactiedatum": resultaat["archiefactiedatum"],
         }
-
-        self.save_result(result_data)
-        return result_data

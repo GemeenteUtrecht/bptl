@@ -1,10 +1,10 @@
 from django.test import TestCase
 
 import requests_mock
-from django_camunda.models import CamundaConfig
-from zgw_consumers.models import Service
 
 from bptl.camunda.models import ExternalTask
+from bptl.tasks.tests.factories import TaskMappingFactory
+from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
 from ..tasks import CreateStatusTask
 from .utils import mock_service_oas_get
@@ -22,24 +22,24 @@ class CreateStatusTaskTests(TestCase):
     def setUpTestData(cls):
         super().setUpTestData()
 
-        config = CamundaConfig.get_solo()
-        config.root_url = "https://some.camunda.com"
-        config.rest_api_path = "engine-rest/"
-        config.save()
-
-        Service.objects.create(
-            api_root=ZRC_URL, api_type="zrc", label="zrc",
+        mapping = TaskMappingFactory.create(topic_name="some-topic")
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZRC_URL,
+            service__api_type="zrc",
+            alias="ZRC",
         )
-        Service.objects.create(
-            api_root=ZTC_URL, api_type="ztc", label="ztc_local",
-        )
-
         cls.fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
                 "zaak": {"type": "String", "value": ZAAK, "valueInfo": {}},
                 "statustype": {"type": "String", "value": STATUSTYPE, "valueInfo": {}},
+                "services": {
+                    "type": "json",
+                    "value": {"ZRC": {"jwt": "Bearer 12345"}},
+                },
             },
         )
 
@@ -60,7 +60,6 @@ class CreateStatusTaskTests(TestCase):
 
         task = CreateStatusTask(self.fetched_task)
 
-        task.perform()
-        self.fetched_task.refresh_from_db()
+        result = task.perform()
 
-        self.assertEqual(self.fetched_task.result_variables, {"status": STATUS})
+        self.assertEqual(result, {"status": STATUS})

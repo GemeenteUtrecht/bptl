@@ -70,10 +70,11 @@ def execute(task: BaseTask, registry: WorkUnitRegistry = register) -> None:
     # actually call the task
     callback = handler.callback
     if inspect.isclass(callback):
-        callback(task).perform()
+        result = callback(task).perform()
     else:
-        callback(task)
+        result = callback(task)
 
     # set complete status
     task.status = Statuses.performed
-    task.save(update_fields=["status"])
+    task.result_variables = result
+    task.save(update_fields=["status", "result_variables"])
