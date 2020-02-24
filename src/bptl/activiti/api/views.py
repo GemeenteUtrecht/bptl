@@ -7,7 +7,6 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.settings import api_settings
 
 from bptl.tasks.api import execute
-from bptl.utils.constants import Statuses
 
 from ..models import ServiceTask
 from .serializers import WorkUnitSerializer
@@ -23,10 +22,6 @@ class WorkUnitView(CreateAPIView):
         try:
             execute(task)
         except Exception as exc:
-            task.status = Statuses.failed
-            task.execution_error = traceback.format_exc()
-            task.save(update_fields=["status", "execution_error"])
-
             raise ValidationError(
                 {
                     api_settings.NON_FIELD_ERRORS_KEY: _(

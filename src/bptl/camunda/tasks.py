@@ -1,6 +1,4 @@
 """ celery tasks to process camunda external tasks"""
-import traceback
-
 from django.conf import settings
 
 from celery.utils.log import get_task_logger
@@ -52,10 +50,6 @@ def task_execute_and_complete(fetched_task_id):
             exc_info=True,
         )
 
-        fetched_task.status = Statuses.failed
-        fetched_task.execution_error = traceback.format_exc()
-        fetched_task.save(update_fields=["status", "execution_error"])
-
         return
 
     logger.info("Task %r is executed", fetched_task_id)
@@ -70,10 +64,6 @@ def task_execute_and_complete(fetched_task_id):
             exc,
             exc_info=True,
         )
-
-        fetched_task.status = Statuses.failed
-        fetched_task.execution_error = traceback.format_exc()
-        fetched_task.save(update_fields=["status", "execution_error"])
 
         return
 

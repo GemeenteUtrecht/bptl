@@ -2,8 +2,10 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
+import bptl.camunda.tasks
 from bptl.camunda.tests.factories import ExternalTaskFactory
 from bptl.utils.constants import Statuses
+from bptl.utils.decorators import save_and_log
 
 from ..tasks import task_execute_and_complete, task_fetch_and_lock
 
@@ -39,6 +41,7 @@ class RouteTaskTests(TestCase):
     @patch("bptl.camunda.tasks.complete")
     @patch("bptl.camunda.tasks.execute", side_effect=Exception("execution is failed"))
     def test_task_execute_and_complete_fail_execute(self, m_execute, m_complete):
+        bptl.camunda.tasks.execute = save_and_log()(bptl.camunda.tasks.execute)
         task = ExternalTaskFactory.create()
 
         task_execute_and_complete(task.id)
@@ -53,6 +56,7 @@ class RouteTaskTests(TestCase):
     @patch("bptl.camunda.tasks.complete", side_effect=Exception("sending is failed"))
     @patch("bptl.camunda.tasks.execute")
     def test_task_execute_and_complete_fail_complete(self, m_execute, m_complete):
+        bptl.camunda.tasks.complete = save_and_log()(bptl.camunda.tasks.complete)
         task = ExternalTaskFactory.create()
 
         task_execute_and_complete(task.id)
