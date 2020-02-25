@@ -18,7 +18,7 @@ class DBLog:
     ):
 
         extra_data = {
-            "service_name": service,
+            "service_base_url": service,
             "request": {
                 "url": url,
                 "method": method,
