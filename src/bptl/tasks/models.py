@@ -86,10 +86,8 @@ class BaseTask(models.Model):
         """
         return self.variables
 
-    def get_request_logs(self):
-        # TODO
-        pass
+    def request_logs(self) -> models.QuerySet:
+        return self.logs.filter(extra_data__has_key="request")
 
-    def get_status_logs(self):
-        # TODO
-        pass
+    def status_logs(self) -> models.QuerySet:
+        return self.logs.filter(extra_data__has_key="status")
