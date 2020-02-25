@@ -6,16 +6,16 @@ from .forms import TaskMappingForm
 from .models import TaskMapping
 
 
-class TasksView(ListView):
+class TaskMappingsView(ListView):
     """
     Display a list of active configured tasks.
     """
 
     queryset = TaskMapping.objects.filter(active=True).annotate_topics()
-    context_object_name = "tasks"
+    context_object_name = "task_mappings"
 
 
-class AddTaskView(LoginRequiredMixin, CreateView):
+class AddTaskMappingView(LoginRequiredMixin, CreateView):
     model = TaskMapping
     form_class = TaskMappingForm
-    success_url = reverse_lazy("tasks:task-list")
+    success_url = reverse_lazy("tasks:taskmapping-list")

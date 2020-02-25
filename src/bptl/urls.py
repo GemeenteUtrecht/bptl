@@ -37,7 +37,7 @@ urlpatterns = [
     ),
     # Simply show the master template.
     path("", TemplateView.as_view(template_name="index.html"), name="index"),
-    path("tasks/", include("bptl.tasks.urls")),
+    path("taskmappings/", include("bptl.tasks.urls")),
     path("api/", include("bptl.activiti.api.urls")),
 ]
 
