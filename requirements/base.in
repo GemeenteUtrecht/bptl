@@ -20,6 +20,7 @@ django-hijack-admin
 django-redis
 django-rosetta
 django-sniplates
+django-timeline-logger
 
 # API libraries
 djangorestframework
