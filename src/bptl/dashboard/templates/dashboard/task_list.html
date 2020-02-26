@@ -1,0 +1,65 @@
+{% extends "master.html" %}
+{% load i18n %}
+
+{% block content-header-subtitle %}{% trans "View external tasks" %}{% endblock %}
+{% block content-header-title %}{% trans "Tasks" %}{% endblock %}
+
+{% block content %}
+
+<header class="task task--header">
+    <div class="task__topic">
+        <strong>{% trans "Task" %}</strong>
+    </div>
+
+    <div class="task__topic">
+        <strong>{% trans "Type" %}</strong>
+    </div>
+
+    <div class="task__topic">
+        <strong>{% trans "Topic name" %}</strong>
+    </div>
+
+    <div class="task__topic">
+        <strong>{% trans "Status" %}</strong>
+    </div>
+
+    <div class="task__variables">
+        <strong>{% trans "Variables" %}</strong>
+    </div>
+
+    <div class="task__variables">
+        <strong>{% trans "Result variables" %}</strong>
+    </div>
+
+</header>
+
+{% for task in tasks %}
+    <article class="task">
+        <div class="task__topic">
+            {{ task.id }}
+        </div>
+
+        <div class="task__topic">
+            {{ task.type }}
+        </div>
+
+        <div class="task__topic">
+            {{ task.topic_name }}
+        </div>
+
+        <div class="task__topic">
+            {{ task.status }}
+        </div>
+
+        <div class="task__variables">
+            {{ task.variables }}
+        </div>
+
+        <div class="task__variables">
+            {{ task.result_variables }}
+        </div>
+    </article>
+{% endfor %}
+
+
+{% endblock %}

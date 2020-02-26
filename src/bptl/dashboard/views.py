@@ -1,6 +1,7 @@
 import collections
 
 from django.db.models import Count
+from django.views.generic import ListView
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -36,3 +37,11 @@ class AggregateView(APIView):
         data = aggregate_data()
 
         return Response(data)
+
+
+class TaskListView(ListView):
+    template_name = "dashboard/task_list.html"
+    queryset = ExternalTask.objects.base_fields("camunda").union(
+        ServiceTask.objects.base_fields("activiti")
+    )
+    context_object_name = "tasks"

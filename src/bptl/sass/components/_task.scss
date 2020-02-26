@@ -1,0 +1,29 @@
+@import "../lib/colors";
+
+.task {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em 0;
+  border-bottom: solid 1px #eeeeee;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &#{&}--header {
+
+    .task__topic,
+    .task__variables {
+      color: $font-color;
+      border-bottom: solid 2px $theme-primary-color;
+    }
+  }
+
+  & &__topic {
+    width: 15%;
+  }
+
+  & &__variables {
+    width: 20%;
+  }
+}

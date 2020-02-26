@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from solo.models import SingletonModel
 
 from bptl.tasks.models import BaseTask
+from bptl.utils.query import BaseTaskQuerySet
 
 
 class ActivitiConfig(SingletonModel):
@@ -41,6 +42,8 @@ class ServiceTask(BaseTask):
     """
     A single activiti task which request bptl API
     """
+
+    objects = BaseTaskQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("service task")
