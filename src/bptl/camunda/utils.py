@@ -45,7 +45,7 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
     fetched = []
     for task in external_tasks:
         fetched.append(
-            ExternalTask(
+            ExternalTask.objects.create(
                 worker_id=worker_id,
                 topic_name=task["topic_name"],
                 priority=task["priority"],
@@ -55,9 +55,7 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
             )
         )
 
-    tasks = ExternalTask.objects.bulk_create(fetched)
-
-    return (worker_id, len(fetched), tasks)
+    return (worker_id, len(fetched), fetched)
 
 
 def complete_task(

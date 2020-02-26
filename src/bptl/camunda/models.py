@@ -11,7 +11,6 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from bptl.tasks.models import BaseTask
-from bptl.utils.query import BaseTaskQuerySet
 
 
 def get_worker_id() -> str:
@@ -39,8 +38,6 @@ class ExternalTask(BaseTask):
     priority = models.PositiveIntegerField(_("priority"), null=True, blank=True)
     task_id = models.CharField(_("task id"), max_length=50)
     lock_expires_at = models.DateTimeField(_("lock expires at"), null=True, blank=True)
-
-    objects = BaseTaskQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("external task")

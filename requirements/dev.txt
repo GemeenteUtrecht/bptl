@@ -33,6 +33,7 @@ django-hijack==2.1.10
 django-ipware==2.1.0
 django-jenkins==0.110.0
 django-ordered-model==2.1.0
+django-polymorphic==2.1.2
 django-redis==4.11.0
 django-rosetta==0.9.3
 django-sniplates==0.6.0

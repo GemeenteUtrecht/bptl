@@ -21,6 +21,7 @@ django-hijack-admin==2.1.10
 django-hijack==2.1.10
 django-ipware==2.1.0      # via django-axes
 django-ordered-model==2.1.0  # via django-admin-index
+django-polymorphic==2.1.2
 django-redis==4.11.0
 django-rosetta==0.9.3
 django-sniplates==0.6.0

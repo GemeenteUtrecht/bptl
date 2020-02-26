@@ -65,14 +65,15 @@ INSTALLED_APPS = [
     "sniplates",
     "hijack",
     "compat",  # Part of hijack
+    "polymorphic",
     "hijack_admin",
     "solo",
     "django_camunda",
     "django_docutils",
     "rest_framework",
     "rest_framework.authtoken",
-    "zgw_consumers",
     "timeline_logger",
+    "zgw_consumers",
     # Project applications.
     "bptl.accounts",
     "bptl.activiti",
