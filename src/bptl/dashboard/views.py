@@ -31,9 +31,8 @@ class AggregateView(APIView):
         return Response(data)
 
 
-class TaskListView(ListView):
+class TaskListView(FilterView):
     template_name = "dashboard/task_list.html"
-    queryset = ExternalTask.objects.base_fields("camunda").union(
-        ServiceTask.objects.base_fields("activiti")
-    )
+    filterset_class = TaskFilter
+    model = BaseTask
     context_object_name = "tasks"

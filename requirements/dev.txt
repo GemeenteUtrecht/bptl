@@ -28,6 +28,7 @@ django-compat==1.0.15
 django-debug-toolbar==2.1
 django-docutils==0.4.0
 django-extensions==2.2.5
+django-filter==2.2.0
 django-hijack-admin==2.1.10
 django-hijack==2.1.10
 django-ipware==2.1.0

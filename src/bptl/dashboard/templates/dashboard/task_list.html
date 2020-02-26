@@ -1,10 +1,21 @@
 {% extends "master.html" %}
-{% load i18n %}
+{% load i18n dashboard %}
 
 {% block content-header-subtitle %}{% trans "View external tasks" %}{% endblock %}
 {% block content-header-title %}{% trans "Tasks" %}{% endblock %}
 
 {% block content %}
+
+
+<form action="" method="get">
+    <div>
+    {{ filter.form.as_p }}
+    </div>
+    <button type="submit" class="button button--submit">
+        {{ btn_text|default:_("Submit")}}
+    </button>
+</form>
+
 
 <header class="task task--header">
     <div class="task__topic">

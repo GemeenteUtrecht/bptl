@@ -65,11 +65,12 @@ INSTALLED_APPS = [
     "sniplates",
     "hijack",
     "compat",  # Part of hijack
-    "polymorphic",
     "hijack_admin",
     "solo",
     "django_camunda",
     "django_docutils",
+    "django_filters",
+    "polymorphic",
     "rest_framework",
     "rest_framework.authtoken",
     "timeline_logger",

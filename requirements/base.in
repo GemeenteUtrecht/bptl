@@ -13,8 +13,9 @@ django < 3.0
 django-admin-index
 django-axes
 django-camunda
-django-docutils
 django-choices
+django-docutils
+django-filter
 django-hijack
 django-hijack-admin
 django-polymorphic
