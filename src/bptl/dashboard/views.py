@@ -8,23 +8,31 @@ from rest_framework.views import APIView
 from bptl.activiti.models import ServiceTask
 from bptl.camunda.models import ExternalTask
 
+TASKTYPE_MAPPING = {"camunda": ExternalTask, "activiti": ServiceTask}
+
+
+def aggregate_data():
+    """Return the number of tasks aggregated by statuses"""
+    items = []
+    counter = collections.Counter()
+    for type, model in TASKTYPE_MAPPING.items():
+        queryset = (
+            model.objects.values("status")
+            .annotate(tasks=Count("status"))
+            .order_by("status")
+        )
+        item_data = {q["status"]: q["tasks"] for q in queryset}
+
+        items.append({type: item_data})
+        counter.update(item_data)
+
+    return {"items": items, "total": dict(counter)}
+
 
 class AggregateView(APIView):
     permission_classes = []
 
     def get(self, request, format=None):
-        """
-        Return the number of tasks aggregated by statuses
-        """
-        # union() doesn't support annotate(), so the final aggregation is done in python datatypes
-        counter = collections.Counter()
-        for model in [ExternalTask, ServiceTask]:
-            queryset = (
-                model.objects.values("status")
-                .annotate(tasks=Count("status"))
-                .order_by("status")
-            )
-            data = {q["status"]: q["tasks"] for q in queryset}
-            counter.update(data)
+        data = aggregate_data()
 
-        return Response(dict(counter))
+        return Response(data)
