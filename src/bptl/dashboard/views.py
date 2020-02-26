@@ -1,33 +1,25 @@
-import collections
-
-from django.db.models import Count
-from django.views.generic import ListView
-
+from django_filters.views import FilterView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from bptl.activiti.models import ServiceTask
-from bptl.camunda.models import ExternalTask
+from bptl.tasks.constants import TASKTYPE_MAPPING
+from bptl.tasks.models import BaseTask
 
-TASKTYPE_MAPPING = {"camunda": ExternalTask, "activiti": ServiceTask}
+from .filters import TaskFilter
 
 
 def aggregate_data():
     """Return the number of tasks aggregated by statuses"""
     items = []
-    counter = collections.Counter()
     for type, model in TASKTYPE_MAPPING.items():
-        queryset = (
-            model.objects.values("status")
-            .annotate(tasks=Count("status"))
-            .order_by("status")
-        )
-        item_data = {q["status"]: q["tasks"] for q in queryset}
-
+        item_qs = BaseTask.objects.instance_of(model).annotate_status()
+        item_data = {q["status"]: q["tasks"] for q in item_qs}
         items.append({type: item_data})
-        counter.update(item_data)
 
-    return {"items": items, "total": dict(counter)}
+    total_qs = BaseTask.objects.annotate_status()
+    total_data = {q["status"]: q["tasks"] for q in total_qs}
+
+    return {"items": items, "total": total_data}
 
 
 class AggregateView(APIView):

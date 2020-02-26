@@ -13,7 +13,7 @@ from timeline_logger.models import TimelineLog
 
 from bptl.utils.constants import Statuses
 
-from .query import TaskQuerySet
+from .query import BaseTaskQuerySet, TaskQuerySet
 
 
 class TaskMapping(models.Model):
