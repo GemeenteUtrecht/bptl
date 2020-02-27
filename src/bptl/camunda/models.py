@@ -6,13 +6,11 @@ can pick up work load again.
 """
 import uuid
 
-from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from bptl.tasks.models import BaseTask
-from bptl.utils.constants import Statuses
 
 
 def get_worker_id() -> str:
