@@ -13,7 +13,7 @@
 
 <article class="task-desc">
 
-    <section class="task-desc__info">
+    <section class="task-desc__section">
         <div class="task-desc__col">
             <h2>General information</h2>
             <div class="task-desc__row">
@@ -116,6 +116,65 @@
         </div>
     </section>
 
+    <section class="task-desc__section">
+    <div class="task-desc__col">
+        <h2>Task steps</h2>
+        <div class="task-desc__row">
+            <div class="task-desc__name">
+                <strong>Status</strong>
+            </div>
+             <div class="task-desc__value">
+                <strong>Time</strong>
+            </div>
+        </div>
+        {% for status_log in task.status_logs %}
+            <div class="task-desc__row">
+                <div class="task-desc__name">
+                    {{ status_log.extra_data.status }}
+                </div>
+                 <div class="task-desc__value">
+                    {{ status_log.timestamp }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="task-desc__col">
+        <h2>Request logs</h2>
+        <div class="task-desc__row">
+            <div class="task-desc__name">
+                <strong>Method</strong>
+            </div>
+             <div class="task-desc__name">
+                <strong>Url</strong>
+            </div>
+            <div class="task-desc__name">
+                <strong>Response code</strong>
+            </div>
+            <div class="task-desc__name">
+                <strong>Time</strong>
+            </div>
+        </div>
+
+        {% for request_log in task.request_logs %}
+            <div class="task-desc__row">
+                <div class="task-desc__item">
+                    {{ request_log.extra_data.request.method }}
+                </div>
+                 <div class="task-desc__item">
+                    {{ request_log.extra_data.request.url | urlize }}
+                </div>
+                <div class="task-desc__item">
+                    {{ request_log.extra_data.response.status }}
+                </div>
+                <div class="task-desc__item">
+                    {{ request_log.timestamp }}
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+    </section>
 
 </article>
 {% endblock %}

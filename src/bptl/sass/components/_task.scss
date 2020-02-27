@@ -2,6 +2,7 @@
 
 .task {
   display: flex;
+  flex-flow: row wrap;
 
   & &__table {
     flex-basis: 75%;
@@ -10,7 +11,7 @@
 
   & &__filter {
     flex-basis: 25%;
-    background: #e5e5e5;
+    background: $filter-background-color;
     padding: 0 1em 1em 1em;
   }
 
