@@ -68,7 +68,6 @@ INSTALLED_APPS = [
     "hijack_admin",
     "solo",
     "django_camunda",
-    "django_docutils",
     "rest_framework",
     "rest_framework.authtoken",
     "zgw_consumers",
