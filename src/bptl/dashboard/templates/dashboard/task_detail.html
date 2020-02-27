@@ -1,0 +1,121 @@
+{% extends "master.html" %}
+{% load i18n dashboard %}
+
+{% block content-header-subtitle %}{% trans "View task details" %}{% endblock %}
+{% block content-header-title %}{% trans "Task " %}{{ task.id }}{% endblock %}
+
+{% block crumbs %}
+    <li class="breadcrumbs__item"><a href="{% url 'dashboard:task-list' %}">Tasks</a></li>
+{% endblock %}
+
+
+{% block content %}
+
+<article class="task-desc">
+
+    <section class="task-desc__info">
+        <div class="task-desc__col">
+            <h2>General information</h2>
+            <div class="task-desc__row">
+                <div class="task-desc__name">
+                    Type
+                </div>
+                <div class="task-desc__value">
+                    {{ task|task_type }}
+                </div>
+            </div>
+
+            <div class="task-desc__row">
+                <div class="task-desc__name">
+                    Status
+                </div>
+                <div class="task-desc__value">
+                    {{ task.status }}
+                </div>
+            </div>
+
+            <div class="task-desc__row">
+                <div class="task-desc__name">
+                    Topic name
+                </div>
+                <div class="task-desc__value">
+                    {{ task.topic_name }}
+                </div>
+            </div>
+
+            <div class="task-desc__row">
+                <div class="task-desc__name">
+                    Variables
+                </div>
+                <div class="task-desc__value">
+                    {{ task.variables }}
+                </div>
+            </div>
+
+            <div class="task-desc__row">
+                <div class="task-desc__name">
+                    Result variables
+                </div>
+                <div class="task-desc__value">
+                    {{ task.result_variables }}
+                </div>
+            </div>
+
+            <div class="task-desc__row">
+                <div class="task-desc__name">
+                    Execution error
+                </div>
+                <div class="task-desc__value">
+                    {{ task.execution_error }}
+                </div>
+            </div>
+        </div>
+
+        <div class="task-desc__col">
+            <h2>Engine specific information</h2>
+            {% if task|task_type == 'camunda' %}
+                <div class="task-desc__row">
+                    <div class="task-desc__name">
+                        Worker ID
+                    </div>
+                    <div class="task-desc__value">
+                        {{ task.worker_id }}
+                    </div>
+                </div>
+
+                <div class="task-desc__row">
+                    <div class="task-desc__name">
+                        Priority
+                    </div>
+                    <div class="task-desc__value">
+                        {{ task.priority }}
+                    </div>
+                </div>
+
+                <div class="task-desc__row">
+                    <div class="task-desc__name">
+                        Task ID
+                    </div>
+                    <div class="task-desc__value">
+                        {{ task.task_id }}
+                    </div>
+                </div>
+
+                <div class="task-desc__row">
+                    <div class="task-desc__name">
+                        Lock expires at
+                    </div>
+                    <div class="task-desc__value">
+                        {{ task.lock_expires_at }}
+                    </div>
+                </div>
+
+            {% else %}
+                <p>There is no additional data</p>
+            {% endif %}
+        </div>
+    </section>
+
+
+</article>
+{% endblock %}

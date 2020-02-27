@@ -1,3 +1,5 @@
+from django.views.generic import DetailView
+
 from django_filters.views import FilterView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -36,3 +38,9 @@ class TaskListView(FilterView):
     filterset_class = TaskFilter
     model = BaseTask
     context_object_name = "tasks"
+
+
+class TaskDetailView(DetailView):
+    template_name = "dashboard/task_detail.html"
+    model = BaseTask
+    context_object_name = "task"

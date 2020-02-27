@@ -39,7 +39,7 @@
         {% for task in tasks %}
         <article class="task__row">
             <div class="task__topic">
-                {{ task.id }}
+                <a href="{% url 'dashboard:task-detail' task.id %}">{{ task.id }}</a>
             </div>
 
             <div class="task__topic">
