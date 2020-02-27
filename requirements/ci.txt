@@ -16,7 +16,7 @@ cssselect==1.1.0          # via pyquery
 django-admin-index==1.2.3
 django-appconf==1.0.3
 django-axes==5.2.2
-django-camunda==0.3.1
+django-camunda==0.4.0
 django-choices==1.7.1
 django-compat==1.0.15
 django-docutils==0.4.0
@@ -41,7 +41,6 @@ flower==0.9.3
 freezegun==0.3.12
 gemma-zds-client==0.13.1
 idna==2.8
-importlib-metadata==1.5.0
 inflection==0.3.1
 kombu==4.6.7
 lxml==4.4.2               # via pyquery
@@ -73,4 +72,3 @@ webob==1.8.5              # via webtest
 webtest==2.0.33           # via django-webtest
 wheel==0.29.0
 zgw-consumers==0.5.1
-zipp==2.1.0
