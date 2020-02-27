@@ -92,3 +92,6 @@ class BaseTask(PolymorphicModel):
 
     def status_logs(self) -> models.QuerySet:
         return self.logs.filter(extra_data__has_key="status")
+
+    def __str__(self):
+        return f"{self.polymorphic_ctype}: {self.topic_name} / {self.id}"
