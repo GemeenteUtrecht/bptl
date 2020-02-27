@@ -2,9 +2,12 @@
 Database model to map task topics and python code objects to process related tasks
 """
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from timeline_logger.models import TimelineLog
 
 from bptl.utils.constants import Statuses
 
@@ -72,6 +75,7 @@ class BaseTask(models.Model):
         blank=True,
         help_text=_("The error that occurred during execution."),
     )
+    logs = GenericRelation(TimelineLog, related_query_name="task")
 
     class Meta:
         abstract = True
@@ -81,3 +85,9 @@ class BaseTask(models.Model):
         return input variables formatted for work_unit
         """
         return self.variables
+
+    def request_logs(self) -> models.QuerySet:
+        return self.logs.filter(extra_data__has_key="request")
+
+    def status_logs(self) -> models.QuerySet:
+        return self.logs.filter(extra_data__has_key="status")

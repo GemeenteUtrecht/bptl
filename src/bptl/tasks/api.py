@@ -4,6 +4,7 @@ Expose the public API to manage tasks.
 import inspect
 
 from bptl.utils.constants import Statuses
+from bptl.utils.decorators import save_and_log
 
 from .models import BaseTask, TaskMapping
 from .registry import WorkUnitRegistry, register
@@ -28,6 +29,7 @@ class TaskPerformed(Exception):
     pass
 
 
+@save_and_log()
 def execute(task: BaseTask, registry: WorkUnitRegistry = register) -> None:
     """
     Execute the appropriate task for a fetched external task.
@@ -74,7 +76,4 @@ def execute(task: BaseTask, registry: WorkUnitRegistry = register) -> None:
     else:
         result = callback(task)
 
-    # set complete status
-    task.status = Statuses.performed
-    task.result_variables = result
-    task.save(update_fields=["status", "result_variables"])
+    return result

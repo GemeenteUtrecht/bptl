@@ -3,6 +3,7 @@ Expose the public API to manage camunda external tasks.
 """
 
 from bptl.utils.constants import Statuses
+from bptl.utils.decorators import save_and_log
 
 from .models import ExternalTask
 from .utils import complete_task
@@ -17,6 +18,7 @@ class TaskNotPerformed(Exception):
     pass
 
 
+@save_and_log(status=Statuses.completed)
 def complete(task: ExternalTask):
     """
     Send the result of a fetched task into Camunda.
@@ -31,6 +33,3 @@ def complete(task: ExternalTask):
         )
 
     complete_task(task, variables=task.result_variables)
-
-    task.status = Statuses.completed
-    task.save()

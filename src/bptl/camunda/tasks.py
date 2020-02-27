@@ -1,9 +1,8 @@
 """ celery tasks to process camunda external tasks"""
-import traceback
-
 from django.conf import settings
 
 from celery.utils.log import get_task_logger
+from timeline_logger.models import TimelineLog
 
 from bptl.camunda.api import complete
 from bptl.camunda.models import ExternalTask
@@ -25,6 +24,11 @@ def task_fetch_and_lock():
     logger.info("fetched %r tasks with %r", num_tasks, worker_id)
 
     for task in tasks:
+        # initial logging
+        TimelineLog.objects.create(
+            content_object=task, extra_data={"status": task.status}
+        )
+
         task_execute_and_complete.delay(task.id)
     return num_tasks
 
@@ -52,10 +56,6 @@ def task_execute_and_complete(fetched_task_id):
             exc_info=True,
         )
 
-        fetched_task.status = Statuses.failed
-        fetched_task.execution_error = traceback.format_exc()
-        fetched_task.save(update_fields=["status", "execution_error"])
-
         return
 
     logger.info("Task %r is executed", fetched_task_id)
@@ -70,10 +70,6 @@ def task_execute_and_complete(fetched_task_id):
             exc,
             exc_info=True,
         )
-
-        fetched_task.status = Statuses.failed
-        fetched_task.execution_error = traceback.format_exc()
-        fetched_task.save(update_fields=["status", "execution_error"])
 
         return
 

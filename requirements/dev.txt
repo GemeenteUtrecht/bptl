@@ -37,6 +37,7 @@ django-redis==4.11.0
 django-rosetta==0.9.3
 django-sniplates==0.6.0
 django-solo==1.1.3
+django-timeline-logger==1.1.2
 django-webtest==1.9.7
 django==2.2.10
 djangorestframework==3.11.0

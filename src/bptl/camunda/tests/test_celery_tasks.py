@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from bptl.camunda.tests.factories import ExternalTaskFactory
 from bptl.utils.constants import Statuses
+from bptl.utils.decorators import save_and_log
 
 from ..tasks import task_execute_and_complete, task_fetch_and_lock
 
@@ -16,7 +17,7 @@ class RouteTaskTests(TestCase):
         with patch(
             "bptl.camunda.tasks.fetch_and_lock",
             return_value=("aWorkerId", 2, [task1, task2]),
-        ) as m_fetch_and_lock:
+        ):
 
             result = task_fetch_and_lock()
 
@@ -39,6 +40,12 @@ class RouteTaskTests(TestCase):
     @patch("bptl.camunda.tasks.complete")
     @patch("bptl.camunda.tasks.execute", side_effect=Exception("execution is failed"))
     def test_task_execute_and_complete_fail_execute(self, m_execute, m_complete):
+        @save_and_log()
+        def new_execute(task):
+            raise Exception("execution is failed")
+
+        m_execute.side_effect = new_execute
+
         task = ExternalTaskFactory.create()
 
         task_execute_and_complete(task.id)
@@ -50,16 +57,21 @@ class RouteTaskTests(TestCase):
         m_execute.assert_called_once_with(task)
         m_complete.assert_not_called()
 
-    @patch("bptl.camunda.tasks.complete", side_effect=Exception("sending is failed"))
+    @patch("bptl.camunda.tasks.complete", side_effect=Exception("completion failed"))
     @patch("bptl.camunda.tasks.execute")
     def test_task_execute_and_complete_fail_complete(self, m_execute, m_complete):
+        @save_and_log()
+        def new_complete(task):
+            raise Exception("completion failed")
+
+        m_complete.side_effect = new_complete
         task = ExternalTaskFactory.create()
 
         task_execute_and_complete(task.id)
 
         task.refresh_from_db()
         self.assertEqual(task.status, "failed")
-        self.assertTrue(task.execution_error.strip().endswith("sending is failed"))
+        self.assertTrue(task.execution_error.strip().endswith("completion failed"))
 
         m_execute.assert_called_once_with(task)
         m_complete.assert_called_once_with(task)

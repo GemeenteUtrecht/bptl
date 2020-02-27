@@ -56,6 +56,7 @@ class ZGWWorkUnit(WorkUnit):
             )
 
         client = default_service.service.build_client()
+        client._log.task = self.task
 
         # add authorization header
         jwt = services_vars.get(default_service.alias, {}).get("jwt")
