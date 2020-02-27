@@ -2,28 +2,42 @@
 
 .task {
   display: flex;
-  justify-content: space-between;
-  padding: 1em 0;
-  border-bottom: solid 1px #eeeeee;
 
-  &:last-child {
-    border-bottom: none;
+  & &__table {
+    flex-basis: 75%;
+    padding: 0 2em 1em 0;
   }
 
-  &#{&}--header {
+  & &__filter {
+    flex-basis: 25%;
+    background: #e5e5e5;
+    padding: 0 1em 1em 1em;
+  }
 
+  & &__row {
+    display: flex;
+    justify-content: space-between;
+    padding: 1em 0;
+    border-bottom: solid 1px #eeeeee;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  & &__row--header {
     .task__topic,
     .task__variables {
-      color: $font-color;
       border-bottom: solid 2px $theme-primary-color;
     }
   }
 
   & &__topic {
-    width: 15%;
+    flex-basis: 15%;
   }
 
   & &__variables {
-    width: 20%;
+    flex-basis: 20%;
   }
+
 }

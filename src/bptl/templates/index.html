@@ -18,12 +18,18 @@
 
 {% block content %}
 <article class="dashboard">
-    TODO: show dashboard
+    TODO: show piechart
+
+    <p>
+        <a href="{% url 'dashboard:task-list' %}">
+            {% trans "View tasks details" %}
+        </a>
+    </p>
 </article>
 
 <article class="index">
     <a class="index__item" href="{% url 'tasks:taskmapping-list' %}">
-        {% trans "View tasks" %}
+        {% trans "View task mappings" %}
     </a>
 </article>
 

@@ -6,70 +6,73 @@
 
 {% block content %}
 
+<article class="task">
 
-<form action="" method="get">
-    <div>
-    {{ filter.form.as_p }}
-    </div>
-    <button type="submit" class="button button--submit">
-        {{ btn_text|default:_("Submit")}}
-    </button>
-</form>
+    <section class="task__table">
+        <header class="task__row task__row--header">
+            <div class="task__topic">
+                <strong>{% trans "Task" %}</strong>
+            </div>
 
+            <div class="task__topic">
+                <strong>{% trans "Type" %}</strong>
+            </div>
 
-<header class="task task--header">
-    <div class="task__topic">
-        <strong>{% trans "Task" %}</strong>
-    </div>
+            <div class="task__topic">
+                <strong>{% trans "Topic name" %}</strong>
+            </div>
 
-    <div class="task__topic">
-        <strong>{% trans "Type" %}</strong>
-    </div>
+            <div class="task__topic">
+                <strong>{% trans "Status" %}</strong>
+            </div>
 
-    <div class="task__topic">
-        <strong>{% trans "Topic name" %}</strong>
-    </div>
+            <div class="task__variables">
+                <strong>{% trans "Variables" %}</strong>
+            </div>
 
-    <div class="task__topic">
-        <strong>{% trans "Status" %}</strong>
-    </div>
+            <div class="task__variables">
+                <strong>{% trans "Result variables" %}</strong>
+            </div>
 
-    <div class="task__variables">
-        <strong>{% trans "Variables" %}</strong>
-    </div>
+        </header>
 
-    <div class="task__variables">
-        <strong>{% trans "Result variables" %}</strong>
-    </div>
+        {% for task in tasks %}
+        <article class="task__row">
+            <div class="task__topic">
+                {{ task.id }}
+            </div>
 
-</header>
+            <div class="task__topic">
+                {{ task|task_type }}
+            </div>
 
-{% for task in tasks %}
-    <article class="task">
-        <div class="task__topic">
-            {{ task.id }}
-        </div>
+            <div class="task__topic">
+                {{ task.topic_name }}
+            </div>
 
-        <div class="task__topic">
-            {{ task|task_type }}
-        </div>
+            <div class="task__topic">
+                {{ task.status }}
+            </div>
 
-        <div class="task__topic">
-            {{ task.topic_name }}
-        </div>
+            <div class="task__variables">
+                {{ task.variables }}
+            </div>
 
-        <div class="task__topic">
-            {{ task.status }}
-        </div>
+            <div class="task__variables">
+                {{ task.result_variables }}
+            </div>
+        </article>
+        {% endfor %}
+    </section>
 
-        <div class="task__variables">
-            {{ task.variables }}
-        </div>
+    <aside class="task__filter">
+        <form action="" method="get">
+            {{ filter.form.as_p }}
+            <button type="submit" class="button button--submit">
+                {{ btn_text|default:_("Submit")}}
+            </button>
+        </form>
+    </aside>
 
-        <div class="task__variables">
-            {{ task.result_variables }}
-        </div>
-    </article>
-{% endfor %}
-
+</article>
 {% endblock %}
