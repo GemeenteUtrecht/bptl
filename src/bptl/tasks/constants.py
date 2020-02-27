@@ -9,7 +9,7 @@ class EngineTypes(DjangoChoices):
     activiti = ChoiceItem("activiti", "Activiti")
 
 
-TASKTYPE_MAPPING = {
+ENGINETYPE_MODEL_MAPPING = {
     EngineTypes.camunda: ExternalTask,
     EngineTypes.activiti: ServiceTask,
 }
