@@ -1,7 +1,5 @@
 import functools
-import os
-
-from django.conf import settings
+import tempfile
 
 from docutils.core import publish_doctree
 from docutils.frontend import OptionParser
@@ -24,8 +22,20 @@ def render_docstring(docstring: str) -> str:
 
 @functools.lru_cache()
 def _get_builder():
-    docs_folder = os.path.join(settings.BASE_DIR, "doc")
-    app = Sphinx(docs_folder, docs_folder, "_ignored", "_ignored", buildername="html",)
+    _tmpdir = tempfile.mkdtemp()
+    app = Sphinx(
+        srcdir=".",
+        confdir=None,
+        outdir=_tmpdir,
+        doctreedir=_tmpdir,
+        buildername="html",
+        confoverrides={
+            "project": "Business Process Task Library",
+            "extensions": ["sphinx.ext.autodoc"],
+        },
+        verbosity=0,
+        status=None,
+    )
     return app.builder
 
 
