@@ -3,6 +3,7 @@
 .task {
   display: flex;
   flex-flow: row wrap;
+  align-items: flex-start;
 
   & &__table {
     flex-basis: 75%;
