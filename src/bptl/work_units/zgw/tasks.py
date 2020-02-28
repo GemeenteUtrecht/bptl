@@ -76,23 +76,23 @@ class CreateZaakTask(ZGWWorkUnit):
     """
     Create a ZAAK in the configured Zaken API and set the initial status.
 
-    The initial status is the STATUSTYPE with **volgnummer** equal to 1 for the
+    The initial status is the STATUSTYPE with ``volgnummer`` equal to 1 for the
     ZAAKTYPE.
 
-    Required process variables:
+    **Required process variables**
 
-    * **zaaktype**: the full URL of the ZAAKTYPE
-    * **organisatieRSIN**: RSIN of the organisation
-    * **services**: JSON Object of connection details for ZGW services:
+    * ``zaaktype``: the full URL of the ZAAKTYPE
+    * ``organisatieRSIN``: RSIN of the organisation
+    * ``services``: JSON Object of connection details for ZGW services:
         * "<ZRC service name>": {"jwt": value for Authorization header in the api}
         * "<ZTC service name>": {"jwt": value for Authorization header in the api}
 
-    Optional process variables:
+    **Optional process variables**
 
-    * **NLXProcessId** - a process id for purpose registration ("doelbinding")
-    * **NLXSubjectIdentifier** - a subject identifier for purpose registration ("doelbinding")
+    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
+    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
 
-    The task sets the process variables:
+    **Sets the process variables**
 
     * ``zaak``: the JSON response of the created ZAAK
     * ``zaakUrl``: the full URL of the created ZAAK
