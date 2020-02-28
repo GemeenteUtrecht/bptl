@@ -56,8 +56,11 @@ class CompleteTests(TestCase):
             {
                 "workerId": "test-worker-id",
                 "variables": {
-                    "zaak": {"value": "https://example.com/api/v1/zaken/123"},
-                    "foo": {"value": 42},
+                    "zaak": {
+                        "value": "https://example.com/api/v1/zaken/123",
+                        "type": "String",
+                    },
+                    "foo": {"value": 42, "type": "Integer"},
                 },
             },
         )

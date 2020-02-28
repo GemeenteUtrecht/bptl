@@ -16,6 +16,21 @@ STATUSTYPE = f"{ZTC_URL}statustypen/7ff0bd9d-571f-47d0-8205-77ae41c3fc0b"
 ZAAK = f"{ZRC_URL}zaken/4f8b4811-5d7e-4e9b-8201-b35f5101f891"
 STATUS = f"{ZRC_URL}statussen/b7218c76-7478-41e9-a088-54d2f914a713"
 
+RESPONSES = {
+    ZAAK: {
+        "url": ZAAK,
+        "uuid": "4f8b4811-5d7e-4e9b-8201-b35f5101f891",
+        "identificatie": "ZAAK-2020-0000000013",
+        "bronorganisatie": "002220647",
+        "omschrijving": "",
+        "zaaktype": ZAAKTYPE,
+        "registratiedatum": "2020-01-16",
+        "verantwoordelijkeOrganisatie": "002220647",
+        "startdatum": "2020-01-16",
+        "einddatum": None,
+    },
+}
+
 
 @requests_mock.Mocker()
 class CreateZaakTaskTests(TestCase):
@@ -80,20 +95,7 @@ class CreateZaakTaskTests(TestCase):
             },
         )
         m.post(
-            f"{ZRC_URL}zaken",
-            status_code=201,
-            json={
-                "url": ZAAK,
-                "uuid": "4f8b4811-5d7e-4e9b-8201-b35f5101f891",
-                "identificatie": "ZAAK-2020-0000000013",
-                "bronorganisatie": "002220647",
-                "omschrijving": "",
-                "zaaktype": ZAAKTYPE,
-                "registratiedatum": "2020-01-16",
-                "verantwoordelijkeOrganisatie": "002220647",
-                "startdatum": "2020-01-16",
-                "einddatum": None,
-            },
+            f"{ZRC_URL}zaken", status_code=201, json=RESPONSES[ZAAK],
         )
         m.post(
             f"{ZRC_URL}statussen",
@@ -111,7 +113,14 @@ class CreateZaakTaskTests(TestCase):
         task = CreateZaakTask(self.fetched_task)
 
         result = task.perform()
-        self.assertEqual(result, {"zaak": ZAAK})
+        self.assertEqual(
+            result,
+            {
+                "zaak": RESPONSES[ZAAK],
+                "zaakUrl": ZAAK,
+                "zaakIdentificatie": "ZAAK-2020-0000000013",
+            },
+        )
 
         request_zaak = next(
             filter(

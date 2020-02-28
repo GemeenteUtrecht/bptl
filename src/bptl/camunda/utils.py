@@ -97,4 +97,7 @@ def serialize_variable(value: Any) -> Dict[str, JSONPrimitive]:
         serialized = json.dumps(value)
         return {"type": "json", "value": serialized}
 
+    if isinstance(value, int):
+        return {"type": "Integer", "value": value}
+
     raise NotImplementedError(f"Type {type(value)} is not implemented yet")
