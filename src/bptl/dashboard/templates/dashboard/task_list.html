@@ -1,0 +1,78 @@
+{% extends "master.html" %}
+{% load i18n dashboard %}
+
+{% block content-header-subtitle %}{% trans "View external tasks" %}{% endblock %}
+{% block content-header-title %}{% trans "Tasks" %}{% endblock %}
+
+{% block content %}
+
+<article class="task">
+
+    <section class="task__table">
+        <header class="task__row task__row--header">
+            <div class="task__topic">
+                <strong>{% trans "Task" %}</strong>
+            </div>
+
+            <div class="task__topic">
+                <strong>{% trans "Type" %}</strong>
+            </div>
+
+            <div class="task__topic">
+                <strong>{% trans "Topic name" %}</strong>
+            </div>
+
+            <div class="task__topic">
+                <strong>{% trans "Status" %}</strong>
+            </div>
+
+            <div class="task__variables">
+                <strong>{% trans "Variables" %}</strong>
+            </div>
+
+            <div class="task__variables">
+                <strong>{% trans "Result variables" %}</strong>
+            </div>
+
+        </header>
+
+        {% for task in tasks %}
+        <article class="task__row">
+            <div class="task__topic">
+                <a href="{% url 'dashboard:task-detail' task.id %}">{{ task.id }}</a>
+            </div>
+
+            <div class="task__topic">
+                {{ task|task_type }}
+            </div>
+
+            <div class="task__topic">
+                {{ task.topic_name }}
+            </div>
+
+            <div class="task__topic">
+                {{ task.status }}
+            </div>
+
+            <div class="task__variables">
+                {{ task.variables }}
+            </div>
+
+            <div class="task__variables">
+                {{ task.result_variables }}
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+
+    <aside class="task__filter">
+        <form action="" method="get">
+            {{ filter.form.as_p }}
+            <button type="submit" class="button button--submit">
+                {{ btn_text|default:_("Submit")}}
+            </button>
+        </form>
+    </aside>
+
+</article>
+{% endblock %}

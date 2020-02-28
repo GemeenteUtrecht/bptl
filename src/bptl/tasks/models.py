@@ -7,11 +7,13 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from polymorphic.managers import PolymorphicManager
+from polymorphic.models import PolymorphicModel
 from timeline_logger.models import TimelineLog
 
 from bptl.utils.constants import Statuses
 
-from .query import TaskQuerySet
+from .query import BaseTaskQuerySet, TaskQuerySet
 
 
 class TaskMapping(models.Model):
@@ -49,7 +51,7 @@ class TaskMapping(models.Model):
         return f"{self.topic_name} / {self.callback}"
 
 
-class BaseTask(models.Model):
+class BaseTask(PolymorphicModel):
     """
     An external task to be processed by work units.
 
@@ -77,8 +79,7 @@ class BaseTask(models.Model):
     )
     logs = GenericRelation(TimelineLog, related_query_name="task")
 
-    class Meta:
-        abstract = True
+    objects = PolymorphicManager.from_queryset(BaseTaskQuerySet)()
 
     def get_variables(self) -> dict:
         """
@@ -87,7 +88,10 @@ class BaseTask(models.Model):
         return self.variables
 
     def request_logs(self) -> models.QuerySet:
-        return self.logs.filter(extra_data__has_key="request")
+        return self.logs.filter(extra_data__has_key="request").order_by("timestamp")
 
     def status_logs(self) -> models.QuerySet:
-        return self.logs.filter(extra_data__has_key="status")
+        return self.logs.filter(extra_data__has_key="status").order_by("timestamp")
+
+    def __str__(self):
+        return f"{self.polymorphic_ctype}: {self.topic_name} / {self.id}"

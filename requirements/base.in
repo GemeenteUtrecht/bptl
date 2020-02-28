@@ -15,8 +15,11 @@ django-admin-index
 django-axes
 django-camunda
 django-choices
+django-docutils
+django-filter
 django-hijack
 django-hijack-admin
+django-polymorphic
 django-redis
 django-rosetta
 django-sniplates

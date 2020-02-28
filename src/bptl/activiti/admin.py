@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from polymorphic.admin import PolymorphicChildModelAdmin
 from solo.admin import SingletonModelAdmin
 
 from .models import ActivitiConfig, ServiceTask
@@ -11,6 +12,6 @@ class ActivitiConfigAdmin(SingletonModelAdmin):
 
 
 @admin.register(ServiceTask)
-class ServiceTaskAdmin(admin.ModelAdmin):
+class ServiceTaskAdmin(PolymorphicChildModelAdmin):
     list_display = ("topic_name", "status")
     list_filter = ("topic_name", "status")

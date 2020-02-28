@@ -24,7 +24,7 @@
     </div>
 </header>
 
-{% for task_mapping in tasks %}
+{% for task_mapping in task_mappings %}
     {% get_registry_task task_mapping.callback as task %}
 
     <article class="task-details">
@@ -43,7 +43,7 @@
 {% endfor %}
 
 <div class="actions-row">
-    <a href="{% url 'tasks:task-create' %}" class="button button--submit">{% trans "Add listener" %}</a>
+    <a href="{% url 'tasks:taskmapping-create' %}" class="button button--submit">{% trans "Add listener" %}</a>
 </div>
 
 <p class="concept-explanation">

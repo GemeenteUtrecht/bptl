@@ -1,9 +1,13 @@
 from django.contrib import admin
 
+from polymorphic.admin import PolymorphicChildModelFilter, PolymorphicParentModelAdmin
+
+from bptl.activiti.models import ServiceTask
+from bptl.camunda.models import ExternalTask
 from bptl.work_units.zgw.models import DefaultService
 
 from .forms import AdminTaskMappingForm
-from .models import TaskMapping
+from .models import BaseTask, TaskMapping
 
 
 class DefaultServiceInline(admin.TabularInline):
@@ -18,3 +22,9 @@ class TaskMappingAdmin(admin.ModelAdmin):
     search_fields = ("topic_name", "callback")
     form = AdminTaskMappingForm
     inlines = (DefaultServiceInline,)
+
+
+@admin.register(BaseTask)
+class BaseTaskAdmin(PolymorphicParentModelAdmin):
+    child_models = (ExternalTask, ServiceTask)
+    list_filter = (PolymorphicChildModelFilter, "status")
