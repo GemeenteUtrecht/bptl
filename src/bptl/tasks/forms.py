@@ -2,7 +2,6 @@ from typing import Tuple
 
 from django import forms
 from django.contrib.admin.widgets import AdminRadioSelect
-from django.template.defaultfilters import linebreaksbr
 from django.utils.html import format_html
 
 from .models import TaskMapping
@@ -16,7 +15,7 @@ def get_callback_choices() -> Tuple[Tuple[str, str]]:
             "<br>"
             '<span class="task-doc">{doc}</span>',
             name=task.name,
-            doc=linebreaksbr(task.documentation),
+            doc=task.html_documentation,
         )
         yield (task.dotted_path, task_label)
 

@@ -7,7 +7,11 @@ performs a unit of work.
 import inspect
 from dataclasses import dataclass
 
+from django.utils.functional import cached_property
 from django.utils.module_loading import autodiscover_modules
+from django.utils.safestring import mark_safe
+
+from .utils import render_docstring
 
 
 @dataclass
@@ -16,6 +20,14 @@ class Task:
     name: str
     documentation: str
     callback: callable
+
+    @cached_property
+    @mark_safe
+    def html_documentation(self) -> str:
+        """
+        Return the docstring rendered as HTML by Sphinx.
+        """
+        return render_docstring(self.documentation)
 
 
 class WorkUnitRegistry:

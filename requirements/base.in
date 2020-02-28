@@ -1,11 +1,12 @@
 # Core python libraries
 Pillow  # handle images
+celery
+gemma-zds-client
 psycopg2  # database driver
 pytz  # handle timezones
 python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
-celery
-gemma-zds-client
+sphinx
 zgw-consumers
 
 # Framework libraries
@@ -13,7 +14,6 @@ django < 3.0
 django-admin-index
 django-axes
 django-camunda
-django-docutils
 django-choices
 django-hijack
 django-hijack-admin
