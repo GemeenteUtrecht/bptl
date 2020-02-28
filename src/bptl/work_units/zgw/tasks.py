@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any, Dict
 
 from django.conf import settings
 from django.utils import timezone
@@ -93,7 +94,9 @@ class CreateZaakTask(ZGWWorkUnit):
 
     The task sets the process variables:
 
-    * **zaak**: the full URL of the created ZAAK
+    * ``zaak``: the JSON response of the created ZAAK
+    * ``zaakUrl``: the full URL of the created ZAAK
+    * ``zaakIdentificatie``: the identificatie of the created ZAAK
     """
 
     def create_zaak(self) -> dict:
@@ -141,10 +144,14 @@ class CreateZaakTask(ZGWWorkUnit):
         status = zrc_client.create("status", data)
         return status
 
-    def perform(self):
+    def perform(self) -> Dict[str, Any]:
         zaak = self.create_zaak()
         self.create_status(zaak)
-        return {"zaak": zaak["url"]}
+        return {
+            "zaak": zaak,
+            "zaakUrl": zaak["url"],
+            "zaakIdentificatie": zaak["identificatie"],
+        }
 
 
 @register
