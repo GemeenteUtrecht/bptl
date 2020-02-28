@@ -26,18 +26,15 @@
   }
 
   & &__row--header {
-    .task__topic,
-    .task__variables {
+    .task__topic, {
       border-bottom: solid 2px $theme-primary-color;
     }
   }
 
   & &__topic {
-    flex-basis: 15%;
+    width: 25%;
+    text-align: center;
   }
 
-  & &__variables {
-    flex-basis: 20%;
-  }
 
 }

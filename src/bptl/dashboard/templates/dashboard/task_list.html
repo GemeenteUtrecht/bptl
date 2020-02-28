@@ -26,14 +26,6 @@
                 <strong>{% trans "Status" %}</strong>
             </div>
 
-            <div class="task__variables">
-                <strong>{% trans "Variables" %}</strong>
-            </div>
-
-            <div class="task__variables">
-                <strong>{% trans "Result variables" %}</strong>
-            </div>
-
         </header>
 
         {% for task in tasks %}
@@ -54,13 +46,6 @@
                 {{ task.status }}
             </div>
 
-            <div class="task__variables">
-                {{ task.variables }}
-            </div>
-
-            <div class="task__variables">
-                {{ task.result_variables }}
-            </div>
         </article>
         {% endfor %}
     </section>
