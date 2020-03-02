@@ -4,10 +4,12 @@ Module for Camunda API interaction.
 TODO: fetch the handled/known topics from the DB and pass that to the fetch and lock
 call.
 """
-from typing import List, Optional, Tuple
+import json
+from typing import Any, Dict, List, Optional, Tuple
 
 from dateutil import parser
 from django_camunda.client import get_client_class
+from django_camunda.types import JSONPrimitive
 
 from bptl.tasks.models import TaskMapping
 from bptl.utils.typing import Object, ProcessVariables
@@ -70,8 +72,9 @@ def complete_task(
     variables.
     """
     camunda = get_client_class()()
+
     serialized_variables = (
-        {name: {"value": value} for name, value in variables.items()}
+        {name: serialize_variable(value) for name, value in variables.items()}
         if variables
         else {}
     )
@@ -81,3 +84,20 @@ def complete_task(
         "variables": serialized_variables,
     }
     camunda.request(f"external-task/{task.task_id}/complete", method="POST", json=body)
+
+
+def serialize_variable(value: Any) -> Dict[str, JSONPrimitive]:
+    if isinstance(value, str):
+        return {"type": "String", "value": value}
+
+    if value is None:
+        return {"type": "Null", "value": "null"}
+
+    if isinstance(value, (dict, list)):
+        serialized = json.dumps(value)
+        return {"type": "json", "value": serialized}
+
+    if isinstance(value, int):
+        return {"type": "Integer", "value": value}
+
+    raise NotImplementedError(f"Type {type(value)} is not implemented yet")

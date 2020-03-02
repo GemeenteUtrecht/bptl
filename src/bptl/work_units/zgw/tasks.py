@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any, Dict
 
 from django.conf import settings
 from django.utils import timezone
@@ -75,25 +76,27 @@ class CreateZaakTask(ZGWWorkUnit):
     """
     Create a ZAAK in the configured Zaken API and set the initial status.
 
-    The initial status is the STATUSTYPE with **volgnummer** equal to 1 for the
+    The initial status is the STATUSTYPE with ``volgnummer`` equal to 1 for the
     ZAAKTYPE.
 
-    Required process variables:
+    **Required process variables**
 
-    * **zaaktype**: the full URL of the ZAAKTYPE
-    * **organisatieRSIN**: RSIN of the organisation
-    * **services**: JSON Object of connection details for ZGW services:
+    * ``zaaktype``: the full URL of the ZAAKTYPE
+    * ``organisatieRSIN``: RSIN of the organisation
+    * ``services``: JSON Object of connection details for ZGW services:
         * "<ZRC service name>": {"jwt": value for Authorization header in the api}
         * "<ZTC service name>": {"jwt": value for Authorization header in the api}
 
-    Optional process variables:
+    **Optional process variables**
 
-    * **NLXProcessId** - a process id for purpose registration ("doelbinding")
-    * **NLXSubjectIdentifier** - a subject identifier for purpose registration ("doelbinding")
+    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
+    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
 
-    The task sets the process variables:
+    **Sets the process variables**
 
-    * **zaak**: the full URL of the created ZAAK
+    * ``zaak``: the JSON response of the created ZAAK
+    * ``zaakUrl``: the full URL of the created ZAAK
+    * ``zaakIdentificatie``: the identificatie of the created ZAAK
     """
 
     def create_zaak(self) -> dict:
@@ -141,10 +144,14 @@ class CreateZaakTask(ZGWWorkUnit):
         status = zrc_client.create("status", data)
         return status
 
-    def perform(self):
+    def perform(self) -> Dict[str, Any]:
         zaak = self.create_zaak()
         self.create_status(zaak)
-        return {"zaak": zaak["url"]}
+        return {
+            "zaak": zaak,
+            "zaakUrl": zaak["url"],
+            "zaakIdentificatie": zaak["identificatie"],
+        }
 
 
 @register

@@ -3,7 +3,7 @@ import os
 # Django-hijack (and Django-hijack-admin)
 from django.urls import reverse_lazy
 
-from celery.schedules import crontab
+from celery.schedules import schedule
 from sentry_sdk.integrations import django, redis
 
 try:
@@ -143,6 +143,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
+SESSION_COOKIE_NAME = "bptl_sessionid"
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -369,7 +370,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = 600
 CELERY_BEAT_SCHEDULE = {
     "task-pull": {
         "task": "bptl.camunda.tasks.task_fetch_and_lock",
-        "schedule": crontab(minute="*"),
+        "schedule": schedule(run_every=1),  # run every second
     },
 }
 CELERY_ACKS_LATE = True
