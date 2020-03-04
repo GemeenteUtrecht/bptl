@@ -18,7 +18,7 @@
 
 {% block content %}
 <article class="dashboard">
-    <div id="piechart">
+    <div id="piechart" data-url="{% url 'dashboard:dashboard-api:aggregate' %}">
     </div>
 
     <p>
@@ -45,69 +45,97 @@
 
     <script>
 
-// set the dimensions and margins of the graph
-const width = 400,
-    height = 400,
-    margin = 40;
+const request = (url, method='GET', body=undefined) => {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(xhr.response);
+            } else {
+                reject(xhr.statusText);
+            }
+        };
+        xhr.onerror = () => reject(xhr.statusText);
+        xhr.send(body);
+    });
+};
 
-// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
-const radius = Math.min(width, height) / 2 - margin;
 
-// append the svg object to the div called 'my_dataviz'
-const svg = d3.select("#piechart")
-  .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-  .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+function chart(data){
+    // set the dimensions and margins of the graph
+    const width = 400,
+        height = 400,
+        margin = 40;
 
-// Create dummy data
-const data =  {"failed": 1, "initial": 1, "performed": 1};
+    // The radius of the pieplot is half the width or half the height (smallest one) minus margin.
+    const radius = Math.min(width, height) / 2 - margin;
 
-// set the color scale
-const color = d3.scaleOrdinal()
-  .domain(data)
-  .range(['red', 'blue', 'yellow', 'green', 'purple']);
+    // append the svg object to the div with id = piechart
+    const svg = d3.select("#piechart")
+      .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+      .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-// Compute the position of each group on the pie:
-const pie = d3.pie()
-  .value(d => d.value);
+    // set the color scale
+    const color = d3.scaleOrdinal()
+      .domain(data)
+      .range(['red', 'blue', 'yellow', 'green', 'purple']);
 
-const data_ready = pie(d3.entries(data));
+    // Compute the position of each group on the pie:
+    const pie = d3.pie()
+      .value(d => d.value);
 
-// shape helper to build arcs:
-const arc = d3.arc()
-  .innerRadius(0)
-  .outerRadius(radius);
+    const data_ready = pie(d3.entries(data));
 
-// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-svg
-  .selectAll('path')
-  .data(data_ready)
-  .enter()
-  .append('path')
-  .attr('d', arc)
-  .attr('fill', d => color(d.data.key))
-  .attr("stroke", "white")
-  .style("stroke-width", "2px")
-  .style("opacity", 0.7);
+    // shape helper to build arcs:
+    const arc = d3.arc()
+      .innerRadius(0)
+      .outerRadius(radius);
 
-// Now add the annotation. Use the centroid method to get the best coordinates
-svg
-  .selectAll('text')
-  .data(data_ready)
-  .enter()
-  .append('text')
-  .attr("transform", d => "translate(" + arc.centroid(d) + ")")
-  .call(text => text.append("tspan")
-      .attr("y", "-1em")
-      .attr("font-weight", "bold")
-      .text(d => d.data.key))
-  .call(text => text.append("tspan")
-      .attr("x", 0)
-      .attr("y", "1em")
-      .text(d => d.data.value))
-  .style("text-anchor", "middle");
+    // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+    svg
+      .selectAll('path')
+      .data(data_ready)
+      .enter()
+      .append('path')
+      .attr('d', arc)
+      .attr('fill', d => color(d.data.key))
+      .attr("stroke", "white")
+      .style("stroke-width", "2px")
+      .style("opacity", 0.7);
+
+    // Now add the annotation. Use the centroid method to get the best coordinates
+    svg
+      .selectAll('text')
+      .data(data_ready)
+      .enter()
+      .append('text')
+      .attr("transform", d => "translate(" + arc.centroid(d) + ")")
+      .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.25).append("tspan")
+        .attr("y", "-0.7em")
+        .attr("font-weight", "bold")
+        .text(d => d.data.key))
+      .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.25).append("tspan")
+        .attr("x", 0)
+        .attr("y", "0.7em")
+        .text(d => d.data.value))
+      .style("text-anchor", "middle");
+}
+
+const container = document.getElementById('piechart');
+const url = container.dataset.url;
+request(url)
+    .then(response => {
+
+        const data = JSON.parse(response);
+        console.log(data.total);
+        console.log(typeof data);
+
+        chart(data.total);
+    });
 
 
 </script>
