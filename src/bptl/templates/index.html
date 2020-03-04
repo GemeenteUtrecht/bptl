@@ -78,6 +78,10 @@ const chart = (data) => {
     const radius = Math.min(width, height) / 2 - margin;
 
     // append the svg object to the div with id = piechart
+    d3.select("#piechart")
+      .selectAll("*")
+      .remove();
+
     const svg = d3.select("#piechart")
       .append("svg")
         .attr("width", width)
@@ -131,37 +135,27 @@ const chart = (data) => {
       .style("text-anchor", "middle");
 };
 
+let data = {
+  "items": {
+  }
+};
+
 
 const choose_data = () => {
-    // mock data
-    const data = {
-        "items": {
-            "camunda": {
-                "completed": 1
-            },
-            "activiti": {
-                "failed": 2,
-                "initial": 1,
-                "performed": 3
-            }
-        },
-        "total": {
-            "completed": 1,
-            "failed": 2,
-            "initial": 1,
-            "performed": 3
-        }
-    };
-
     const checkboxes = document.querySelectorAll('input[name=engine]');
-    let use_data = {};
-    for (let i = 0; i < checkboxes.length; i++ ){
-        if (checkboxes[i].checked) {
-            let data_item = data.items[checkboxes[i].value];
-            use_data = {...use_data, ...data_item};
-        }
-    }
-    console.log(use_data);
+    const engines = [...checkboxes]
+      .filter(x => x.checked)
+      .map(cb => cb.value);
+
+    const use_data = engines.reduce((acc, engine) => {
+      const engineData = data.items[engine] || {};
+      Object.keys(engineData).forEach(status => {
+        acc[status] = (acc[status] || 0) + engineData[status]
+      });
+      return acc;
+    }, {});
+
+    // console.log(use_data);
     chart(use_data);
 
 };
@@ -171,11 +165,10 @@ const container = document.getElementById('piechart');
 const url = container.dataset.url;
 request(url)
     .then(response => {
+      data = JSON.parse(response);
+      console.log(response);
 
-        const data = JSON.parse(response);
-        console.log(response);
-
-        chart(data.total);
+      chart(data.total);
     });
 
 
