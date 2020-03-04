@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 
 import requests_mock
@@ -44,10 +46,9 @@ class CloseZaakTaskTests(TestCase):
                 "zaak": {"type": "String", "value": ZAAK, "valueInfo": {}},
                 "services": {
                     "type": "json",
-                    "value": {
-                        "ZRC": {"jwt": "Bearer 12345"},
-                        "ZTC": {"jwt": "Bearer 789"},
-                    },
+                    "value": json.dumps(
+                        {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                    ),
                 },
             },
         )

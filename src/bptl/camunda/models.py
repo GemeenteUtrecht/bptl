@@ -53,4 +53,6 @@ class ExternalTask(BaseTask):
         return self.lock_expires_at <= timezone.now()
 
     def get_variables(self) -> dict:
-        return {k: v["value"] for k, v in self.variables.items()}
+        from .utils import deserialize_variable
+
+        return {k: deserialize_variable(v) for k, v in self.variables.items()}

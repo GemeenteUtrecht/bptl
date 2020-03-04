@@ -19,6 +19,7 @@ class FlatVariablesTests(TestCase):
                     "value": "002220647",
                     "valueInfo": {},
                 },
+                "foo": {"type": "Json", "value": '{"bar":"baz"}', "valueInfo": {},},
             },
         )
 
@@ -27,6 +28,7 @@ class FlatVariablesTests(TestCase):
             {
                 "zaaktype": "http://ztc.com/api/v1/zaaktypen/b38fbc9f-1273-4a0e-8189-cbec1b1f408f",
                 "organisatieRSIN": "002220647",
+                "foo": {"bar": "baz",},
             },
         )
 
