@@ -18,7 +18,13 @@
 
 {% block content %}
 <article class="dashboard">
-    <div id="piechart" data-url="{% url 'dashboard:dashboard-api:aggregate' %}">
+    <div class="dashboard__chart" id="piechart" data-url="{% url 'dashboard:dashboard-api:aggregate' %}">
+    </div>
+
+    <div class="dashboard__filter">
+        <label class="dashboard__checkbox"><input type="checkbox" name="engine" value="camunda" checked/>Camunda</label>
+        <label class="dashboard__checkbox"><input type="checkbox" name="engine" value="activiti" checked/>Activiti</label>
+        <button type="submit" class="button button--submit" onclick="choose_data()">Show</button>
     </div>
 
     <p>
@@ -62,7 +68,7 @@ const request = (url, method='GET', body=undefined) => {
 };
 
 
-function chart(data){
+const chart = (data) => {
     // set the dimensions and margins of the graph
     const width = 400,
         height = 400,
@@ -123,16 +129,51 @@ function chart(data){
         .attr("y", "0.7em")
         .text(d => d.data.value))
       .style("text-anchor", "middle");
-}
+};
 
+
+const choose_data = () => {
+    // mock data
+    const data = {
+        "items": {
+            "camunda": {
+                "completed": 1
+            },
+            "activiti": {
+                "failed": 2,
+                "initial": 1,
+                "performed": 3
+            }
+        },
+        "total": {
+            "completed": 1,
+            "failed": 2,
+            "initial": 1,
+            "performed": 3
+        }
+    };
+
+    const checkboxes = document.querySelectorAll('input[name=engine]');
+    let use_data = {};
+    for (let i = 0; i < checkboxes.length; i++ ){
+        if (checkboxes[i].checked) {
+            let data_item = data.items[checkboxes[i].value];
+            use_data = {...use_data, ...data_item};
+        }
+    }
+    console.log(use_data);
+    chart(use_data);
+
+};
+
+// get aggregated data
 const container = document.getElementById('piechart');
 const url = container.dataset.url;
 request(url)
     .then(response => {
 
         const data = JSON.parse(response);
-        console.log(data.total);
-        console.log(typeof data);
+        console.log(response);
 
         chart(data.total);
     });
