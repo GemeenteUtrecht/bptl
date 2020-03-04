@@ -46,15 +46,15 @@
     <script>
 
 // set the dimensions and margins of the graph
-var width = 400,
+const width = 400,
     height = 400,
     margin = 40;
 
 // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
-var radius = Math.min(width, height) / 2 - margin;
+const radius = Math.min(width, height) / 2 - margin;
 
 // append the svg object to the div called 'my_dataviz'
-var svg = d3.select("#piechart")
+const svg = d3.select("#piechart")
   .append("svg")
     .attr("width", width)
     .attr("height", height)
@@ -62,22 +62,21 @@ var svg = d3.select("#piechart")
     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
 // Create dummy data
-var data =  {"failed": 1, "initial": 1, "performed": 1};
+const data =  {"failed": 1, "initial": 1, "performed": 1};
 
 // set the color scale
-var color = d3.scaleOrdinal()
+const color = d3.scaleOrdinal()
   .domain(data)
-  {#.range(d3.schemeCategory20);#}
   .range(['red', 'blue', 'yellow', 'green', 'purple']);
 
 // Compute the position of each group on the pie:
-var pie = d3.pie()
-  .value(function(d) {return d.value; });
+const pie = d3.pie()
+  .value(d => d.value);
 
-var data_ready = pie(d3.entries(data));
+const data_ready = pie(d3.entries(data));
 
 // shape helper to build arcs:
-var arc = d3.arc()
+const arc = d3.arc()
   .innerRadius(0)
   .outerRadius(radius);
 
@@ -88,7 +87,7 @@ svg
   .enter()
   .append('path')
   .attr('d', arc)
-  .attr('fill', function(d){ return(color(d.data.key)) })
+  .attr('fill', d => color(d.data.key))
   .attr("stroke", "white")
   .style("stroke-width", "2px")
   .style("opacity", 0.7);
@@ -99,7 +98,7 @@ svg
   .data(data_ready)
   .enter()
   .append('text')
-  .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")";  })
+  .attr("transform", d => "translate(" + arc.centroid(d) + ")")
   .call(text => text.append("tspan")
       .attr("y", "-1em")
       .attr("font-weight", "bold")
