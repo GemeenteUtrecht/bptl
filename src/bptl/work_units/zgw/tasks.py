@@ -8,6 +8,7 @@ from zgw_consumers.constants import APITypes
 from bptl.tasks.registry import register
 
 from .base import ZGWWorkUnit
+from .nlx import get_nlx_headers
 
 __all__ = (
     "CreateZaakTask",
@@ -60,14 +61,7 @@ class CreateZaakTask(ZGWWorkUnit):
             "startdatum": today,
         }
 
-        headers = {}
-        nlx_subject_identifier = variables.get("NLXSubjectIdentifier")
-        if nlx_subject_identifier:
-            headers["X-NLX-Request-Subject-Identifier"] = nlx_subject_identifier
-        nlx_process_id = variables.get("NLXProcessId")
-        if nlx_process_id:
-            headers["X-NLX-Request-Process-Id"] = nlx_process_id
-
+        headers = get_nlx_headers(variables)
         zaak = client_zrc.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
@@ -258,3 +252,58 @@ class CloseZaakTask(ZGWWorkUnit):
             "archiefnominatie": resultaat["archiefnominatie"],
             "archiefactiedatum": resultaat["archiefactiedatum"],
         }
+
+
+@register
+class RelatePand(ZGWWorkUnit):
+    """
+    Relate Pand objects from the BAG to a ZAAK as ZAAKOBJECTs.
+
+    One or more PANDen are related to the ZAAK in the process as ZAAKOBJECT.
+
+    **Required process variables**
+
+    * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. The PANDen are related to this.
+    * ``services``: JSON Object of connection details for ZGW services:
+
+      .. code-block:: json
+
+        {
+            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
+        }
+
+    **Optional process variables**
+
+    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
+    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+
+    **Sets no process variables**
+    """
+
+    def perform(self) -> dict:
+        # prep client
+        zrc_client = self.get_client(APITypes.zrc)
+
+        # get vars
+        variables = self.task.get_variables()
+        zaak_url = variables["zaakUrl"]
+        pand_urls = variables["panden"]
+
+        # See https://zaken-api.vng.cloud/api/v1/schema/#operation/zaakobject_create
+        bodies = [
+            {
+                "zaak": zaak_url,
+                "object": pand_url,
+                "type": "pand",
+                "relatieomschrijving": "",  # TODO -> process var?
+            }
+            for pand_url in pand_urls
+        ]
+
+        headers = get_nlx_headers(variables)
+
+        # TODO: concurrent.futures this
+        for body in bodies:
+            zrc_client.create("zaakobject", body, request_kwargs={"headers": headers})
+
+        return {}
