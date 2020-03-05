@@ -70,16 +70,15 @@ const request = (url, method='GET', body=undefined) => {
 
 const chart = (data) => {
     // set the dimensions and margins of the graph
-    const width = 400,
-        height = 400,
-        margin = 40;
+    const width = 600,
+        height = 300;
 
     const key = function(d){
       return d.data.label;
     };
 
-    // The radius of the pieplot is half the width or half the height (smallest one) minus margin.
-    const radius = Math.min(width, height) / 3 - margin;
+    // The radius of the pieplot is half the width or half the height (smallest one)
+    const radius = Math.min(width, height) / 2;
 
     // append the svg object to the div with id = piechart
     d3.select("#piechart")
@@ -106,8 +105,12 @@ const chart = (data) => {
 
     // shape helper to build arcs:
     const arc = d3.arc()
-      .innerRadius(0)
-      .outerRadius(radius);
+      .innerRadius(radius*0.4)
+      .outerRadius(radius*0.8);
+
+    const outerArc = d3.arc()
+      .innerRadius(radius * 0.9)
+      .outerRadius(radius * 0.9);
 
     // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
     svg
@@ -142,33 +145,30 @@ const chart = (data) => {
     		return d.startAngle + (d.endAngle - d.startAngle)/2;
     	}
 
-      var outerArc = d3.arc()
-        	.innerRadius(radius * 1.2)
-        	.outerRadius(radius * 1.2);
+      text
+        .attr("transform", function(d){
+            const pos = outerArc.centroid(d);
+            pos[0] = radius * 1.5 * (midAngle(d) < Math.PI ? 1 : -1);
+            return "translate("+ pos +")";
+        });
 
-      text.attr("transform", function(d){
-         var pos = outerArc.centroid(d);
-         pos[0] = radius * 1.5 * (midAngle(d) < Math.PI ? 1 : -1);
-         return "translate("+ pos +")";
-       }).style(function(d) {
-         return midAngle(d) < Math.PI ? "start":"end";
-       })
+      // lines for labbels
+      svg.selectAll("polyline")
+        .data(data_ready)
+        .enter()
+        .append("polyline")
+        .attr("points", function(d) {
+            const pos = outerArc.centroid(d);
+            pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
 
-       var polyline = svg.selectAll("polyline")
-         .data(data_ready)
-         .enter()
-         .append("polyline")
-         .attr("points", function(d) {
-           var pos = outerArc.centroid(d);
-               pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
-
-           return [arc.centroid(d), outerArc.centroid(d), pos];
-         })
-         .style("fill", "none")
-         .style("stroke", "black")
-         .style("stroke-width", "1px");
+            return [arc.centroid(d), outerArc.centroid(d), pos];
+        })
+        .style("fill", "none")
+        .style("stroke", "black")
+        .style("stroke-width", "1px");
 
 };
+
 
 let data = {
   "items": {
