@@ -1,5 +1,5 @@
 {% extends "master.html" %}
-{% load i18n dashboard %}
+{% load i18n dashboard humanize %}
 
 {% block content-header-subtitle %}{% trans "View task details" %}{% endblock %}
 {% block content-header-title %}{% trans "Task " %}{{ task.id }}{% endblock %}
@@ -131,7 +131,7 @@
                     {{ status_log.extra_data.status }}
                 </div>
                  <div class="task-desc__value">
-                    {{ status_log.timestamp }}
+                    {{ status_log.timestamp|naturaltime }}
                 </div>
             </div>
         {% endfor %}
@@ -166,7 +166,7 @@
                     {{ request_log.extra_data.response.status }}
                 </div>
                 <div class="task-desc__item">
-                    {{ request_log.timestamp }}
+                    {{ request_log.timestamp|naturaltime }}
                 </div>
             </div>
         {% endfor %}

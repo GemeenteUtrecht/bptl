@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     # Optional applications.
     "django.contrib.admin",
     # 'django.contrib.admindocs',
-    # 'django.contrib.humanize',
+    "django.contrib.humanize",
     # 'django.contrib.sitemaps',
     # External applications.
     "axes",
