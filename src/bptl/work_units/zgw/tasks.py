@@ -294,7 +294,7 @@ class RelatePand(ZGWWorkUnit):
             {
                 "zaak": zaak_url,
                 "object": pand_url,
-                "type": "pand",
+                "objectType": "pand",
                 "relatieomschrijving": "",  # TODO -> process var?
             }
             for pand_url in pand_urls
