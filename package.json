@@ -19,6 +19,7 @@
   "license": "MIT",
   "homepage": "https://maykinmedia.nl",
   "dependencies": {
+    "d3": "latest",
     "microscope-sass": "latest"
   },
   "devDependencies": {
