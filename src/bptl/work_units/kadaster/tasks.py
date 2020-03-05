@@ -1,5 +1,7 @@
 from typing import Any, Dict
 
+import requests
+
 from bptl.tasks.models import BaseTask
 from bptl.tasks.registry import register
 
@@ -25,6 +27,43 @@ def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
     * ``geometry``: A GeoJSON geometry that is checked for overlap.
     * ``BRTKey``: API key to use to query the BRT
     """
-    import bpdb
+    variables = task.get_variables()
 
-    bpdb.set_trace()
+    resources = ["wegdelen"]  # , "inrichtingselementen"]
+    formatters = {
+        "wegdelen": format_wegdeel,
+    }
+
+    body = {"geometrie": {"intersects": variables["geometry"]}}
+    headers = {
+        "Accept-Crs": "epsg:4258",  # ~ WGS84
+        "X-Api-Key": variables["BRTKey"],
+    }
+
+    def fetch(resource: str, formatter: callable):
+        response = requests.post(
+            f"{API_ROOT}/{resource}",
+            params={"pageSize": 50},
+            json=body,
+            headers=headers,
+        )
+        results = response.json()["_embedded"][resource]
+        results = [formatter(result) for result in results]
+        return results
+
+    features = [fetch(resource, formatters[resource]) for resource in resources]
+    return {"features": features}
+
+
+def format_wegdeel(wegdeel: Dict[str, Any]) -> Dict[str, str]:
+    return {
+        "type": "Feature",
+        "geometry": wegdeel["_embedded"]["hoofdGeometrie"],
+        "properties": {
+            "url": wegdeel["_links"]["self"]["href"],
+            "objectType": "wegdeel",
+            "identificatie": wegdeel["identificatie"],
+            "status": wegdeel["status"],
+            "naam": wegdeel["naam"],
+        },
+    }
