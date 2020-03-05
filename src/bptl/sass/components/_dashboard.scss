@@ -1,0 +1,23 @@
+@import "../lib/colors";
+
+.dashboard {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+
+  &__chart {
+    padding-bottom: 2em;
+  }
+
+  &__filter {
+    padding: 1em;
+    background: $filter-background-color;
+  }
+
+  &__checkbox {
+    display: block;
+    padding-bottom: 1em;
+  }
+
+}
+
