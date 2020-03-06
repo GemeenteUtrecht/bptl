@@ -1,4 +1,8 @@
-const d3 = require("d3");
+import { select } from 'd3-selection';
+import { scaleOrdinal } from 'd3-scale';
+import { arc, pie } from 'd3-shape';
+import { entries } from 'd3-collection';
+
 import request from '../request';
 
 
@@ -18,11 +22,11 @@ const init = () => {
         const radius = Math.min(width, height) / 2;
 
         // append the svg object to the div with id = piechart
-        d3.select("#piechart")
+        select("#piechart")
           .selectAll("*")
           .remove();
 
-        const svg = d3.select("#piechart")
+        const svg = select("#piechart")
           .append("svg")
             .attr("width", width)
             .attr("height", height)
@@ -30,26 +34,26 @@ const init = () => {
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
         // set the color scale
-        const color = d3.scaleOrdinal()
-          .domain(data)
+        const color = scaleOrdinal()
+          .domain(Object.keys(data))
           .range(['red', 'blue', 'yellow', 'green', 'purple']);
 
         // Compute the position of each group on the pie:
-        const pie = d3.pie()
+        const pieChart = pie()
           .value(d => d.value);
 
-        const data_ready = pie(d3.entries(data));
+        const data_ready = pieChart(entries(data));
 
         // shape helper to build arcs:
-        const arc = d3.arc()
+        const _arc = arc()
           .innerRadius(radius*0.4)
           .outerRadius(radius*0.8);
 
         // for labels
-        const innerArc = d3.arc()
+        const innerArc = arc()
           .innerRadius(radius * 0.7)
           .outerRadius(radius * 0.7);
-        const outerArc = d3.arc()
+        const outerArc = arc()
           .innerRadius(radius * 0.9)
           .outerRadius(radius * 0.9);
 
@@ -59,7 +63,7 @@ const init = () => {
           .data(data_ready)
           .enter()
           .append('path')
-          .attr('d', arc)
+          .attr('d', _arc)
           .attr('fill', d => color(d.data.key))
           .attr("stroke", "white")
           .style("stroke-width", "2px")
@@ -71,7 +75,7 @@ const init = () => {
           .data(data_ready)
           .enter()
           .append('text')
-          .attr("transform", d => "translate(" + arc.centroid(d) + ")")
+          .attr("transform", d => "translate(" + _arc.centroid(d) + ")")
           .call(text => text.filter(d => (d.endAngle - d.startAngle) > 0.25).append("tspan")
             .text(d => d.data.value))
           .style("text-anchor", "middle");
@@ -137,8 +141,6 @@ const init = () => {
     request(url)
         .then(response => {
           data = JSON.parse(response);
-          console.log(response);
-
           chart(data.total);
         });
 
