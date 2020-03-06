@@ -119,8 +119,7 @@ const renderPieChart = (node, data, width=600, height=300) => {
  * @param  {DOMElement} node  The DOM node to render the pie chart at.
  * @param  {Object} data Raw data, keyed by checkbox value: {items: {foo: {...}}}
  */
-const renderSelectedData = (node, data) => {
-    const checkboxes = document.querySelectorAll('input[name=engine]');
+const renderSelectedData = (node, data, checkboxes) => {
     const engines = [...checkboxes]
       .filter(x => x.checked)
       .map(cb => cb.value);
@@ -138,6 +137,7 @@ const renderSelectedData = (node, data) => {
 
 const init = () => {
     const chartNode = document.getElementById(PIE_CHART_ID);
+    const checkboxes = document.querySelectorAll('input[name=engine]');
 
     if (!chartNode) {
         return;
@@ -153,13 +153,13 @@ const init = () => {
           renderPieChart(chartNode, statusData.total);
         });
 
-    // redraw chart when click on the button
-    document
-        .getElementById('piebutton')
-        .addEventListener(
-            'click',
-            () => renderSelectedData(chartNode, statusData)
-        );
+    // redraw chart when checkbox changes
+    Array.from(checkboxes).forEach(
+        cb => cb.addEventListener(
+            'change',
+            () => renderSelectedData(chartNode, statusData, checkboxes)
+        )
+    );
 
 };
 
