@@ -18,14 +18,23 @@ def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
     can be drawn/selected on maps as GeoJSON.
 
     Checked resources:
+
     - Wegdeel
-    - Terrein
-    - Inrichtingselement
+    - Terrein (in development)
+    - Inrichtingselement (in development)
 
     **Required process variables**
 
     * ``geometry``: A GeoJSON geometry that is checked for overlap.
     * ``BRTKey``: API key to use to query the BRT
+
+    **Sets the following return/process variables**
+
+    * ``features``: a list of GeoJSON features, in EPSG:4258 CRS. Properties contain
+      feature-specific keys/values.
+
+    .. note:: The kadaster geo query APIs have long response times (up to 40s) - this
+       work unit takes a considerable time to execute.
     """
     variables = task.get_variables()
 
