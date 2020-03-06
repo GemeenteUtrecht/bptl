@@ -129,7 +129,7 @@
                 <div class="task-desc__name">
                     {{ status_log.extra_data.status }}
                 </div>
-                 <div class="task-desc__value">
+                 <div class="task-desc__value" title="{{ status_log.timestamp}}">
                     {{ status_log.timestamp|naturaltime }}
                 </div>
             </div>
@@ -150,7 +150,7 @@
                     <td>{{ request_log.extra_data.request.method }}</td>
                     <td>{{ request_log.extra_data.request.url | urlize }}</td>
                     <td>{{ request_log.extra_data.response.status }}</td>
-                    <td>{{ request_log.timestamp|naturaltime }}</td>
+                    <td title="{{ request_log.timestamp}}">{{ request_log.timestamp|naturaltime }}</td>
                 </tr>
             {% endfor %}
         </table>
