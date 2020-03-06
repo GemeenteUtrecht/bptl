@@ -4,11 +4,11 @@
 
 {% block breadcrumbs %}{% endblock %}
 
-{% block content-header-subtitle %}{% trans "Manage Camunda process building blocks" %}{% endblock %}
-{% block content-header-title %}{% trans "Camunda Worker Configuration" %}{% endblock %}
+{% block content-header-subtitle %}{% trans "Manage BPTL building blocks" %}{% endblock %}
+{% block content-header-title %}{% trans "BP Task Library Configuration" %}{% endblock %}
 {% block content-header-explanation %}
 {% blocktrans trimmed %}
-    De Camunda Worker pikt taken op van Camunda processen.
+    De BPTL pikt taken op van externe processen.
     <br>
     In deze omgeving kan je bestaande functies/bouwblokken configureren voor je processen,
     en die opnemen in je procesmodel.
@@ -17,15 +17,23 @@
 
 
 {% block content %}
+<h4>Tasks by their statuses:</h4>
 <article class="dashboard">
-    TODO: show piechart
+    <div class="dashboard__chart" id="piechart" data-url="{% url 'dashboard:dashboard-api:aggregate' %}">
+    </div>
 
-    <p>
-        <a href="{% url 'dashboard:task-list' %}">
-            {% trans "View tasks details" %}
-        </a>
-    </p>
+    <div class="dashboard__filter">
+        <label class="dashboard__checkbox"><input type="checkbox" name="engine" value="camunda" checked/>Camunda</label>
+        <label class="dashboard__checkbox"><input type="checkbox" name="engine" value="activiti" checked/>Activiti</label>
+    </div>
+
 </article>
+
+<p>
+    <a href="{% url 'dashboard:task-list' %}">
+        {% trans "View tasks details" %}
+    </a>
+</p>
 
 <article class="index">
     <a class="index__item" href="{% url 'tasks:taskmapping-list' %}">

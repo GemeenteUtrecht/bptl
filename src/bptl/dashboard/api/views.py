@@ -7,11 +7,11 @@ from bptl.tasks.models import BaseTask
 
 def aggregate_data():
     """Return the number of tasks aggregated by statuses"""
-    items = []
+    items = {}
     for type, model in ENGINETYPE_MODEL_MAPPING.items():
         item_qs = BaseTask.objects.instance_of(model).annotate_status()
         item_data = {q["status"]: q["tasks"] for q in item_qs}
-        items.append({type: item_data})
+        items[type] = item_data
 
     total_qs = BaseTask.objects.annotate_status()
     total_data = {q["status"]: q["tasks"] for q in total_qs}

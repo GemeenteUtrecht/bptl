@@ -40,7 +40,7 @@ RUN npm ci
 COPY ./src /app/src
 
 # build frontend
-RUN npm run build
+RUN npm run build --production
 
 
 # Stage 3 - Build docker image suitable for production
