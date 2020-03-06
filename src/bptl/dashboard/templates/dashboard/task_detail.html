@@ -114,8 +114,7 @@
         {% endif %}
     </section>
 
-    <section class="task-desc__section task-desc__section--flex">
-    <div class="task-desc__col">
+    <section class="task-desc__section">
         <h2>Task steps</h2>
         <div class="task-desc__row">
             <div class="task-desc__name">
@@ -135,43 +134,26 @@
                 </div>
             </div>
         {% endfor %}
-    </div>
+    </section>
 
-    <div class="task-desc__col">
+    <section class="task-desc__section">
         <h2>Request logs</h2>
-        <div class="task-desc__row">
-            <div class="task-desc__name">
-                <strong>Method</strong>
-            </div>
-             <div class="task-desc__name">
-                <strong>Url</strong>
-            </div>
-            <div class="task-desc__name">
-                <strong>Response code</strong>
-            </div>
-            <div class="task-desc__name">
-                <strong>Time</strong>
-            </div>
-        </div>
-
-        {% for request_log in task.request_logs %}
-            <div class="task-desc__row">
-                <div class="task-desc__item">
-                    {{ request_log.extra_data.request.method }}
-                </div>
-                 <div class="task-desc__item">
-                    {{ request_log.extra_data.request.url | urlize }}
-                </div>
-                <div class="task-desc__item">
-                    {{ request_log.extra_data.response.status }}
-                </div>
-                <div class="task-desc__item">
-                    {{ request_log.timestamp|naturaltime }}
-                </div>
-            </div>
-        {% endfor %}
-
-    </div>
+        <table class="task-desc__table">
+            <tr>
+                <th>Method</th>
+                <th>Url</th>
+                <th>Response code</th>
+                <th>Time</th>
+            </tr>
+            {% for request_log in task.request_logs %}
+                <tr>
+                    <td>{{ request_log.extra_data.request.method }}</td>
+                    <td>{{ request_log.extra_data.request.url | urlize }}</td>
+                    <td>{{ request_log.extra_data.response.status }}</td>
+                    <td>{{ request_log.timestamp|naturaltime }}</td>
+                </tr>
+            {% endfor %}
+        </table>
     </section>
 
 </article>
