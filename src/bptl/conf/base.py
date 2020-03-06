@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "bptl.tasks",
     "bptl.dummy",
     "bptl.utils",
+    "bptl.work_units.kadaster",
     "bptl.work_units.zgw",
 ]
 
@@ -370,7 +371,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = 600
 CELERY_BEAT_SCHEDULE = {
     "task-pull": {
         "task": "bptl.camunda.tasks.task_fetch_and_lock",
-        "schedule": schedule(run_every=1),  # run every second
+        "schedule": schedule(run_every=10),  # run every 10 seconds
     },
 }
 CELERY_ACKS_LATE = True

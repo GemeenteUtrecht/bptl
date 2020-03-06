@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 
 import requests_mock
@@ -30,7 +32,10 @@ class ZGWClientLogTests(TestCase):
         cls.task = ExternalTaskFactory.create(
             topic_name="some-topic",
             variables={
-                "services": {"type": "json", "value": {"ZRC": {"jwt": "Bearer 12345"}}}
+                "services": {
+                    "type": "json",
+                    "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
+                }
             },
         )
         cls.work_unit = ZGWWorkUnit(cls.task)

@@ -101,3 +101,17 @@ def serialize_variable(value: Any) -> Dict[str, JSONPrimitive]:
         return {"type": "Integer", "value": value}
 
     raise NotImplementedError(f"Type {type(value)} is not implemented yet")
+
+
+def deserialize_variable(variable: Dict[str, Any]) -> Any:
+    var_type = variable.get("type", "String").lower()
+    if var_type == "string":
+        return variable["value"]
+
+    if var_type in ("integer", "short", "long"):
+        return int(variable["value"])
+
+    if var_type == "json":
+        return json.loads(variable["value"])
+
+    raise NotImplementedError(f"Type {var_type} is not implemented yet")

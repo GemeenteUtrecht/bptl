@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 
 import requests_mock
@@ -38,7 +40,7 @@ class CreateStatusTaskTests(TestCase):
                 "statustype": {"type": "String", "value": STATUSTYPE, "valueInfo": {}},
                 "services": {
                     "type": "json",
-                    "value": {"ZRC": {"jwt": "Bearer 12345"}},
+                    "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
                 },
             },
         )

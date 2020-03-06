@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 
 import requests_mock
@@ -46,7 +48,7 @@ class CreateDocumentRelationTaskTests(TestCase):
                 },
                 "services": {
                     "type": "json",
-                    "value": {"ZRC": {"jwt": "Bearer 12345"},},
+                    "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"},}),
                 },
             },
         )

@@ -1,74 +1,22 @@
 from datetime import date
 from typing import Any, Dict
 
-from django.conf import settings
 from django.utils import timezone
 
 from zgw_consumers.constants import APITypes
 
-from bptl.tasks.base import WorkUnit
-from bptl.tasks.models import TaskMapping
 from bptl.tasks.registry import register
-from bptl.work_units.zgw.models import DefaultService
 
-from .client import MultipleServices, NoAuth, NoService
+from .base import ZGWWorkUnit
+from .nlx import get_nlx_headers
 
 __all__ = (
-    "ZGWWorkUnit",
     "CreateZaakTask",
     "CreateStatusTask",
     "CreateResultaatTask",
     "RelateDocumentToZaakTask",
     "CloseZaakTask",
 )
-
-
-class ZGWWorkUnit(WorkUnit):
-    def get_client(self, service_type):
-        """
-        create ZGW client with requested parameters
-        """
-        default_services = TaskMapping.objects.get(
-            topic_name=self.task.topic_name
-        ).defaultservice_set.filter(service__api_type=service_type)
-        if default_services.count() == 0:
-            raise NoService(
-                f"No {service_type} service is configured for topic {self.task.topic_name}"
-            )
-
-        services_vars = self.task.get_variables().get("services", {})
-
-        if not services_vars and not settings.DEBUG:
-            raise NoService(f"Expected service aliases in process variables")
-
-        aliases_vars = list(services_vars.keys())
-        if aliases_vars:
-            default_services = default_services.filter(alias__in=aliases_vars)
-
-        try:
-            default_service = default_services.get()
-        except DefaultService.DoesNotExist:
-            raise NoService(
-                f"No {service_type} service with aliases {aliases_vars} is configured for topic {self.task.topic_name}"
-            )
-        except DefaultService.MultipleObjectsReturned:
-            raise MultipleServices(
-                f"More than one {service_type} service with aliases {aliases_vars} is configured for topic {self.task.topic_name}"
-            )
-
-        client = default_service.service.build_client()
-        client._log.task = self.task
-
-        # add authorization header
-        jwt = services_vars.get(default_service.alias, {}).get("jwt")
-        if not jwt and not settings.DEBUG:
-            raise NoAuth(
-                f"Expected 'jwt' variable for {default_service.alias} in process variables"
-            )
-
-        client.set_auth_value(jwt)
-
-        return client
 
 
 @register
@@ -113,14 +61,7 @@ class CreateZaakTask(ZGWWorkUnit):
             "startdatum": today,
         }
 
-        headers = {}
-        nlx_subject_identifier = variables.get("NLXSubjectIdentifier")
-        if nlx_subject_identifier:
-            headers["X-NLX-Request-Subject-Identifier"] = nlx_subject_identifier
-        nlx_process_id = variables.get("NLXProcessId")
-        if nlx_process_id:
-            headers["X-NLX-Request-Process-Id"] = nlx_process_id
-
+        headers = get_nlx_headers(variables)
         zaak = client_zrc.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
@@ -311,3 +252,58 @@ class CloseZaakTask(ZGWWorkUnit):
             "archiefnominatie": resultaat["archiefnominatie"],
             "archiefactiedatum": resultaat["archiefactiedatum"],
         }
+
+
+@register
+class RelatePand(ZGWWorkUnit):
+    """
+    Relate Pand objects from the BAG to a ZAAK as ZAAKOBJECTs.
+
+    One or more PANDen are related to the ZAAK in the process as ZAAKOBJECT.
+
+    **Required process variables**
+
+    * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. The PANDen are related to this.
+    * ``services``: JSON Object of connection details for ZGW services:
+
+      .. code-block:: json
+
+        {
+            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
+        }
+
+    **Optional process variables**
+
+    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
+    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+
+    **Sets no process variables**
+    """
+
+    def perform(self) -> dict:
+        # prep client
+        zrc_client = self.get_client(APITypes.zrc)
+
+        # get vars
+        variables = self.task.get_variables()
+        zaak_url = variables["zaakUrl"]
+        pand_urls = variables["panden"]
+
+        # See https://zaken-api.vng.cloud/api/v1/schema/#operation/zaakobject_create
+        bodies = [
+            {
+                "zaak": zaak_url,
+                "object": pand_url,
+                "objectType": "pand",
+                "relatieomschrijving": "",  # TODO -> process var?
+            }
+            for pand_url in pand_urls
+        ]
+
+        headers = get_nlx_headers(variables)
+
+        # TODO: concurrent.futures this
+        for body in bodies:
+            zrc_client.create("zaakobject", body, request_kwargs={"headers": headers})
+
+        return {}

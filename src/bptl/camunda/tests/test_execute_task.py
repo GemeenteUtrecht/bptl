@@ -73,10 +73,9 @@ class ExecuteCommandTests(TestCase):
                 "organisatieRSIN": {"value": "123456788"},
                 "services": {
                     "type": "json",
-                    "value": {
-                        "ZRC": {"jwt": "Bearer 12345"},
-                        "ZTC": {"jwt": "Bearer 789"},
-                    },
+                    "value": json.dumps(
+                        {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                    ),
                 },
             },
         )
@@ -152,10 +151,9 @@ class ExecuteCommandTests(TestCase):
                 "organisatieRSIN": {"value": "123456788"},
                 "services": {
                     "type": "json",
-                    "value": {
-                        "ZRC": {"jwt": "Bearer 12345"},
-                        "ZTC": {"jwt": "Bearer 789"},
-                    },
+                    "value": json.dumps(
+                        {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                    ),
                 },
             },
         )

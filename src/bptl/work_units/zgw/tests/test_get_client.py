@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase, override_settings
 
 from zgw_consumers.constants import APITypes
@@ -30,7 +32,10 @@ class GetZGWClientTests(TestCase):
             task_mapping=self.mapping, service=self.service, alias="ZRC"
         )
         self.task.variables = {
-            "services": {"type": "json", "value": {"ZRC": {"jwt": "Bearer 12345"}}}
+            "services": {
+                "type": "json",
+                "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
+            }
         }
         self.task.save()
 
@@ -81,7 +86,10 @@ class GetZGWClientTests(TestCase):
             task_mapping=self.mapping, service=self.service, alias="other ZRC"
         )
         self.task.variables = {
-            "services": {"type": "json", "value": {"ZRC": {"jwt": "Bearer 12345"}}}
+            "services": {
+                "type": "json",
+                "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
+            }
         }
         self.task.save()
 
@@ -106,7 +114,10 @@ class GetZGWClientTests(TestCase):
             task_mapping=self.mapping, service=other_service, alias="ZRC"
         )
         self.task.variables = {
-            "services": {"type": "json", "value": {"ZRC": {"jwt": "Bearer 12345"}}}
+            "services": {
+                "type": "json",
+                "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
+            }
         }
         self.task.save()
 
@@ -125,7 +136,7 @@ class GetZGWClientTests(TestCase):
         self.task.variables = {
             "services": {
                 "type": "json",
-                "value": {"ZRC": {"some_claims": "some value"}},
+                "value": json.dumps({"ZRC": {"some_claims": "some value"}}),
             }
         }
         self.task.save()
