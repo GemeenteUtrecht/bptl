@@ -62,6 +62,7 @@ class DefaultServiceForm(forms.ModelForm):
         empty_label=None,
         label=_("Service"),
         help_text=_("ZGW Service to connect with"),
+        required=False,
     )
 
     class Meta:
@@ -70,7 +71,7 @@ class DefaultServiceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print(self.fields)
+        self.fields["alias"].required = False
 
 
 DefaultServiceFormset = inlineformset_factory(

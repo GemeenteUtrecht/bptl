@@ -24,6 +24,7 @@
 
     <div class="formset">
     <h3>Services</h3>
+    {{ defaultservices.management_form }}
     {% for service_form in defaultservices %}
         <div class="form formset__form">
         {% form_field service_form.alias %}
