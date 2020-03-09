@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import DetailView
 
 from django_filters.views import FilterView
@@ -14,7 +15,7 @@ class TaskListView(FilterView):
     context_object_name = "tasks"
 
 
-class TaskDetailView(DetailView):
+class TaskDetailView(LoginRequiredMixin, DetailView):
     template_name = "dashboard/task_detail.html"
     model = BaseTask
     context_object_name = "task"
