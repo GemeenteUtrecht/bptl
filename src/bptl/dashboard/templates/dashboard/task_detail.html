@@ -29,7 +29,7 @@
                 Status
             </div>
             <div class="task-desc__value">
-                {{ task.status }}
+                {{ task.get_status_display }}
             </div>
         </div>
 
@@ -72,7 +72,7 @@
 
     <section class="task-desc__section">
         <h2>Engine specific information</h2>
-        {% if task|task_type == 'camunda' %}
+        {% if task|task_type == 'Camunda' %}
             <div class="task-desc__row">
                 <div class="task-desc__name">
                     Worker ID
@@ -127,7 +127,7 @@
         {% for status_log in task.status_logs %}
             <div class="task-desc__row">
                 <div class="task-desc__name">
-                    {{ status_log.extra_data.status }}
+                    {{ status_log.extra_data.status|display_status }}
                 </div>
                  <div class="task-desc__value" title="{{ status_log.timestamp}}">
                     {{ status_log.timestamp|naturaltime }}
