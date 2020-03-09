@@ -2,7 +2,13 @@ from typing import Tuple
 
 from django import forms
 from django.contrib.admin.widgets import AdminRadioSelect
-from django.utils.html import format_html
+from django.forms.models import inlineformset_factory
+from django.utils.html import format_html, mark_safe, urlize
+from django.utils.translation import ugettext_lazy as _
+
+from zgw_consumers.models import Service
+
+from bptl.work_units.zgw.models import DefaultService
 
 from .models import TaskMapping
 from .registry import register
@@ -27,6 +33,14 @@ class CallbackField(forms.ChoiceField):
         super().__init__(*args, **kwargs)
 
 
+class ServiceField(forms.ModelChoiceField):
+    widget = forms.RadioSelect
+    label = "Service"
+
+    def label_from_instance(self, obj):
+        return mark_safe(f"{obj.api_type}: {urlize(obj.api_root)}")
+
+
 class AdminTaskMappingForm(forms.ModelForm):
     class Meta:
         model = TaskMapping
@@ -40,3 +54,25 @@ class TaskMappingForm(forms.ModelForm):
         model = TaskMapping
         fields = ("topic_name", "callback")
         field_classes = {"callback": CallbackField}
+
+
+class DefaultServiceForm(forms.ModelForm):
+    service = ServiceField(
+        queryset=Service.objects,
+        empty_label=None,
+        label=_("Service"),
+        help_text=_("ZGW Service to connect with"),
+    )
+
+    class Meta:
+        model = DefaultService
+        fields = ("alias", "service")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        print(self.fields)
+
+
+DefaultServiceFormset = inlineformset_factory(
+    TaskMapping, DefaultService, form=DefaultServiceForm, extra=2
+)
