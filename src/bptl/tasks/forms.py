@@ -34,9 +34,6 @@ class CallbackField(forms.ChoiceField):
 
 
 class ServiceField(forms.ModelChoiceField):
-    widget = forms.RadioSelect
-    label = "Service"
-
     def label_from_instance(self, obj):
         return mark_safe(f"{obj.api_type}: {urlize(obj.api_root)}")
 
@@ -62,7 +59,7 @@ class DefaultServiceForm(forms.ModelForm):
         empty_label=None,
         label=_("Service"),
         help_text=_("ZGW Service to connect with"),
-        required=False,
+        widget=forms.RadioSelect,
     )
 
     class Meta:
