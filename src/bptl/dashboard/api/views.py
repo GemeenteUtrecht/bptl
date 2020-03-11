@@ -20,6 +20,8 @@ def aggregate_data():
 
 
 class AggregateView(APIView):
+    swagger_schema = None
+
     permission_classes = []
 
     def get(self, request, format=None):
