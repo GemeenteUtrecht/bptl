@@ -264,6 +264,7 @@ class RelatePand(ZGWWorkUnit):
     **Required process variables**
 
     * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. The PANDen are related to this.
+    * ``panden``: list of URL references to PANDen in BAG API.
     * ``services``: JSON Object of connection details for ZGW services:
 
       .. code-block:: json

@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     "bptl.tasks",
     "bptl.dummy",
     "bptl.utils",
+    "bptl.work_units.brp",
     "bptl.work_units.kadaster",
     "bptl.work_units.zgw",
 ]
