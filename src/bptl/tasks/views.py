@@ -20,21 +20,28 @@ class AddTaskMappingView(LoginRequiredMixin, CreateView):
     form_class = TaskMappingForm
     success_url = reverse_lazy("tasks:taskmapping-list")
 
+    def get_formset(self):
+        data = self.request.POST if self.request.method == "POST" else None
+        return DefaultServiceFormset(data=data)
+
     def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.request.POST:
-            data["defaultservices"] = DefaultServiceFormset(self.request.POST)
-        else:
-            data["defaultservices"] = DefaultServiceFormset()
-        return data
+        formset = kwargs.pop("formset", self.get_formset())
+        kwargs["formset"] = formset
+
+        context = super().get_context_data(**kwargs)
+
+        return context
 
     def form_valid(self, form):
         context = self.get_context_data()
-        defaultservices = context["defaultservices"]
+        formset = context["formset"]
 
-        if defaultservices.is_valid():
+        if formset.is_valid():
             self.object = form.save()
-            defaultservices.instance = self.object
-            defaultservices.save()
+            formset.instance = self.object
+            formset.save()
+            return super().form_valid(form)
 
-        return super().form_valid(form)
+        return self.render_to_response(
+            self.get_context_data(form=form, formset=formset)
+        )

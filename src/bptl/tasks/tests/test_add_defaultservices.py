@@ -9,6 +9,7 @@ from zgw_consumers.models import Service
 from bptl.accounts.models import User
 from bptl.work_units.zgw.models import DefaultService
 
+from ..forms import DefaultServiceFormset
 from ..models import TaskMapping
 from ..registry import WorkUnitRegistry
 
@@ -121,4 +122,21 @@ class AddDefaultServicesTests(TestCase):
         task_mapping = TaskMapping.objects.get()
 
         self.assertEqual(task_mapping.defaultservice_set.count(), 0)
+        self.assertEqual(DefaultService.objects.count(), 0)
+
+    def test_add_two_same_services_fail(self):
+        zrc = Service.objects.create(
+            api_type=APITypes.zrc, label="ZRC", api_root="https://some.zrc.nl/api/v1/"
+        )
+
+        data = self.data.copy()
+        data["defaultservice_set-0-alias"] = "foo zrc"
+        data["defaultservice_set-0-service"] = zrc.id
+        data["defaultservice_set-1-alias"] = "same zrc"
+        data["defaultservice_set-1-service"] = zrc.id
+
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(TaskMapping.objects.count(), 0)
         self.assertEqual(DefaultService.objects.count(), 0)
