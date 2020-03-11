@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "solo",
     "django_camunda",
     "django_filters",
+    "drf_yasg",
     "polymorphic",
     "rest_framework",
     "rest_framework.authtoken",
