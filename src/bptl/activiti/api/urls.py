@@ -5,14 +5,18 @@ from django.views.generic import RedirectView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+from rest_framework.settings import api_settings
 
 from .views import WorkUnitView
 
 schema_view = get_schema_view(
     openapi.Info(
         title="BP Task Library API",
-        default_version="v1",
+        default_version=api_settings.DEFAULT_VERSION,
         description="An API to approach BPTL work units",
+        license=openapi.License(
+            name="EUPL 1.2", url="https://opensource.org/licenses/EUPL-1.2"
+        ),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),

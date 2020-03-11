@@ -12,6 +12,15 @@ from .serializers import WorkUnitSerializer
 
 
 class WorkUnitView(CreateAPIView):
+    """
+    Execute external tasks.
+
+    post:
+    Execute task
+
+    Execute external task with specific ``topic``.
+    """
+
     queryset = ServiceTask.objects.all()
     serializer_class = WorkUnitSerializer
     task = None
