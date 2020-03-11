@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "solo",
     "django_camunda",
     "django_filters",
+    "drf_yasg",
     "polymorphic",
     "rest_framework",
     "rest_framework.authtoken",
@@ -405,4 +406,12 @@ REST_FRAMEWORK = {
     "VERSION_PARAM": "version",
     # test
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+}
+
+# OAS settings
+SWAGGER_SETTINGS = {
+    # Use apiKey type since OAS2 doesn't support Bearer authentication
+    "SECURITY_DEFINITIONS": {
+        "Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
+    },
 }
