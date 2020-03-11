@@ -6,20 +6,6 @@
 
   }
 
-  & &__section--flex {
-    display: flex;
-    flex-flow: row wrap;
-  }
-
-  & &__col {
-    width: 50%;
-    padding-right: 2em;
-
-    &:last-child {
-      padding-right: 0;
-    }
-  }
-
   & &__row {
     display: flex;
     justify-content: space-between;
@@ -44,13 +30,17 @@
     overflow-x: auto;
   }
 
-  & &__item {
-    width: 25%;
-    word-wrap: break-word;
-    padding-right: 0.5em;
+  & &__table {
+    width: 100%;
 
-    &:last-child {
-      padding-right: 0;
+    td, th {
+      border-top: solid 1px #eeeeee;
+      border-bottom: solid 1px #eeeeee;
+      padding: 0.5em;
+    }
+
+    th {
+      text-align: left;
     }
   }
 }
