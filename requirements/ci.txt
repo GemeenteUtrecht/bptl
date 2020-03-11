@@ -11,11 +11,15 @@ beautifulsoup4==4.8.2     # via webtest
 billiard==3.6.1.0
 celery==4.4.0
 certifi==2019.11.28
+cffi==1.13.2
 chardet==3.0.4
 coverage==4.5.4
+cryptography==2.8
 cssselect==1.1.0          # via pyquery
 django-admin-index==1.2.3
 django-appconf==1.0.3
+django-auth-adfs-db==0.1.1
+django-auth-adfs==1.3.1
 django-axes==5.2.2
 django-camunda==0.4.0
 django-choices==1.7.1
@@ -54,6 +58,7 @@ packaging==20.1
 pillow==7.0.0
 polib==1.1.0
 psycopg2==2.8.4
+pycparser==2.19
 pygments==2.5.2
 pyjwt==1.7.1
 pyparsing==2.4.6

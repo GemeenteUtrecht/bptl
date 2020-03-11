@@ -35,6 +35,7 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(),
         name="password_reset_complete",
     ),
+    path("adfs/", include("django_auth_adfs.urls")),
     # Simply show the master template.
     path("", TemplateView.as_view(template_name="index.html"), name="index"),
     path("tasks/", include("bptl.dashboard.urls")),
