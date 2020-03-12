@@ -1,5 +1,3 @@
-import json
-
 from django.test import TestCase
 
 import requests_mock
@@ -21,7 +19,7 @@ class CreateStatusTaskTests(TestCase):
 
         cls.fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
-            variables={"burgerservicenummer": "999999011", "age": 18,},
+            variables={"burgerservicenummer": "999999011", "age": 18},
         )
         config = BRPConfig.get_solo()
         config.api_root = BRP_API_ROOT

@@ -1,9 +1,7 @@
-import requests
-
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
-from .models import BRPConfig
+from .client import get_client_class
 
 __all__ = ["IsAboveAge"]
 
@@ -26,18 +24,16 @@ class IsAboveAge(WorkUnit):
 
     def perform(self) -> dict:
         variables = self.task.get_variables()
-
         bsn = variables["burgerservicenummer"]
         age = variables["age"]
 
-        config = BRPConfig.get_solo()
-        headers = config.auth_header
-        url = f"{config.api_root}ingeschrevenpersonen/{bsn}"
+        client = get_client_class()()
+        client.task = self.task
+        url = f"ingeschrevenpersonen/{bsn}"
 
-        response = requests.get(url, {"fields": "leeftijd"}, headers=headers)
+        response = client.get(url, params={"fields": "leeftijd"})
 
-        leeftijd = response.json().get("leeftijd")
-
+        leeftijd = response.get("leeftijd")
         is_above_age = None if leeftijd is None else leeftijd >= age
 
         return {"isAboveAge": is_above_age}
