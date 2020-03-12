@@ -3,10 +3,9 @@ import requests
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
-BRP_API_ROOT = "https://haalcentraal.lostlemon.nl/"
+from .models import BRPConfig
 
-
-__all__ = "IsAboveAge"
+__all__ = ["IsAboveAge"]
 
 
 @register
@@ -31,8 +30,12 @@ class IsAboveAge(WorkUnit):
         bsn = variables["burgerservicenummer"]
         age = variables["age"]
 
-        url = f"{BRP_API_ROOT}ingeschrevenpersonen/{bsn}"
-        response = requests.get(url, {"fields": "leeftijd"})
+        config = BRPConfig.get_solo()
+        headers = config.auth_header
+        url = f"{config.api_root}ingeschrevenpersonen/{bsn}"
+
+        response = requests.get(url, {"fields": "leeftijd"}, headers=headers)
+
         leeftijd = response.json().get("leeftijd")
 
         is_above_age = None if leeftijd is None else leeftijd >= age
