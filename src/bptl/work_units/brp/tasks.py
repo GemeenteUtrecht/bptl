@@ -13,13 +13,13 @@ class IsAboveAge(WorkUnit):
 
     Required process variables:
 
-    * **burgerservicenummer**: BSN of the person
-    * **age**: integer, which represents the number of years
+    * ``burgerservicenummer``: BSN of the person
+    * ``age``: integer, which represents the number of years
 
     The task sets the process variables:
 
-    * **isAboveAge**: boolean, which indicate if the requested person is equal or above a certain age.
-      If the information about person's age is not found, isAboveAge will be set as ``none``
+    * ``isAboveAge``: boolean, which indicate if the requested person is equal or above a certain age.
+      If the information about person's age is not found, ``isAboveAge`` will be set as ``none``
     """
 
     def perform(self) -> dict:
