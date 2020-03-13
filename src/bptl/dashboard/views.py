@@ -13,6 +13,7 @@ class TaskListView(FilterView):
     filterset_class = TaskFilter
     queryset = BaseTask.objects.all().order_by("-pk")
     context_object_name = "tasks"
+    paginate_by = 20
 
 
 class TaskDetailView(LoginRequiredMixin, DetailView):

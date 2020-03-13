@@ -9,7 +9,7 @@
   "scripts": {
     "test": "gulp test",
     "build": "gulp build",
-    "watch": "gulp watch"
+    "watch": "gulp watch --sourcemap"
   },
   "repository": {
     "type": "git",
