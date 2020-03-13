@@ -64,6 +64,7 @@
     "simulant": "latest",
     "sinon": "latest",
     "url-loader": "latest",
+    "utrecht-design-system": "git+https://github.com/GemeenteUtrecht/utrecht-design-system.git",
     "webpack": "latest",
     "webpack-dev-server": "latest",
     "webpack-stream": "latest",
