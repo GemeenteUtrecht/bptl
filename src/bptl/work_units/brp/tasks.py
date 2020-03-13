@@ -91,7 +91,7 @@ class HasDegreeOfKinship(WorkUnit):
         relations1_parents, relations1_children = self.request_relations(client, bsn1)
 
         has_degree_kinship_1 = bsn2 in relations1_parents | relations1_children
-        if kinship == has_degree_kinship_1:
+        if kinship == 1:
             return {"hasDegreeOfKinship": has_degree_kinship_1}
 
         if has_degree_kinship_1:
@@ -107,7 +107,7 @@ class HasDegreeOfKinship(WorkUnit):
             | (relations2_parents & relations1_children)
         )
         has_degree_kinship_2 = siblings or grandchildren
-        if kinship == has_degree_kinship_2:
+        if kinship == 2:
             return {"hasDegreeOfKinship": has_degree_kinship_2}
 
         if has_degree_kinship_2:
@@ -146,7 +146,7 @@ class HasDegreeOfKinship(WorkUnit):
             | (relations2_parents_children & relations1_parents)
             | (relations2_children_children & relations1_parents)
         )
-        if kinship == has_degree_kinship_3:
+        if kinship == 3:
             return {"hasDegreeOfKinship": has_degree_kinship_3}
 
         if has_degree_kinship_3:
