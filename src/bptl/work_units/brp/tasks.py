@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
@@ -58,18 +60,17 @@ class HasDegreeOfKinship(WorkUnit):
     """
 
     @staticmethod
-    def request_relations(client, bsn) -> set:
+    def request_relations(client, bsn) -> Tuple[set, set]:
         url = f"ingeschrevenpersonen/{bsn}"
         response = client.get(
             url,
             params={
                 "expand": "kinderen.burgerservicenummer,ouders.burgerservicenummer"
             },
-        )
-        relation_response = response["_embedded"].get("ouders", []) + response[
-            "_embedded"
-        ].get("kinderen", [])
-        return {rel["burgerservicenummer"] for rel in relation_response}
+        )["_embedded"]
+        parents = {rel["burgerservicenummer"] for rel in response.get("ouders", [])}
+        children = {rel["burgerservicenummer"] for rel in response.get("kinderen", [])}
+        return parents, children
 
     def perform(self) -> dict:
         variables = self.task.get_variables()
@@ -87,9 +88,9 @@ class HasDegreeOfKinship(WorkUnit):
         client.task = self.task
 
         # 1. request 1-level relations of the 1st person
-        relations1_1 = self.request_relations(client, bsn1)
+        relations1_parents, relations1_children = self.request_relations(client, bsn1)
 
-        has_degree_kinship_1 = bsn2 in relations1_1
+        has_degree_kinship_1 = bsn2 in relations1_parents | relations1_children
         if kinship == has_degree_kinship_1:
             return {"hasDegreeOfKinship": has_degree_kinship_1}
 
@@ -97,9 +98,15 @@ class HasDegreeOfKinship(WorkUnit):
             return {"hasDegreeOfKinship": False}
 
         # 2. request 1-level relations of the 2nd person
-        relations2_1 = self.request_relations(client, bsn2)
+        relations2_parents, relations2_children = self.request_relations(client, bsn2)
 
-        has_degree_kinship_2 = bool(relations1_1 & relations2_1)
+        # parents are not considered related, so we exclude intersection by children
+        siblings = bool(relations1_parents & relations2_parents)
+        grandchildren = bool(
+            (relations1_parents & relations2_children)
+            | (relations2_parents & relations1_children)
+        )
+        has_degree_kinship_2 = siblings or grandchildren
         if kinship == has_degree_kinship_2:
             return {"hasDegreeOfKinship": has_degree_kinship_2}
 
@@ -107,18 +114,37 @@ class HasDegreeOfKinship(WorkUnit):
             return {"hasDegreeOfKinship": False}
 
         # 3. Request 2-level relations of the 1st and 2nd people
-        relations1_2 = set()
-        for rel in relations1_1:
-            relations = self.request_relations(client, rel)
-            relations1_2 = relations1_2 | relations
+        relations1_parents_parents = set()
+        relations1_parents_children = set()
+        relations1_children_children = set()
+        for rel in relations1_parents:
+            parents, children = self.request_relations(client, rel)
+            relations1_parents_parents = relations1_parents_parents | parents
+            relations1_parents_children = relations1_parents_children | children
+        for rel in relations1_children:
+            parents, children = self.request_relations(client, rel)
+            relations1_children_children = relations1_children_children | children
 
-        relations2_2 = set()
-        for rel in relations2_1:
-            relations = self.request_relations(client, rel)
-            relations2_2 = relations2_2 | relations
+        relations2_parents_parents = set()
+        relations2_parents_children = set()
+        relations2_children_children = set()
+        for rel in relations2_parents:
+            parents, children = self.request_relations(client, rel)
+            relations2_parents_parents = relations2_parents_parents | parents
+            relations2_parents_children = relations2_parents_children | children
+        for rel in relations2_children:
+            parents, children = self.request_relations(client, rel)
+            relations2_children_children = relations2_children_children | children
 
-        has_degree_kinship_3 = bool(relations1_2 & relations2_1) or bool(
-            relations1_1 & relations2_2
+        has_degree_kinship_3 = bool(
+            (relations1_parents_parents & relations2_parents)
+            | (relations1_parents_parents & relations2_children)
+            | (relations1_parents_children & relations2_parents)
+            | (relations1_children_children & relations2_parents)
+            | (relations2_parents_parents & relations1_parents)
+            | (relations2_parents_parents & relations1_children)
+            | (relations2_parents_children & relations1_parents)
+            | (relations2_children_children & relations1_parents)
         )
         if kinship == has_degree_kinship_3:
             return {"hasDegreeOfKinship": has_degree_kinship_3}
@@ -126,5 +152,11 @@ class HasDegreeOfKinship(WorkUnit):
         if has_degree_kinship_3:
             return {"hasDegreeOfKinship": False}
 
-        has_degree_kinship_4 = bool(relations1_2 & relations2_2)
+        has_degree_kinship_4 = bool(
+            (relations1_parents_parents & relations2_parents_parents)
+            | (relations1_parents_parents & relations2_parents_children)
+            | (relations1_parents_parents & relations2_children_children)
+            | (relations2_parents_parents & relations1_parents_children)
+            | (relations2_parents_parents & relations1_children_children)
+        )
         return {"hasDegreeOfKinship": has_degree_kinship_4}

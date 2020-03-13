@@ -12,7 +12,7 @@ PERSON_URL = f"{BRP_API_ROOT}ingeschrevenpersonen/999999011?fields=leeftijd"
 
 
 @requests_mock.Mocker()
-class CreateStatusTaskTests(TestCase):
+class IsAboveAgeTaskTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
