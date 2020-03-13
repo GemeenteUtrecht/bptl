@@ -1,10 +1,10 @@
 import os
-import sys
 import warnings
 
 os.environ.setdefault(
     "SECRET_KEY", "8n47ma!3%cfdm3cgt)@1ozjo7+^!j+z18@+0f-2+!p6ba^kof_"
 )
+os.environ.setdefault("ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 # uses postgresql by default, see base.py
 os.environ.setdefault("DB_NAME", "bptl"),
@@ -26,10 +26,6 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 ADMINS = ()
 MANAGERS = ADMINS
-
-# Hosts/domain names that are valid for this site; required if DEBUG is False
-# See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 LOGGING["loggers"].update(
     {
