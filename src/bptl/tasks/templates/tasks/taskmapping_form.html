@@ -22,6 +22,20 @@
     {% form_field form.topic_name %}
     {% form_field form.callback "form:CallbackSelect" %}
 
+    <div class="formset">
+    <h3>Services</h3>
+    {{ formset.management_form }}
+    {{  formset.non_form_errors }}
+
+    {% for service_form in formset %}
+        {{  service_form.non_field_errors }}
+        <div class="form formset__form">
+        {% form_field service_form.alias %}
+        {% form_field service_form.service %}
+        </div>
+    {% endfor %}
+
+    </div>
     <div class="actions-row">
         <button type="submit" class="button button--submit">
             {% trans "Connect listener to topic" %}
