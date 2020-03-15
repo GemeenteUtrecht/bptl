@@ -135,7 +135,7 @@ class CreateStatusTaskTests(TestCase):
             variables={
                 "burgerservicenummer1": "999990676",
                 "burgerservicenummer2": "999992612",
-                "kinship": 3,
+                "kinship": 4,
             },
         )
 

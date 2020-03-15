@@ -1,4 +1,5 @@
-from typing import Tuple
+from collections import namedtuple
+from typing import Iterable, Optional, Tuple
 
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
@@ -41,6 +42,46 @@ class IsAboveAge(WorkUnit):
         return {"isAboveAge": is_above_age}
 
 
+Person = namedtuple("Person", ["bsn", "type", "distance"])
+
+
+class Relations:
+    def __init__(self, subject: str):
+        self.subject = subject
+        self.people = []
+
+    def included(self, bsn: str) -> bool:
+        for p in self.people:
+            if p.bsn == bsn:
+                return True
+        return False
+
+    def add_relations(self, ids: Iterable, relation_type: str, distance: int):
+        for bsn in ids:
+            if not self.included(bsn):
+                self.people.append(Person(bsn, relation_type, distance))
+
+    def get_person(self, bsn: str) -> Optional[Person]:
+        for p in self.people:
+            if p.bsn == bsn:
+                return p
+
+        return None
+
+    def kinship(self, relations) -> Optional[int]:
+        kinships = []
+        for external_person in relations.people:
+            if self.included(external_person.bsn):
+                person = self.get_person(external_person.bsn)
+                # exclude relations based by children (spouses, in-laws)
+                if not (person.type == "child" and external_person.type == "child"):
+                    kinships.append(external_person.distance + person.distance)
+
+        if kinships:
+            return min(kinships)
+        return None
+
+
 @register
 class HasDegreeOfKinship(WorkUnit):
     """
@@ -60,7 +101,7 @@ class HasDegreeOfKinship(WorkUnit):
     """
 
     @staticmethod
-    def request_relations(client, bsn) -> Tuple[set, set]:
+    def request_relations(client, bsn) -> Tuple[list, list]:
         url = f"ingeschrevenpersonen/{bsn}"
         response = client.get(
             url,
@@ -68,8 +109,8 @@ class HasDegreeOfKinship(WorkUnit):
                 "expand": "kinderen.burgerservicenummer,ouders.burgerservicenummer"
             },
         )["_embedded"]
-        parents = {rel["burgerservicenummer"] for rel in response.get("ouders", [])}
-        children = {rel["burgerservicenummer"] for rel in response.get("kinderen", [])}
+        parents = [rel["burgerservicenummer"] for rel in response.get("ouders", [])]
+        children = [rel["burgerservicenummer"] for rel in response.get("kinderen", [])]
         return parents, children
 
     def perform(self) -> dict:
@@ -88,9 +129,12 @@ class HasDegreeOfKinship(WorkUnit):
         client.task = self.task
 
         # 1. request 1-level relations of the 1st person
-        relations1_parents, relations1_children = self.request_relations(client, bsn1)
+        parents1, children1 = self.request_relations(client, bsn1)
+        rel1 = Relations(bsn1)
+        rel1.add_relations(parents1, "parent", 1)
+        rel1.add_relations(children1, "child", 1)
 
-        has_degree_kinship_1 = bsn2 in relations1_parents | relations1_children
+        has_degree_kinship_1 = rel1.included(bsn2)
         if kinship == 1:
             return {"hasDegreeOfKinship": has_degree_kinship_1}
 
@@ -98,65 +142,38 @@ class HasDegreeOfKinship(WorkUnit):
             return {"hasDegreeOfKinship": False}
 
         # 2. request 1-level relations of the 2nd person
-        relations2_parents, relations2_children = self.request_relations(client, bsn2)
+        parents2, children2 = self.request_relations(client, bsn2)
+        rel2 = Relations(bsn1)
+        rel2.add_relations(parents2, "parent", 1)
+        rel2.add_relations(children2, "child", 1)
 
-        # parents are not considered related, so we exclude intersection by children
-        siblings = bool(relations1_parents & relations2_parents)
-        grandchildren = bool(
-            (relations1_parents & relations2_children)
-            | (relations2_parents & relations1_children)
-        )
-        has_degree_kinship_2 = siblings or grandchildren
-        if kinship == 2:
-            return {"hasDegreeOfKinship": has_degree_kinship_2}
+        actual_kinship = rel1.kinship(rel2)
 
-        if has_degree_kinship_2:
+        if actual_kinship:
+            if kinship == actual_kinship:
+                return {"hasDegreeOfKinship": True}
             return {"hasDegreeOfKinship": False}
 
         # 3. Request 2-level relations of the 1st and 2nd people
-        relations1_parents_parents = set()
-        relations1_parents_children = set()
-        relations1_children_children = set()
-        for rel in relations1_parents:
+        for rel in parents1:
             parents, children = self.request_relations(client, rel)
-            relations1_parents_parents = relations1_parents_parents | parents
-            relations1_parents_children = relations1_parents_children | children
-        for rel in relations1_children:
+            rel1.add_relations(parents, "parent", 2)
+            rel1.add_relations(children, "child", 2)
+        for rel in children1:
             parents, children = self.request_relations(client, rel)
-            relations1_children_children = relations1_children_children | children
+            # don't use parent relations on children
+            rel1.add_relations(children, "child", 2)
 
-        relations2_parents_parents = set()
-        relations2_parents_children = set()
-        relations2_children_children = set()
-        for rel in relations2_parents:
+        for rel in parents2:
             parents, children = self.request_relations(client, rel)
-            relations2_parents_parents = relations2_parents_parents | parents
-            relations2_parents_children = relations2_parents_children | children
-        for rel in relations2_children:
+            rel2.add_relations(parents, "parent", 2)
+            rel2.add_relations(children, "child", 2)
+        for rel in children2:
             parents, children = self.request_relations(client, rel)
-            relations2_children_children = relations2_children_children | children
+            # don't use parent relations on children
+            rel2.add_relations(children, "child", 2)
 
-        has_degree_kinship_3 = bool(
-            (relations1_parents_parents & relations2_parents)
-            | (relations1_parents_parents & relations2_children)
-            | (relations1_parents_children & relations2_parents)
-            | (relations1_children_children & relations2_parents)
-            | (relations2_parents_parents & relations1_parents)
-            | (relations2_parents_parents & relations1_children)
-            | (relations2_parents_children & relations1_parents)
-            | (relations2_children_children & relations1_parents)
-        )
-        if kinship == 3:
-            return {"hasDegreeOfKinship": has_degree_kinship_3}
-
-        if has_degree_kinship_3:
-            return {"hasDegreeOfKinship": False}
-
-        has_degree_kinship_4 = bool(
-            (relations1_parents_parents & relations2_parents_parents)
-            | (relations1_parents_parents & relations2_parents_children)
-            | (relations1_parents_parents & relations2_children_children)
-            | (relations2_parents_parents & relations1_parents_children)
-            | (relations2_parents_parents & relations1_children_children)
-        )
-        return {"hasDegreeOfKinship": has_degree_kinship_4}
+        actual_kinship = rel1.kinship(rel2)
+        if kinship == actual_kinship:
+            return {"hasDegreeOfKinship": True}
+        return {"hasDegreeOfKinship": False}
