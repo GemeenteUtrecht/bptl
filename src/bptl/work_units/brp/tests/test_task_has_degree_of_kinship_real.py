@@ -21,6 +21,21 @@ class DegreeOfKinshipTests(TestCase):
         config.api_root = BRP_API_ROOT
         config.save()
 
+    def test_same_bsn(self, m):
+        fetched_task = ServiceTask.objects.create(
+            topic_name="some-topic",
+            variables={
+                "burgerservicenummer1": "999990676",
+                "burgerservicenummer2": "999990676",
+            },
+        )
+
+        task = DegreeOfKinship(fetched_task)
+
+        result = task.perform()
+
+        self.assertEqual(result, {"kinship": None})
+
     def test_children_1(self, m):
         mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(

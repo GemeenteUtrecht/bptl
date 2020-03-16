@@ -61,7 +61,7 @@ class DegreeOfKinship(WorkUnit):
         bsn2 = variables["burgerservicenummer2"]
 
         if bsn1 == bsn2:
-            return {"hasDegreeOfKinship": None}
+            return {"kinship": None}
 
         client = get_client_class()()
         client.task = self.task
