@@ -9,7 +9,7 @@
   "scripts": {
     "test": "gulp test",
     "build": "gulp build",
-    "watch": "gulp watch"
+    "watch": "gulp watch --sourcemap"
   },
   "repository": {
     "type": "git",
@@ -64,6 +64,7 @@
     "simulant": "latest",
     "sinon": "latest",
     "url-loader": "latest",
+    "utrecht-design-system": "git+https://github.com/GemeenteUtrecht/utrecht-design-system.git",
     "webpack": "latest",
     "webpack-dev-server": "latest",
     "webpack-stream": "latest",

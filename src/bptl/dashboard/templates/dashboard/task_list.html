@@ -2,7 +2,10 @@
 {% load i18n dashboard %}
 
 {% block content-header-subtitle %}{% trans "View external tasks" %}{% endblock %}
-{% block content-header-title %}{% trans "Tasks" %}{% endblock %}
+{% block content-header-title %}
+    {% trans "Tasks" %}
+    <small title="{% trans 'total amount of tasks' %}">({{ paginator.count }})</small>
+{% endblock %}
 
 {% block content %}
 
@@ -39,7 +42,7 @@
             </div>
 
             <div class="task__topic">
-                {{ task.topic_name }}
+                <code>{{ task.topic_name }}</code>
             </div>
 
             <div class="task__topic">
@@ -60,4 +63,7 @@
     </aside>
 
 </article>
+
+{% include "includes/pagination.html" %}
+
 {% endblock %}

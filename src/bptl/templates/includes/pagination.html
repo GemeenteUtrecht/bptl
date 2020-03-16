@@ -1,0 +1,54 @@
+{% load i18n %}
+
+{% comment %}
+Expected context variables:
+
+    * {{ is_paginated }}
+    * {{ paginator }}
+    * {{ page_obj }}
+
+{% endcomment %}
+
+
+{% if is_paginated %}
+<nav class="pagination">
+
+    {% if page_obj.has_previous %}
+    <a
+        href="?page=1"
+        class="pagination__page pagination__page--first">
+        {% trans "first" %}
+    </a>
+
+    <a
+        href="?page={{ page_obj.previous_page_number }}"
+        class="pagination__page pagination__page--previous">
+        {% trans "previous" %}
+    </a>
+    {% else %}
+        <span></span>
+        <span></span>
+    {% endif %}
+
+    <span class="pagination__page pagination__page--current" title="{% trans 'current page' %}">
+        {% blocktrans with n=page_obj.number %}page {{ n }}{% endblocktrans %}
+    </span>
+
+    {% if page_obj.has_next %}
+    <a
+        href="?page={{ page_obj.next_page_number }}"
+        class="pagination__page pagination__page--next">
+        {% trans "next" %}
+    </a>
+    <a
+        href="?page={{ paginator.num_pages }}"
+        class="pagination__page pagination__page--last">
+        {% trans "last" %}
+    </a>
+    {% else %}
+        <span></span>
+        <span></span>
+    {% endif %}
+
+</nav>
+{% endif %}
