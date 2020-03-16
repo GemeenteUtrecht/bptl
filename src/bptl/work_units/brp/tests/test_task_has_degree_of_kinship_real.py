@@ -1,13 +1,17 @@
 from django.test import TestCase
 
+import requests_mock
+
 from bptl.activiti.models import ServiceTask
 
 from ..models import BRPConfig
 from ..tasks import DegreeOfKinship
+from .utils import mock_family
 
-BRP_API_ROOT = "https://haalcentraal.lostlemon.nl/"
+BRP_API_ROOT = "http://brp.example.com/"
 
 
+@requests_mock.Mocker()
 class DegreeOfKinshipTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -17,12 +21,13 @@ class DegreeOfKinshipTests(TestCase):
         config.api_root = BRP_API_ROOT
         config.save()
 
-    def test_children_1(self):
+    def test_children_1(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999993392",
-                "burgerservicenummer2": "999990676",
+                "burgerservicenummer1": "999990676",
+                "burgerservicenummer2": "999993392",
             },
         )
 
@@ -32,12 +37,13 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": 1})
 
-    def test_spouse_none(self):
+    def test_spouse_none(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999990421",
+                "burgerservicenummer1": "999994177",
+                "burgerservicenummer2": "999995224",
             },
         )
 
@@ -47,7 +53,8 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": None})
 
-    def test_siblings_2(self):
+    def test_siblings_2(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
@@ -62,12 +69,13 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": 2})
 
-    def test_grandchild_2(self):
+    def test_grandchild_2(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
                 "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999991115",
+                "burgerservicenummer2": "999992223",
             },
         )
 
@@ -77,12 +85,13 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": 2})
 
-    def test_uncle_3(self):
+    def test_uncle_3(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999991760",
-                "burgerservicenummer2": "999991115",
+                "burgerservicenummer1": "999991978",
+                "burgerservicenummer2": "999992223",
             },
         )
 
@@ -92,12 +101,13 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": 3})
 
-    def test_son_in_law_none(self):
+    def test_son_in_law_none(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999991589",
+                "burgerservicenummer1": "999992223",
+                "burgerservicenummer2": "999995224",
             },
         )
 
@@ -107,12 +117,13 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": None})
 
-    def test_great_grandchildren_3(self):
+    def test_great_grandchildren_3(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999993392",
-                "burgerservicenummer2": "999992612",
+                "burgerservicenummer1": "999990676",
+                "burgerservicenummer2": "999994177",
             },
         )
 
@@ -122,7 +133,8 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": 3})
 
-    def test_great_great_grandchildren_4(self):
+    def test_great_great_grandchildren_4(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
@@ -137,13 +149,13 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": 4})
 
-    # todo
-    def test_cousins_4(self):
+    def test_cousins_4(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999992612",
+                "burgerservicenummer1": "999993333",
+                "burgerservicenummer2": "999992223",
             },
         )
 
@@ -153,12 +165,13 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": 4})
 
-    def test_great_uncle_4(self):
+    def test_great_uncle_4(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999991115",
-                "burgerservicenummer2": "999992612",
+                "burgerservicenummer1": "999991978",
+                "burgerservicenummer2": "999994177",
             },
         )
 
@@ -168,8 +181,9 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": 4})
 
-    def test_grand_parents_in_law_none(self):
+    def test_grand_parents_in_law_none(self, m):
         # parents of son-n-law
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
@@ -184,12 +198,13 @@ class DegreeOfKinshipTests(TestCase):
 
         self.assertEqual(result, {"kinship": None})
 
-    def test_grand_son_in_law_none(self):
+    def test_grand_son_in_law_none(self, m):
+        mock_family(m, BRP_API_ROOT)
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999994347",
+                "burgerservicenummer1": "999995224",
+                "burgerservicenummer2": "999993392",
             },
         )
 

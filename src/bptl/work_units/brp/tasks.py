@@ -2,7 +2,7 @@ from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
 from .client import get_client_class
-from .utils import Person, Relations, request_relations
+from .utils import Relations
 
 __all__ = ["IsAboveAge", "DegreeOfKinship"]
 
