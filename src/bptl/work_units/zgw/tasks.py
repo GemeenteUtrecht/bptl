@@ -214,12 +214,26 @@ class CloseZaakTask(ZGWWorkUnit):
         * "<ZRC service name>": {"jwt": value for Authorization header in the api}
         * "<ZTC service name>": {"jwt": value for Authorization header in the api}
 
+    **Optional process variables**
+
+    * **resultaattype**: full URL of the RESULTAATTYPE to set.
+      If provided the RESULTAAT is created before the ZAAK is closed
+
     The task sets the process variables:
 
     * **einddatum**: date of closing the zaak
     * **archiefnominatie**: shows if the zaak should be destroyed or stored permanently
     * **archiefactiedatum**: date when the archived zaak should be destroyed or transferred to the archive
     """
+
+    def create_resultaat(self):
+        resultaattype = self.task.get_variables().get("resultaattype")
+
+        if not resultaattype:
+            return
+
+        create_resultaat_work_unit = CreateResultaatTask(self.task)
+        create_resultaat_work_unit.create_resultaat()
 
     def close_zaak(self) -> dict:
         # build clients
@@ -245,6 +259,7 @@ class CloseZaakTask(ZGWWorkUnit):
         return zaak_closed
 
     def perform(self):
+        self.create_resultaat()
         resultaat = self.close_zaak()
 
         return {
