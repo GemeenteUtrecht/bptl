@@ -9,7 +9,7 @@ __all__ = ["IsAboveAge"]
 @register
 class IsAboveAge(WorkUnit):
     """
-    Fetches BRP API and return flag if a certain person is older above a certain age
+    Fetches BRP API and returns whether a person is exactly, or older than, a certain age.
 
     Required process variables:
 
