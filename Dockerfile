@@ -69,11 +69,11 @@ COPY --from=backend-build /usr/local/bin/uwsgi /usr/local/bin/uwsgi
 COPY --from=backend-build /usr/local/bin/celery /usr/local/bin/celery
 COPY --from=backend-build /app/src/ /app/src/
 
-# copy frontend build statics
-COPY --from=frontend-build /app/src/bptl/static /app/src/bptl/static
-
 # copy source code
 COPY ./src /app/src
+
+# copy frontend build statics
+COPY --from=frontend-build /app/src/bptl/static /app/src/bptl/static
 
 RUN useradd -M -u 1000 maykin
 RUN chown -R maykin /app
