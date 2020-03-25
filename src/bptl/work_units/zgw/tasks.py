@@ -40,6 +40,10 @@ class CreateZaakTask(ZGWWorkUnit):
     * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
     * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
 
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
     **Sets the process variables**
 
     * ``zaak``: the JSON response of the created ZAAK
