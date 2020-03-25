@@ -64,3 +64,34 @@ class CompleteTests(TestCase):
                 },
             },
         )
+
+    def test_callback_url_called_on_completion(self, m):
+        task = ExternalTask.objects.create(
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "callbackUrl": {
+                    "type": "String",
+                    "value": "https://callback.example.com/foo",
+                }
+            },
+        )
+
+        m.post(
+            "https://some.camunda.com/engine-rest/external-task/test-task-id/complete",
+            status_code=204,
+        )
+        m.post("https://callback.example.com/foo", status_code=204)
+
+        complete_task(task)
+
+        self.assertEqual(len(m.request_history), 2)
+
+        first_request = m.request_history[0]
+        self.assertEqual(
+            first_request.url,
+            "https://some.camunda.com/engine-rest/external-task/test-task-id/complete",
+        )
+
+        last_request = m.last_request
+        self.assertEqual(last_request.url, "https://callback.example.com/foo")
