@@ -32,13 +32,22 @@ class CreateZaakTask(ZGWWorkUnit):
     * ``zaaktype``: the full URL of the ZAAKTYPE
     * ``organisatieRSIN``: RSIN of the organisation
     * ``services``: JSON Object of connection details for ZGW services:
-        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
-        * "<ZTC service name>": {"jwt": value for Authorization header in the api}
+
+        .. code-block:: json
+
+          {
+              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
+              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
+          }
 
     **Optional process variables**
 
     * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
     * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
 
     **Sets the process variables**
 
@@ -100,17 +109,26 @@ class CreateStatusTask(ZGWWorkUnit):
     """
     Create a new STATUS for the ZAAK in the process.
 
-    Required process variables:
+    **Required process variables**
 
-    * **zaak**: full URL of the ZAAK to create a new status for
-    * **statustype**: full URL of the STATUSTYPE to set
-    * **services**: JSON Object of connection details for ZGW services:
-        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
-        * "<ZTC service name>": {"jwt": value for Authorization header in the api}
+    * ``zaak``: full URL of the ZAAK to create a new status for
+    * ``statustype``: full URL of the STATUSTYPE to set
+    * ``services``: JSON Object of connection details for ZGW services:
 
-    The task sets the process variables:
+        .. code-block:: json
 
-    * **status**: the full URL of the created STATUS
+          {
+              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
+              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
+          }
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
+    **Sets the process variables**
+
+    * ``status``: the full URL of the created STATUS
     """
 
     def create_status(self) -> dict:
@@ -137,20 +155,29 @@ class CreateResultaatTask(ZGWWorkUnit):
     A resultaat is required to be able to close a zaak. A zaak can only have one
     resultaat.
 
-    Required process variables:
+    **Required process variables**
 
-    * **zaak**: full URL of the ZAAK to set the RESULTAAT for
-    * **resultaattype**: full URL of the RESULTAATTYPE to set
-    * **services**: JSON Object of connection details for ZGW services:
-        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
+    * ``zaak``: full URL of the ZAAK to set the RESULTAAT for
+    * ``resultaattype``: full URL of the RESULTAATTYPE to set
+    * ``services``: JSON Object of connection details for ZGW services:
 
-    Optional process variables:
+        .. code-block:: json
 
-    * **toelichting**
+          {
+              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
+          }
 
-    The task sets the process variables:
+    **Optional process variables**
 
-    * **resultaat**: the full URL of the created RESULTAAT
+    * ``toelichting``
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
+    **Sets the process variables**
+
+    * ``resultaat``: the full URL of the created RESULTAAT
     """
 
     def create_resultaat(self):
@@ -174,16 +201,25 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
     """
     Create relations between ZAAK and INFORMATIEOBJECT
 
-    Required process variables:
+    **Required process variables**
 
-    * **zaak**: full URL of the ZAAK
-    * **informatieobject**: full URL of the INFORMATIEOBJECT
-    * **services**: JSON Object of connection details for ZGW services:
-        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
+    * ``zaak``: full URL of the ZAAK
+    * ``informatieobject``: full URL of the INFORMATIEOBJECT
+    * ``services``: JSON Object of connection details for ZGW services:
 
-    The task sets the process variables:
+        .. code-block:: json
 
-    * **zaakinformatieobject**: full URL of ZAAKINFORMATIEOBJECT
+          {
+              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
+          }
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
+    **Sets the process variables**
+
+    * ``zaakinformatieobject``: full URL of ZAAKINFORMATIEOBJECT
     """
 
     def relate_document(self) -> dict:
@@ -207,23 +243,32 @@ class CloseZaakTask(ZGWWorkUnit):
 
     A ZAAK is required to have a RESULTAAT.
 
-    Required process variables:
+    **Required process variables**
 
-    * **zaak**: full URL of the ZAAK
-    * **services**: JSON Object of connection details for ZGW services:
-        * "<ZRC service name>": {"jwt": value for Authorization header in the api}
-        * "<ZTC service name>": {"jwt": value for Authorization header in the api}
+    * ``zaak``: full URL of the ZAAK
+    * ``services``: JSON Object of connection details for ZGW services:
+
+        .. code-block:: json
+
+          {
+              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
+              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
+          }
 
     **Optional process variables**
 
-    * **resultaattype**: full URL of the RESULTAATTYPE to set.
+    * ``resultaattype``: full URL of the RESULTAATTYPE to set.
       If provided the RESULTAAT is created before the ZAAK is closed
 
-    The task sets the process variables:
+    **Optional process variables (Camunda exclusive)**
 
-    * **einddatum**: date of closing the zaak
-    * **archiefnominatie**: shows if the zaak should be destroyed or stored permanently
-    * **archiefactiedatum**: date when the archived zaak should be destroyed or transferred to the archive
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
+    **Sets the process variables**
+
+    * ``einddatum``: date of closing the zaak
+    * ``archiefnominatie``: shows if the zaak should be destroyed or stored permanently
+    * ``archiefactiedatum``: date when the archived zaak should be destroyed or transferred to the archive
     """
 
     def create_resultaat(self):
@@ -292,6 +337,10 @@ class RelatePand(ZGWWorkUnit):
 
     * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
     * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
 
     **Sets no process variables**
     """
