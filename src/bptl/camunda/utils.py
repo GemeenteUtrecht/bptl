@@ -1,12 +1,11 @@
 """
 Module for Camunda API interaction.
-
-TODO: fetch the handled/known topics from the DB and pass that to the fetch and lock
-call.
 """
 import json
+import logging
 from typing import Any, Dict, List, Optional, Tuple
 
+import requests
 from dateutil import parser
 from django_camunda.client import get_client_class
 from django_camunda.types import JSONPrimitive
@@ -15,6 +14,8 @@ from bptl.tasks.models import TaskMapping
 from bptl.utils.typing import Object, ProcessVariables
 
 from .models import ExternalTask, get_worker_id
+
+logger = logging.getLogger(__name__)
 
 LOCK_DURATION = 60 * 10  # 10 minutes
 
@@ -68,9 +69,12 @@ def complete_task(
 
     API reference: https://docs.camunda.org/manual/7.12/reference/rest/external-task/post-complete/
 
+    If a task variable ``callbackUrl`` is available, a post request is made to it.
+
     Note that we currently only support setting process variables and not local task
     variables.
     """
+    task_variables = task.get_variables()
     camunda = get_client_class()()
 
     serialized_variables = (
@@ -84,6 +88,14 @@ def complete_task(
         "variables": serialized_variables,
     }
     camunda.request(f"external-task/{task.task_id}/complete", method="POST", json=body)
+
+    callback_url = task_variables.get("callbackUrl", "")
+    assert isinstance(callback_url, str), "URLs must be of the type string"
+    if callback_url:
+        logger.info("Calling callback url for task %s", task)
+        response = requests.post(callback_url)
+        logger.info("Callback response status code: %d", response.status_code)
+        response.raise_for_status()
 
 
 def serialize_variable(value: Any) -> Dict[str, JSONPrimitive]:
