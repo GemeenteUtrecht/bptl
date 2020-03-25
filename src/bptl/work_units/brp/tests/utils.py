@@ -1,5 +1,17 @@
 import requests_mock
 
+NAMES = {
+    "JANE": "999990676",
+    "JILL": "999993392",
+    "RICK": "999991978",
+    "MARY": "999992223",
+    "JOHN": "999993333",
+    "LISA": "999994177",
+    "KATE": "999991929",
+    "JACK": "999995224",
+    "BART": "999992612",
+}
+
 
 def mock_relations(m, brp_url, bsn, parents=None, children=None):
     parents = [{"burgerservicenummer": p} for p in parents] if parents else []
@@ -13,31 +25,46 @@ def mock_relations(m, brp_url, bsn, parents=None, children=None):
 
 
 def mock_family(m: requests_mock.Mocker, brp_url: str):
+    """
+    create family with following structure:
+                JANE
+                 |
+              ---+---
+             |      |
+           JILL   RICK
+            |       |
+    KATE   MARY   JOHN
+     |      |
+    JACK - LISA
+         |
+        BART
+    """
+
+    # level 0
+    mock_relations(m, brp_url, NAMES["JANE"], children=[NAMES["JILL"], NAMES["RICK"]])
+
     # level 1
-    mock_relations(m, brp_url, "999990676", children=["999993392", "999991978"])
+    mock_relations(
+        m, brp_url, NAMES["JILL"], parents=[NAMES["JANE"]], children=[NAMES["MARY"]]
+    )
+    mock_relations(
+        m, brp_url, NAMES["RICK"], parents=[NAMES["JANE"]], children=[NAMES["JOHN"]]
+    )
 
     # level 2
     mock_relations(
-        m, brp_url, "999993392", parents=["999990676"], children=["999992223"]
+        m, brp_url, NAMES["MARY"], parents=[NAMES["JILL"]], children=[NAMES["LISA"]]
     )
-    mock_relations(
-        m, brp_url, "999991978", parents=["999990676"], children=["999993333"]
-    )
+    mock_relations(m, brp_url, NAMES["JOHN"], parents=[NAMES["RICK"]])
+    mock_relations(m, brp_url, NAMES["KATE"], children=[NAMES["JACK"]])
 
     # level 3
     mock_relations(
-        m, brp_url, "999992223", parents=["999993392"], children=["999994177"]
+        m, brp_url, NAMES["LISA"], parents=[NAMES["MARY"]], children=[NAMES["BART"]]
     )
-    mock_relations(m, brp_url, "999993333", parents=["999991978"])
-    mock_relations(m, brp_url, "999991929", children=["999995224"])
+    mock_relations(
+        m, brp_url, NAMES["JACK"], parents=[NAMES["KATE"]], children=[NAMES["BART"]]
+    )
 
     # level 4
-    mock_relations(
-        m, brp_url, "999994177", parents=["999992223"], children=["999992612"]
-    )
-    mock_relations(
-        m, brp_url, "999995224", parents=["999991929"], children=["999992612"]
-    )
-
-    # level 5
-    mock_relations(m, brp_url, "999992612", parents=["999994177", "999995224"])
+    mock_relations(m, brp_url, NAMES["BART"], parents=[NAMES["LISA"], NAMES["JACK"]])

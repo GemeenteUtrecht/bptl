@@ -17,22 +17,36 @@ Person = namedtuple("Person", ["bsn", "type", "distance"])
 
 
 class Relations:
+    """
+    class to store parent and child relations of subject node
+    It's not a graph since we don't have to know relations between all the nodes.
+    For kinship purposes we must know:
+    * the distance of the node from the subject (i.e. kinship)
+    * the type of last connection: 'child', 'parent' or 'origin', the latter is used only
+    for the main subject of relations. We keep the type, since we don't consider relations based on
+    mutual children (partners, in-laws)
+    Therefore we use Person namedtuples to store all necessary data about each node
+    """
+
     def __init__(self, subject: str):
         self.subject = subject
         self.people = [Person(bsn=subject, type="origin", distance=0)]
 
     def included(self, bsn: str) -> bool:
+        """ check if requested bsn is in the relations set. Return boolean"""
         for p in self.people:
             if p.bsn == bsn:
                 return True
         return False
 
     def add_relations(self, ids: Iterable, relation_type: str, distance: int):
+        """ If the requested bsn is not in relations yet, add it to the relations"""
         for bsn in ids:
             if not self.included(bsn):
                 self.people.append(Person(bsn, relation_type, distance))
 
     def get_person(self, bsn: str) -> Optional[Person]:
+        """retrieve Person object based on bsn"""
         for p in self.people:
             if p.bsn == bsn:
                 return p
@@ -40,6 +54,9 @@ class Relations:
         return None
 
     def kinship(self, relations) -> Optional[int]:
+        """
+        calculate kinship of subjects of two relations
+        """
         if relations.subject == self.subject:
             return None
 
@@ -57,7 +74,13 @@ class Relations:
         return None
 
     def expand(self, client, distance: int):
-        """expands relations with BRP api"""
+        """
+        expands relations with BRP api for specified level (distance)
+        For example, calling rel.expand(2) means that relations will be requested
+        for all Person objects with distance = 1 and the relations set will be
+        increased on these relations.
+        All relations are considered but relations based on mutual children (partners, in-laws)
+        """
         if not distance:
             return
 

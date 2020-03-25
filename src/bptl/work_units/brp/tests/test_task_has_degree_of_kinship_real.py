@@ -6,7 +6,7 @@ from bptl.activiti.models import ServiceTask
 
 from ..models import BRPConfig
 from ..tasks import DegreeOfKinship
-from .utils import mock_family
+from .utils import NAMES, mock_family
 
 BRP_API_ROOT = "http://brp.example.com/"
 
@@ -25,8 +25,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999990676",
+                "burgerservicenummer1": NAMES["JANE"],
+                "burgerservicenummer2": NAMES["JANE"],
             },
         )
 
@@ -41,8 +41,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999993392",
+                "burgerservicenummer1": NAMES["JANE"],
+                "burgerservicenummer2": NAMES["JILL"],
             },
         )
 
@@ -57,8 +57,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999994177",
-                "burgerservicenummer2": "999995224",
+                "burgerservicenummer1": NAMES["LISA"],
+                "burgerservicenummer2": NAMES["JACK"],
             },
         )
 
@@ -73,8 +73,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999993392",
-                "burgerservicenummer2": "999991978",
+                "burgerservicenummer1": NAMES["JILL"],
+                "burgerservicenummer2": NAMES["RICK"],
             },
         )
 
@@ -89,8 +89,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999992223",
+                "burgerservicenummer1": NAMES["JANE"],
+                "burgerservicenummer2": NAMES["MARY"],
             },
         )
 
@@ -105,8 +105,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999991978",
-                "burgerservicenummer2": "999992223",
+                "burgerservicenummer1": NAMES["RICK"],
+                "burgerservicenummer2": NAMES["MARY"],
             },
         )
 
@@ -121,8 +121,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999992223",
-                "burgerservicenummer2": "999995224",
+                "burgerservicenummer1": NAMES["MARY"],
+                "burgerservicenummer2": NAMES["JACK"],
             },
         )
 
@@ -137,8 +137,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999994177",
+                "burgerservicenummer1": NAMES["JANE"],
+                "burgerservicenummer2": NAMES["LISA"],
             },
         )
 
@@ -153,8 +153,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999990676",
-                "burgerservicenummer2": "999992612",
+                "burgerservicenummer1": NAMES["JANE"],
+                "burgerservicenummer2": NAMES["BART"],
             },
         )
 
@@ -169,8 +169,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999993333",
-                "burgerservicenummer2": "999992223",
+                "burgerservicenummer1": NAMES["JOHN"],
+                "burgerservicenummer2": NAMES["MARY"],
             },
         )
 
@@ -185,8 +185,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999991978",
-                "burgerservicenummer2": "999994177",
+                "burgerservicenummer1": NAMES["RICK"],
+                "burgerservicenummer2": NAMES["LISA"],
             },
         )
 
@@ -202,8 +202,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999992223",
-                "burgerservicenummer2": "999991929",
+                "burgerservicenummer1": NAMES["MARY"],
+                "burgerservicenummer2": NAMES["KATE"],
             },
         )
 
@@ -218,8 +218,8 @@ class DegreeOfKinshipTests(TestCase):
         fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
             variables={
-                "burgerservicenummer1": "999995224",
-                "burgerservicenummer2": "999993392",
+                "burgerservicenummer1": NAMES["JACK"],
+                "burgerservicenummer2": NAMES["JILL"],
             },
         )
 

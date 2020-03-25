@@ -66,21 +66,24 @@ class DegreeOfKinship(WorkUnit):
         client = get_client_class()()
         client.task = self.task
 
+        # set up classes for storing parent and child relations of one node
         rel1 = Relations(bsn1)
         rel2 = Relations(bsn2)
 
-        # 1. request 1-level relations
+        # 1. request 1-level relations (child-parend kinship)
         rel1.expand(client, 1)
         rel2.expand(client, 1)
 
+        # search for intersectipns between two relations sets
         kinship = rel1.kinship(rel2)
 
         if kinship:
             return {"kinship": kinship}
 
-        # 2. Request 2-level relations
+        # 2. Request 2-level relations (siblings and grandparents-grandchildren kinship)
         rel1.expand(client, 2)
         rel2.expand(client, 2)
 
+        # search for intersectipns between two relations sets
         kinship = rel1.kinship(rel2)
         return {"kinship": kinship}
