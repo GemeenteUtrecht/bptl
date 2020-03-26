@@ -87,7 +87,7 @@ def complete_task(
         "workerId": task.worker_id,
         "variables": serialized_variables,
     }
-    camunda.request(f"external-task/{task.task_id}/complete", method="POST", json=body)
+    camunda.post(f"external-task/{task.task_id}/complete", json=body)
 
     callback_url = task_variables.get("callbackUrl", "")
     assert isinstance(callback_url, str), "URLs must be of the type string"
@@ -96,6 +96,32 @@ def complete_task(
         response = requests.post(callback_url)
         logger.info("Callback response status code: %d", response.status_code)
         response.raise_for_status()
+
+
+def fail_task(task: ExternalTask, reason: str = "") -> None:
+    """
+    Mark an external task as failed.
+
+    See https://docs.camunda.org/manual/7.11/reference/rest/external-task/post-failure/
+
+    When the number of retries becomes 0, an incident is created in Camunda.
+    """
+    camunda = get_client()
+
+    if not reason:
+        error_lines = task.execution_error.splitlines()
+        if error_lines:
+            reason = error_lines[-1]
+
+    body = {
+        "workerId": task.worker_id,
+        "errorMessage": reason,
+        "errorDetail": task.execution_error,
+        "retries": 0,  # TODO: some sort of retry policy?
+        "retryTimeout": 0,
+    }
+
+    camunda.post(f"external-task/{task.task_id}/failure", json=body)
 
 
 def serialize_variable(value: Any) -> Dict[str, JSONPrimitive]:
@@ -127,11 +153,3 @@ def deserialize_variable(variable: Dict[str, Any]) -> Any:
         return json.loads(variable["value"])
 
     raise NotImplementedError(f"Type {var_type} is not implemented yet")
-
-
-def fail_task(task: ExternalTask, reason: str = "") -> None:
-    """
-    Mark an external task as failed.
-    """
-
-    raise Exception("foo")
