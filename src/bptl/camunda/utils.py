@@ -127,3 +127,10 @@ def deserialize_variable(variable: Dict[str, Any]) -> Any:
         return json.loads(variable["value"])
 
     raise NotImplementedError(f"Type {var_type} is not implemented yet")
+
+
+def fail_task(task: ExternalTask, reason: str = "") -> None:
+    """
+    Mark an external task as failed.
+    """
+    raise Exception("foo")

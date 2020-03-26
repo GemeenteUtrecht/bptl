@@ -1,5 +1,6 @@
 import json
 from io import StringIO
+from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -143,7 +144,8 @@ class ExecuteCommandTests(TestCase):
             },
         )
 
-    def test_execute_fail(self, m):
+    @patch("bptl.camunda.tasks.fail_task")
+    def test_execute_fail(self, m, mock_fail_task):
         task = ExternalTaskFactory.create(
             topic_name="zaak-initialize",
             variables={
@@ -168,3 +170,5 @@ class ExecuteCommandTests(TestCase):
         task.refresh_from_db()
         self.assertEqual(task.status, Statuses.failed)
         self.assertTrue(task.execution_error.strip().endswith("some connection error"))
+
+        mock_fail_task.assert_called_once_with(task)

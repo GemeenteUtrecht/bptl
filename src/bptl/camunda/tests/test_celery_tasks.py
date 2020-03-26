@@ -37,9 +37,12 @@ class RouteTaskTests(TestCase):
         m_execute.assert_called_once_with(task)
         m_complete.assert_called_once_with(task)
 
+    @patch("bptl.camunda.tasks.fail_task")
     @patch("bptl.camunda.tasks.complete")
     @patch("bptl.camunda.tasks.execute", side_effect=Exception("execution is failed"))
-    def test_task_execute_and_complete_fail_execute(self, m_execute, m_complete):
+    def test_task_execute_and_complete_fail_execute(
+        self, m_execute, m_complete, m_fail_task
+    ):
         @save_and_log()
         def new_execute(task):
             raise Exception("execution is failed")
@@ -56,6 +59,7 @@ class RouteTaskTests(TestCase):
 
         m_execute.assert_called_once_with(task)
         m_complete.assert_not_called()
+        m_fail_task.assert_called_once_with(task)
 
     @patch("bptl.camunda.tasks.complete", side_effect=Exception("completion failed"))
     @patch("bptl.camunda.tasks.execute")
@@ -77,7 +81,7 @@ class RouteTaskTests(TestCase):
         m_complete.assert_called_once_with(task)
 
     @patch("bptl.camunda.tasks.logger.warning")
-    def test_task_execute_alreaty_run(self, m_logger):
+    def test_task_execute_already_run(self, m_logger):
         task = ExternalTaskFactory.create(status=Statuses.in_progress)
 
         task_execute_and_complete(task.id)
