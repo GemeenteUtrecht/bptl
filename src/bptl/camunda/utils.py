@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from dateutil import parser
-from django_camunda.client import get_client_class
+from django_camunda.client import get_client
 from django_camunda.types import JSONPrimitive
 
 from bptl.tasks.models import TaskMapping
@@ -26,7 +26,7 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
 
     API reference: https://docs.camunda.org/manual/7.12/reference/rest/external-task/fetch/
     """
-    camunda = get_client_class()()
+    camunda = get_client()
 
     # Fetch the topics that are known (and active!) in this configured instance only
     mappings = TaskMapping.objects.filter(active=True)
@@ -75,7 +75,7 @@ def complete_task(
     variables.
     """
     task_variables = task.get_variables()
-    camunda = get_client_class()()
+    camunda = get_client()
 
     serialized_variables = (
         {name: serialize_variable(value) for name, value in variables.items()}
@@ -133,4 +133,5 @@ def fail_task(task: ExternalTask, reason: str = "") -> None:
     """
     Mark an external task as failed.
     """
+
     raise Exception("foo")
