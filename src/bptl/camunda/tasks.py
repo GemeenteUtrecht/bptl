@@ -11,6 +11,7 @@ from bptl.tasks.api import execute
 from bptl.utils.constants import Statuses
 
 from ..celery import app
+from .utils import fail_task
 
 logger = get_task_logger(__name__)
 
@@ -55,7 +56,7 @@ def task_execute_and_complete(fetched_task_id):
             exc,
             exc_info=True,
         )
-
+        fail_task(fetched_task)
         return
 
     logger.info("Task %r is executed", fetched_task_id)
@@ -70,7 +71,6 @@ def task_execute_and_complete(fetched_task_id):
             exc,
             exc_info=True,
         )
-
         return
 
     logger.info("Task %r is completed", fetched_task_id)

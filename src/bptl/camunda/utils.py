@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from dateutil import parser
-from django_camunda.client import get_client_class
+from django_camunda.client import get_client
 from django_camunda.types import JSONPrimitive
 
 from bptl.tasks.models import TaskMapping
@@ -26,7 +26,7 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
 
     API reference: https://docs.camunda.org/manual/7.12/reference/rest/external-task/fetch/
     """
-    camunda = get_client_class()()
+    camunda = get_client()
 
     # Fetch the topics that are known (and active!) in this configured instance only
     mappings = TaskMapping.objects.filter(active=True)
@@ -75,7 +75,7 @@ def complete_task(
     variables.
     """
     task_variables = task.get_variables()
-    camunda = get_client_class()()
+    camunda = get_client()
 
     serialized_variables = (
         {name: serialize_variable(value) for name, value in variables.items()}
@@ -87,7 +87,7 @@ def complete_task(
         "workerId": task.worker_id,
         "variables": serialized_variables,
     }
-    camunda.request(f"external-task/{task.task_id}/complete", method="POST", json=body)
+    camunda.post(f"external-task/{task.task_id}/complete", json=body)
 
     callback_url = task_variables.get("callbackUrl", "")
     assert isinstance(callback_url, str), "URLs must be of the type string"
@@ -96,6 +96,32 @@ def complete_task(
         response = requests.post(callback_url)
         logger.info("Callback response status code: %d", response.status_code)
         response.raise_for_status()
+
+
+def fail_task(task: ExternalTask, reason: str = "") -> None:
+    """
+    Mark an external task as failed.
+
+    See https://docs.camunda.org/manual/7.11/reference/rest/external-task/post-failure/
+
+    When the number of retries becomes 0, an incident is created in Camunda.
+    """
+    camunda = get_client()
+
+    if not reason:
+        error_lines = task.execution_error.splitlines()
+        if error_lines:
+            reason = error_lines[-1]
+
+    body = {
+        "workerId": task.worker_id,
+        "errorMessage": reason,
+        "errorDetail": task.execution_error,
+        "retries": 0,  # TODO: some sort of retry policy?
+        "retryTimeout": 0,
+    }
+
+    camunda.post(f"external-task/{task.task_id}/failure", json=body)
 
 
 def serialize_variable(value: Any) -> Dict[str, JSONPrimitive]:
