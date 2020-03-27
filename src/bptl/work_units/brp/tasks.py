@@ -43,16 +43,17 @@ class IsAboveAge(WorkUnit):
 @register
 class DegreeOfKinship(WorkUnit):
     """
-    Fetches BRP API and returns flag if certain two people have a specified degree of kinship
+    Retrieve the degree of kinship from the BRP API.
 
     Required process variables:
 
     * ``burgerservicenummer1``: BSN of the first person
     * ``burgerservicenummer2``: BSN of the second person
 
-    The task sets the process variables:
+    **Sets the process variables**
 
-    * ``kinship``: integer, which represents the degree of kinship (blood relations). Values can be in range [1..4]
+    * ``kinship``: integer, which represents the degree of kinship (blood relations). Values can be in 
+       range [1..4] or ``Null`` if the BSNs are identical.
     """
 
     def perform(self) -> dict:
