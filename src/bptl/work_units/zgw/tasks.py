@@ -294,7 +294,7 @@ class CloseZaakTask(ZGWWorkUnit):
         # create status to close zaak
         data = {
             "zaak": zaak,
-            "statustype": statustype,
+            "statustype": statustype["url"],
             "datumStatusGezet": timezone.now().isoformat(),
         }
         zrc_client.create("status", data)
