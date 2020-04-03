@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Any, Dict
+from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from django.utils import timezone
 
@@ -345,6 +346,21 @@ class RelatePand(ZGWWorkUnit):
     **Sets no process variables**
     """
 
+    @staticmethod
+    def _clean_url(url: str) -> str:
+        scheme, netloc, path, query, fragment = urlsplit(url)
+        query_dict = parse_qs(query)
+
+        # Delete the geldigOp querystring, which contains the date the pand was retrieved.
+        # It's still the same pand, but might a different representation on another date.
+        # Dropping the QS allows the zaakobject list filter to work when passing in the
+        # object to find related zaken.
+        if "geldigOp" in query_dict:
+            del query_dict["geldigOp"]
+
+        query = urlencode(query_dict, doseq=True)
+        return urlunsplit((scheme, netloc, path, query, fragment))
+
     def perform(self) -> dict:
         # prep client
         zrc_client = self.get_client(APITypes.zrc)
@@ -358,7 +374,7 @@ class RelatePand(ZGWWorkUnit):
         bodies = [
             {
                 "zaak": zaak_url,
-                "object": pand_url,
+                "object": self._clean_url(pand_url),
                 "objectType": "pand",
                 "relatieomschrijving": "",  # TODO -> process var?
             }
