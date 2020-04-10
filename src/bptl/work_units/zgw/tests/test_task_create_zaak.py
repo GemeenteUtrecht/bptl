@@ -1,10 +1,9 @@
-import json
-
 from django.test import TestCase
 
 import requests_mock
 
 from bptl.camunda.models import ExternalTask
+from bptl.camunda.tests.utils import json_variable
 from bptl.tasks.tests.factories import TaskMappingFactory
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
@@ -32,6 +31,42 @@ RESPONSES = {
         "einddatum": None,
     },
 }
+
+
+def mock_statustypen_get(m):
+    m.get(
+        f"{ZTC_URL}statustypen?zaaktype={ZAAKTYPE}",
+        json={
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    "url": STATUSTYPE,
+                    "omschrijving": "initial",
+                    "zaaktype": ZAAKTYPE,
+                    "volgnummer": 1,
+                    "isEindstatus": False,
+                    "informeren": False,
+                },
+            ],
+        },
+    )
+
+
+def mock_status_post(m):
+    m.post(
+        f"{ZRC_URL}statussen",
+        status_code=201,
+        json={
+            "url": STATUS,
+            "uuid": "b7218c76-7478-41e9-a088-54d2f914a713",
+            "zaak": ZAAK,
+            "statustype": STATUSTYPE,
+            "datumStatusGezet": "2020-01-16T00:00:00.000000Z",
+            "statustoelichting": "",
+        },
+    )
 
 
 @requests_mock.Mocker()
@@ -65,51 +100,19 @@ class CreateZaakTaskTests(TestCase):
                     "valueInfo": {},
                 },
                 "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
-                "services": {
-                    "type": "json",
-                    "value": json.dumps(
-                        {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
-                    ),
-                },
+                "services": json_variable(
+                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                ),
             },
         )
 
     def test_create_zaak(self, m):
         mock_service_oas_get(m, ZTC_URL, "ztc")
         mock_service_oas_get(m, ZRC_URL, "zrc")
-        m.get(
-            f"{ZTC_URL}statustypen?zaaktype={ZAAKTYPE}",
-            json={
-                "count": 1,
-                "next": None,
-                "previous": None,
-                "results": [
-                    {
-                        "url": STATUSTYPE,
-                        "omschrijving": "initial",
-                        "zaaktype": ZAAKTYPE,
-                        "volgnummer": 1,
-                        "isEindstatus": False,
-                        "informeren": False,
-                    },
-                ],
-            },
-        )
-        m.post(
-            f"{ZRC_URL}zaken", status_code=201, json=RESPONSES[ZAAK],
-        )
-        m.post(
-            f"{ZRC_URL}statussen",
-            status_code=201,
-            json={
-                "url": STATUS,
-                "uuid": "b7218c76-7478-41e9-a088-54d2f914a713",
-                "zaak": ZAAK,
-                "statustype": STATUSTYPE,
-                "datumStatusGezet": "2020-01-16T00:00:00.000000Z",
-                "statustoelichting": "",
-            },
-        )
+
+        mock_statustypen_get(m)
+        m.post(f"{ZRC_URL}zaken", status_code=201, json=RESPONSES[ZAAK])
+        mock_status_post(m)
 
         task = CreateZaakTask(self.fetched_task)
 
@@ -131,3 +134,30 @@ class CreateZaakTaskTests(TestCase):
         )
         self.assertEqual(request_zaak.headers["X-NLX-Request-Process-Id"], "12345")
         self.assertEqual(request_zaak.headers["Authorization"], "Bearer 12345")
+
+    def test_extra_variables(self, m):
+        self.fetched_task.variables["zaakDetails"] = json_variable(
+            {"omschrijving": "foo",}
+        )
+        self.fetched_task.save(0)
+
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+
+        mock_statustypen_get(m)
+        response = RESPONSES[ZAAK].copy()
+        response["omschrijving"] = "foo"
+        m.post(f"{ZRC_URL}zaken", status_code=201, json=response)
+        mock_status_post(m)
+        task = CreateZaakTask(self.fetched_task)
+
+        task.perform()
+
+        request_zaak = next(
+            filter(
+                lambda x: x.url == f"{ZRC_URL}zaken" and x.method == "POST",
+                m.request_history,
+            )
+        )
+
+        self.assertEqual(request_zaak.json()["omschrijving"], "foo")

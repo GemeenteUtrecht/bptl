@@ -9,7 +9,7 @@ from bptl.camunda.tests.factories import ExternalTaskFactory
 from bptl.tasks.tests.factories import TaskMappingFactory
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
-from ..tasks import ZGWWorkUnit
+from ..tasks.base import ZGWWorkUnit
 from .utils import mock_service_oas_get
 
 ZRC_URL = "https://some.zrc.nl/api/v1/"

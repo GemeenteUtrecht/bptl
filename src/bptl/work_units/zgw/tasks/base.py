@@ -4,11 +4,11 @@ from bptl.tasks.base import WorkUnit
 from bptl.tasks.models import TaskMapping
 from bptl.work_units.zgw.models import DefaultService
 
-from .client import MultipleServices, NoAuth, NoService
+from ..client import MultipleServices, NoAuth, NoService
 
 
 class ZGWWorkUnit(WorkUnit):
-    def get_client(self, service_type):
+    def get_client(self, service_type: str):
         """
         create ZGW client with requested parameters
         """

@@ -51,7 +51,7 @@ class ExecuteCommandTests(TestCase):
 
         mapping = TaskMapping.objects.create(
             topic_name="zaak-initialize",
-            callback="bptl.work_units.zgw.tasks.CreateZaakTask",
+            callback="bptl.work_units.zgw.tasks.zaak.CreateZaakTask",
         )
         DefaultServiceFactory.create(
             task_mapping=mapping,

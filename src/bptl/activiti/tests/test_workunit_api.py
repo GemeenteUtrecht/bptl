@@ -15,14 +15,14 @@ from .utils import TokenAuthMixin
 
 class WorkUnitTestCase(TokenAuthMixin, APITestCase):
     @patch(
-        "bptl.work_units.zgw.tasks.CreateZaakTask.create_zaak",
+        "bptl.work_units.zgw.tasks.zaak.CreateZaakTask.create_zaak",
         return_value={"url": "zaak_url", "identificatie": "foo"},
     )
-    @patch("bptl.work_units.zgw.tasks.CreateZaakTask.create_status")
+    @patch("bptl.work_units.zgw.tasks.zaak.CreateZaakTask.create_status")
     def test_post_workunit(self, *mocks):
         TaskMapping.objects.create(
             topic_name="zaak-initialize",
-            callback="bptl.work_units.zgw.tasks.CreateZaakTask",
+            callback="bptl.work_units.zgw.tasks.zaak.CreateZaakTask",
         )
 
         data = {"topic": "zaak-initialize", "vars": {"someOtherVar": 123}}
