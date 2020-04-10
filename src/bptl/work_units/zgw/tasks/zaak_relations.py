@@ -1,7 +1,10 @@
+from concurrent import futures
+from typing import Dict
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from zgw_consumers.constants import APITypes
 
+from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
@@ -15,8 +18,9 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaak``: full URL of the ZAAK
-    * ``informatieobject``: full URL of the INFORMATIEOBJECT
+    * ``zaakUrl``: full URL of the ZAAK
+    * ``informatieobject``: full URL of the INFORMATIEOBJECT. If empty, no relation
+       will be created.
     * ``services``: JSON Object of connection details for ZGW services:
 
         .. code-block:: json
@@ -35,17 +39,27 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
     """
 
     def relate_document(self) -> dict:
+        variables = self.task.get_variables()
+
+        informatieobject = check_variable(
+            variables, "informatieobject", empty_allowed=True
+        )
+        if not informatieobject:
+            return None
+
+        # recently renamed zaak -> zaakUrl: handle correctly
+        zaak = variables.get("zaakUrl", variables.get("zaak"))
+
         zrc_client = self.get_client(APITypes.zrc)
-        data = {
-            "zaak": self.task.get_variables()["zaak"],
-            "informatieobject": self.task.get_variables()["informatieobject"],
-        }
+        data = {"zaak": zaak, "informatieobject": informatieobject}
         zio = zrc_client.create("zaakinformatieobject", data)
         return zio
 
-    def perform(self):
-        resultaat = self.relate_document()
-        return {"zaakinformatieobject": resultaat["url"]}
+    def perform(self) -> Dict[str, str]:
+        zio = self.relate_document()
+        if zio is None:
+            return {}
+        return {"zaakinformatieobject": zio["url"]}
 
 
 @register
@@ -100,8 +114,9 @@ class RelatePand(ZGWWorkUnit):
 
         # get vars
         variables = self.task.get_variables()
-        zaak_url = variables["zaakUrl"]
-        pand_urls = variables["panden"]
+
+        zaak_url = check_variable(variables, "zaakUrl")
+        pand_urls = check_variable(variables, "panden", empty_allowed=True)
 
         # See https://zaken-api.vng.cloud/api/v1/schema/#operation/zaakobject_create
         bodies = [
@@ -116,8 +131,10 @@ class RelatePand(ZGWWorkUnit):
 
         headers = get_nlx_headers(variables)
 
-        # TODO: concurrent.futures this
-        for body in bodies:
+        def _api_call(body):
             zrc_client.create("zaakobject", body, request_kwargs={"headers": headers})
+
+        with futures.ThreadPoolExecutor() as executor:
+            executor.map(_api_call, bodies)
 
         return {}
