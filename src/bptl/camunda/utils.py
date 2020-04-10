@@ -3,6 +3,7 @@ Module for Camunda API interaction.
 """
 import json
 import logging
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
@@ -124,32 +125,53 @@ def fail_task(task: ExternalTask, reason: str = "") -> None:
     camunda.post(f"external-task/{task.task_id}/failure", json=body)
 
 
+def noop(val):
+    return val
+
+
+TYPE_MAP = {
+    bool: ("Boolean", noop),
+    date: (
+        "String",
+        lambda d: d.isoformat(),
+    ),  # Date object requires time information, which we don't have
+    datetime: ("Date", lambda d: d.isoformat()),
+    int: ("Integer", noop),
+    float: ("Double", noop),
+    str: ("String", noop),
+    type(None): ("Null", noop),
+    dict: ("Json", json.dumps),
+    list: ("Json", json.dumps),
+}
+
+
+REVERSE_TYPE_MAP = {
+    "date": parser.parse,
+    "json": json.loads,
+    "integer": int,
+    "short": int,
+    "long": int,
+}
+
+
 def serialize_variable(value: Any) -> Dict[str, JSONPrimitive]:
-    if isinstance(value, str):
-        return {"type": "String", "value": value}
+    val_type = type(value)
+    if val_type not in TYPE_MAP:
+        raise NotImplementedError(f"Type {val_type} is not implemented yet")
 
-    if value is None:
-        return {"type": "Null", "value": "null"}
-
-    if isinstance(value, (dict, list)):
-        serialized = json.dumps(value)
-        return {"type": "json", "value": serialized}
-
-    if isinstance(value, int):
-        return {"type": "Integer", "value": value}
-
-    raise NotImplementedError(f"Type {type(value)} is not implemented yet")
+    type_name, converter = TYPE_MAP[val_type]
+    return {
+        "type": type_name,
+        "value": converter(value),
+    }
 
 
 def deserialize_variable(variable: Dict[str, Any]) -> Any:
-    var_type = variable.get("type", "String").lower()
-    if var_type == "string":
-        return variable["value"]
+    var_type = variable.get("type", "String")
+    converter = REVERSE_TYPE_MAP.get(var_type.lower())
+    if converter:
+        value = converter(variable["value"])
+    else:
+        value = variable["value"]  # a JSON primitive that maps to proper python objects
 
-    if var_type in ("integer", "short", "long"):
-        return int(variable["value"])
-
-    if var_type == "json":
-        return json.loads(variable["value"])
-
-    raise NotImplementedError(f"Type {var_type} is not implemented yet")
+    return value

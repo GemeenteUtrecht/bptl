@@ -1,4 +1,3 @@
-import json
 from io import StringIO
 from unittest.mock import patch
 
@@ -15,6 +14,7 @@ from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
 from .factories import ExternalTaskFactory
+from .utils import json_variable
 
 ZTC_URL = "https://some.ztc.nl/api/v1/"
 ZRC_URL = "https://some.zrc.nl/api/v1/"
@@ -72,12 +72,9 @@ class ExecuteCommandTests(TestCase):
             variables={
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
-                "services": {
-                    "type": "json",
-                    "value": json.dumps(
-                        {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
-                    ),
-                },
+                "services": json_variable(
+                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
+                ),
             },
         )
         # mock camunda
@@ -140,7 +137,7 @@ class ExecuteCommandTests(TestCase):
                     "value": "ZAAK-2020-0000000013",
                     "type": "String",
                 },
-                "zaak": {"value": json.dumps(RESPONSES[ZAAK]), "type": "json"},
+                "zaak": json_variable(RESPONSES[ZAAK]),
             },
         )
 
@@ -151,12 +148,9 @@ class ExecuteCommandTests(TestCase):
             variables={
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
-                "services": {
-                    "type": "json",
-                    "value": json.dumps(
-                        {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
-                    ),
-                },
+                "services": json_variable(
+                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                ),
             },
         )
         # mock openzaak services
