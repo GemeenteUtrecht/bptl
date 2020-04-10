@@ -138,3 +138,8 @@ class RelatePand(ZGWWorkUnit):
             executor.map(_api_call, bodies)
 
         return {}
+
+
+class CreateEigenschap(ZGWWorkUnit):
+    # TODO: validate formaat eigenschap as declared by ZTC
+    pass
