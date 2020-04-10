@@ -8,6 +8,7 @@ from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
+from ..utils import get_paginated_results
 from .base import ZGWWorkUnit
 
 
@@ -141,5 +142,86 @@ class RelatePand(ZGWWorkUnit):
 
 
 class CreateEigenschap(ZGWWorkUnit):
+    """
+    Set a particular EIGENSCHAP value for a given zaak.
+
+    Unique eigenschappen can be defined for a given zaaktype. This task looks up the
+    eigenschap reference for the given zaak and will set the provided value.
+
+    **Required process variables**
+
+    * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. The eigenschap is created
+      for this zaak.
+    * ``eigenschap``: a JSON Object containing the name and value:
+
+      .. code-block:: json
+
+        {
+            "naam": "eigenschapnaam as in zaaktypecatalogus",
+            "value": "<value to set>"
+        }
+
+
+    * ``services``: JSON Object of connection details for ZGW services:
+
+      .. code-block:: json
+
+        {
+            "<ztc alias>": {"jwt": "Bearer <JWT value>"}
+            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
+        }
+
+    **Optional process variables**
+
+    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
+    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
+    **Sets no process variables**
+    """
+
     # TODO: validate formaat eigenschap as declared by ZTC
-    pass
+
+    def perform(self) -> dict:
+        # prep clients
+        ztc_client = self.get_client(APITypes.ztc)
+        zrc_client = self.get_client(APITypes.zrc)
+
+        # get vars
+        variables = self.task.get_variables()
+
+        zaak_url = check_variable(variables, "zaakUrl")
+        zaak_uuid = zaak_url.split("/")[-1]
+        eigenschap = check_variable(variables, "eigenschap", empty_allowed=True)
+        if not eigenschap:
+            return {}
+
+        naam = check_variable(eigenschap, "naam")
+        waarde = check_variable(eigenschap, "waarde")
+
+        # fetch zaak meta-data
+        zaak = zrc_client.retrieve("zaak", uuid=zaak_uuid)
+
+        # fetch eigenschappen
+        eigenschappen = get_paginated_results(
+            ztc_client, "eigenschap", query_params={"zaaktype": zaak["zaaktype"]}
+        )
+        eigenschap_url = next(
+            (
+                eigenschap["url"]
+                for eigenschap in eigenschappen
+                if eigenschap["naam"] == naam
+            )
+        )
+
+        zrc_client.create(
+            "zaakeigenschap",
+            {"eigenschap": eigenschap_url, "waarde": waarde,},
+            zaak_uuid=zaak_uuid,
+            request_kwargs={"headers": get_nlx_headers(variables)},
+        )
+
+        return {}
