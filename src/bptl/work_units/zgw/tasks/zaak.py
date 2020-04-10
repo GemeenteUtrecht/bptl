@@ -20,6 +20,8 @@ class CreateZaakTask(ZGWWorkUnit):
     The initial status is the STATUSTYPE with ``volgnummer`` equal to 1 for the
     ZAAKTYPE.
 
+    By default, the ``registratiedatum`` and ``startdatum`` are set to todays date.
+
     **Required process variables**
 
     * ``zaaktype``: the full URL of the ZAAKTYPE
@@ -37,6 +39,11 @@ class CreateZaakTask(ZGWWorkUnit):
 
     * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
     * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+    * ``zaakDetails``: a JSON object with extra properties for zaak creation. See
+      https://zaken-api.vng.cloud/api/v1/schema/#operation/zaak_create for the available
+      properties. Note that you can use these to override ``zaaktype``, ``bronorganisatie``,
+      ``verantwoordelijkeOrganisatie``, ``registratiedatum`` and ``startdatum`` if you'd
+      require so.
 
     **Optional process variables (Camunda exclusive)**
 
@@ -52,15 +59,17 @@ class CreateZaakTask(ZGWWorkUnit):
     def create_zaak(self) -> dict:
         variables = self.task.get_variables()
 
+        extra_props = variables.get("zaakDetails", {})
+
         client_zrc = self.get_client(APITypes.zrc)
         today = date.today().strftime("%Y-%m-%d")
         data = {
             "zaaktype": variables["zaaktype"],
-            "vertrouwelijkheidaanduiding": "openbaar",
             "bronorganisatie": variables["organisatieRSIN"],
             "verantwoordelijkeOrganisatie": variables["organisatieRSIN"],
             "registratiedatum": today,
             "startdatum": today,
+            **extra_props,
         }
 
         headers = get_nlx_headers(variables)
