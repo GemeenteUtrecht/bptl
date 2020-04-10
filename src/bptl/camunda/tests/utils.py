@@ -1,3 +1,7 @@
+import json
+from typing import Dict, Union
+
+
 def get_fetch_and_lock_response(topic="createOrder", variables=None):
     return [
         {
@@ -20,3 +24,8 @@ def get_fetch_and_lock_response(topic="createOrder", variables=None):
             "variables": variables or {},
         }
     ]
+
+
+def json_variable(data: Union[dict, list]) -> Dict[str, str]:
+    serialized = json.dumps(data)
+    return {"type": "Json", "value": serialized}
