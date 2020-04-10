@@ -203,12 +203,15 @@ class CreateEigenschap(ZGWWorkUnit):
         naam = check_variable(eigenschap, "naam")
         waarde = check_variable(eigenschap, "waarde")
 
-        # fetch zaak meta-data
-        zaak = zrc_client.retrieve("zaak", uuid=zaak_uuid)
+        # fetch zaaktype - either from process variable or derive from zaak
+        zaaktype = variables.get("zaaktype")
+        if zaaktype is None or not isinstance(zaaktype, str):
+            zaak = zrc_client.retrieve("zaak", uuid=zaak_uuid)
+            zaaktype = zaak["zaaktype"]
 
         # fetch eigenschappen
         eigenschappen = get_paginated_results(
-            ztc_client, "eigenschap", query_params={"zaaktype": zaak["zaaktype"]}
+            ztc_client, "eigenschap", query_params={"zaaktype": zaaktype}
         )
         eigenschap_url = next(
             (
@@ -220,7 +223,7 @@ class CreateEigenschap(ZGWWorkUnit):
 
         zrc_client.create(
             "zaakeigenschap",
-            {"eigenschap": eigenschap_url, "waarde": waarde,},
+            {"zaak": zaak_url, "eigenschap": eigenschap_url, "waarde": waarde,},
             zaak_uuid=zaak_uuid,
             request_kwargs={"headers": get_nlx_headers(variables)},
         )

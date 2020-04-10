@@ -108,5 +108,9 @@ class CreateDocumentRelationTaskTests(TestCase):
 
         self.assertEqual(
             m.last_request.json(),
-            {"eigenschap": f"{ZTC_URL}eigenschappen/start", "waarde": "2020-05-01",},
+            {
+                "zaak": ZAAK,
+                "eigenschap": f"{ZTC_URL}eigenschappen/start",
+                "waarde": "2020-05-01",
+            },
         )
