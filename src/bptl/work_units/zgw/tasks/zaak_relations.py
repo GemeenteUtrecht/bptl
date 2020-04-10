@@ -141,6 +141,7 @@ class RelatePand(ZGWWorkUnit):
         return {}
 
 
+@register
 class CreateEigenschap(ZGWWorkUnit):
     """
     Set a particular EIGENSCHAP value for a given zaak.
