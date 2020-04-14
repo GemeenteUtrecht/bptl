@@ -67,4 +67,4 @@ class CreateResultaatTaskTests(TestCase):
 
         result = task.perform()
 
-        self.assertEqual(result, {"resultaat": RESULTAAT})
+        self.assertEqual(result, {"resultaatUrl": RESULTAAT})

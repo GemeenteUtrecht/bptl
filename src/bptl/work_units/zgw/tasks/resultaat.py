@@ -1,5 +1,6 @@
 from zgw_consumers.constants import APITypes
 
+from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from .base import ZGWWorkUnit
@@ -15,7 +16,7 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaak``: full URL of the ZAAK to set the RESULTAAT for
+    * ``zaakUrl``: full URL of the ZAAK to set the RESULTAAT for
     * ``resultaattype``: full URL of the RESULTAATTYPE to set
     * ``services``: JSON Object of connection details for ZGW services:
 
@@ -35,15 +36,23 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     **Sets the process variables**
 
-    * ``resultaat``: the full URL of the created RESULTAAT
+    * ``resultaatUrl``: the full URL of the created RESULTAAT
     """
 
     def create_resultaat(self):
+        variables = self.task.get_variables()
+
         zrc_client = self.get_client(APITypes.zrc)
+
+        # recently renamed zaak -> zaakUrl: handle correctly
+        zaak = variables.get("zaakUrl", variables.get("zaak"))
+        resultaattype = check_variable(variables, "resultaattype")
+        toelichting = variables.get("toelichting", "")
+
         data = {
-            "zaak": self.task.get_variables()["zaak"],
-            "resultaattype": self.task.get_variables()["resultaattype"],
-            "toelichting": self.task.get_variables().get("toelichting", ""),
+            "zaak": zaak,
+            "resultaattype": resultaattype,
+            "toelichting": toelichting,
         }
 
         resultaat = zrc_client.create("resultaat", data)
@@ -51,4 +60,4 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     def perform(self):
         resultaat = self.create_resultaat()
-        return {"resultaat": resultaat["url"]}
+        return {"resultaatUrl": resultaat["url"]}
