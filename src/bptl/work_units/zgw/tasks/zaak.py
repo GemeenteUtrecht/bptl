@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from zgw_consumers.constants import APITypes
 
+from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
@@ -115,7 +116,7 @@ class CloseZaakTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaak``: full URL of the ZAAK
+    * ``zaakUrl``: full URL of the ZAAK
     * ``services``: JSON Object of connection details for ZGW services:
 
         .. code-block:: json
@@ -151,26 +152,28 @@ class CloseZaakTask(ZGWWorkUnit):
         create_resultaat_work_unit.create_resultaat()
 
     def close_zaak(self) -> dict:
+        variables = self.task.get_variables()
+
         # build clients
         zrc_client = self.get_client(APITypes.zrc)
         ztc_client = self.get_client(APITypes.ztc)
 
         # get statustype to close zaak
-        zaak = self.task.get_variables()["zaak"]
-        zaaktype = zrc_client.retrieve("zaak", zaak)["zaaktype"]
+        zaak_url = variables.get("zaakUrl", variables.get("zaak"))
+        zaaktype = zrc_client.retrieve("zaak", url=zaak_url)["zaaktype"]
         statustypen = ztc_client.list("statustype", {"zaaktype": zaaktype})["results"]
         statustype = next(filter(lambda x: x["isEindstatus"] is True, statustypen))
 
         # create status to close zaak
         data = {
-            "zaak": zaak,
+            "zaak": zaak_url,
             "statustype": statustype["url"],
             "datumStatusGezet": timezone.now().isoformat(),
         }
         zrc_client.create("status", data)
 
         # get zaak to receive calculated variables
-        zaak_closed = zrc_client.retrieve("zaak", zaak)
+        zaak_closed = zrc_client.retrieve("zaak", url=zaak_url)
         return zaak_closed
 
     def perform(self):
