@@ -4,5 +4,6 @@ from .zaak import CloseZaakTask, CreateZaakTask  # noqa
 from .zaak_relations import (  # noqa
     CreateEigenschap,
     RelateDocumentToZaakTask,
+    RelateerZaak,
     RelatePand,
 )

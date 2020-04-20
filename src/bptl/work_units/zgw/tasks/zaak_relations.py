@@ -229,3 +229,73 @@ class CreateEigenschap(ZGWWorkUnit):
         )
 
         return {}
+
+
+@register
+class RelateerZaak(ZGWWorkUnit):
+    """
+    Relate a zaak to another zaak.
+
+    Different kinds of relations are possible, specifying the relation type will ensure
+    this is done correctly. Existing relations are not affected - if there are any, they
+    are retained and the new relation is added.
+
+    **Required process variables**
+
+    * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. This zaak receives the
+      relations.
+    * ``bijdrageZaakUrl``: URL reference to another ZAAK in a Zaken API, to be related
+      to ``zaakUrl``.
+    * ``bijdrageAard``: the type of relation. One of ``vervolg``, ``onderwerp`` or
+      ``bijdrage``.
+    * ``services``: JSON Object of connection details for ZGW services:
+
+      .. code-block:: json
+
+        {
+            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
+        }
+
+    **Optional process variables**
+
+    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
+    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
+    **Sets no process variables**
+    """
+
+    def perform(self) -> dict:
+        # prep clients
+        zrc_client = self.get_client(APITypes.zrc)
+
+        # get vars
+        variables = self.task.get_variables()
+
+        zaak_url = check_variable(variables, "zaakUrl")
+        bijdrage_zaak_url = check_variable(variables, "bijdrageZaakUrl")
+        bijdrage_aard = check_variable(variables, "bijdrageAard")
+
+        if bijdrage_aard not in ["vervolg", "onderwerp", "bijdrage"]:
+            raise ValueError(f"Unknown 'bijdrage_aard': '{bijdrage_aard}'")
+
+        headers = get_nlx_headers(variables)
+
+        zaak = zrc_client.retrieve("zaak", url=zaak_url, request_headers=headers)
+
+        relevante_andere_zaken = zaak["relevanteAndereZaken"]
+        relevante_andere_zaken.append(
+            {"url": bijdrage_zaak_url, "aardRelatie": bijdrage_aard,}
+        )
+
+        zrc_client.partial_update(
+            "zaak",
+            {"relevanteAndereZaken": relevante_andere_zaken},
+            url=zaak_url,
+            request_headers=headers,
+        )
+
+        return {}
