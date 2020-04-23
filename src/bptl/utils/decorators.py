@@ -1,5 +1,6 @@
 import functools
 import traceback
+from typing import Optional
 
 from timeline_logger.models import TimelineLog
 
@@ -38,3 +39,34 @@ def save_and_log(status=Statuses.performed):
         return wrapper
 
     return inner
+
+
+def retry(times=3, exceptions=(Exception,), condition: callable = lambda exc: True):
+    """
+    Retry the decorated callable up to ``times`` if it raises a known exception.
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            tries_left = times + 1
+
+            while tries_left > 0:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as exc:
+                    # the extra exception check doesn't pass, so consider it an
+                    # unexpected exception
+                    if not condition(exc):
+                        raise
+                    else:  # expected exception, retry (if there are retries left)
+                        tries_left -= 1
+
+                    # if we've reached the maximum number of retries, raise the
+                    # exception again
+                    if tries_left < 1:
+                        raise
+
+        return wrapper
+
+    return decorator

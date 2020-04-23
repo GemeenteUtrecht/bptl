@@ -6,6 +6,7 @@ https://docs.camunda.org/manual/7.12/reference/rest/external-task/post-complete/
 """
 from django.test import TestCase
 
+import requests
 import requests_mock
 from django_camunda.models import CamundaConfig
 
@@ -95,3 +96,17 @@ class CompleteTests(TestCase):
 
         last_request = m.last_request
         self.assertEqual(last_request.url, "https://callback.example.com/foo")
+
+    def test_retry_behaviour(self, m):
+        task = ExternalTask.objects.create(
+            worker_id="test-worker-id", task_id="test-task-id", variables={},
+        )
+        m.post(
+            "https://some.camunda.com/engine-rest/external-task/test-task-id/complete",
+            status_code=500,
+        )
+
+        with self.assertRaises(requests.HTTPError):
+            complete_task(task)
+
+        self.assertEqual(len(m.request_history), 4)

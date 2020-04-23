@@ -12,6 +12,7 @@ from django_camunda.client import get_client
 from django_camunda.types import JSONPrimitive
 
 from bptl.tasks.models import TaskMapping
+from bptl.utils.decorators import retry
 from bptl.utils.typing import Object, ProcessVariables
 
 from .models import ExternalTask, get_worker_id
@@ -62,6 +63,11 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
     return (worker_id, len(fetched), fetched)
 
 
+@retry(
+    times=3,
+    exceptions=(requests.HTTPError,),
+    condition=lambda exc: exc.response.status_code == 500,
+)
 def complete_task(
     task: ExternalTask, variables: Optional[ProcessVariables] = None
 ) -> None:
@@ -74,6 +80,13 @@ def complete_task(
 
     Note that we currently only support setting process variables and not local task
     variables.
+
+    Camunda performs optimistic table locking, see the `docs`_. This results in HTTP
+    500 exceptions being thrown when concurrent mutations to the process instance
+    happen. The recommended way to deal with this by Camunda is to retry the operation
+    to reach eventual consistency, which is why the ``@retry`` decorator applies.
+
+    .. _docs: https://docs.camunda.org/manual/latest/user-guide/process-engine/transactions-in-processes/#common-places-where-optimistic-locking-exceptions-are-thrown  # noqa
     """
     task_variables = task.get_variables()
     camunda = get_client()
