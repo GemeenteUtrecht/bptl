@@ -17,7 +17,8 @@
 
 
 {% block content %}
-<h4>Tasks by their statuses:</h4>
+<h4>Tasks by their statuses</h4>
+<small id="task-statuses-since"></small>
 <article class="dashboard">
     <div class="dashboard__chart" id="piechart" data-url="{% url 'dashboard:dashboard-api:aggregate' %}">
     </div>

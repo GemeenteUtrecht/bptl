@@ -127,7 +127,7 @@ const renderSelectedData = (node, data, checkboxes) => {
     const use_data = engines.reduce((acc, engine) => {
       const engineData = data.items[engine] || {};
       Object.keys(engineData).forEach(status => {
-        acc[status] = (acc[status] || 0) + engineData[status]
+        acc[status] = (acc[status] || 0) + engineData[status];
       });
       return acc;
     }, {});
@@ -138,6 +138,7 @@ const renderSelectedData = (node, data, checkboxes) => {
 const init = () => {
     const chartNode = document.getElementById(PIE_CHART_ID);
     const checkboxes = document.querySelectorAll('input[name=engine]');
+    const sinceNode = document.getElementById('task-statuses-since');
 
     if (!chartNode) {
         return;
@@ -150,6 +151,10 @@ const init = () => {
     request(url)
         .then(response => {
           statusData = JSON.parse(response);
+
+          const date = new Date(statusData.since);
+          sinceNode.innerText = `Since ${date.toLocaleString()}`;
+
           renderPieChart(chartNode, statusData.total);
         });
 
