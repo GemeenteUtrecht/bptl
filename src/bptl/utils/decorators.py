@@ -1,10 +1,13 @@
 import functools
+import logging
+import time
 import traceback
-from typing import Optional
 
 from timeline_logger.models import TimelineLog
 
 from .constants import Statuses
+
+logger = logging.getLogger(__name__)
 
 
 def save_and_log(status=Statuses.performed):
@@ -41,7 +44,9 @@ def save_and_log(status=Statuses.performed):
     return inner
 
 
-def retry(times=3, exceptions=(Exception,), condition: callable = lambda exc: True):
+def retry(
+    times=3, exceptions=(Exception,), condition: callable = lambda exc: True, delay=1.0
+):
     """
     Retry the decorated callable up to ``times`` if it raises a known exception.
     """
@@ -50,6 +55,8 @@ def retry(times=3, exceptions=(Exception,), condition: callable = lambda exc: Tr
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             tries_left = times + 1
+
+            logger.info("Tries left: %d, %r", tries_left, func)
 
             while tries_left > 0:
                 try:
@@ -65,7 +72,10 @@ def retry(times=3, exceptions=(Exception,), condition: callable = lambda exc: Tr
                     # if we've reached the maximum number of retries, raise the
                     # exception again
                     if tries_left < 1:
+                        logger.error("Task didn't succeed after %d retries", times)
                         raise
+
+                time.sleep(delay)
 
         return wrapper
 
