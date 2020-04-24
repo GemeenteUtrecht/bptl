@@ -34,8 +34,8 @@ class RelateerZaakTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaakUrl": {"type": "String", "value": ZAAK, "valueInfo": {}},
-                "bijdrageZaakUrl": {"type": "String", "value": BIJDRAGE_ZAAK},
+                "zaakUrl": {"type": "String", "value": BIJDRAGE_ZAAK, "valueInfo": {}},
+                "hoofdZaakUrl": {"type": "String", "value": ZAAK},
                 "bijdrageAard": {"type": "String", "value": "bijdrage"},
                 "services": json_variable({"ZRC": {"jwt": "Bearer 12345"}}),
             },

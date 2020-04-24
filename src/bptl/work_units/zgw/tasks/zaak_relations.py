@@ -242,9 +242,9 @@ class RelateerZaak(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. This zaak receives the
+    * ``hoofdZaakUrl``: URL reference to a ZAAK in a Zaken API. This zaak receives the
       relations.
-    * ``bijdrageZaakUrl``: URL reference to another ZAAK in a Zaken API, to be related
+    * ``zaakUrl``: URL reference to another ZAAK in a Zaken API, to be related
       to ``zaakUrl``.
     * ``bijdrageAard``: the type of relation. One of ``vervolg``, ``onderwerp`` or
       ``bijdrage``.
@@ -275,8 +275,8 @@ class RelateerZaak(ZGWWorkUnit):
         # get vars
         variables = self.task.get_variables()
 
-        zaak_url = check_variable(variables, "zaakUrl")
-        bijdrage_zaak_url = check_variable(variables, "bijdrageZaakUrl")
+        zaak_url = check_variable(variables, "hoofdZaakUrl")
+        bijdrage_zaak_url = check_variable(variables, "zaakUrl")
         bijdrage_aard = check_variable(variables, "bijdrageAard")
 
         if bijdrage_aard not in ["vervolg", "onderwerp", "bijdrage"]:
