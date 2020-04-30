@@ -299,3 +299,53 @@ class RelateerZaak(ZGWWorkUnit):
         )
 
         return {}
+
+
+@register
+class CreateZaakObject(ZGWWorkUnit):
+    """
+    Create a new ZAAKOBJECT for the ZAAK in the process.
+
+    **Required process variables**
+
+    * ``zaakUrl``: full URL of the ZAAK to create a new ZaakObject for
+    * ``objectUrl``: full URL of the OBJECT to set
+    * ``objectType``: type of the OBJECT
+    * ``services``: JSON Object of connection details for ZGW services:
+
+        .. code-block:: json
+
+          {
+              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
+          }
+
+    **Optional process variables**
+
+    * ``objectTypeOverige``: description of the OBJECT type if objectType = 'overige'
+    * ``relatieomschrijving``: description of relationship between ZAAK and OBJECT
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
+    **Sets the process variables**
+
+    * ``zaakobject``: the full URL of the created ZAAKOBJECT
+    """
+
+    def create_zaakobject(self) -> dict:
+        variables = self.task.get_variables()
+        zrc_client = self.get_client(APITypes.zrc)
+        data = {
+            "zaak": variables["zaakUrl"],
+            "object": variables["objectUrl"],
+            "objectType": variables["objectType"],
+            "objectTypeOverige": variables.get("objectTypeOverige", ""),
+            "relatieomschrijving": variables.get("relatieomschrijving", ""),
+        }
+        zaakobject = zrc_client.create("zaakobject", data)
+        return zaakobject
+
+    def perform(self):
+        zaakobject = self.create_zaakobject()
+        return {"zaakobject": zaakobject["url"]}
