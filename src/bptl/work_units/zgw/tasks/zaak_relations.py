@@ -348,4 +348,4 @@ class CreateZaakObject(ZGWWorkUnit):
 
     def perform(self):
         zaakobject = self.create_zaakobject()
-        return {"zaakobject": zaakobject["url"]}
+        return {"zaakObjectUrl": zaakobject["url"]}
