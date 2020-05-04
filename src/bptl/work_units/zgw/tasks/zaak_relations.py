@@ -330,16 +330,16 @@ class CreateZaakObject(ZGWWorkUnit):
 
     **Sets the process variables**
 
-    * ``zaakobject``: the full URL of the created ZAAKOBJECT
+    * ``zaakObjectUrl``: the full URL of the created ZAAKOBJECT
     """
 
     def create_zaakobject(self) -> dict:
         variables = self.task.get_variables()
         zrc_client = self.get_client(APITypes.zrc)
         data = {
-            "zaak": variables["zaakUrl"],
-            "object": variables["objectUrl"],
-            "objectType": variables["objectType"],
+            "zaak": check_variable(variables, "zaakUrl"),
+            "object": check_variable(variables, "objectUrl"),
+            "objectType": check_variable(variables, "objectType"),
             "objectTypeOverige": variables.get("objectTypeOverige", ""),
             "relatieomschrijving": variables.get("relatieomschrijving", ""),
         }

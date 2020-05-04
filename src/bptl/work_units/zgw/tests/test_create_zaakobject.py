@@ -64,7 +64,7 @@ class CreateZaakObjectTests(TestCase):
 
         result = task.perform()
 
-        self.assertEqual(result, {"zaakobject": zaakobject_url})
+        self.assertEqual(result, {"zaakObjectUrl": zaakobject_url})
         self.assertEqual(
             m.last_request.json(),
             {
