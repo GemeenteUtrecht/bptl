@@ -40,6 +40,10 @@
     <a class="index__item" href="{% url 'tasks:taskmapping-list' %}">
         {% trans "View task mappings" %}
     </a>
+    &nbsp;&bull;&nbsp;
+    <a class="index__item" href="{% url 'camunda:process-instance-list' %}">
+        {% trans "Camunda process instances" %}
+    </a>
 </article>
 
 <section class="index-admin">

@@ -11,31 +11,43 @@
 
 
 {% block content %}
-<table class="table">
-    <thead>
-        <tr>
-            <th class="table__header">#</th>
-            <th class="table__header">ID</th>
-            <th class="table__header">Process</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for instance in process_instances %}
+<form action="." method="post">
+    {% csrf_token %}
+    <table class="table">
+        <thead>
             <tr>
-                <th>{{ forloop.counter }}</th>
-                <td>{{ instance.id }}</td>
-                <td>
-                    {% if instance.definition_name %}
-                        <strong>
-                            {{ instance.definition_name }}
-                        </strong>
-                    {% else %}
-                        {{ instance.definition_id }}
-                    {% endif %}
-                </td>
+                <th class="table__header">#</th>
+                <th class="table__header">ID</th>
+                <th class="table__header" colspan="2">Process</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+
+        <tbody>
+            {% for instance in process_instances %}
+                <tr>
+                    <th>{{ forloop.counter }}</th>
+                    <td>{{ instance.id }}</td>
+                    <td>
+                        {% if instance.definition_name %}
+                            <strong>
+                                {{ instance.definition_name }}
+                            </strong>
+                        {% else %}
+                            {{ instance.definition_id }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <input
+                            type="checkbox"
+                            name="_delete"
+                            value="{{ instance.id }}"
+                        >
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button type="submit">Delete process instances</button>
+</form>
 {% endblock %}

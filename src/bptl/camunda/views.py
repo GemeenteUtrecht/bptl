@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from django_camunda.client import get_client
@@ -48,3 +49,18 @@ class ProcessInstanceListView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["process_instances"] = get_process_instances()
         return context
+
+    def post(self, request, *args, **kwargs):
+        camunda = get_client()
+        ids = request.POST.getlist("_delete")
+        camunda.post(
+            "process-instance/delete",
+            json={
+                "processInstanceIds": ids,
+                "deleteReason": f"BPTL initiated delete by {request.user}",
+                "skipCustomListeners": True,
+                "skipSubprocesses": False,
+                "failIfNotExists": False,
+            },
+        )
+        return redirect("camunda:process-instance-list")
