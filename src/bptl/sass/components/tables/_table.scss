@@ -1,0 +1,28 @@
+@import "../../lib/colors";
+
+$table-head-border-color: $color-secondary !default;
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  padding: 1em;
+
+  & > tbody > tr {
+    border-bottom: solid 1px #eee;
+  }
+
+  & &__header {
+    font-size: 1.3em;
+    font-weight: 400;
+    font-variant: small-caps;
+    text-align: left;
+    padding: 0.3em 0.5em 0.3em 0;
+    border-bottom: solid 1px $table-head-border-color;
+  }
+
+  & &__id-column {
+    font-weight: 600;
+    padding: 0.3em 0.5em 0.3em 0;
+    text-align: left;
+  }
+}

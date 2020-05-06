@@ -41,6 +41,7 @@ urlpatterns = [
     path("tasks/", include("bptl.dashboard.urls")),
     path("taskmappings/", include("bptl.tasks.urls")),
     path("api/", include("bptl.activiti.api.urls")),
+    path("camunda/", include("bptl.camunda.urls")),
 ]
 
 # NOTE: The staticfiles_urlpatterns also discovers static files (ie. no need to run collectstatic). Both the static
