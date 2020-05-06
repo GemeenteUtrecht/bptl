@@ -1,0 +1,41 @@
+{% extends "master.html" %}
+{% load i18n tasks %}
+
+{% block content-header-subtitle %}{% trans "Manage running process instances" %}{% endblock %}
+{% block content-header-title %}{% trans "Process instances" %}{% endblock %}
+{% block content-header-explanation %}
+{% blocktrans trimmed %}
+    View and manage running process instances in Camunda.
+{% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+<table class="table">
+    <thead>
+        <tr>
+            <th class="table__header">#</th>
+            <th class="table__header">ID</th>
+            <th class="table__header">Process</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for instance in process_instances %}
+            <tr>
+                <th>{{ forloop.counter }}</th>
+                <td>{{ instance.id }}</td>
+                <td>
+                    {% if instance.definition_name %}
+                        <strong>
+                            {{ instance.definition_name }}
+                        </strong>
+                    {% else %}
+                        {{ instance.definition_id }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
