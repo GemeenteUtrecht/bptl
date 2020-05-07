@@ -108,8 +108,11 @@ class CompleteTests(TestCase):
             status_code=500,
         )
 
-        with self.assertRaises(requests.HTTPError):
-            complete_task(task)
+        with patch("bptl.camunda.utils.fail_task"), patch(
+            "bptl.utils.decorators.time.sleep"
+        ):
+            with self.assertRaises(requests.HTTPError):
+                complete_task(task)
 
         self.assertEqual(len(m.request_history), 4)
 

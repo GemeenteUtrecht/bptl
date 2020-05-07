@@ -45,10 +45,16 @@ def save_and_log(status=Statuses.performed):
 
 
 def retry(
-    times=3, exceptions=(Exception,), condition: callable = lambda exc: True, delay=1.0
+    times=3,
+    exceptions=(Exception,),
+    condition: callable = lambda exc: True,
+    delay=1.0,
+    on_failure: callable = lambda exc, *args, **kwargs: None,
 ):
     """
     Retry the decorated callable up to ``times`` if it raises a known exception.
+
+    If the retries are all spent, then on_failure will be invoked.
     """
 
     def decorator(func):
@@ -73,6 +79,7 @@ def retry(
                     # exception again
                     if tries_left < 1:
                         logger.error("Task didn't succeed after %d retries", times)
+                        on_failure(exc, *args, **kwargs)
                         raise
 
                 time.sleep(delay)

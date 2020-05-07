@@ -63,10 +63,19 @@ def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
     return (worker_id, len(fetched), fetched)
 
 
+def fail_retried_complete(
+    exception: Exception,
+    task: ExternalTask,
+    variables: Optional[ProcessVariables] = None,
+):
+    fail_task(task, reason=exception.args[0])
+
+
 @retry(
     times=3,
     exceptions=(requests.HTTPError,),
     condition=lambda exc: exc.response.status_code == 500,
+    on_failure=fail_retried_complete,
 )
 def complete_task(
     task: ExternalTask, variables: Optional[ProcessVariables] = None
