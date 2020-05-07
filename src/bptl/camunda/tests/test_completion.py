@@ -4,6 +4,8 @@ Test the fetching and locking of external tasks in Camunda.
 Example requests and response taken from
 https://docs.camunda.org/manual/7.12/reference/rest/external-task/post-complete/
 """
+from unittest.mock import patch
+
 from django.test import TestCase
 
 import requests
@@ -110,3 +112,41 @@ class CompleteTests(TestCase):
             complete_task(task)
 
         self.assertEqual(len(m.request_history), 4)
+
+    def test_retries_failed_task_failed(self, m):
+        task = ExternalTask.objects.create(
+            worker_id="test-worker-id", task_id="test-task-id", variables={},
+        )
+        m.post(
+            "https://some.camunda.com/engine-rest/external-task/test-task-id/complete",
+            status_code=500,
+        )
+        m.post(
+            "https://some.camunda.com/engine-rest/external-task/test-task-id/failure",
+            status_code=204,
+        )
+
+        with patch("bptl.utils.decorators.time.sleep"):
+            with self.assertRaises(requests.HTTPError):
+                complete_task(task)
+
+        self.assertEqual(len(m.request_history), 5)
+
+        self.assertEqual(
+            m.last_request.url,
+            "https://some.camunda.com/engine-rest/external-task/test-task-id/failure",
+        )
+        self.assertEqual(m.last_request.method, "POST")
+        self.assertEqual(
+            m.last_request.json(),
+            {
+                "workerId": "test-worker-id",
+                "errorMessage": (
+                    "500 Server Error: None for url: https://some.camunda.com/engine-rest/"
+                    "external-task/test-task-id/complete"
+                ),
+                "errorDetail": "",
+                "retries": 0,
+                "retryTimeout": 0,
+            },
+        )
