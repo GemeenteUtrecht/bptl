@@ -23,7 +23,7 @@ django-appconf==1.0.3
 django-auth-adfs-db==0.2.0
 django-auth-adfs==1.3.1
 django-axes==5.2.2
-django-camunda==0.5.1
+django-camunda==0.6.0
 django-choices==1.7.1
 django-compat==1.0.15
 django-docutils==0.4.0
@@ -52,6 +52,7 @@ freezegun==0.3.12
 gemma-zds-client==0.13.1
 idna==2.8
 imagesize==1.2.0
+importlib-metadata==1.6.0
 inflection==0.3.1
 itypes==1.1.0
 jinja2==2.11.1
@@ -101,6 +102,7 @@ webob==1.8.5              # via webtest
 webtest==2.0.33           # via django-webtest
 wheel==0.29.0
 zgw-consumers==0.5.1
+zipp==3.1.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
