@@ -10,6 +10,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from django_camunda.client import get_client
+
 from bptl.tasks.models import BaseTask
 
 
@@ -56,3 +58,8 @@ class ExternalTask(BaseTask):
         from .utils import deserialize_variable
 
         return {k: deserialize_variable(v) for k, v in self.variables.items()}
+
+    def get_process_instance_id(self) -> str:
+        camunda = get_client()
+        task = camunda.get(f"external-task/{self.task_id}")
+        return task["processInstanceId"]
