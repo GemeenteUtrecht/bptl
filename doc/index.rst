@@ -33,6 +33,8 @@ voor verschillende processen.
 Uitbreiding met nieuwe (typen) van taken wordt eenvoudig, en het invullen van de
 procestaken met Camunda is technologie-onafhankelijk door het gebruik van External Tasks.
 
+Zie :ref:`architecture` (EN) voor een overzicht van de architectuur.
+
 Usage
 =====
 
@@ -50,6 +52,8 @@ Developers
 .. toctree::
    :maxdepth: 2
 
+   architecture
+   work_units
    general/index
    coding_style/index
    testing
