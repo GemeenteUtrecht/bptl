@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from django_camunda.client import get_client
+from django_camunda.utils import deserialize_variable
 
 from bptl.tasks.models import BaseTask
 
@@ -55,8 +56,6 @@ class ExternalTask(BaseTask):
         return self.lock_expires_at <= timezone.now()
 
     def get_variables(self) -> dict:
-        from django_camunda.utils import deserialize_variable
-
         return {k: deserialize_variable(v) for k, v in self.variables.items()}
 
     def get_process_instance_id(self) -> str:
