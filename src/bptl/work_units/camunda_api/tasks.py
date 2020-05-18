@@ -1,9 +1,13 @@
-from django_camunda.client import get_client
+from django_camunda.api import get_all_process_instance_variables
 from django_camunda.tasks import start_process
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import WorkUnit, check_variable
 from bptl.tasks.registry import register
+
+
+__all__ = ["CallActivity"]
 
 
 class CamundaRequired(Exception):
@@ -19,7 +23,7 @@ class CallActivity(WorkUnit):
 
     * ``subprocessDefinitionId``: id of process definition for target subprocess.
 
-    **Optional process variables (Camunda exclusive)**
+    **Optional process variables**
 
     * ``variablesMapping``: JSON object to map variables from the parent process
        to be sent into the new subprocess. If renaming is not needed, use the same
@@ -52,16 +56,19 @@ class CallActivity(WorkUnit):
     def perform(self) -> dict:
         variables = self.task.get_variables()
         subprocess_id = check_variable(variables, "subprocessDefinitionId")
-        mapping = variables.get("variableMapping", {})
+        mapping = variables.get("variablesMapping", {})
 
-        # get parent process instance variables
         if not isinstance(self.task, ExternalTask):
             raise CamundaRequired("Only Camunda tasks support CallActivity task")
-        instance_id = self.task.get_process_instance_id()
-        camunda = get_client()
-        instance_variables = camunda(f"process-instance/{instance_id}/variables")
 
-        variables = self.construct_variables(instance_variables, mapping)
+        # get parent process instance variables
+        instance_id = self.task.get_process_instance_id()
+        instance_variables = get_all_process_instance_variables(instance_id)
+        serialized_variables = {
+            k: serialize_variable(v) for k, v in instance_variables.items()
+        }
+
+        variables = self.construct_variables(serialized_variables, mapping)
 
         # start subprocess
         subprocess = start_process(process_id=subprocess_id, variables=variables)
