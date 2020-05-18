@@ -62,4 +62,4 @@ class ExternalTask(BaseTask):
     def get_process_instance_id(self) -> str:
         camunda = get_client()
         task = camunda.get(f"external-task/{self.task_id}")
-        return task["processInstanceId"]
+        return task["process_instance_id"]
