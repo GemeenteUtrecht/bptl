@@ -1,4 +1,5 @@
 from django_camunda.api import get_all_process_instance_variables
+from django_camunda.client import get_client
 from django_camunda.tasks import start_process
 from django_camunda.utils import serialize_variable
 
@@ -20,9 +21,14 @@ class CallActivity(WorkUnit):
 
     **Required process variables**
 
-    * ``subprocessDefinitionId``: id of process definition for target subprocess.
+    * ``subprocessDefinition``: process definition key for the target subprocess to
+       start.
 
     **Optional process variables**
+
+    * ``subprocessDefinitionVersion``: a specific version of the deployed subprocess.
+       defaults to ``latest`` if not set, which means the process will be kicked off by
+       definition key.
 
     * ``variablesMapping``: JSON object to map variables from the parent process
        to be sent into the new subprocess. If renaming is not needed, use the same
@@ -54,7 +60,8 @@ class CallActivity(WorkUnit):
 
     def perform(self) -> dict:
         variables = self.task.get_variables()
-        subprocess_id = check_variable(variables, "subprocessDefinitionId")
+        subprocess_key = check_variable(variables, "subprocessDefinition")
+        subprocess_version = variables.get("subprocessDefinitionVersion", "latest")
         mapping = variables.get("variablesMapping", {})
 
         if not isinstance(self.task, ExternalTask):
@@ -69,7 +76,23 @@ class CallActivity(WorkUnit):
 
         variables = self.construct_variables(serialized_variables, mapping)
 
+        # determine which process version
+        if subprocess_version == "latest":
+            start_process_kwargs = {"process_key": subprocess_key}
+        else:
+            client = get_client()
+            definitions = client.get(
+                "process-definition",
+                params={"key": subprocess_key, "version": subprocess_version,},
+            )
+            if len(definitions) != 1:
+                raise ValueError(
+                    f"Expected 1 process definition for key {subprocess_key} and version "
+                    f"{subprocess_version}, got {len(definitions)}."
+                )
+            start_process_kwargs = {"process_id": definitions[0]["id"]}
+
         # start subprocess
-        subprocess = start_process(process_id=subprocess_id, variables=variables)
+        subprocess = start_process(variables=variables, **start_process_kwargs)
 
         return {"processInstanceId": subprocess["instance_id"]}

@@ -1,7 +1,10 @@
+import uuid
+
 from django.test import TestCase
 
 import requests_mock
 from django_camunda.models import CamundaConfig
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
 
@@ -44,32 +47,33 @@ class CallActivityTests(TestCase):
                 "telefoon": {"type": "String", "value": "06123456789", "valueInfo": {}},
             },
         )
+        started_instance = {
+            "links": [
+                {
+                    "method": "GET",
+                    "href": f"{CAMUNDA_API_ROOT}process-instance/subprocess-id",
+                    "rel": "self",
+                }
+            ],
+            "id": "subprocess-id",
+            "definitionId": f"someProcess:1:{uuid.uuid4()}",
+            "businessKey": "",
+            "tenantId": None,
+            "ended": False,
+            "suspended": False,
+        }
         m.post(
-            f"{CAMUNDA_API_ROOT}process-definition/subprocess-definition-id/start",
-            json={
-                "links": [
-                    {
-                        "method": "GET",
-                        "href": f"{CAMUNDA_API_ROOT}process-instance/subprocess-id",
-                        "rel": "self",
-                    }
-                ],
-                "id": "subprocess-id",
-                "definitionId": "subprocess-definition-id",
-                "businessKey": "myBusinessKey",
-                "tenantId": None,
-                "ended": False,
-                "suspended": False,
-            },
+            f"{CAMUNDA_API_ROOT}process-definition/key/someProcess/start",
+            json=started_instance,
+        )
+        m.post(
+            f"{CAMUNDA_API_ROOT}process-definition/someProcess:3:14abd794-40f3-450a-9060-44c6b72c964e/start",
+            json=started_instance,
         )
 
     def test_call_activity_without_mapping(self, m):
         self.fetched_task.variables = {
-            "subprocessDefinitionId": {
-                "type": "String",
-                "value": "subprocess-definition-id",
-                "valueInfo": {},
-            }
+            "subprocessDefinition": serialize_variable("someProcess"),
         }
         self.fetched_task.save()
         self._mock_camunda(m)
@@ -82,8 +86,8 @@ class CallActivityTests(TestCase):
             m.last_request.json(),
             {
                 "variables": {
-                    "zaakUrl": {"type": "String", "value": ZAAK},
-                    "telefoon": {"type": "String", "value": "06123456789"},
+                    "zaakUrl": serialize_variable(ZAAK),
+                    "telefoon": serialize_variable("06123456789"),
                 },
                 "businessKey": None,
                 "withVariablesInReturn": False,
@@ -92,16 +96,8 @@ class CallActivityTests(TestCase):
 
     def test_call_activity_with_mapping(self, m):
         self.fetched_task.variables = {
-            "subprocessDefinitionId": {
-                "type": "String",
-                "value": "subprocess-definition-id",
-                "valueInfo": {},
-            },
-            "variablesMapping": {
-                "type": "Json",
-                "value": '{"zaakUrl": "hoofdZaakUrl"}',
-                "valueInfo": {},
-            },
+            "subprocessDefinition": serialize_variable("someProcess"),
+            "variablesMapping": serialize_variable({"zaakUrl": "hoofdZaakUrl"}),
         }
         self.fetched_task.save()
 
@@ -114,7 +110,59 @@ class CallActivityTests(TestCase):
         self.assertEqual(
             m.last_request.json(),
             {
-                "variables": {"hoofdZaakUrl": {"type": "String", "value": ZAAK},},
+                "variables": {"hoofdZaakUrl": serialize_variable(ZAAK)},
+                "businessKey": None,
+                "withVariablesInReturn": False,
+            },
+        )
+
+    def test_call_activity_explicit_version(self, m):
+        self.fetched_task.variables = {
+            "subprocessDefinition": serialize_variable("someProcess"),
+            "subprocessDefinitionVersion": serialize_variable(3),
+        }
+
+        self.fetched_task.save()
+        self._mock_camunda(m)
+        process_id = "someProcess:3:14abd794-40f3-450a-9060-44c6b72c964e"
+        m.get(
+            f"{CAMUNDA_API_ROOT}process-definition?key=someProcess&version=3",
+            json=[
+                {
+                    "id": process_id,
+                    "key": "someProcess",
+                    "category": "http://bpmn.io/schema/bpmn",
+                    "description": None,
+                    "name": "Dummy",
+                    "version": 3,
+                    "resource": "dummy.bpmn",
+                    "deploymentId": "277323c7-522b-11ea-b0b2-7ee96954906c",
+                    "diagram": None,
+                    "suspended": False,
+                    "tenantId": None,
+                    "versionTag": None,
+                    "historyTimeToLive": None,
+                    "startableInTasklist": True,
+                }
+            ],
+        )
+        task = CallActivity(self.fetched_task)
+
+        result = task.perform()
+
+        self.assertEqual(result, {"processInstanceId": "subprocess-id"})
+
+        self.assertEqual(
+            m.last_request.url,
+            f"{CAMUNDA_API_ROOT}process-definition/{process_id}/start",
+        )
+        self.assertEqual(
+            m.last_request.json(),
+            {
+                "variables": {
+                    "zaakUrl": serialize_variable(ZAAK),
+                    "telefoon": serialize_variable("06123456789"),
+                },
                 "businessKey": None,
                 "withVariablesInReturn": False,
             },
