@@ -6,7 +6,6 @@ from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import WorkUnit, check_variable
 from bptl.tasks.registry import register
 
-
 __all__ = ["CallActivity"]
 
 

@@ -26,13 +26,7 @@ class CallActivityTests(TestCase):
             topic_name="some-topic",
             worker_id="test-worker-id",
             task_id="test-task-id",
-            variables={
-                "subprocessDefinitionId": {
-                    "type": "String",
-                    "value": "subprocess-definition-id",
-                    "valueInfo": {},
-                },
-            },
+            variables={},
         )
 
     def _mock_camunda(self, m):
@@ -70,6 +64,14 @@ class CallActivityTests(TestCase):
         )
 
     def test_call_activity_without_mapping(self, m):
+        self.fetched_task.variables = {
+            "subprocessDefinitionId": {
+                "type": "String",
+                "value": "subprocess-definition-id",
+                "valueInfo": {},
+            }
+        }
+        self.fetched_task.save()
         self._mock_camunda(m)
         task = CallActivity(self.fetched_task)
 
