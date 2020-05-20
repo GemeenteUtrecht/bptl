@@ -32,7 +32,7 @@ class CallActivity(WorkUnit):
 
     * ``variablesMapping``: JSON object to map variables from the parent process
        to be sent into the new subprocess. If renaming is not needed, use the same
-       name as a key and a value. If ``variableMapping`` is empty, the all parent
+       name as a key and a value. If ``variablesMapping`` is empty, the all parent
        variables are sent to subprocess unchanged.
 
         .. code-block:: json
