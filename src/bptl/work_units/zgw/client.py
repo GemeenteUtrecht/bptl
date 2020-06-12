@@ -1,7 +1,5 @@
-from typing import Any
-
 from timeline_logger.models import TimelineLog
-from zds_client.client import Client
+from zgw_consumers.client import ZGWClient as _ZGWClient
 
 from .log import DBLog
 
@@ -18,22 +16,12 @@ class NoAuth(Exception):
     pass
 
 
-class ZGWClient(Client):
+class ZGWClient(_ZGWClient):
     _log = DBLog()
-    auth_value = None
 
     def set_auth_value(self, auth_value):
-        self.auth_value = auth_value
-
-    def pre_request(self, method: str, url: str, **kwargs) -> Any:
-        """
-        Add authorization header to requests
-        """
-        if self.auth_value:
-            headers = kwargs.get("headers", {})
-            headers["Authorization"] = self.auth_value
-
-        return super().pre_request(method, url, **kwargs)
+        self.auth = None
+        self.auth_value = {"Authorization": auth_value}
 
     @property
     def log(self):
