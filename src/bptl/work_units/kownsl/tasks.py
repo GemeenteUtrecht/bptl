@@ -16,13 +16,6 @@ def get_client(task: BaseTask, alias: str = "kownsl") -> ZGWClient:
     client = services_by_alias[alias].build_client()
     client._log.task = task
 
-    # TODO: inject auth when it's set up
-    # services_vars = task.get_variables().get("services", {})
-    # token = services_vars.get(alias, {}).get("token")
-    # if token is None:
-    #     raise RuntimeError(f"No 'token' key present in services config for alias '{alias}'")
-    # client.set_auth_value(f"Token {token}")
-
     return client
 
 
