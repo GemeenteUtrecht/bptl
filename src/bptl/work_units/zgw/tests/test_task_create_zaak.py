@@ -14,8 +14,10 @@ ZTC_URL = "https://some.ztc.nl/api/v1/"
 ZRC_URL = "https://some.zrc.nl/api/v1/"
 ZAAKTYPE = f"{ZTC_URL}zaaktypen/abcd"
 STATUSTYPE = f"{ZTC_URL}statustypen/7ff0bd9d-571f-47d0-8205-77ae41c3fc0b"
+ROLTYPE_URL = f"{ZTC_URL}roltypen"
 ZAAK = f"{ZRC_URL}zaken/4f8b4811-5d7e-4e9b-8201-b35f5101f891"
 STATUS = f"{ZRC_URL}statussen/b7218c76-7478-41e9-a088-54d2f914a713"
+ROLTYPE = f"{ZTC_URL}roltypen/64dae7f9-8d11-4b11-9a10-747acb73630e"
 
 RESPONSES = {
     ZAAK: {
@@ -65,6 +67,41 @@ def mock_status_post(m):
             "statustype": STATUSTYPE,
             "datumStatusGezet": "2020-01-16T00:00:00.000000Z",
             "statustoelichting": "",
+        },
+    )
+
+
+def mock_roltype_get(m):
+    m.get(
+        f"{ROLTYPE_URL}?zaaktype={ZAAKTYPE}&omschrijvingGeneriek=initiator",
+        json={
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    "url": ROLTYPE,
+                    "omschrijving": "roltype omschrijving",
+                    "zaaktype": ZAAKTYPE,
+                    "omschrijvingGeneriek": "initiator",
+                },
+            ],
+        },
+    )
+
+
+def mock_rol_post(m):
+    m.post(
+        f"{ZRC_URL}rollen",
+        status_code=201,
+        json={
+            "zaak": ZAAK,
+            "betrokkene": "",
+            "betrokkeneType": "natuurlijk_persoon",
+            "roltype": ROLTYPE,
+            "roltoelichting": "A test roltoelichting",
+            "indicatieMachtiging": "",
+            "betrokkeneIdentificatie": {},
         },
     )
 
@@ -161,3 +198,50 @@ class CreateZaakTaskTests(TestCase):
         )
 
         self.assertEqual(request_zaak.json()["omschrijving"], "foo")
+
+    def test_create_zaak_with_rol(self, m):
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+
+        mock_statustypen_get(m)
+        m.post(f"{ZRC_URL}zaken", status_code=201, json=RESPONSES[ZAAK])
+        mock_status_post(m)
+
+        mock_roltype_get(m)
+        mock_rol_post(m)
+
+        task_with_initiator = ExternalTask.objects.create(
+            topic_name="some-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "zaaktype": {"type": "String", "value": ZAAKTYPE, "valueInfo": {}},
+                "organisatieRSIN": {
+                    "type": "String",
+                    "value": "002220647",
+                    "valueInfo": {},
+                },
+                "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
+                "services": json_variable(
+                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                ),
+                "initiator": json_variable(
+                    {
+                        "betrokkeneType": "natuurlijk_persoon",
+                        "roltoelichting": "A test roltoelichting",
+                    }
+                ),
+            },
+        )
+
+        task = CreateZaakTask(task_with_initiator)
+        result = task.perform()
+
+        self.assertEqual(
+            result,
+            {
+                "zaak": RESPONSES[ZAAK],
+                "zaakUrl": ZAAK,
+                "zaakIdentificatie": "ZAAK-2020-0000000013",
+            },
+        )
