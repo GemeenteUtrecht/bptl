@@ -36,7 +36,7 @@ jobs:
       install:
         - pip install isort
       before_script: skip
-      script: isort --recursive --check-only --diff .
+      script: isort . --check-only --diff
 
     - name: Code style
       install:
