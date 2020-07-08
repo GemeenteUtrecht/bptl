@@ -45,6 +45,8 @@ class CreateZaakTask(ZGWWorkUnit):
       properties. Note that you can use these to override ``zaaktype``, ``bronorganisatie``,
       ``verantwoordelijkeOrganisatie``, ``registratiedatum`` and ``startdatum`` if you'd
       require so.
+    * ``initiator``: a JSON object with data used to create a rol for a particular zaak. See
+        https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
 
     **Optional process variables (Camunda exclusive)**
 
@@ -77,6 +79,35 @@ class CreateZaakTask(ZGWWorkUnit):
         zaak = client_zrc.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
+    def create_rol(self, zaak: dict) -> dict:
+        variables = self.task.get_variables()
+        initiator = variables.get("initiator", {})
+
+        if not initiator:
+            return {}
+
+        ztc_client = self.get_client(APITypes.ztc)
+        query_params = {
+            "zaaktype": variables["zaaktype"],
+            "omschrijvingGeneriek": initiator.get("omshrijvingGenerik", "initiator"),
+        }
+        rol_type = ztc_client.list("roltype", query_params,)
+
+        zrc_client = self.get_client(APITypes.zrc)
+        request_body = (
+            {
+                "zaak": zaak["url"],
+                "betrokkene": initiator.get("betrokkene", ""),
+                "betrokkeneType": initiator.get("betrokkeneType", "natuurlijk_persoon"),
+                "roltype": rol_type["results"][0]["url"],
+                "roltoelichting": initiator.get("roltoelichting", ""),
+                "indicatieMachtiging": initiator.get("indicatieMachtiging", ""),
+                "betrokkeneIdentificatie": initiator.get("betrokkeneIdentificatie", {}),
+            },
+        )
+        rol = zrc_client.create("rol", request_body,)
+        return rol
+
     def create_status(self, zaak: dict) -> dict:
         variables = self.task.get_variables()
 
@@ -100,6 +131,8 @@ class CreateZaakTask(ZGWWorkUnit):
     def perform(self) -> Dict[str, Any]:
         zaak = self.create_zaak()
         self.create_status(zaak)
+        self.create_rol(zaak)
+
         return {
             "zaak": zaak,
             "zaakUrl": zaak["url"],
