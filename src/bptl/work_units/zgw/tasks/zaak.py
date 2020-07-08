@@ -94,17 +94,15 @@ class CreateZaakTask(ZGWWorkUnit):
         rol_type = ztc_client.list("roltype", query_params,)
 
         zrc_client = self.get_client(APITypes.zrc)
-        request_body = (
-            {
-                "zaak": zaak["url"],
-                "betrokkene": initiator.get("betrokkene", ""),
-                "betrokkeneType": initiator.get("betrokkeneType", "natuurlijk_persoon"),
-                "roltype": rol_type["results"][0]["url"],
-                "roltoelichting": initiator.get("roltoelichting", ""),
-                "indicatieMachtiging": initiator.get("indicatieMachtiging", ""),
-                "betrokkeneIdentificatie": initiator.get("betrokkeneIdentificatie", {}),
-            },
-        )
+        request_body = {
+            "zaak": zaak["url"],
+            "betrokkene": initiator.get("betrokkene", ""),
+            "betrokkeneType": initiator.get("betrokkeneType", "natuurlijk_persoon"),
+            "roltype": rol_type["results"][0]["url"],
+            "roltoelichting": initiator.get("roltoelichting", ""),
+            "indicatieMachtiging": initiator.get("indicatieMachtiging", ""),
+            "betrokkeneIdentificatie": initiator.get("betrokkeneIdentificatie", {}),
+        }
         rol = zrc_client.create("rol", request_body,)
         return rol
 

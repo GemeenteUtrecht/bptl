@@ -245,3 +245,6 @@ class CreateZaakTaskTests(TestCase):
                 "zaakIdentificatie": "ZAAK-2020-0000000013",
             },
         )
+        # check that the /api/v1/rollen endpoint was called correctly
+        self.assertEqual(m.last_request.url, "https://some.zrc.nl/api/v1/rollen")
+        self.assertIsInstance(m.last_request.json(), dict)
