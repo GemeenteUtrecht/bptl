@@ -50,7 +50,7 @@ def finalize_review_request(task: BaseTask) -> dict:
     client = get_client(task)
 
     resp_data = client.partial_update(
-        "reviewrequest", data={"advice_zaak": zaak_url}, uuid=request_id,
+        "reviewrequest", data={"review_zaak": zaak_url}, uuid=request_id,
     )
 
     return {
