@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "bptl.work_units.kadaster",
     "bptl.work_units.kownsl",
     "bptl.work_units.zgw",
+    "bptl.work_units.valid_sign",
 ]
 
 MIDDLEWARE = [
