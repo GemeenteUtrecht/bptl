@@ -26,7 +26,7 @@ class ValidSignTask(WorkUnit):
 
     """
 
-    _auth_header = {"Authorization": f"Basic {settings.APIKEY}"}
+    _auth_header = {"Authorization": f"Basic {settings.VALIDSIGN_APIKEY}"}
 
     def _get_signers_from_api(self) -> List[dict]:
         """
@@ -95,14 +95,31 @@ class ValidSignTask(WorkUnit):
 
     def _get_documents_from_api(self) -> List[Tuple[str, bytes]]:
         """
-        Retrieves the documents from API X and returns a list of the name and the binary content
+        Retrieves the documents from Documenten API and returns a list of the name and the binary content
         of each document.
         """
-        # TODO Documents need to be retrieved from an API
-        return [
-            ("Test doc name 1", b"Test content 1"),
-            ("Test doc name 2", b"Test content 2"),
-        ]
+        variables = self.task.get_variables()
+
+        document_urls = variables.get("documents")
+
+        documents = []
+        for document_url in document_urls:
+            # Retrieving the document
+            response = requests.get(
+                document_url,
+                auth=(settings.PROEFTUIN_USER, settings.PROEFTUIN_PASSWORD),
+            )
+            document_data = response.json()
+            # Retrieving the content of the document
+            response = requests.get(
+                document_data.get("inhoud"),
+                auth=(settings.PROEFTUIN_USER, settings.PROEFTUIN_PASSWORD),
+            )
+            document_content = response.content
+
+            documents.append((document_data.get("titel"), document_content))
+
+        return documents
 
     def _get_signers_from_validsign(self, package: dict) -> List[dict]:
         """
