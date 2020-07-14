@@ -21,77 +21,36 @@ class ValidSignTask(WorkUnit):
     * ``documents``: list of API URLs where the documents to be signed can be retrieved.
         The API should provide the document name and the content.
 
-    * ``signers``: list of API URLs where details of the signers can be retrieved.
-        The API should provide at least the first name, the last name and the email address of the signer.
+    * ``signers``: array of signers. For ValidSign, the first name, the last name and the
+        email address of each signer are required. Example ``signers``:
+
+        .. code-block:: json
+
+            [{
+                "email": "example.signer@example.com",
+                "firstName": "ExampleFirstName",
+                "lastName": "ExampleLastName",
+            },
+            {
+                "email": "another.signer@example.com",
+                "firstName": "AnotherFirstName",
+                "lastName": "AnotherLastName",
+            }]
 
     """
 
     _auth_header = {"Authorization": f"Basic {settings.VALIDSIGN_APIKEY}"}
 
-    def _get_signers_from_api(self) -> List[dict]:
+    def format_signers(self, signers: List[dict]) -> List[dict]:
         """
-        Gets information about the signers and formats it as needed by ValidSign
+        Formats the signer information into an array of JSON objects as needed by ValidSign.
         """
+        formatted_signers = []
 
-        # TODO retrieve signer info from API
-        test_signers = [
-            {
-                "id": "test-signer-1-id",
-                "name": "Test Signer 1",
-                "type": "SIGNER",
-                "index": 0,
-                "signers": [
-                    {
-                        "id": "test-signer-1-id",
-                        "company": "Test Company",
-                        "email": "test.signer1@example.com",
-                        "firstName": "Test name 1",
-                        "lastName": "Test surname 1",
-                        "phone": "000000000000",
-                        "title": "Consultant",
-                        "address": None,
-                        "language": "nl",
-                        "name": "Test Signer 1",
-                        "auth": {"challenges": [], "scheme": "NONE"},
-                        "knowledgeBasedAuthentication": None,
-                        "delivery": {
-                            "email": True,
-                            "download": True,
-                            "provider": False,
-                        },
-                    }
-                ],
-            },
-            {
-                "id": "test-signer-2-id",
-                "name": "Test Signer 2",
-                "type": "SIGNER",
-                "index": 1,
-                "signers": [
-                    {
-                        "id": "test-signer-2-id",
-                        "company": "Test Company",
-                        "email": "test.signer2@example.com",
-                        "firstName": "Test name 2",
-                        "lastName": "Test surname 2",
-                        "phone": "000000000000",
-                        "title": "Consultant",
-                        "address": None,
-                        "language": "nl",
-                        "name": "Test Signer 2",
-                        "auth": {"challenges": [], "scheme": "NONE"},
-                        "knowledgeBasedAuthentication": None,
-                        "delivery": {
-                            "email": True,
-                            "download": True,
-                            "provider": False,
-                        },
-                    }
-                ],
-            },
-        ]
+        for signer in signers:
+            formatted_signers.append({"type": "SIGNER", "signers": [signer]})
 
-        return test_signers
+        return formatted_signers
 
     def _get_documents_from_api(self) -> List[Tuple[str, bytes]]:
         """
@@ -99,7 +58,6 @@ class ValidSignTask(WorkUnit):
         of each document.
         """
         variables = self.task.get_variables()
-
         document_urls = variables.get("documents")
 
         documents = []
@@ -138,16 +96,14 @@ class ValidSignTask(WorkUnit):
         Creates a ValidSign package with the signers and the settings
         for the signing ceremony.
         """
-
-        signers = self._get_signers_from_api()
+        variables = self.task.get_variables()
+        signers = self.format_signers(variables.get("signers"))
 
         url = f"{settings.VALIDSIGN_ROOT_URL}api/packages"
 
         body = {
             "name": f"Package {uuid.uuid1()}",
             "type": "PACKAGE",
-            "language": "en",
-            "emailMessage": "",
             "description": "Package created by BPTL",
             "roles": signers,
         }

@@ -35,36 +35,35 @@ RESPONSE_2 = {
 
 SIGNER_1 = {
     "id": "test-signer-1-id",
+    "company": "Test Company",
+    "email": "test.signer1@example.com",
+    "firstName": "Test name 1",
+    "lastName": "Test surname 1",
+}
+
+
+SIGNER_2 = {
+    "id": "test-signer-2-id",
+    "company": "Test Company",
+    "email": "test.signer2@example.com",
+    "firstName": "Test name 2",
+    "lastName": "Test surname 2",
+}
+
+FORMATTED_SIGNER_1 = {
+    "id": "test-signer-1-id",
     "name": "Test Signer 1",
     "type": "SIGNER",
     "index": 2,
-    "signers": [
-        {
-            "id": "test-signer-1-id",
-            "company": "Test Company",
-            "email": "test.signer1@example.com",
-            "firstName": "Test name 1",
-            "lastName": "Test surname 1",
-        }
-    ],
+    "signers": [SIGNER_1],
 }
 
-SIGNER_2 = {
+FORMATTED_SIGNER_2 = {
     "id": "test-signer-2-id",
     "name": "Test Signer 2",
     "type": "SIGNER",
     "index": 2,
-    "signers": [
-        {
-            "id": "test-signer-2-id",
-            "company": "Test Company",
-            "email": "test.signer2@example.com",
-            "firstName": "Test name 2",
-            "lastName": "Test surname 2",
-            "phone": "000000000000",
-            "title": "Consultant",
-        }
-    ],
+    "signers": [SIGNER_2],
 }
 
 OWNER = {
@@ -89,7 +88,7 @@ OWNER = {
 def mock_roles_get(m, package):
     m.get(
         f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package.get('id')}/roles",
-        json={"count": 3, "results": [OWNER, SIGNER_1, SIGNER_2]},
+        json={"count": 3, "results": [OWNER, FORMATTED_SIGNER_1, FORMATTED_SIGNER_2]},
     )
 
 
@@ -111,14 +110,26 @@ class ValidSignTests(TestCase):
             task_id="test-task-id",
             variables={
                 "documents": {"type": "List", "value": [DOCUMENT_1, DOCUMENT_2]},
-                # TODO create test data for signers
-                "signers": {"type": "String", "value": ""},
+                "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
             },
         )
 
-    # TODO
-    def test_get_signers_info(self, m):
-        pass
+    def test_format_signers(self, m):
+        task = ValidSignTask(self.fetched_task)
+
+        formatted_signer_1 = task.format_signers([SIGNER_1])
+        self.assertEqual(
+            formatted_signer_1, [{"type": "SIGNER", "signers": [SIGNER_1]}]
+        )
+
+        formatted_signers = task.format_signers([SIGNER_1, SIGNER_2])
+        self.assertEqual(
+            formatted_signers,
+            [
+                {"type": "SIGNER", "signers": [SIGNER_1]},
+                {"type": "SIGNER", "signers": [SIGNER_2]},
+            ],
+        )
 
     def test_get_documents_from_api(self, m):
         # Mock call to retrieve the documents from the API
@@ -183,8 +194,8 @@ class ValidSignTests(TestCase):
         signers = task._get_signers_from_package(test_package)
 
         # Test that the signers are returned and not the package owner
-        self.assertEqual(signers[0]["id"], SIGNER_1["id"])
-        self.assertEqual(signers[1]["id"], SIGNER_2["id"])
+        self.assertEqual(signers[0]["id"], FORMATTED_SIGNER_1["id"])
+        self.assertEqual(signers[1]["id"], FORMATTED_SIGNER_2["id"])
         self.assertEqual(len(signers), 2)
 
     def test_create_approval(self, m):
@@ -227,11 +238,11 @@ class ValidSignTests(TestCase):
         mock_roles_get(m, test_package)
 
         m.get(
-            f"{settings.VALIDSIGN_ROOT_URL}api/packages/{test_package.get('id')}/roles/{SIGNER_1.get('id')}/signingUrl",
+            f"{settings.VALIDSIGN_ROOT_URL}api/packages/{test_package.get('id')}/roles/{FORMATTED_SIGNER_1.get('id')}/signingUrl",
             json=signing_url_response_1,
         )
         m.get(
-            f"{settings.VALIDSIGN_ROOT_URL}api/packages/{test_package.get('id')}/roles/{SIGNER_2.get('id')}/signingUrl",
+            f"{settings.VALIDSIGN_ROOT_URL}api/packages/{test_package.get('id')}/roles/{FORMATTED_SIGNER_2.get('id')}/signingUrl",
             json=signing_url_response_2,
         )
 
