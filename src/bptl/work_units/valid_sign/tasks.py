@@ -107,13 +107,13 @@ class ValidSignTask(WorkUnit):
             # Retrieving the document
             response = requests.get(
                 document_url,
-                auth=(settings.PROEFTUIN_USER, settings.PROEFTUIN_PASSWORD),
+                auth=(settings.DOCUMENT_API_USER, settings.DOCUMENT_API_PASSWORD),
             )
             document_data = response.json()
             # Retrieving the content of the document
             response = requests.get(
                 document_data.get("inhoud"),
-                auth=(settings.PROEFTUIN_USER, settings.PROEFTUIN_PASSWORD),
+                auth=(settings.DOCUMENT_API_USER, settings.DOCUMENT_API_PASSWORD),
             )
             document_content = response.content
 
@@ -121,7 +121,7 @@ class ValidSignTask(WorkUnit):
 
         return documents
 
-    def _get_signers_from_validsign(self, package: dict) -> List[dict]:
+    def _get_signers_from_package(self, package: dict) -> List[dict]:
         """
         Retrieves all the roles from a ValidSign package and returns all the signers.
         """
@@ -189,7 +189,7 @@ class ValidSignTask(WorkUnit):
         specified documents for all signers.
         """
 
-        signers = self._get_signers_from_validsign(package)
+        signers = self._get_signers_from_package(package)
 
         # Settings such as where the signature will be placed in the document, the type of the approval (signature)
         # TODO change the placement of the signature for each signer, otherwise they overlap
@@ -210,7 +210,7 @@ class ValidSignTask(WorkUnit):
             approval_url = f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package.get('id')}/documents/{document.get('id')}/approvals"
             for signer in signers:
                 data = {"role": f"{signer.get('id')}", "fields": approval_settings}
-                response = requests.post(
+                requests.post(
                     approval_url, data=json.dumps(data), headers=self._auth_header
                 )
 
@@ -227,7 +227,7 @@ class ValidSignTask(WorkUnit):
         Retrieves all the urls where each signer can go to sign the documents. Each url is returned as a dictionary
         with also the id of the signer and the id of the package.
         """
-        signers = self._get_signers_from_validsign(package)
+        signers = self._get_signers_from_package(package)
 
         signing_urls = []
         for signer in signers:
