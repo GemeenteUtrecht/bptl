@@ -247,6 +247,12 @@ class ValidSignTests(TestCase):
         )
 
         task = ValidSignTask(self.fetched_task)
-        signing_urls = task.get_signing_urls(test_package)
+        signing_urls = task.get_signing_details(test_package)
 
-        self.assertEqual(signing_urls, [signing_url_response_1, signing_url_response_2])
+        # The data obtained from ValidSign when requesting the signing URLs is combined with the signer details
+        signing_url_response_1.update({"signer_details": FORMATTED_SIGNER_1}),
+        signing_url_response_2.update({"signer_details": FORMATTED_SIGNER_2})
+
+        self.assertEqual(
+            signing_urls, [signing_url_response_1, signing_url_response_2],
+        )
