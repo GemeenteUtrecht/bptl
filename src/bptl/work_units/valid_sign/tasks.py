@@ -184,30 +184,37 @@ class ValidSignTask(WorkUnit):
         """
         Creates an approval (a placeholder for where a signature will go) in the
         specified documents for all signers.
+
+        According to https://apidocs.validsign.nl/validsign_integrator_guide.pdf the anchor extraction cannot be used
+        with the API call to create an approval. So, the position has to be provided. If no ``top``, ``bottom``,
+        ``width`` and ``height`` are given, then an 'acceptance button' appears under the document.
         """
 
         signers = self._get_signers_from_package(package)
 
-        # Settings such as where the signature will be placed in the document, the type of the approval (signature)
-        # TODO change the placement of the signature for each signer, otherwise they overlap
-        approval_settings = [
-            {
-                "top": 50,
-                "left": 300,
-                "width": 200,
-                "height": 50,
-                "page": 0,
-                "type": "SIGNATURE",
-                "value": None,
-                "subtype": "FULLNAME",
-            }
-        ]
+        # Settings for the size and the place of the signature field in the document
+        signature_width = 150
+        signature_height = 50
+        left_offset = 0
+
         # For all the documents, create an approval for each signer
         for document in documents:
             approval_url = f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package.get('id')}/documents/{document.get('id')}/approvals"
-            for signer in signers:
+            # FIXME the signatures are stacked vertically, but if they reach the end of the page it causes a 500 error
+            for counter, signer in enumerate(signers):
+                approval_settings = [
+                    {
+                        "top": counter * signature_height,
+                        "left": left_offset,
+                        "width": signature_width,
+                        "height": signature_height,
+                        "page": 0,
+                        "type": "SIGNATURE",
+                        "subtype": "FULLNAME",
+                    }
+                ]
                 data = {"role": f"{signer.get('id')}", "fields": approval_settings}
-                requests.post(
+                response = requests.post(
                     approval_url, data=json.dumps(data), headers=self._auth_header
                 )
 
