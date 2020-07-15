@@ -322,3 +322,39 @@ class ValidSignTask(WorkUnit):
         details = self.get_signing_details(package)
 
         return {"signing_details": details}
+
+
+class ValidSignReminderTask(WorkUnit):
+    """
+    Takes a ValidSign package ID and the email address of a signer and sends an email-reminder to the signer providing a
+    link to where the documents can be signed.
+
+    **Required process variables**
+
+    * ``package_id``: string with the ValidSign Id of a package
+    * ``email``: the email address of the signer who needs a reminder
+
+    **Sets no process variables**
+
+    """
+
+    _auth_header = {"Authorization": f"Basic {settings.VALIDSIGN_APIKEY}"}
+
+    def send_reminder(self, package_id: str, email: str):
+        logger.debug(f"Sending a reminder to '{email}' through ValidSign")
+
+        url = f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package_id}/notifications"
+        body = {"email": email}
+        response = requests.post(url, headers=self._auth_header, data=json.dumps(body))
+        response.raise_for_status()
+
+    def perform(self) -> dict:
+
+        variables = self.task.get_variables()
+
+        package_id = variables.get("package_id")
+        email = variables.get("email")
+
+        self.send_reminder(package_id, email)
+
+        return {}

@@ -6,7 +6,7 @@ from django.test import TestCase
 import requests_mock
 
 from bptl.camunda.models import ExternalTask
-from bptl.work_units.valid_sign.tasks import ValidSignTask
+from bptl.work_units.valid_sign.tasks import ValidSignReminderTask, ValidSignTask
 
 ZRC_URL = "https://some.zrc.nl/api/v1/"
 DOCUMENT_1 = (
@@ -256,3 +256,36 @@ class ValidSignTests(TestCase):
         self.assertEqual(
             signing_urls, [signing_url_response_1, signing_url_response_2],
         )
+
+
+@requests_mock.Mocker()
+class ValidSignReminderTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        cls.fetched_task = ExternalTask.objects.create(
+            topic_name="validsign",
+            worker_id="reminder-worker-id",
+            task_id="reminder-task-id",
+            variables={
+                "package_id": {
+                    "type": "String",
+                    "value": "BW5fsOKyhj48A-fRwjPyYmZ8Mno=",
+                },
+                "email": {"type": "String", "value": "test@example.com"},
+            },
+        )
+
+    def test_send_reminder(self, m):
+        m.post(
+            f"{settings.VALIDSIGN_ROOT_URL}api/packages/BW5fsOKyhj48A-fRwjPyYmZ8Mno=/notifications"
+        )
+
+        task = ValidSignReminderTask(self.fetched_task)
+        task.perform()
+
+        self.assertEqual(m.call_count, 1)
+        request_body = m.request_history[0].text
+
+        self.assertEqual('{"email": "test@example.com"}', request_body)
