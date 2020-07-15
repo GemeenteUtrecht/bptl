@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "task_id", type=int, help="ID of the External Task in the database"
+            "--task-id", type=int, help="ID of the External Task in the database"
         )
         parser.add_argument(
             "-f",
@@ -25,7 +25,13 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         task_id = options["task_id"]
-        task = ExternalTask.objects.filter(id=task_id).first()
+
+        if task_id is not None:
+            task = ExternalTask.objects.filter(id=task_id).first()
+        else:
+            task = ExternalTask.objects.last()
+            task_id = task.id if task else None
+
         if task is None:
             raise CommandError("Could not find this task.")
 

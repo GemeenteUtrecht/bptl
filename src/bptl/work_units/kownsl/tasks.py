@@ -1,3 +1,4 @@
+from zds_client.schema import get_operation_url
 from zgw_consumers.client import ZGWClient
 
 from bptl.tasks.base import BaseTask, check_variable
@@ -55,4 +56,66 @@ def finalize_review_request(task: BaseTask) -> dict:
 
     return {
         "doReviewUrl": resp_data["frontend_url"],
+    }
+
+
+@register
+def get_approval_status(task: BaseTask) -> dict:
+    """
+    Get the result of an approval review request.
+
+    Once all reviewers have submitted their approval or rejection, derive the end-result
+    from the review session. If all reviewers approve, the result is positive. If any
+    rejections are present, the result is negative.
+
+    In the task binding, the service with alias ``kownsl`` must be connected, so that
+    this task knows which endpoints to contact.
+
+    **Required process variables**
+
+    * ``reviewRequestId``: the identifier of the Kowns review request, used to update
+      the object in the API.
+    * ``zaakUrl``: URL reference to the zaak used for the review itself.
+
+    **Sets the process variables**
+
+    * ``approvalResult``: a JSON-object containing meta-data about the result:
+
+      .. code-block:: json
+
+         {
+            "approved": true,
+            "num_approved": 3,
+            "num_rejected": 0
+         }
+    """
+    client = get_client(task)
+    variables = task.get_variables()
+
+    # TODO: switch from zaak-based retrieval to review-request based
+    zaak_url = check_variable(variables, "zaakUrl")
+    check_variable(variables, "reviewRequestId")
+
+    operation_id = "approvalcollection_retrieve"
+    url = get_operation_url(client.schema, operation_id, base_url=client.base_url)
+
+    params = {"objectUrl": zaak_url}
+    approval_collection = client.request(
+        url, operation_id, request_kwargs={"params": params},
+    )
+
+    num_approved = 0
+    num_rejected = 0
+    for approval in approval_collection["approvals"]:
+        if approval["approved"]:
+            num_approved += 1
+        else:
+            num_rejected += 1
+
+    return {
+        "approvalResult": {
+            "approved": num_approved > 0 and num_rejected == 0,
+            "num_approved": num_approved,
+            "num_rejected": num_rejected,
+        },
     }
