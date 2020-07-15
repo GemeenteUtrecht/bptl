@@ -40,47 +40,12 @@ class ValidSignTask(WorkUnit):
                     "lastName": "AnotherLastName",
                 }]
 
+    * ``package_name``: string. Name of the ValidSign package that contains the documents to sign and the signers.
+        This name appears in the notification-email that is sent to the signers.
+
     **Sets the process variables**
 
-    * ``signing_details``: List of JSON object with the urls at which the signers can go to sign the document, as well
-        as the details of the signer. These include, among all the others that are provided by ValidSign, the email
-        address, the first name and the last name of the signers. Example ``signing_details``:
-
-            .. code-block:: json
-
-                [
-                    {
-                        "url": "https://try.validsign.nl/signing_url_for_signer_1",
-                        "roleId": "9b51bb7a-9934-4df5-bab8-a9856f3894f9",
-                        "packageId": "7X2K7m-PXNKXnAGs0H3aLxWl8LA="
-                        "signer_details": {
-                            "type": "SIGNER",
-                            "signers": [
-                                {
-                                    "email": "test.signer1@example.com",
-                                    "firstName":"Test name 1",
-                                    "lastName":"Test surname 1"
-                                },
-                            ]
-                        }
-                    },
-                    {
-                        "url": "https://try.validsign.nl/signing_url_for_signer_2",
-                        "roleId": "0fcea629-de4a-47c1-96c1-4b78a5628dd9",
-                        "packageId": "7X2K7m-PXNKXnAGs0H3aLxWl8LA="
-                        "signer_details": {
-                            "type": "SIGNER",
-                            "signers": [
-                                {
-                                    "email": "test.signer2@example.com",
-                                    "firstName":"Test name 2",
-                                    "lastName":"Test surname 2"
-                                },
-                            ]
-                        }
-                    }
-                ]
-
+    * ``package_id``: string. ID of the ValidSign package created by the task.
     """
 
     _auth_header = {"Authorization": f"Basic {settings.VALIDSIGN_APIKEY}"}
@@ -154,13 +119,13 @@ class ValidSignTask(WorkUnit):
 
         variables = self.task.get_variables()
         signers = self.format_signers(variables.get("signers"))
+        package_name = variables.get("package_name")
 
         url = f"{settings.VALIDSIGN_ROOT_URL}api/packages"
 
         body = {
-            "name": f"Package {uuid.uuid1()}",
+            "name": package_name,
             "type": "PACKAGE",
-            "description": "Package created by BPTL",
             "roles": signers,
         }
 
@@ -244,7 +209,8 @@ class ValidSignTask(WorkUnit):
 
     def send_package(self, package: dict):
         """
-        Changes the status of a package to "SENT".
+        Changes the status of a package to "SENT". This automatically sends an email to all the signers with a
+        link where they can sign the documents.
         """
         logger.debug(f"Setting the status of package '{package.get('id')}' to SENT")
         url = f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package.get('id')}"
@@ -252,76 +218,13 @@ class ValidSignTask(WorkUnit):
         response = requests.put(url, headers=self._auth_header, data=json.dumps(body))
         response.raise_for_status()
 
-    def get_signing_details(self, package: dict) -> List[dict]:
-        """
-        Retrieves all the urls where each signer can go to sign the documents. The signer details are returned along
-        the signing ``url``, the ``roleId`` of the signer and the ``packageId`` of the package. Example
-        of the returned object:
-
-            .. code-block:: python
-
-                [{
-                    "url": "https://try.validsign.nl/signing_url_for_signer_1",
-                    "roleId": "9b51bb7a-9934-4df5-bab8-a9856f3894f9",
-                    "packageId": "7X2K7m-PXNKXnAGs0H3aLxWl8LA="
-                    "signer_details": {
-                        "type": "SIGNER",
-                        "signers": [
-                            {
-                                "email": "test.signer1@example.com",
-                                "firstName":"Test name 1",
-                                "lastName":"Test surname 1"
-                            },
-                        ]
-                    }
-                },
-                {
-                    "url": "https://try.validsign.nl/signing_url_for_signer_2",
-                    "roleId": "9b51bb7a-9934-4df5-bab8-a9856f3894f9",
-                    "packageId": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="
-                    "signer_details": {
-                        "type": "SIGNER",
-                        "signers": [
-                            {
-                                "email": "test.signer2@example.com",
-                                "firstName":"Test name 2",
-                                "lastName":"Test surname 2"
-                            },
-                        ]
-                    }
-                }]
-
-        For each signer, all the data returned from valid sign is returned in ``signer_details``, but in the example
-        above only the ``type`` and ``signers`` attributes are shown.
-
-        """
-
-        logger.debug(
-            f"Retrieving details to sign documents in ValidSign package '{package.get('id')}'"
-        )
-
-        signers = self._get_signers_from_package(package)
-
-        details_for_signers = []
-        for signer in signers:
-            get_url = f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package.get('id')}/roles/{signer.get('id')}/signingUrl"
-            response = requests.get(get_url, headers=self._auth_header)
-            response.raise_for_status()
-            signing_url_details = response.json()
-            # Adds the details of each signer
-            signing_url_details.update({"signer_details": signer})
-            details_for_signers.append(signing_url_details)
-
-        return details_for_signers
-
     def perform(self) -> dict:
         package = self.create_package()
         documents = self.add_documents_to_package(package)
         self.create_approval_for_documents(package, documents)
         self.send_package(package)
-        details = self.get_signing_details(package)
 
-        return {"signing_details": details}
+        return {"package_id": package.get("id")}
 
 
 class ValidSignReminderTask(WorkUnit):

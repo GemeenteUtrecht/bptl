@@ -111,6 +111,7 @@ class ValidSignTests(TestCase):
             variables={
                 "documents": {"type": "List", "value": [DOCUMENT_1, DOCUMENT_2]},
                 "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
+                "package_name": {"type": "String", "value": "Test package name"},
             },
         )
 
@@ -219,43 +220,6 @@ class ValidSignTests(TestCase):
 
         # One call to get the roles and 2 calls per document (to add the 2 signers) and there are 2 documents in total.
         self.assertEqual(m.call_count, 5)
-
-    def test_get_signing_urls(self, m):
-        # Mock calls to retrieve the signing URL for each signer
-        test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
-        signing_url_response_1 = {
-            "url": f"{settings.VALIDSIGN_ROOT_URL}test/url/signer1",
-            "roleId": SIGNER_1["id"],
-            "packageId": test_package["id"],
-        }
-        signing_url_response_2 = {
-            "url": f"{settings.VALIDSIGN_ROOT_URL}test/url/signer2",
-            "roleId": SIGNER_2["id"],
-            "packageId": test_package["id"],
-        }
-
-        # The task will retrieve the roles from ValidSign, so mock the call
-        mock_roles_get(m, test_package)
-
-        m.get(
-            f"{settings.VALIDSIGN_ROOT_URL}api/packages/{test_package.get('id')}/roles/{FORMATTED_SIGNER_1.get('id')}/signingUrl",
-            json=signing_url_response_1,
-        )
-        m.get(
-            f"{settings.VALIDSIGN_ROOT_URL}api/packages/{test_package.get('id')}/roles/{FORMATTED_SIGNER_2.get('id')}/signingUrl",
-            json=signing_url_response_2,
-        )
-
-        task = ValidSignTask(self.fetched_task)
-        signing_urls = task.get_signing_details(test_package)
-
-        # The data obtained from ValidSign when requesting the signing URLs is combined with the signer details
-        signing_url_response_1.update({"signer_details": FORMATTED_SIGNER_1}),
-        signing_url_response_2.update({"signer_details": FORMATTED_SIGNER_2})
-
-        self.assertEqual(
-            signing_urls, [signing_url_response_1, signing_url_response_2],
-        )
 
 
 @requests_mock.Mocker()
