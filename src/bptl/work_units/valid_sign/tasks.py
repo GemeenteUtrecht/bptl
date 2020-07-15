@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from typing import List, Tuple
 
@@ -8,6 +9,8 @@ import requests
 
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
+
+logger = logging.getLogger(__name__)
 
 
 @register
@@ -98,6 +101,8 @@ class ValidSignTask(WorkUnit):
         Retrieves the documents from Documenten API and returns a list of the name and the binary content
         of each document.
         """
+        logger.debug("Retrieving documents from Documenten API")
+
         variables = self.task.get_variables()
         document_urls = variables.get("documents")
 
@@ -108,12 +113,15 @@ class ValidSignTask(WorkUnit):
                 document_url,
                 auth=(settings.DOCUMENT_API_USER, settings.DOCUMENT_API_PASSWORD),
             )
+            response.raise_for_status()
+
             document_data = response.json()
             # Retrieving the content of the document
             response = requests.get(
                 document_data.get("inhoud"),
                 auth=(settings.DOCUMENT_API_USER, settings.DOCUMENT_API_PASSWORD),
             )
+            response.raise_for_status()
             document_content = response.content
 
             documents.append((document_data.get("titel"), document_content))
@@ -124,10 +132,15 @@ class ValidSignTask(WorkUnit):
         """
         Retrieves all the roles from a ValidSign package and returns all the signers.
         """
+        logger.debug(
+            f"Retrieving the roles from validSign package '{package.get('id')}'"
+        )
+
         roles_url = (
             f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package.get('id')}/roles"
         )
         response = requests.get(roles_url, headers=self._auth_header)
+        response.raise_for_status()
         roles = response.json().get("results")
         # Not all the roles are signers (one of them is the account owner)
         return [role for role in roles if role.get("type") == "SIGNER"]
@@ -137,6 +150,8 @@ class ValidSignTask(WorkUnit):
         Creates a ValidSign package with the signers and the settings
         for the signing ceremony.
         """
+        logger.debug("Creating ValidSign package")
+
         variables = self.task.get_variables()
         signers = self.format_signers(variables.get("signers"))
 
@@ -150,6 +165,7 @@ class ValidSignTask(WorkUnit):
         }
 
         response = requests.post(url, headers=self._auth_header, data=json.dumps(body))
+        response.raise_for_status()
         package = response.json()
 
         return package
@@ -158,6 +174,8 @@ class ValidSignTask(WorkUnit):
         """
         Adds documents to the specified package and returns a list with the information about each document.
         """
+
+        logger.debug(f"Adding documents to ValidSign package '{package.get('id')}'")
 
         documents = self._get_documents_from_api()
 
@@ -176,6 +194,7 @@ class ValidSignTask(WorkUnit):
             response = requests.post(
                 post_url, headers=self._auth_header, files=file, data=payload
             )
+            response.raise_for_status()
             attached_documents.append(response.json())
 
         return attached_documents
@@ -189,6 +208,10 @@ class ValidSignTask(WorkUnit):
         with the API call to create an approval. So, the position has to be provided. If no ``top``, ``bottom``,
         ``width`` and ``height`` are given, then an 'acceptance button' appears under the document.
         """
+
+        logger.debug(
+            f"Creating approvals for documents in ValidSign package '{package.get('id')}'"
+        )
 
         signers = self._get_signers_from_package(package)
 
@@ -217,14 +240,17 @@ class ValidSignTask(WorkUnit):
                 response = requests.post(
                     approval_url, data=json.dumps(data), headers=self._auth_header
                 )
+                response.raise_for_status()
 
     def send_package(self, package: dict):
         """
         Changes the status of a package to "SENT".
         """
+        logger.debug(f"Setting the status of package '{package.get('id')}' to SENT")
         url = f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package.get('id')}"
         body = {"status": "SENT"}
-        requests.put(url, headers=self._auth_header, data=json.dumps(body))
+        response = requests.put(url, headers=self._auth_header, data=json.dumps(body))
+        response.raise_for_status()
 
     def get_signing_details(self, package: dict) -> List[dict]:
         """
@@ -232,7 +258,7 @@ class ValidSignTask(WorkUnit):
         the signing ``url``, the ``roleId`` of the signer and the ``packageId`` of the package. Example
         of the returned object:
 
-            .. code-block:: json
+            .. code-block:: python
 
                 [{
                     "url": "https://try.validsign.nl/signing_url_for_signer_1",
@@ -269,12 +295,18 @@ class ValidSignTask(WorkUnit):
         above only the ``type`` and ``signers`` attributes are shown.
 
         """
+
+        logger.debug(
+            f"Retrieving details to sign documents in ValidSign package '{package.get('id')}'"
+        )
+
         signers = self._get_signers_from_package(package)
 
         details_for_signers = []
         for signer in signers:
             get_url = f"{settings.VALIDSIGN_ROOT_URL}api/packages/{package.get('id')}/roles/{signer.get('id')}/signingUrl"
             response = requests.get(get_url, headers=self._auth_header)
+            response.raise_for_status()
             signing_url_details = response.json()
             # Adds the details of each signer
             signing_url_details.update({"signer_details": signer})
