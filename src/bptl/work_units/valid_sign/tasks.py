@@ -16,18 +16,20 @@ logger = logging.getLogger(__name__)
 @register
 class ValidSignTask(WorkUnit):
     """
-    Takes a set of documents and a set of signers and uses the ValidSign signing
-    process to make the signers digitally sign all the documents.
+    Creates a ValidSign package with the name specified by the process variables and adds a set of documents and a set
+    of signers. Once the package is ready, it sends an email to the signers to notify them that they need to sign the
+    documents.
 
     **Required process variables**
 
-    * ``documents``: list of API URLs where the documents to be signed can be retrieved.
-        The API should provide the document name and the content.
+    * ``documents``: List of strings. List of API URLs where the documents to be signed can be retrieved.
+        The API is expected to return a JSON object with attributes ``titel`` (the document name) and ``inhoud`` (the
+        URL where to retrieve the content).
 
-    * ``signers``: array of signers. For ValidSign, the first name, the last name and the
+    * ``signers``: List of dict. For ValidSign, the first name, the last name and the
         email address of each signer are required. Example ``signers``:
 
-            .. code-block:: json
+            .. code-block:: python
 
                 [{
                     "email": "example.signer@example.com",
@@ -63,7 +65,7 @@ class ValidSignTask(WorkUnit):
 
     def _get_documents_from_api(self) -> List[Tuple[str, bytes]]:
         """
-        Retrieves the documents from Documenten API and returns a list of the name and the binary content
+        Retrieves the documents from Documenten API and returns a list of tuples with the name and the binary content
         of each document.
         """
         logger.debug("Retrieving documents from Documenten API")
@@ -87,9 +89,8 @@ class ValidSignTask(WorkUnit):
                 auth=(settings.DOCUMENT_API_USER, settings.DOCUMENT_API_PASSWORD),
             )
             response.raise_for_status()
-            document_content = response.content
 
-            documents.append((document_data.get("titel"), document_content))
+            documents.append((document_data.get("titel"), response.content))
 
         return documents
 
@@ -112,8 +113,7 @@ class ValidSignTask(WorkUnit):
 
     def create_package(self) -> dict:
         """
-        Creates a ValidSign package with the signers and the settings
-        for the signing ceremony.
+        Creates a ValidSign package with the name specified by the process variables and adds the signers to it.
         """
         logger.debug("Creating ValidSign package")
 
@@ -137,7 +137,8 @@ class ValidSignTask(WorkUnit):
 
     def add_documents_to_package(self, package: dict) -> List[dict]:
         """
-        Adds documents to the specified package and returns a list with the information about each document.
+        Adds documents to the specified package and returns a list with the information about each document returned by
+        ValidSign.
         """
 
         logger.debug(f"Adding documents to ValidSign package '{package.get('id')}'")
@@ -170,7 +171,7 @@ class ValidSignTask(WorkUnit):
         specified documents for all signers.
 
         According to https://apidocs.validsign.nl/validsign_integrator_guide.pdf the anchor extraction cannot be used
-        with the API call to create an approval. So, the position has to be provided. If no ``top``, ``bottom``,
+        with the API call to create an approval. So, the position has to be provided. If no ``top``, ``left``,
         ``width`` and ``height`` are given, then an 'acceptance button' appears under the document.
         """
 
