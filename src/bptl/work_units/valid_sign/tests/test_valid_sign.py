@@ -34,8 +34,6 @@ RESPONSE_2 = {
 }
 
 SIGNER_1 = {
-    "id": "test-signer-1-id",
-    "company": "Test Company",
     "email": "test.signer1@example.com",
     "firstName": "Test name 1",
     "lastName": "Test surname 1",
@@ -43,43 +41,28 @@ SIGNER_1 = {
 
 
 SIGNER_2 = {
-    "id": "test-signer-2-id",
-    "company": "Test Company",
     "email": "test.signer2@example.com",
     "firstName": "Test name 2",
     "lastName": "Test surname 2",
 }
 
 FORMATTED_SIGNER_1 = {
-    "id": "test-signer-1-id",
-    "name": "Test Signer 1",
     "type": "SIGNER",
-    "index": 2,
     "signers": [SIGNER_1],
 }
 
 FORMATTED_SIGNER_2 = {
-    "id": "test-signer-2-id",
-    "name": "Test Signer 2",
     "type": "SIGNER",
-    "index": 2,
     "signers": [SIGNER_2],
 }
 
 OWNER = {
-    "id": "owner-id",
-    "name": "Test Owner",
     "type": "OWNER",
-    "index": 0,
     "signers": [
         {
-            "id": "owner-id",
-            "company": "Test Company",
             "email": "test.owner@example.com",
             "firstName": "Test name owner",
             "lastName": "Test surname owner",
-            "phone": "000000000000",
-            "title": "Developer",
         }
     ],
 }
@@ -118,10 +101,8 @@ class ValidSignTests(TestCase):
     def test_format_signers(self, m):
         task = ValidSignTask(self.fetched_task)
 
-        formatted_signer_1 = task.format_signers([SIGNER_1])
-        self.assertEqual(
-            formatted_signer_1, [{"type": "SIGNER", "signers": [SIGNER_1]}]
-        )
+        formatted_signer = task.format_signers([SIGNER_1])
+        self.assertEqual(formatted_signer, [{"type": "SIGNER", "signers": [SIGNER_1]}])
 
         formatted_signers = task.format_signers([SIGNER_1, SIGNER_2])
         self.assertEqual(
@@ -157,6 +138,16 @@ class ValidSignTests(TestCase):
         package = task.create_package()
 
         self.assertEqual(package["id"], test_package_id)
+
+        self.assertEqual(m.call_count, 1)
+        request_body = m.request_history[0].json()
+        self.assertEqual(request_body.get("name"), "Test package name")
+        self.assertEqual(request_body.get("type"), "PACKAGE")
+        expected_roles = [
+            {"type": "SIGNER", "signers": [SIGNER_1]},
+            {"type": "SIGNER", "signers": [SIGNER_2]},
+        ]
+        self.assertEqual(request_body.get("roles"), expected_roles)
 
     def test_add_documents_to_package(self, m):
         test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
@@ -195,9 +186,9 @@ class ValidSignTests(TestCase):
         signers = task._get_signers_from_package(test_package)
 
         # Test that the signers are returned and not the package owner
-        self.assertEqual(signers[0]["id"], FORMATTED_SIGNER_1["id"])
-        self.assertEqual(signers[1]["id"], FORMATTED_SIGNER_2["id"])
         self.assertEqual(len(signers), 2)
+        self.assertEqual(signers[0], FORMATTED_SIGNER_1)
+        self.assertEqual(signers[1], FORMATTED_SIGNER_2)
 
     def test_create_approval(self, m):
         test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
@@ -250,6 +241,6 @@ class ValidSignReminderTests(TestCase):
         task.perform()
 
         self.assertEqual(m.call_count, 1)
-        request_body = m.request_history[0].text
+        request_body = m.request_history[0].json()
 
-        self.assertEqual('{"email": "test@example.com"}', request_body)
+        self.assertEqual({"email": "test@example.com"}, request_body)
