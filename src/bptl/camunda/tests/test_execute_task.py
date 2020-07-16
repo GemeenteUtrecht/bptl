@@ -122,7 +122,7 @@ class ExecuteCommandTests(TestCase):
 
         # execute command
         stdout = StringIO()
-        call_command("execute_task", task.id, stdout=stdout)
+        call_command("execute_task", task_id=task.id, stdout=stdout)
 
         task.refresh_from_db()
         self.assertEqual(task.status, Statuses.completed)
@@ -159,7 +159,7 @@ class ExecuteCommandTests(TestCase):
         m.post(f"{ZRC_URL}zaken", exc=ConnectionError("some connection error"))
 
         stdout = StringIO()
-        call_command("execute_task", task.id, stdout=stdout)
+        call_command("execute_task", task_id=task.id, stdout=stdout)
 
         task.refresh_from_db()
         self.assertEqual(task.status, Statuses.failed)
