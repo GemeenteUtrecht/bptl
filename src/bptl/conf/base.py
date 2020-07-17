@@ -419,11 +419,3 @@ SWAGGER_SETTINGS = {
         "Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
     },
 }
-
-# ValidSign settings
-VALIDSIGN_APIKEY = os.getenv("VALIDSIGN_APIKEY")
-VALIDSIGN_ROOT_URL = os.getenv("VALIDSIGN_ROOT_URL")
-
-# Document API settings
-DOCUMENT_API_USER = os.getenv("DOCUMENT_API_USER")
-DOCUMENT_API_PASSWORD = os.getenv("DOCUMENT_API_PASSWORD")

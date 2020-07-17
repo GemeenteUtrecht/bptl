@@ -109,11 +109,6 @@ warnings.filterwarnings(
     r"django\.db\.models\.fields",
 )
 
-# ValidSign settings
-VALIDSIGN_ROOT_URL = os.environ.setdefault(
-    "VALIDSIGN_ROOT_URL", "https://try.validsign.nl/"
-)
-
 # Override settings with local settings.
 try:
     from .local import *  # noqa
