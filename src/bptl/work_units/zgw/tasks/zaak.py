@@ -47,6 +47,8 @@ class CreateZaakTask(ZGWWorkUnit):
       properties. Note that you can use these to override ``zaaktype``, ``bronorganisatie``,
       ``verantwoordelijkeOrganisatie``, ``registratiedatum`` and ``startdatum`` if you'd
       require so.
+    * ``initialStatusRemarks``: a text to use for the remarks field on the initial status.
+      Must be maximum 1000 characters.
     * ``initiator``: a JSON object with data used to create a rol for a particular zaak. See
         https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
 
@@ -124,12 +126,15 @@ class CreateZaakTask(ZGWWorkUnit):
         )["results"]
         statustype = next(filter(lambda x: x["volgnummer"] == 1, statustypen))
 
+        initial_status_remarks = variables.get("initialStatusRemarks", "")
+
         # create status
         zrc_client = self.get_client(APITypes.zrc)
         data = {
             "zaak": zaak["url"],
             "statustype": statustype["url"],
             "datumStatusGezet": timezone.now().isoformat(),
+            "statustoelichting": initial_status_remarks,
         }
         status = zrc_client.create("status", data)
         return status
