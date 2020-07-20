@@ -1,16 +1,18 @@
+import logging
 from datetime import date
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from django.utils import timezone
 
 from zgw_consumers.constants import APITypes
 
-from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
 from .base import ZGWWorkUnit
 from .resultaat import CreateResultaatTask
+
+logger = logging.getLogger(__name__)
 
 
 @register
@@ -79,26 +81,32 @@ class CreateZaakTask(ZGWWorkUnit):
         zaak = client_zrc.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
-    def create_rol(self, zaak: dict) -> dict:
+    def create_rol(self, zaak: dict) -> Optional[dict]:
         variables = self.task.get_variables()
         initiator = variables.get("initiator", {})
 
         if not initiator:
-            return {}
+            return None
 
         ztc_client = self.get_client(APITypes.ztc)
         query_params = {
             "zaaktype": variables["zaaktype"],
-            "omschrijvingGeneriek": initiator.get("omshrijvingGenerik", "initiator"),
+            "omschrijvingGeneriek": initiator.get("omschrijvingGeneriek", "initiator"),
         }
-        rol_type = ztc_client.list("roltype", query_params,)
+        rol_typen = ztc_client.list("roltype", query_params)
+        if not rol_typen:
+            logger.info(
+                "Roltype specified, but no matching roltype found in the zaaktype.",
+                extra={"query_params": query_params},
+            )
+            return None
 
         zrc_client = self.get_client(APITypes.zrc)
         request_body = {
             "zaak": zaak["url"],
             "betrokkene": initiator.get("betrokkene", ""),
             "betrokkeneType": initiator.get("betrokkeneType", "natuurlijk_persoon"),
-            "roltype": rol_type["results"][0]["url"],
+            "roltype": rol_typen["results"][0]["url"],
             "roltoelichting": initiator.get("roltoelichting", ""),
             "indicatieMachtiging": initiator.get("indicatieMachtiging", ""),
             "betrokkeneIdentificatie": initiator.get("betrokkeneIdentificatie", {}),
