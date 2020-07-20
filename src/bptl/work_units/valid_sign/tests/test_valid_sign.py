@@ -189,7 +189,7 @@ class ValidSignTests(TestCase):
             ]
             self.assertEqual(body["roles"], expected_roles)
 
-    def test_add_documents_to_package(self, m):
+    def test_add_documents_and_signers_to_package(self, m):
         mock_service_oas_get(
             m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
         )
@@ -203,6 +203,9 @@ class ValidSignTests(TestCase):
         m.get(DOCUMENT_2, json=RESPONSE_2)
         m.get(CONTENT_2, content=b"Test content 2")
 
+        # The task will retrieve the roles from ValidSign, so mock the call
+        mock_roles_get(m, test_package)
+
         test_document_response = {
             "id": "75204439c02fffeddaeb224a1ded0ea07016456c9069eadd",
             "name": "Test Document",
@@ -214,12 +217,25 @@ class ValidSignTests(TestCase):
         )
 
         task = CreateValidSignPackageTask(self.fetched_task)
-        document_list = task.add_documents_to_package(test_package)
+        document_list = task.add_documents_and_approvals_to_package(test_package)
 
         # Since there are two documents in the package, the document list should contain 2 docs
         self.assertEqual(
             document_list, [test_document_response, test_document_response]
         )
+
+        # Check that the request headers and body for POSTing the documents were formatted correctly
+        for mocked_request in m.request_history[-2:]:
+            self.assertEqual(mocked_request._request.headers["Accept"], "*/*")
+            self.assertIn(
+                "multipart/form-data; boundary=",
+                mocked_request._request.headers["Content-Type"],
+            )
+            body = mocked_request._request.body.decode()
+            self.assertIn('Content-Disposition: form-data; name="payload"', body)
+            self.assertIn(
+                'Content-Disposition: form-data; name="file"; filename="file"', body
+            )
 
     def test_get_signers(self, m):
         mock_service_oas_get(
@@ -237,45 +253,6 @@ class ValidSignTests(TestCase):
         self.assertEqual(len(signers), 2)
         self.assertEqual(signers[0], FORMATTED_SIGNER_1)
         self.assertEqual(signers[1], FORMATTED_SIGNER_2)
-
-    def test_create_approval(self, m):
-        mock_service_oas_get(
-            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
-        )
-
-        test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
-        test_documents = [
-            {
-                "id": "75204439c02fffeddaeb224a1ded0ea07016456c9069eadd",
-                "name": "Test Document 1",
-            },
-            {
-                "id": "24a1ded0ea07016456c9069eadd75204439c02fffeddaeb2",
-                "name": "Test Document 2",
-            },
-        ]
-
-        mock_create_approval_post(m, test_package)
-        mock_roles_get(m, test_package)
-
-        task = CreateValidSignPackageTask(self.fetched_task)
-        task.create_approval_for_documents(test_package, test_documents)
-
-        # One call to get the roles and 2 calls per document (to add the 2 signers) and there are 2 documents in total.
-        expected_paths = [
-            "/api/packages/bw5fsokyhj48a-frwjpyymz8mno=/roles",
-            "/api/packages/bw5fsokyhj48a-frwjpyymz8mno=/documents/75204439c02fffeddaeb224a1ded0ea07016456c9069eadd/approvals",
-            "/api/packages/bw5fsokyhj48a-frwjpyymz8mno=/documents/75204439c02fffeddaeb224a1ded0ea07016456c9069eadd/approvals",
-            "/api/packages/bw5fsokyhj48a-frwjpyymz8mno=/documents/24a1ded0ea07016456c9069eadd75204439c02fffeddaeb2/approvals",
-            "/api/packages/bw5fsokyhj48a-frwjpyymz8mno=/documents/24a1ded0ea07016456c9069eadd75204439c02fffeddaeb2/approvals",
-        ]
-
-        actual_paths = []
-        for req in m.request_history:
-            actual_paths.append(req.path)
-
-        for path in expected_paths:
-            self.assertIn(path, actual_paths)
 
 
 @requests_mock.Mocker()

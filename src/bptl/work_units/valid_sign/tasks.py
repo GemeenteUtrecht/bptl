@@ -1,4 +1,3 @@
-import io
 import json
 import logging
 from typing import List, Tuple
@@ -111,7 +110,7 @@ class CreateValidSignPackageTask(ValidSignTask):
                 document_data["inhoud"], headers=document_client.auth.credentials(),
             )
 
-            documents.append((document_data["titel"], io.BytesIO(response.content)))
+            documents.append((document_data["titel"], response.content))
 
         return documents
 
@@ -131,6 +130,35 @@ class CreateValidSignPackageTask(ValidSignTask):
         roles = response["results"]
         # Not all the roles are signers (one of them is the account owner)
         return [role for role in roles if role["type"] == "SIGNER"]
+
+    def _get_approvals(self, signers: List[dict]) -> List[dict]:
+        """Make approvals from signers
+
+        The approval is a placeholder for where a signature from a signer will go.
+        """
+
+        fields = [
+            {
+                "type": "SIGNATURE",
+                "subtype": "FULLNAME",
+                "extractAnchor": {
+                    "anchorText": "Capture Signature",
+                    "index": 0,
+                    "characterIndex": 0,
+                    "anchorPoint": "BOTTOMLEFT",
+                    "leftOffset": 0,
+                    "topOffset": 0,
+                    "width": 150,
+                    "height": 50,
+                },
+            }
+        ]
+
+        approvals = []
+        for signer in signers:
+            approvals.append({"role": f"{signer['id']}", "fields": fields})
+
+        return approvals
 
     def create_package(self) -> dict:
         """Create a ValidSign package with the name specified by the process variable and add the signers to it."""
@@ -155,10 +183,12 @@ class CreateValidSignPackageTask(ValidSignTask):
 
         return package
 
-    def add_documents_to_package(self, package: dict) -> List[dict]:
-        """Add documents to the package."""
+    def add_documents_and_approvals_to_package(self, package: dict) -> List[dict]:
+        """Add documents and approvals to the package."""
 
-        logger.debug("Adding documents to ValidSign package '%s'", package["id"])
+        logger.debug(
+            "Adding documents and approvals to ValidSign package '%s'", package["id"]
+        )
 
         documents = self._get_documents_from_api()
 
@@ -170,10 +200,13 @@ class CreateValidSignPackageTask(ValidSignTask):
             topic_name="CreateValidSignPackage"
         )
 
+        signers = self._get_signers_from_package(package)
+        approvals = self._get_approvals(signers)
+
         attached_documents = []
         for doc_name, doc_content in documents:
-            url = f"{validsign_client.base_url}/api/packages/{package['id']}/documents"
-            payload = {"name": doc_name}
+            url = f"{validsign_client.base_url}api/packages/{package['id']}/documents"
+            payload = {"name": doc_name, "extract": True, "approvals": approvals}
             body = {"payload": json.dumps(payload)}
             file = [("file", doc_content)]
 
@@ -187,56 +220,6 @@ class CreateValidSignPackageTask(ValidSignTask):
             attached_documents.append(attached_doc)
 
         return attached_documents
-
-    def create_approval_for_documents(self, package: dict, documents: List[dict]):
-        """Create an approval in the specified documents for all signers.
-
-        The approval is a placeholder for where a signature will go. According to
-        https://apidocs.validsign.nl/validsign_integrator_guide.pdf the anchor extraction cannot be used
-        with the API call to create an approval. So, the position has to be provided. If no ``top``, ``left``,
-        ``width`` and ``height`` are given, then an 'acceptance button' appears under the document.
-        """
-
-        logger.debug(
-            "Creating approvals for documents in ValidSign package '%s'", package["id"]
-        )
-
-        signers = self._get_signers_from_package(package)
-
-        # Settings for the size and the place of the signature field in the document
-        signature_width = 150
-        signature_height = 50
-        left_offset = 0
-
-        validsign_client = self.get_validsign_client(
-            topic_name="CreateValidSignPackage"
-        )
-
-        # For all the documents, create an approval for each signer
-        for document in documents:
-            approval_path = (
-                f"api/packages/{package['id']}/documents/{document['id']}/approvals"
-            )
-            # FIXME the signatures are stacked vertically, but if they reach the end of the page it causes a 500 error
-            for counter, signer in enumerate(signers):
-                approval_settings = [
-                    {
-                        "top": counter * signature_height,
-                        "left": left_offset,
-                        "width": signature_width,
-                        "height": signature_height,
-                        "page": 0,
-                        "type": "SIGNATURE",
-                        "subtype": "FULLNAME",
-                    }
-                ]
-                data = {"role": f"{signer['id']}", "fields": approval_settings}
-                validsign_client.request(
-                    path=approval_path,
-                    operation="api.packages._packageId.documents._documentId.approvals.post",
-                    method="POST",
-                    json=data,
-                )
 
     def send_package(self, package: dict):
         """Change the status of the package to 'SENT'
@@ -258,8 +241,7 @@ class CreateValidSignPackageTask(ValidSignTask):
     def perform(self) -> dict:
 
         package = self.create_package()
-        documents = self.add_documents_to_package(package)
-        self.create_approval_for_documents(package, documents)
+        self.add_documents_and_approvals_to_package(package)
         self.send_package(package)
 
         return {"packageId": package["id"]}
