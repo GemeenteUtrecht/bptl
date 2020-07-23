@@ -3,6 +3,7 @@ import json
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.tests.factories import TaskMappingFactory
@@ -36,12 +37,9 @@ class CreateStatusTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaak": {"type": "String", "value": ZAAK, "valueInfo": {}},
-                "statustype": {"type": "String", "value": STATUSTYPE, "valueInfo": {}},
-                "services": {
-                    "type": "json",
-                    "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
-                },
+                "zaakUrl": serialize_variable(ZAAK),
+                "statustype": serialize_variable(STATUSTYPE),
+                "services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}}),
             },
         )
 
@@ -64,4 +62,4 @@ class CreateStatusTaskTests(TestCase):
 
         result = task.perform()
 
-        self.assertEqual(result, {"status": STATUS})
+        self.assertEqual(result, {"statusUrl": STATUS})

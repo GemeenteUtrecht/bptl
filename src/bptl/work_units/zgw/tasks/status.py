@@ -2,6 +2,7 @@ from django.utils import timezone
 
 from zgw_consumers.constants import APITypes
 
+from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from .base import ZGWWorkUnit
@@ -14,7 +15,7 @@ class CreateStatusTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaak``: full URL of the ZAAK to create a new status for
+    * ``zaakUrl``: full URL of the ZAAK to create a new status for
     * ``statustype``: full URL of the STATUSTYPE to set
     * ``services``: JSON Object of connection details for ZGW services:
 
@@ -31,15 +32,17 @@ class CreateStatusTask(ZGWWorkUnit):
 
     **Sets the process variables**
 
-    * ``status``: the full URL of the created STATUS
+    * ``statusUrl``: the full URL of the created STATUS
     """
 
     def create_status(self) -> dict:
         variables = self.task.get_variables()
         zrc_client = self.get_client(APITypes.zrc)
+        zaak_url = check_variable(variables, "zaakUrl")
+        statustype = check_variable(variables, "statustype")
         data = {
-            "zaak": variables["zaak"],
-            "statustype": variables["statustype"],
+            "zaak": zaak_url,
+            "statustype": statustype,
             "datumStatusGezet": timezone.now().isoformat(),
         }
         status = zrc_client.create("status", data)
@@ -47,4 +50,4 @@ class CreateStatusTask(ZGWWorkUnit):
 
     def perform(self):
         status = self.create_status()
-        return {"status": status["url"]}
+        return {"statusUrl": status["url"]}
