@@ -26,6 +26,10 @@ class CreateStatusTask(ZGWWorkUnit):
               "<ztc alias>": {"jwt": "Bearer <JWT value>"}
           }
 
+    **Optional process variables**
+
+    * ``toelichting``: description of the STATUS
+
     **Optional process variables (Camunda exclusive)**
 
     * ``callbackUrl``: send an empty POST request to this URL to signal completion
@@ -40,10 +44,12 @@ class CreateStatusTask(ZGWWorkUnit):
         zrc_client = self.get_client(APITypes.zrc)
         zaak_url = check_variable(variables, "zaakUrl")
         statustype = check_variable(variables, "statustype")
+        toelichting = variables.get("toelichting", "")
         data = {
             "zaak": zaak_url,
             "statustype": statustype,
             "datumStatusGezet": timezone.now().isoformat(),
+            "statustoelichting": toelichting,
         }
         status = zrc_client.create("status", data)
         return status
