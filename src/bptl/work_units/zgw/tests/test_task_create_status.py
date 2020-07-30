@@ -1,9 +1,8 @@
-import json
-
 from django.test import TestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
+from freezegun import freeze_time
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.tests.factories import TaskMappingFactory
@@ -40,9 +39,11 @@ class CreateStatusTaskTests(TestCase):
                 "zaakUrl": serialize_variable(ZAAK),
                 "statustype": serialize_variable(STATUSTYPE),
                 "services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}}),
+                "toelichting": serialize_variable("some description"),
             },
         )
 
+    @freeze_time("2020-01-16")
     def test_create_status(self, m):
         mock_service_oas_get(m, ZRC_URL, "zrc")
         m.post(
@@ -53,8 +54,8 @@ class CreateStatusTaskTests(TestCase):
                 "uuid": "b7218c76-7478-41e9-a088-54d2f914a713",
                 "zaak": ZAAK,
                 "statustype": STATUSTYPE,
-                "datumStatusGezet": "2020-01-16T00:00:00.000000Z",
-                "statustoelichting": "",
+                "datumStatusGezet": "2020-01-16T00:00:00+00:00",
+                "statustoelichting": "some description",
             },
         )
 
@@ -63,3 +64,12 @@ class CreateStatusTaskTests(TestCase):
         result = task.perform()
 
         self.assertEqual(result, {"statusUrl": STATUS})
+        self.assertEqual(
+            m.last_request.json(),
+            {
+                "zaak": ZAAK,
+                "statustype": STATUSTYPE,
+                "datumStatusGezet": "2020-01-16T00:00:00+00:00",
+                "statustoelichting": "some description",
+            },
+        )
