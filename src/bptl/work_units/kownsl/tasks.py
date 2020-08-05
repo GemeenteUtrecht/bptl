@@ -25,6 +25,8 @@ def finalize_review_request(task: BaseTask) -> dict:
     """
     Update a review request in Kownsl.
 
+    DEPRECATED - do not use anymore.
+
     Review requests can be requests for advice or approval. This tasks registers the
     case used for the actual review with the review request, and derives the frontend
     URL for end-users where they can submit their review.
