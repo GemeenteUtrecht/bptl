@@ -95,20 +95,17 @@ def get_approval_status(task: BaseTask) -> dict:
     variables = task.get_variables()
 
     # TODO: switch from zaak-based retrieval to review-request based
-    zaak_url = check_variable(variables, "zaakUrl")
-    check_variable(variables, "reviewRequestId")
+    review_request_id = check_variable(variables, "reviewRequestId")
 
-    operation_id = "approvalcollection_retrieve"
-    url = get_operation_url(client.schema, operation_id, base_url=client.base_url)
-
-    params = {"objectUrl": zaak_url}
-    approval_collection = client.request(
-        url, operation_id, request_kwargs={"params": params},
+    operation_id = "reviewrequest_approvals"
+    url = get_operation_url(
+        client.schema, operation_id, base_url=client.base_url, uuid=review_request_id,
     )
 
-    num_approved = 0
-    num_rejected = 0
-    for approval in approval_collection["approvals"]:
+    approvals = client.request(url, operation_id)
+
+    num_approved, num_rejected = 0, 0
+    for approval in approvals:
         if approval["approved"]:
             num_approved += 1
         else:
