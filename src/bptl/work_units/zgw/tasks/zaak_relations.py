@@ -159,7 +159,7 @@ class CreateEigenschap(ZGWWorkUnit):
 
         {
             "naam": "eigenschapnaam as in zaaktypecatalogus",
-            "value": "<value to set>"
+            "waarde": "<value to set>"
         }
 
 
