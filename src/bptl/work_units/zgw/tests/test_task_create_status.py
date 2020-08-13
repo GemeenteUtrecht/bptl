@@ -92,7 +92,7 @@ class CreateStatusTaskTests(TestCase):
             task_id="test-task-id",
             variables={
                 "zaakUrl": serialize_variable(ZAAK),
-                "statusVolnummer": serialize_variable(2),
+                "statusVolgnummer": serialize_variable(2),
                 "services": serialize_variable(
                     {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 12345"},}
                 ),

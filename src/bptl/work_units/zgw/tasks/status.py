@@ -20,7 +20,7 @@ class CreateStatusTask(ZGWWorkUnit):
     **Required process variables**
 
     * ``zaakUrl``: full URL of the ZAAK to create a new status for
-    * ``statusVolnummer``: volgnummer of the status type as it occurs in the catalogus OR
+    * ``statusVolgnummer``: volgnummer of the status type as it occurs in the catalogus OR
     * ``statustype``: full URL of the STATUSTYPE to set
     * ``services``: JSON Object of connection details for ZGW services:
 
@@ -31,7 +31,7 @@ class CreateStatusTask(ZGWWorkUnit):
               "<ztc alias>": {"jwt": "Bearer <JWT value>"}
           }
 
-    Note that either ``statusVolnummer`` or ``statustype`` are sufficient.
+    Note that either ``statusVolgnummer`` or ``statustype`` are sufficient.
 
     **Optional process variables**
 
@@ -52,8 +52,8 @@ class CreateStatusTask(ZGWWorkUnit):
         zrc_client = self.get_client(APITypes.zrc)
         zaak_url = check_variable(variables, "zaakUrl")
 
-        if "statusVolnummer" in variables:
-            volgnummer = int(variables["statusVolnummer"])
+        if "statusVolgnummer" in variables:
+            volgnummer = int(variables["statusVolgnummer"])
             ztc_client = self.get_client(APITypes.ztc)
 
             logger.info("Deriving statustype URL from Catalogi API")
@@ -74,7 +74,7 @@ class CreateStatusTask(ZGWWorkUnit):
                 )
             except StopIteration:
                 raise ValueError(
-                    f"Statustype met volgnummer '{variables['statusVolnummer']}' niet gevonden."
+                    f"Statustype met volgnummer '{variables['statusVolgnummer']}' niet gevonden."
                 )
         else:
             statustype = check_variable(variables, "statustype")
