@@ -1,3 +1,5 @@
+import logging
+
 from django.utils import timezone
 
 from zgw_consumers.constants import APITypes
@@ -6,6 +8,8 @@ from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from .base import ZGWWorkUnit
+
+logger = logging.getLogger(__name__)
 
 
 @register
@@ -16,6 +20,7 @@ class CreateStatusTask(ZGWWorkUnit):
     **Required process variables**
 
     * ``zaakUrl``: full URL of the ZAAK to create a new status for
+    * ``statusVolnummer``: volgnummer of the status type as it occurs in the catalogus OR
     * ``statustype``: full URL of the STATUSTYPE to set
     * ``services``: JSON Object of connection details for ZGW services:
 
@@ -25,6 +30,8 @@ class CreateStatusTask(ZGWWorkUnit):
               "<zrc alias>": {"jwt": "Bearer <JWT value>"},
               "<ztc alias>": {"jwt": "Bearer <JWT value>"}
           }
+
+    Note that either ``statusVolnummer`` or ``statustype`` are sufficient.
 
     **Optional process variables**
 
@@ -41,9 +48,37 @@ class CreateStatusTask(ZGWWorkUnit):
 
     def create_status(self) -> dict:
         variables = self.task.get_variables()
+
         zrc_client = self.get_client(APITypes.zrc)
         zaak_url = check_variable(variables, "zaakUrl")
-        statustype = check_variable(variables, "statustype")
+
+        if "statusVolnummer" in variables:
+            volgnummer = int(variables["statusVolnummer"])
+            ztc_client = self.get_client(APITypes.ztc)
+
+            logger.info("Deriving statustype URL from Catalogi API")
+            zaak = zrc_client.retrieve("zaak", url=zaak_url)
+
+            statustypen = ztc_client.list(
+                "statustype", query_params={"zaaktype": zaak["zaaktype"]}
+            )
+
+            if statustypen["next"]:
+                raise NotImplementedError("Pagination not implemented yet")
+
+            try:
+                statustype = next(
+                    st["url"]
+                    for st in statustypen["results"]
+                    if st["volgnummer"] == volgnummer
+                )
+            except StopIteration:
+                raise ValueError(
+                    f"Statustype met volgnummer '{variables['statusVolnummer']}' niet gevonden."
+                )
+        else:
+            statustype = check_variable(variables, "statustype")
+
         toelichting = variables.get("toelichting", "")
         data = {
             "zaak": zaak_url,
