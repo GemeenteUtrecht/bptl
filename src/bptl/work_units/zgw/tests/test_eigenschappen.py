@@ -114,3 +114,19 @@ class CreateDocumentRelationTaskTests(TestCase):
                 "waarde": "2020-05-01",
             },
         )
+
+    def test_eigenschap_does_not_exist(self, m):
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+
+        m.get(ZAAK, json={"zaaktype": ZAAKTYPE})
+        # https://catalogi-api.vng.cloud/api/v1/schema/#operation/eigenschap_list
+        m.get(
+            f"{ZTC_URL}eigenschappen?zaaktype={ZAAKTYPE}",
+            json={"count": 0, "next": None, "previous": None, "results": [],},
+        )
+
+        task = CreateEigenschap(self.fetched_task)
+        task.perform()
+
+        self.assertTrue(all(req.method == "GET" for req in m.request_history))

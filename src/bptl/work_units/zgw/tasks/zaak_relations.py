@@ -1,3 +1,4 @@
+import logging
 from concurrent import futures
 from typing import Dict
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
@@ -10,6 +11,8 @@ from bptl.tasks.registry import register
 from ..nlx import get_nlx_headers
 from ..utils import get_paginated_results
 from .base import ZGWWorkUnit
+
+logger = logging.getLogger(__name__)
 
 
 @register
@@ -213,13 +216,18 @@ class CreateEigenschap(ZGWWorkUnit):
         eigenschappen = get_paginated_results(
             ztc_client, "eigenschap", query_params={"zaaktype": zaaktype}
         )
-        eigenschap_url = next(
-            (
-                eigenschap["url"]
-                for eigenschap in eigenschappen
-                if eigenschap["naam"] == naam
+        try:
+            eigenschap_url = next(
+                (
+                    eigenschap["url"]
+                    for eigenschap in eigenschappen
+                    if eigenschap["naam"] == naam
+                )
             )
-        )
+        except StopIteration:
+            # eigenschap not found - abort
+            logger.info("Eigenschap '%s' did not exist on the zaaktype, aborting.")
+            return {}
 
         zrc_client.create(
             "zaakeigenschap",
