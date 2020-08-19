@@ -29,6 +29,7 @@ django-timeline-logger
 
 # API libraries
 djangorestframework
+djangorestframework-camel-case
 # django-extra-fields
 # django-filter
 drf-yasg  # api documentation
