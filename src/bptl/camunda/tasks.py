@@ -2,6 +2,7 @@
 from django.conf import settings
 
 from celery.utils.log import get_task_logger
+from celery_once import QueueOnce
 from timeline_logger.models import TimelineLog
 
 from bptl.camunda.api import complete
@@ -18,9 +19,23 @@ logger = get_task_logger(__name__)
 __all__ = ("task_fetch_and_lock", "task_execute_and_complete")
 
 
-@app.task()
+@app.task(
+    base=QueueOnce,
+    autoretry_for=(Exception,),  # if something goes wrong, automatically retry the task
+    retry_backoff=True,
+    once={
+        "graceful": True,  # raise no exception if we're scheduling this more often (beat!)
+        "timeout": (
+            settings.LONG_POLLING_TIMEOUT_MINUTES * 60 + 1
+        ),  # timeout if something goes wrong
+    },
+)
 def task_fetch_and_lock():
-    worker_id, num_tasks, tasks = fetch_and_lock(settings.MAX_TASKS)
+    worker_id, num_tasks, tasks = fetch_and_lock(
+        settings.MAX_TASKS,
+        # convert to milliseconds
+        long_polling_timeout=settings.LONG_POLLING_TIMEOUT_MINUTES * 60 * 1000,
+    )
 
     logger.info("fetched %r tasks with %r", num_tasks, worker_id)
 
@@ -31,6 +46,11 @@ def task_fetch_and_lock():
         )
 
         task_execute_and_complete.delay(task.id)
+
+    # once we're completed, which may be way within the timeout, we need to-reschedule
+    # a new long-poll!
+    task_fetch_and_lock.delay()
+
     return num_tasks
 
 
