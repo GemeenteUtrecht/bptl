@@ -9,8 +9,7 @@ amqp==2.5.2               # via -r requirements/base.txt, kombu
 babel==2.8.0              # via -r requirements/base.txt, flower, sphinx
 beautifulsoup4==4.8.2     # via webtest
 billiard==3.6.1.0         # via -r requirements/base.txt, celery
-celery-once==3.0.1        # via -r requirements/base.txt
-celery==4.4.0             # via -r requirements/base.txt, celery-once, django-camunda, flower
+celery==4.4.0             # via -r requirements/base.txt, django-camunda, flower
 certifi==2019.11.28       # via -r requirements/base.txt, elastic-apm, requests, sentry-sdk
 cffi==1.13.2              # via -r requirements/base.txt, cryptography
 chardet==3.0.4            # via -r requirements/base.txt, requests
@@ -73,7 +72,7 @@ python-decouple==3.3      # via -r requirements/base.txt
 python-dotenv==0.10.3     # via -r requirements/base.txt
 pytz==2019.3              # via -r requirements/base.txt, babel, celery, django, flower
 pyyaml==5.3               # via -r requirements/base.txt, gemma-zds-client
-redis==3.3.11             # via -r requirements/base.txt, celery-once, django-redis
+redis==3.3.11             # via -r requirements/base.txt, django-redis
 requests-mock==1.7.0      # via -r requirements/test-tools.in
 requests==2.22.0          # via -r requirements/base.txt, coreapi, django-auth-adfs, django-camunda, django-rosetta, gemma-zds-client, requests-mock, sphinx
 ruamel.yaml.clib==0.2.0   # via -r requirements/base.txt, ruamel.yaml

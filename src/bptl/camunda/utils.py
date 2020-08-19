@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 LOCK_DURATION = 60 * 10  # 10 minutes
 
 
-def fetch_and_lock(max_tasks: int, long_polling_timeout=None) -> Tuple[str, int, list]:
+def fetch_and_lock(max_tasks: int) -> Tuple[str, int, list]:
     """
     Fetch and lock a number of external tasks.
 
@@ -39,16 +39,10 @@ def fetch_and_lock(max_tasks: int, long_polling_timeout=None) -> Tuple[str, int,
     ]
 
     worker_id = get_worker_id()
-    body = {
-        "workerId": worker_id,
-        "maxTasks": max_tasks,
-        "topics": topics,
-    }
-    if long_polling_timeout:
-        body["asyncResponseTimeout"] = long_polling_timeout
-
     external_tasks: List[Object] = camunda.request(
-        "external-task/fetchAndLock", method="POST", json=body
+        "external-task/fetchAndLock",
+        method="POST",
+        json={"workerId": worker_id, "maxTasks": max_tasks, "topics": topics,},
     )
 
     fetched = []
