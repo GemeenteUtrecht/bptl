@@ -384,29 +384,14 @@ CELERY_TASK_SOFT_TIME_LIMIT = 600
 CELERY_BEAT_SCHEDULE = {
     "task-pull": {
         "task": "bptl.camunda.tasks.task_fetch_and_lock",
-        # run every 10 seconds - we leave this, even though the long-poll timeout is set
-        # to 10 minutes (see LONG_POLLING_TIMEOUT_MINUTES). This ensures that beat will
-        # start the polling after 10 seconds, and keep it running. The task itself
-        # is marked graceful, so it'll just return None and not be scheduled again.
-        "schedule": schedule(run_every=10),
+        "schedule": schedule(run_every=10),  # run every 10 seconds
     },
 }
 CELERY_ACKS_LATE = True
 
-CELERY_ONCE = {
-    "backend": "celery_once.backends.Redis",
-    "settings": {
-        "url": os.getenv("CELERY_ONCE_REDIS_URL", CELERY_BROKER_URL),
-        "default_timeout": 60 * 60,  # one hour
-    },
-}
-
 # project application settings
-ZGW_CONSUMERS_CLIENT_CLASS = "bptl.work_units.zgw.client.ZGWClient"
-
 MAX_TASKS = 10
-
-LONG_POLLING_TIMEOUT_MINUTES = 10
+ZGW_CONSUMERS_CLIENT_CLASS = "bptl.work_units.zgw.client.ZGWClient"
 
 # api settings
 REST_FRAMEWORK = {

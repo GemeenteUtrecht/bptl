@@ -1,7 +1,6 @@
 # Core python libraries
 Pillow  # handle images
 celery
-celery-once
 gemma-zds-client
 psycopg2  # database driver
 pytz  # handle timezones
