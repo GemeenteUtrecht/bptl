@@ -8,7 +8,8 @@ alabaster==0.7.12         # via sphinx
 amqp==2.5.2               # via kombu
 babel==2.8.0              # via flower, sphinx
 billiard==3.6.1.0         # via celery
-celery==4.4.0             # via -r requirements/base.in, django-camunda, flower
+celery-once==3.0.1        # via -r requirements/base.in
+celery==4.4.0             # via -r requirements/base.in, celery-once, django-camunda, flower
 certifi==2019.11.28       # via elastic-apm, requests, sentry-sdk
 cffi==1.13.2              # via cryptography
 chardet==3.0.4            # via requests
@@ -62,7 +63,7 @@ python-decouple==3.3      # via -r requirements/base.in
 python-dotenv==0.10.3     # via -r requirements/base.in
 pytz==2019.3              # via -r requirements/base.in, babel, celery, django, flower
 pyyaml==5.3               # via gemma-zds-client
-redis==3.3.11             # via django-redis
+redis==3.3.11             # via celery-once, django-redis
 requests==2.22.0          # via coreapi, django-auth-adfs, django-camunda, django-rosetta, gemma-zds-client, sphinx
 ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via drf-yasg
