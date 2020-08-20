@@ -1,7 +1,5 @@
 import logging
 
-from bptl.camunda.models import ExternalTask
-from bptl.camunda.utils import complete_task
 from bptl.tasks.models import BaseTask
 from bptl.tasks.registry import register
 
@@ -20,6 +18,4 @@ def dummy(task: BaseTask) -> None:
 
     logger.info("Received external task: %s", task_id)
     logger.info("External task currently has the variables: %r", task.get_variables())
-    logger.info("Marking task as completed...")
-    if isinstance(task, ExternalTask):
-        complete_task(task)
+    return {}

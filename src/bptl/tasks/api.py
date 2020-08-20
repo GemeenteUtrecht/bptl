@@ -30,7 +30,7 @@ class TaskPerformed(Exception):
 
 
 @save_and_log()
-def execute(task: BaseTask, registry: WorkUnitRegistry = register) -> None:
+def execute(task: BaseTask, registry: WorkUnitRegistry = register) -> dict:
     """
     Execute the appropriate task for a fetched external task.
 
@@ -76,4 +76,4 @@ def execute(task: BaseTask, registry: WorkUnitRegistry = register) -> None:
     else:
         result = callback(task)
 
-    return result
+    return result or {}

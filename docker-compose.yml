@@ -56,6 +56,9 @@ services:
   # camunda
   mysql:
     image: mariadb:10.5-bionic
+    command: [
+      '--wait_timeout=28800'
+    ]
     volumes:
       - "mysql-storage:/var/lib/mysql"
     environment:

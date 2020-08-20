@@ -379,8 +379,8 @@ ELASTIC_APM = {
 # Celery
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-# Add a 10 minutes timeout to all Celery tasks.
-CELERY_TASK_SOFT_TIME_LIMIT = 600
+# Add a 30 minutes timeout to all Celery tasks.
+CELERY_TASK_SOFT_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULE = {
     "task-pull": {
         "task": "bptl.camunda.tasks.task_fetch_and_lock",
