@@ -1,9 +1,14 @@
 import json
 import logging
 from typing import List, Tuple
+from urllib.parse import urlsplit, urlunsplit
+
+from django.conf import settings
+from django.db.models.functions import Length
 
 import requests
 from zgw_consumers.client import ZGWClient
+from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import WorkUnit, check_variable
 from bptl.tasks.models import TaskMapping
@@ -12,14 +17,26 @@ from bptl.tasks.registry import register
 logger = logging.getLogger(__name__)
 
 
+class NoService(Exception):
+    pass
+
+
+class NoAuth(Exception):
+    pass
+
+
+class DoesNotExist(Exception):
+    pass
+
+
 class ValidSignTask(WorkUnit):
 
     _validsign_client = None
 
-    def get_validsign_client(self, topic_name: str) -> ZGWClient:
+    def get_validsign_client(self) -> ZGWClient:
         if self._validsign_client is None:
             default_services = TaskMapping.objects.get(
-                topic_name=topic_name
+                topic_name=self.task.topic_name
             ).defaultservice_set.select_related("service")
             services_by_alias = {svc.alias: svc.service for svc in default_services}
 
@@ -62,26 +79,71 @@ class CreateValidSignPackageTask(ValidSignTask):
     * ``packageName``: string. Name of the ValidSign package that contains the documents to sign and the signers.
         This name appears in the notification-email that is sent to the signers.
 
+    * ``services``: JSON Object of connection details for ZGW services:
+
+        .. code-block:: json
+
+          {
+              "<drc alias1>": {"jwt": "Bearer <JWT value>"},
+              "<drc alias2>": {"jwt": "Bearer <JWT value>"}
+          }
+
     **Sets the process variables**
 
     * ``packageId``: string. ID of the ValidSign package created by the task.
     """
 
-    _documents_client = None
+    _document_clients = None
 
-    def get_documents_client(self, topic_name: str) -> ZGWClient:
-        if self._documents_client is None:
+    def build_document_clients(self) -> List[ZGWClient]:
+        if self._document_clients is None:
             default_services = TaskMapping.objects.get(
-                topic_name=topic_name
-            ).defaultservice_set.select_related("service")
-            services_by_alias = {svc.alias: svc.service for svc in default_services}
+                topic_name=self.task.topic_name
+            ).defaultservice_set.filter(service__api_type=APITypes.drc)
 
-            alias = "DocumentenAPI"
-            if alias not in services_by_alias:
-                raise RuntimeError(f"Service alias '{alias}' not found.")
+            if default_services.count() == 0:
+                raise NoService(
+                    f"No {APITypes.drc} service is configured for topic {self.task.topic_name}"
+                )
 
-            self._documents_client = services_by_alias[alias].build_client()
-        return self._documents_client
+            services_vars = self.task.get_variables().get("services", {})
+            if not services_vars and not settings.DEBUG:
+                raise NoService(f"Expected service aliases in process variables")
+
+            aliases_vars = list(services_vars.keys())
+            if aliases_vars:
+                # Order based on the length of the api_root (longest first)
+                # For 2 APIs with root URL http://drc1/api/v1 and http://drc1/api/ a URL http://drc1/api/v1/document/1
+                # will match both clients, but should use the first one
+                default_services = default_services.filter(
+                    alias__in=aliases_vars
+                ).order_by(Length("service__api_root").desc())
+
+            clients = []
+            for default_service in default_services:
+                client = default_service.service.build_client()
+                # add authorization header
+                jwt = services_vars.get(default_service.alias, {}).get("jwt")
+                if not jwt and not settings.DEBUG:
+                    raise NoAuth(
+                        f"Expected 'jwt' variable for {default_service.alias} in process variables"
+                    )
+                client.set_auth_value(jwt)
+                clients.append(client)
+
+            self._document_clients = clients
+        return self._document_clients
+
+    @staticmethod
+    def get_document_client(url: str, candidates: List[ZGWClient]) -> ZGWClient:
+        for candidate in candidates:
+            if url.startswith(candidate.base_url):
+                client = candidate
+                break
+        else:
+            raise DoesNotExist(f"No service found for url '{url}'")
+
+        return client
 
     def format_signers(self, signers: List[dict]) -> List[dict]:
         """Format the signer information into an array of JSON objects as needed by ValidSign."""
@@ -95,10 +157,13 @@ class CreateValidSignPackageTask(ValidSignTask):
 
         variables = self.task.get_variables()
         document_urls = check_variable(variables, "documents")
-        document_client = self.get_documents_client(topic_name="CreateValidSignPackage")
+        # Building the document clients for all DRC services
+        document_clients = self.build_document_clients()
 
         documents = []
         for document_url in document_urls:
+            # Getting the appropriate client
+            document_client = self.get_document_client(document_url, document_clients)
             # Retrieving the document
             document_data = document_client.retrieve(
                 resource="enkelvoudiginformatieobject", url=document_url,
@@ -107,7 +172,7 @@ class CreateValidSignPackageTask(ValidSignTask):
             # Retrieving the content of the document
             # Need use requests directly instead of `document_client.request()` since the response is not in JSON format
             response = requests.get(
-                document_data["inhoud"], headers=document_client.auth.credentials(),
+                document_data["inhoud"], headers=document_client.auth_header,
             )
 
             documents.append((document_data["titel"], response.content))
@@ -119,9 +184,7 @@ class CreateValidSignPackageTask(ValidSignTask):
 
         logger.debug("Retrieving the roles from validSign package '%s'", package["id"])
 
-        response = self.get_validsign_client(
-            topic_name="CreateValidSignPackage"
-        ).request(
+        response = self.get_validsign_client().request(
             path=f"api/packages/{package['id']}/roles",
             operation="api.packages._packageId.roles.get",
             method="GET",
@@ -175,9 +238,7 @@ class CreateValidSignPackageTask(ValidSignTask):
             "roles": signers,
         }
 
-        package = self.get_validsign_client(
-            topic_name="CreateValidSignPackage"
-        ).request(
+        package = self.get_validsign_client().request(
             path="api/packages", operation="api.packages.post", method="POST", json=body
         )
 
@@ -196,9 +257,7 @@ class CreateValidSignPackageTask(ValidSignTask):
         # to the request, but then not sure how to specify the filename yet...
         # files = [("files[]", content) for name, content in documents]
 
-        validsign_client = self.get_validsign_client(
-            topic_name="CreateValidSignPackage"
-        )
+        validsign_client = self.get_validsign_client()
 
         signers = self._get_signers_from_package(package)
         approvals = self._get_approvals(signers)
@@ -210,7 +269,8 @@ class CreateValidSignPackageTask(ValidSignTask):
             body = {"payload": json.dumps(payload)}
             file = [("file", doc_content)]
 
-            # Not using validsign_client because the request doesn't get formatted properly
+            # Not using validsign_client because the request doesn't get formatted properly,
+            # since this a multipart/form-data call while zds_client only supports JSON.
             response = requests.post(
                 url=url, headers=validsign_client.auth_header, data=body, files=file
             )
@@ -231,7 +291,7 @@ class CreateValidSignPackageTask(ValidSignTask):
         logger.debug("Setting the status of package '%s' to SENT", package["id"])
         body = {"status": "SENT"}
 
-        self.get_validsign_client("CreateValidSignPackage").request(
+        self.get_validsign_client().request(
             path=f"api/packages/{package['id']}",
             operation="api.packages._packageId.post",
             method="PUT",
@@ -264,7 +324,7 @@ class ValidSignReminderTask(ValidSignTask):
         logger.debug("Sending a reminder to '%s' through ValidSign", email)
 
         body = {"email": email}
-        self.get_validsign_client("ValidSignReminder").request(
+        self.get_validsign_client().request(
             path=f"api/packages/{package_id}/notifications",
             operation="api.packages._packageId.notifications.post",
             method="POST",

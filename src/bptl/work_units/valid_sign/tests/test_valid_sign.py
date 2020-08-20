@@ -7,6 +7,7 @@ from django.test import TestCase
 import requests_mock
 
 from bptl.camunda.models import ExternalTask
+from bptl.camunda.tests.utils import json_variable
 from bptl.tasks.models import TaskMapping
 from bptl.work_units.valid_sign.tasks import (
     CreateValidSignPackageTask,
@@ -16,16 +17,19 @@ from bptl.work_units.valid_sign.tests.utils import mock_service_oas_get
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
 VALIDSIGN_URL = "https://try.validsign.test.nl/"
-ZRC_URL = "https://some.zrc.nl/api/v1/"
+DRC_URL = "https://some.drc.nl/api/v1/"
+OTHER_DRC_URL = "https://other.drc.nl/api/v1/"
 
 DOCUMENT_1 = (
-    f"{ZRC_URL}enkelvoudiginformatieobjecten/4f8b4811-5d7e-4e9b-8201-b35f5101f891/"
+    f"{DRC_URL}enkelvoudiginformatieobjecten/4f8b4811-5d7e-4e9b-8201-b35f5101f891/"
 )
 DOCUMENT_2 = (
-    f"{ZRC_URL}enkelvoudiginformatieobjecten/b7218c76-7478-41e9-a088-54d2f914a713/"
+    f"{DRC_URL}enkelvoudiginformatieobjecten/b7218c76-7478-41e9-a088-54d2f914a713/"
 )
+DOCUMENT_3 = f"{OTHER_DRC_URL}enkelvoudiginformatieobjecten/c3714142-4d6b-450a-9e66-42cc2ef187be/"
 CONTENT_1 = f"{DOCUMENT_1}download/"
 CONTENT_2 = f"{DOCUMENT_2}download/"
+CONTENT_3 = f"{DOCUMENT_3}download/"
 
 RESPONSE_1 = {
     "url": DOCUMENT_1,
@@ -39,6 +43,13 @@ RESPONSE_2 = {
     "uuid": "b7218c76-7478-41e9-a088-54d2f914a713",
     "inhoud": CONTENT_2,
     "titel": "Test Doc 2",
+}
+
+RESPONSE_3 = {
+    "url": DOCUMENT_3,
+    "uuid": "c3714142-4d6b-450a-9e66-42cc2ef187be",
+    "inhoud": CONTENT_3,
+    "titel": "Test Doc 3",
 }
 
 SIGNER_1 = {
@@ -103,9 +114,9 @@ class ValidSignTests(TestCase):
         )
         DefaultServiceFactory.create(
             task_mapping=mapping,
-            service__api_root=ZRC_URL,
-            service__api_type="zrc",
-            alias="DocumentenAPI",
+            service__api_root=DRC_URL,
+            service__api_type="drc",
+            alias="drc",
         )
         DefaultServiceFactory.create(
             task_mapping=mapping,
@@ -122,6 +133,7 @@ class ValidSignTests(TestCase):
                 "documents": {"type": "List", "value": [DOCUMENT_1, DOCUMENT_2]},
                 "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
                 "packageName": {"type": "String", "value": "Test package name"},
+                "services": json_variable({"drc": {"jwt": "Bearer 12345"}}),
             },
         )
 
@@ -145,7 +157,7 @@ class ValidSignTests(TestCase):
         )
 
     def test_get_documents_from_api(self, m):
-        mock_service_oas_get(m=m, url=ZRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
 
         # Mock call to retrieve the documents from the API
         m.get(DOCUMENT_1, json=RESPONSE_1)
@@ -193,7 +205,7 @@ class ValidSignTests(TestCase):
         mock_service_oas_get(
             m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
         )
-        mock_service_oas_get(m=m, url=ZRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
 
         test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
 
@@ -253,6 +265,121 @@ class ValidSignTests(TestCase):
         self.assertEqual(len(signers), 2)
         self.assertEqual(signers[0], FORMATTED_SIGNER_1)
         self.assertEqual(signers[1], FORMATTED_SIGNER_2)
+
+
+@requests_mock.Mocker()
+class ValidSignMultipleDocsAPITests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        mapping = TaskMapping.objects.create(
+            topic_name="CreateValidSignPackage",
+            callback="bptl.work_units.valid_sign.tasks.CreateValidSignPackage",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=DRC_URL,
+            service__api_type="drc",
+            alias="drc1",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=OTHER_DRC_URL,
+            service__api_type="drc",
+            alias="drc2",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=VALIDSIGN_URL,
+            service__api_type="orc",
+            alias="ValidSignAPI",
+        )
+
+        cls.fetched_task = ExternalTask.objects.create(
+            topic_name="CreateValidSignPackage",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "documents": {"type": "List", "value": [DOCUMENT_1, DOCUMENT_3]},
+                "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
+                "packageName": {"type": "String", "value": "Test package name"},
+                "services": json_variable(
+                    {"drc1": {"jwt": "Bearer 12345"}, "drc2": {"jwt": "Bearer 789"},}
+                ),
+            },
+        )
+
+    def test_get_documents_from_api(self, m):
+        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(
+            m=m, url=OTHER_DRC_URL, service="documenten", extension="json"
+        )
+
+        # Mock call to retrieve the documents from the API
+        m.get(DOCUMENT_1, json=RESPONSE_1)
+        m.get(DOCUMENT_3, json=RESPONSE_3)
+        # Mock calls to retrieve the content of the documents
+        m.get(CONTENT_1, content=b"Test content 1")
+        m.get(CONTENT_3, content=b"Test content 3")
+
+        task = CreateValidSignPackageTask(self.fetched_task)
+        documents = task._get_documents_from_api()
+
+        self.assertEqual(len(documents), 2)
+        self.assertEqual(documents[0], (RESPONSE_1["titel"], b"Test content 1"))
+        self.assertEqual(documents[1], (RESPONSE_3["titel"], b"Test content 3"))
+
+    def test_add_documents_and_signers_to_package(self, m):
+        mock_service_oas_get(
+            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
+        )
+        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(
+            m=m, url=OTHER_DRC_URL, service="documenten", extension="json"
+        )
+
+        test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
+
+        # Two test documents are added to the package
+        m.get(DOCUMENT_1, json=RESPONSE_1)
+        m.get(CONTENT_1, content=b"Test content 1")
+        m.get(DOCUMENT_3, json=RESPONSE_3)
+        m.get(CONTENT_3, content=b"Test content 3")
+
+        # The task will retrieve the roles from ValidSign, so mock the call
+        mock_roles_get(m, test_package)
+
+        test_document_response = {
+            "id": "75204439c02fffeddaeb224a1ded0ea07016456c9069eadd",
+            "name": "Test Document",
+        }
+
+        m.post(
+            f"{VALIDSIGN_URL}api/packages/{test_package['id']}/documents",
+            json=test_document_response,
+        )
+
+        task = CreateValidSignPackageTask(self.fetched_task)
+        document_list = task.add_documents_and_approvals_to_package(test_package)
+
+        # Since there are two documents in the package, the document list should contain 2 docs
+        self.assertEqual(
+            document_list, [test_document_response, test_document_response]
+        )
+
+        # Check that the request headers and body for POSTing the documents were formatted correctly
+        for mocked_request in m.request_history[-2:]:
+            self.assertEqual(mocked_request._request.headers["Accept"], "*/*")
+            self.assertIn(
+                "multipart/form-data; boundary=",
+                mocked_request._request.headers["Content-Type"],
+            )
+            body = mocked_request._request.body.decode()
+            self.assertIn('Content-Disposition: form-data; name="payload"', body)
+            self.assertIn(
+                'Content-Disposition: form-data; name="file"; filename="file"', body
+            )
 
 
 @requests_mock.Mocker()
