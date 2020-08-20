@@ -60,7 +60,8 @@ class CreateValidSignPackageTask(ValidSignTask):
     **Required process variables**
 
     * ``documents``: List of strings. List of API URLs where the documents to be signed can be retrieved.
-        The API must comply with the Documenten API 1.0.x (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
+        The API must comply with the Documenten API 1.0.x (
+        https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
 
     * ``signers``: JSON list with signers information. For ValidSign, the first name, the last name and the
         email address of each signer are required. Example ``signers``:
