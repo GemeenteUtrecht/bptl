@@ -5,10 +5,11 @@ services:
   db:
     # NOTE: No persistance storage configured.
     # See: https://hub.docker.com/_/postgres/
-    image: postgres
+    image: postgres:12
     # NOTE: this works for bitnami, not sure if this works for regular
     # postgres image
     volumes:
+      - "postgres-storage:/var/lib/postgres/data"
       - ./docker-init-db.sql:/docker-entrypoint-initdb.d/init_db.sql
 
   web:
@@ -24,22 +25,8 @@ services:
     depends_on:
       - db
 
-# See: src/bptl/conf/docker.py
-# Optional containers below:
-#  elasticsearch:
-#    # NOTE: No persistance storage configured.
-#    # See: https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
-#    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
-#    container_name: elasticsearch
-#    environment:
-#      - discovery.type=single-node
-#      - cluster.routing.allocation.disk.threshold_enabled=false
-#    ports:
-#      - 9200:9200
-
   redis:
-    # NOTE: No persistance storage configured.
-    image: redis
+    image: redis:5
 
   celery:
     build: .
@@ -65,3 +52,35 @@ services:
     depends_on:
       - redis
       - celery
+
+  # camunda
+  mysql:
+    image: mariadb:10.5-bionic
+    command: [
+      '--wait_timeout=28800'
+    ]
+    volumes:
+      - "mysql-storage:/var/lib/mysql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=camunda
+      - MYSQL_USER=camunda
+      - MYSQL_PASSWORD=camunda
+
+  camunda:
+    image: scrumteamzgw/camunda:latest
+    environment:
+      - DB_DRIVER=com.mysql.jdbc.Driver
+      - DB_URL=jdbc:mysql://mysql:3306/camunda?autoReconnect=true
+      - DB_USERNAME=camunda
+      - DB_PASSWORD=camunda
+      - DB_VALIDATE_ON_BORROW="true"
+      - WAIT_FOR=mysql:3306
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-storage:
+  postgres-storage:
