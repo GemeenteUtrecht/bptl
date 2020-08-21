@@ -7,6 +7,8 @@ from rest_framework.request import Request
 
 from bptl.accounts.models import User
 
+from .models import ValidSignConfiguration
+
 
 class ValidSignAuthentication(BaseAuthentication):
 
@@ -14,8 +16,8 @@ class ValidSignAuthentication(BaseAuthentication):
 
     @staticmethod
     def _get_auth_key() -> str:
-        # TODO: look up configured key in database
-        return "some-random-key"
+        config = ValidSignConfiguration.get_solo()
+        return config.auth_key
 
     def authenticate(self, request: Request):
         auth = get_authorization_header(request).split()

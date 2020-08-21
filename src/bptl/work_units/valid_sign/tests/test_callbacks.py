@@ -27,6 +27,8 @@ from django.urls import reverse_lazy
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from ..models import ValidSignConfiguration
+
 BODY = {
     "@class": "com.silanis.esl.packages.event.ESLProcessEvent",
     "name": "PACKAGE_COMPLETE",
@@ -65,8 +67,10 @@ class CallbackTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_correct_basic_auth_key(self):
+        config = ValidSignConfiguration.get_solo()
+
         response = self.client.post(
-            self.endpoint, BODY, HTTP_AUTHORIZATION="Basic some-random-key"
+            self.endpoint, BODY, HTTP_AUTHORIZATION=f"Basic {config.auth_key}"
         )
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
