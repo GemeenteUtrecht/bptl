@@ -32,22 +32,24 @@ class DoesNotExist(Exception):
 
 
 class ValidSignTask(WorkUnit):
-
-    _validsign_client = None
+    @property
+    def client(self):
+        if not hasattr(self, "_client"):
+            self._client = self.get_validsign_client()
+        return self._client
 
     def get_validsign_client(self) -> ZGWClient:
-        if self._validsign_client is None:
-            default_services = TaskMapping.objects.get(
-                topic_name=self.task.topic_name
-            ).defaultservice_set.select_related("service")
-            services_by_alias = {svc.alias: svc.service for svc in default_services}
+        topic_name = self.task.topic_name
+        default_services = TaskMapping.objects.get(
+            topic_name=topic_name
+        ).defaultservice_set.select_related("service")
+        services_by_alias = {svc.alias: svc.service for svc in default_services}
 
-            alias = "ValidSignAPI"
-            if alias not in services_by_alias:
-                raise RuntimeError(f"Service alias '{alias}' not found.")
+        alias = "ValidSignAPI"
+        if alias not in services_by_alias:
+            raise RuntimeError(f"Service alias '{alias}' not found.")
 
-            self._validsign_client = services_by_alias[alias].build_client()
-        return self._validsign_client
+        return services_by_alias[alias].build_client()
 
     def perform(self) -> dict:
         raise NotImplementedError
@@ -218,7 +220,7 @@ class CreateValidSignPackageTask(ValidSignTask):
 
         logger.debug("Retrieving the roles from validSign package '%s'", package["id"])
 
-        response = self.get_validsign_client().request(
+        response = self.client.request(
             path=f"api/packages/{package['id']}/roles",
             operation="api.packages._packageId.roles.get",
             method="GET",
@@ -272,7 +274,7 @@ class CreateValidSignPackageTask(ValidSignTask):
             "roles": signers,
         }
 
-        package = self.get_validsign_client().request(
+        package = self.client.request(
             path="api/packages", operation="api.packages.post", method="POST", json=body
         )
 
@@ -291,14 +293,12 @@ class CreateValidSignPackageTask(ValidSignTask):
         # to the request, but then not sure how to specify the filename yet...
         # files = [("files[]", content) for name, content in documents]
 
-        validsign_client = self.get_validsign_client()
-
         signers = self._get_signers_from_package(package)
         approvals = self._get_approvals(signers)
 
         attached_documents = []
         for doc_name, doc_content in documents:
-            url = f"{validsign_client.base_url}api/packages/{package['id']}/documents"
+            url = f"{self.client.base_url}api/packages/{package['id']}/documents"
             payload = {"name": doc_name, "extract": True, "approvals": approvals}
             body = {"payload": json.dumps(payload)}
             doc_content.seek(0)
@@ -309,7 +309,7 @@ class CreateValidSignPackageTask(ValidSignTask):
             # Not using validsign_client because the request doesn't get formatted properly,
             # since this a multipart/form-data call while zds_client only supports JSON.
             response = requests.post(
-                url=url, headers=validsign_client.auth_header, data=body, files=file
+                url=url, headers=self.client.auth_header, data=body, files=file
             )
             doc_content.close()
 
@@ -329,7 +329,7 @@ class CreateValidSignPackageTask(ValidSignTask):
         logger.debug("Setting the status of package '%s' to SENT", package["id"])
         body = {"status": "SENT"}
 
-        self.get_validsign_client().request(
+        self.client.request(
             path=f"api/packages/{package['id']}",
             operation="api.packages._packageId.post",
             method="PUT",
@@ -362,7 +362,7 @@ class ValidSignReminderTask(ValidSignTask):
         logger.debug("Sending a reminder to '%s' through ValidSign", email)
 
         body = {"email": email}
-        self.get_validsign_client().request(
+        self.client.request(
             path=f"api/packages/{package_id}/notifications",
             operation="api.packages._packageId.notifications.post",
             method="POST",
