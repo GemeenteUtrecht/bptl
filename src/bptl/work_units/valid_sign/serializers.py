@@ -33,7 +33,11 @@ class CallbackSerializer(serializers.Serializer):
     name = serializers.ChoiceField(label=_("event"), choices=EventTypes)
     session_user = serializers.CharField()
     package_id = serializers.CharField(label=_("package ID"))
-    document_id = serializers.CharField(label=_("document ID"), required=False)
-    new_role_id = serializers.CharField(label=_("new role ID"), required=False)
-    message = serializers.CharField(label=_("message"), required=False)
+    document_id = serializers.CharField(
+        label=_("document ID"), required=False, allow_null=True
+    )
+    new_role_id = serializers.CharField(
+        label=_("new role ID"), required=False, allow_null=True
+    )
+    message = serializers.CharField(label=_("message"), required=False, allow_null=True)
     created_date = serializers.DateTimeField(label=_("created"))

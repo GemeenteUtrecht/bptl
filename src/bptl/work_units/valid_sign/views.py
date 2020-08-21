@@ -3,14 +3,13 @@ from rest_framework import permissions, status, views
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from .authentication import ValidSignAuthentication
 from .serializers import CallbackSerializer, EventTypes
 
 
 class CallbackView(views.APIView):
-    authentication_classes = ()
-    # TODO: secure using the key mechanism, but we first need to see how we get the data
-    # headers back
-    permission_classes = (permissions.AllowAny,)
+    authentication_classes = (ValidSignAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
     parser_classes = (CamelCaseJSONParser,)
 
     def post(self, request: Request):
@@ -21,4 +20,4 @@ class CallbackView(views.APIView):
             # TODO: handle notification
             pass
 
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
