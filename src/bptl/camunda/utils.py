@@ -58,6 +58,7 @@ def fetch_and_lock(max_tasks: int, long_polling_timeout=None) -> Tuple[str, int,
                 topic_name=task["topic_name"],
                 priority=task["priority"],
                 task_id=task["id"],
+                instance_id=task["process_instance_id"],
                 lock_expires_at=parser.parse(task["lock_expiration_time"]),
                 variables=task["variables"],
             )

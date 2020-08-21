@@ -16,6 +16,8 @@ from bptl.tasks.base import WorkUnit, check_variable
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.registry import register
 
+from .models import CreatedPackage
+
 logger = logging.getLogger(__name__)
 
 
@@ -84,6 +86,7 @@ class CreateValidSignPackageTask(ValidSignTask):
     * ``packageName``: string. Name of the ValidSign package that contains the documents to sign and the signers.
         This name appears in the notification-email that is sent to the signers.
 
+
     * ``services``: JSON Object of connection details for ZGW services:
 
         .. code-block:: json
@@ -92,6 +95,12 @@ class CreateValidSignPackageTask(ValidSignTask):
               "<drc alias1>": {"jwt": "Bearer <JWT value>"},
               "<drc alias2>": {"jwt": "Bearer <JWT value>"}
           }
+
+    **Optional process variables**
+
+    * ``messageId``: string. The message ID to send back into the process when the
+        package is signed by everyone. You can use this to continue process execution.
+        If left empty, then no message will be sent.
 
     **Sets the process variables**
 
@@ -342,6 +351,8 @@ class CreateValidSignPackageTask(ValidSignTask):
         package = self.create_package()
         self.add_documents_and_approvals_to_package(package)
         self.send_package(package)
+
+        CreatedPackage.objects.create(package_id=package["id"], task=self.task)
 
         return {"packageId": package["id"]}
 

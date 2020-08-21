@@ -40,6 +40,7 @@ class ExternalTask(BaseTask):
     )
     priority = models.PositiveIntegerField(_("priority"), null=True, blank=True)
     task_id = models.CharField(_("task id"), max_length=50)
+    instance_id = models.CharField(_("task id"), max_length=50)
     lock_expires_at = models.DateTimeField(_("lock expires at"), null=True, blank=True)
 
     class Meta:

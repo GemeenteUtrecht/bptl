@@ -6,7 +6,7 @@ from solo.admin import SingletonModelAdmin
 
 from bptl.utils.admin import RequestAdminMixin
 
-from .models import ValidSignConfiguration
+from .models import CreatedPackage, ValidSignConfiguration
 
 
 @admin.register(ValidSignConfiguration)
@@ -19,3 +19,10 @@ class ValidSignConfigurationAdmin(RequestAdminMixin, SingletonModelAdmin):
         return urlize(full_uri)
 
     get_callback_url.short_description = _("Callback URL")
+
+
+@admin.register(CreatedPackage)
+class CreatedPackageAdmin(admin.ModelAdmin):
+    list_display = ("package_id",)
+    search_fields = ("package_id",)
+    raw_id_fields = ("task",)

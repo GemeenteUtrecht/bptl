@@ -32,3 +32,19 @@ class ValidSignConfiguration(SingletonModel):
     @property
     def callback_url(self):
         return reverse("valid_sign:callbacks")
+
+
+class CreatedPackage(models.Model):
+    """
+    Store the relation between an executed task and a created package.
+    """
+
+    package_id = models.CharField(_("package ID"), max_length=200, db_index=True)
+    task = models.ForeignKey("tasks.BaseTask", on_delete=models.PROTECT)
+
+    class Meta:
+        verbose_name = _("created package")
+        verbose_name_plural = _("created packages")
+
+    def __str__(self):
+        return self.package_id
