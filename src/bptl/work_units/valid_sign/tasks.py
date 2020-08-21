@@ -133,7 +133,8 @@ class CreateValidSignPackageTask(ValidSignTask):
                     raise NoAuth(
                         f"Expected 'jwt' variable for {default_service.alias} in process variables"
                     )
-                client.set_auth_value(jwt)
+                elif jwt:
+                    client.set_auth_value(jwt)
                 clients.append(client)
 
             self._document_clients = clients
