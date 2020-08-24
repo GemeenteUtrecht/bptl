@@ -1,8 +1,9 @@
 import json
+import os
 import re
-import uuid
 
-from django.test import TestCase
+from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.test import TestCase, override_settings
 
 import requests_mock
 
@@ -163,8 +164,16 @@ class ValidSignTests(TestCase):
         m.get(DOCUMENT_1, json=RESPONSE_1)
         m.get(DOCUMENT_2, json=RESPONSE_2)
         # Mock calls to retrieve the content of the documents
-        m.get(CONTENT_1, content=b"Test content 1")
-        m.get(CONTENT_2, content=b"Test content 2")
+        m.get(
+            CONTENT_1,
+            content=b"Test content 1",
+            headers={"content-length": str(len("Test content 1"))},
+        )
+        m.get(
+            CONTENT_2,
+            content=b"Test content 2",
+            headers={"content-length": str(len("Test content 2"))},
+        )
 
         task = CreateValidSignPackageTask(self.fetched_task)
         documents = task._get_documents_from_api()
@@ -172,6 +181,64 @@ class ValidSignTests(TestCase):
         self.assertEqual(len(documents), 2)
         self.assertEqual(documents[0], (RESPONSE_1["titel"], b"Test content 1"))
         self.assertEqual(documents[1], (RESPONSE_2["titel"], b"Test content 2"))
+
+    @override_settings(MAX_DOCUMENT_SIZE=1e-5)
+    def test_get_large_documents_from_api(self, m):
+        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+
+        # Mock call to retrieve the documents from the API
+        m.get(DOCUMENT_1, json=RESPONSE_1)
+        m.get(DOCUMENT_2, json=RESPONSE_2)
+
+        # Mock calls to retrieve the content of the documents
+        m.get(
+            CONTENT_1,
+            content=b"Test content 1",
+            headers={"content-length": str(len("Test content 1"))},
+        )
+        m.get(
+            CONTENT_2,
+            content=b"Test content 2",
+            headers={"content-length": str(len("Test content 2"))},
+        )
+
+        task = CreateValidSignPackageTask(self.fetched_task)
+        documents = task._get_documents_from_api()
+
+        for index, doc in enumerate(documents):
+            self.assertTrue(isinstance(documents[index][1], TemporaryUploadedFile))
+            documents[index][1].seek(0)
+            uploaded_content = documents[index][1].read()
+
+            self.assertEqual(
+                uploaded_content, f"Test content {index+1}".encode("utf-8")
+            )
+
+    @override_settings(MAX_TOT_DOCUMENT_SIZE=2e-5)
+    def test_many_documents_from_api(self, m):
+        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+
+        # Mock call to retrieve the documents from the API
+        m.get(DOCUMENT_1, json=RESPONSE_1)
+        m.get(DOCUMENT_2, json=RESPONSE_2)
+
+        # Mock calls to retrieve the content of the documents
+        m.get(
+            CONTENT_1,
+            content=b"Test content 1",
+            headers={"content-length": str(len("Test content 1"))},
+        )
+        m.get(
+            CONTENT_2,
+            content=b"Test content 2",
+            headers={"content-length": str(len("Test content 2"))},
+        )
+
+        task = CreateValidSignPackageTask(self.fetched_task)
+        documents = task._get_documents_from_api()
+
+        self.assertFalse(isinstance(documents[0][1], TemporaryUploadedFile))
+        self.assertTrue(isinstance(documents[1][1], TemporaryUploadedFile))
 
     def test_create_package(self, m):
         mock_service_oas_get(
@@ -211,9 +278,17 @@ class ValidSignTests(TestCase):
 
         # Two test documents are added to the package
         m.get(DOCUMENT_1, json=RESPONSE_1)
-        m.get(CONTENT_1, content=b"Test content 1")
+        m.get(
+            CONTENT_1,
+            content=b"Test content 1",
+            headers={"content-length": str(len("Test content 1"))},
+        )
         m.get(DOCUMENT_2, json=RESPONSE_2)
-        m.get(CONTENT_2, content=b"Test content 2")
+        m.get(
+            CONTENT_2,
+            content=b"Test content 2",
+            headers={"content-length": str(len("Test content 2"))},
+        )
 
         # The task will retrieve the roles from ValidSign, so mock the call
         mock_roles_get(m, test_package)
@@ -320,8 +395,16 @@ class ValidSignMultipleDocsAPITests(TestCase):
         m.get(DOCUMENT_1, json=RESPONSE_1)
         m.get(DOCUMENT_3, json=RESPONSE_3)
         # Mock calls to retrieve the content of the documents
-        m.get(CONTENT_1, content=b"Test content 1")
-        m.get(CONTENT_3, content=b"Test content 3")
+        m.get(
+            CONTENT_1,
+            content=b"Test content 1",
+            headers={"content-length": str(len("Test content 1"))},
+        )
+        m.get(
+            CONTENT_3,
+            content=b"Test content 3",
+            headers={"content-length": str(len("Test content 3"))},
+        )
 
         task = CreateValidSignPackageTask(self.fetched_task)
         documents = task._get_documents_from_api()
@@ -343,9 +426,17 @@ class ValidSignMultipleDocsAPITests(TestCase):
 
         # Two test documents are added to the package
         m.get(DOCUMENT_1, json=RESPONSE_1)
-        m.get(CONTENT_1, content=b"Test content 1")
+        m.get(
+            CONTENT_1,
+            content=b"Test content 1",
+            headers={"content-length": str(len("Test content 1"))},
+        )
         m.get(DOCUMENT_3, json=RESPONSE_3)
-        m.get(CONTENT_3, content=b"Test content 3")
+        m.get(
+            CONTENT_3,
+            content=b"Test content 3",
+            headers={"content-length": str(len("Test content 3"))},
+        )
 
         # The task will retrieve the roles from ValidSign, so mock the call
         mock_roles_get(m, test_package)
@@ -380,6 +471,67 @@ class ValidSignMultipleDocsAPITests(TestCase):
             self.assertIn(
                 'Content-Disposition: form-data; name="file"; filename="file"', body
             )
+
+    @override_settings(MAX_DOCUMENT_SIZE=1e-5)
+    def test_add_large_documents_and_signers_to_package(self, m):
+        mock_service_oas_get(
+            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
+        )
+        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(
+            m=m, url=OTHER_DRC_URL, service="documenten", extension="json"
+        )
+
+        test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
+
+        # Two test documents are added to the package
+        m.get(DOCUMENT_1, json=RESPONSE_1)
+        m.get(
+            CONTENT_1,
+            content=b"Test large content 1",
+            headers={"content-length": str(len("Test large content 1"))},
+        )
+        m.get(DOCUMENT_3, json=RESPONSE_3)
+        m.get(
+            CONTENT_3,
+            content=b"Test large content 3",
+            headers={"content-length": str(len("Test large content 3"))},
+        )
+
+        # The task will retrieve the roles from ValidSign, so mock the call
+        mock_roles_get(m, test_package)
+
+        test_document_response = {
+            "id": "75204439c02fffeddaeb224a1ded0ea07016456c9069eadd",
+            "name": "Test Document",
+        }
+
+        m.post(
+            f"{VALIDSIGN_URL}api/packages/{test_package['id']}/documents",
+            json=test_document_response,
+        )
+
+        task = CreateValidSignPackageTask(self.fetched_task)
+        document_list = task.add_documents_and_approvals_to_package(test_package)
+
+        # Since there are two documents in the package, the document list should contain 2 docs
+        self.assertEqual(
+            document_list, [test_document_response, test_document_response]
+        )
+
+        # Check that the request headers and body for POSTing the documents were formatted correctly
+        for mocked_request in m.request_history[-2:]:
+            self.assertEqual(mocked_request._request.headers["Accept"], "*/*")
+            self.assertIn(
+                "multipart/form-data; boundary=",
+                mocked_request._request.headers["Content-Type"],
+            )
+            body = mocked_request._request.body.decode()
+            self.assertIn('Content-Disposition: form-data; name="payload"', body)
+            self.assertIn(
+                'Content-Disposition: form-data; name="file"; filename=', body
+            )
+            self.assertTrue("Test large content ", body)
 
 
 @requests_mock.Mocker()

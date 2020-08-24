@@ -419,3 +419,9 @@ SWAGGER_SETTINGS = {
         "Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
     },
 }
+
+# ValidSign Documents settings
+# The maximum size (in Mb) that all the documents combined can have
+MAX_TOT_DOCUMENT_SIZE = os.getenv("MAX_TOT_DOCUMENT_SIZE", 2000)
+# The maximum size (in Mb) that each document can have
+MAX_DOCUMENT_SIZE = os.getenv("MAX_DOCUMENT_SIZE", 2.5)

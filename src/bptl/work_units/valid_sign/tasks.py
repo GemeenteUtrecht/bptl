@@ -1,10 +1,12 @@
 import json
 import logging
+import sys
 from typing import List, Tuple
-from urllib.parse import urlsplit, urlunsplit
 
 from django.conf import settings
+from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.functions import Length
+from django.utils.crypto import get_random_string
 
 import requests
 from zgw_consumers.client import ZGWClient
@@ -161,6 +163,8 @@ class CreateValidSignPackageTask(ValidSignTask):
         document_clients = self.build_document_clients()
 
         documents = []
+
+        current_total_documents_size = 0
         for document_url in document_urls:
             # Getting the appropriate client
             document_client = self.get_document_client(document_url, document_clients)
@@ -172,10 +176,38 @@ class CreateValidSignPackageTask(ValidSignTask):
             # Retrieving the content of the document
             # Need use requests directly instead of `document_client.request()` since the response is not in JSON format
             response = requests.get(
-                document_data["inhoud"], headers=document_client.auth_header,
+                document_data["inhoud"],
+                headers=document_client.auth_header,
+                stream=True,
             )
 
-            documents.append((document_data["titel"], response.content))
+            # Get the document size in Mb
+            document_size = int(response.headers["content-length"]) / 1e6
+
+            # If the size of the document is above the max size or if all the documents together have already reached
+            # the maximum size, write the file content to a temporary file
+            if (
+                document_size > settings.MAX_DOCUMENT_SIZE
+                or (current_total_documents_size + document_size)
+                > settings.MAX_TOT_DOCUMENT_SIZE
+            ):
+                tmp_file_object = TemporaryUploadedFile(
+                    name=f"{document_data['titel']}-{get_random_string(length=5)}.tempfile",
+                    content_type="application/octet-stream",
+                    size=sys.getsizeof(response.content),
+                    charset="utf8",
+                )
+                for line in response.iter_lines():
+                    tmp_file_object.write(line)
+                tmp_file_object.flush()
+                doc_tuple = (document_data["titel"], tmp_file_object)
+            else:
+                doc_tuple = (document_data["titel"], response.content)
+                current_total_documents_size += document_size
+
+            response.close()
+
+            documents.append(doc_tuple)
 
         return documents
 
@@ -267,6 +299,10 @@ class CreateValidSignPackageTask(ValidSignTask):
             url = f"{validsign_client.base_url}api/packages/{package['id']}/documents"
             payload = {"name": doc_name, "extract": True, "approvals": approvals}
             body = {"payload": json.dumps(payload)}
+            if isinstance(doc_content, TemporaryUploadedFile):
+                doc_content.seek(0)
+
+            # if doc_content is a TemporaryUploadedFile, this does a streaming upload
             file = [("file", doc_content)]
 
             # Not using validsign_client because the request doesn't get formatted properly,
@@ -274,9 +310,12 @@ class CreateValidSignPackageTask(ValidSignTask):
             response = requests.post(
                 url=url, headers=validsign_client.auth_header, data=body, files=file
             )
+
+            if isinstance(doc_content, TemporaryUploadedFile):
+                doc_content.close()
+
             response.raise_for_status()
             attached_doc = response.json()
-
             attached_documents.append(attached_doc)
 
         return attached_documents
