@@ -1,6 +1,6 @@
 import json
 import logging
-import sys
+from io import BytesIO
 from typing import List, Tuple
 
 from django.conf import settings
@@ -152,7 +152,7 @@ class CreateValidSignPackageTask(ValidSignTask):
 
         return [{"type": "SIGNER", "signers": [signer]} for signer in signers]
 
-    def _get_documents_from_api(self) -> List[Tuple[str, bytes]]:
+    def _get_documents_from_api(self) -> List[Tuple[str, BytesIO]]:
         """Retrieve the documents and their content from the Documenten API."""
 
         logger.debug("Retrieving documents from Documenten API")
@@ -181,28 +181,29 @@ class CreateValidSignPackageTask(ValidSignTask):
                 stream=True,
             )
 
-            # Get the document size in Mb
-            document_size = int(response.headers["content-length"]) / 1e6
+            # Get the document size in bytes
+            document_size = document_data["bestandsomvang"]
 
             # If the size of the document is above the max size or if all the documents together have already reached
             # the maximum size, write the file content to a temporary file
             if (
                 document_size > settings.MAX_DOCUMENT_SIZE
                 or (current_total_documents_size + document_size)
-                > settings.MAX_TOT_DOCUMENT_SIZE
+                > settings.MAX_TOTAL_DOCUMENT_SIZE
             ):
+                # The file is created with rb+ mode by default
                 tmp_file_object = TemporaryUploadedFile(
                     name=f"{document_data['titel']}-{get_random_string(length=5)}.tempfile",
                     content_type="application/octet-stream",
-                    size=sys.getsizeof(response.content),
-                    charset="utf8",
+                    size=document_size,
+                    charset=None,  # Required argument in TemporaryUploadedFile, but not in parent class UploadedFile
                 )
-                for line in response.iter_lines():
-                    tmp_file_object.write(line)
+                for chunk in response.iter_content(chunk_size=settings.CHUNK_SIZE):
+                    tmp_file_object.write(chunk)
                 tmp_file_object.flush()
                 doc_tuple = (document_data["titel"], tmp_file_object)
             else:
-                doc_tuple = (document_data["titel"], response.content)
+                doc_tuple = (document_data["titel"], BytesIO(response.content))
                 current_total_documents_size += document_size
 
             response.close()
@@ -299,8 +300,7 @@ class CreateValidSignPackageTask(ValidSignTask):
             url = f"{validsign_client.base_url}api/packages/{package['id']}/documents"
             payload = {"name": doc_name, "extract": True, "approvals": approvals}
             body = {"payload": json.dumps(payload)}
-            if isinstance(doc_content, TemporaryUploadedFile):
-                doc_content.seek(0)
+            doc_content.seek(0)
 
             # if doc_content is a TemporaryUploadedFile, this does a streaming upload
             file = [("file", doc_content)]
@@ -310,9 +310,7 @@ class CreateValidSignPackageTask(ValidSignTask):
             response = requests.post(
                 url=url, headers=validsign_client.auth_header, data=body, files=file
             )
-
-            if isinstance(doc_content, TemporaryUploadedFile):
-                doc_content.close()
+            doc_content.close()
 
             response.raise_for_status()
             attached_doc = response.json()

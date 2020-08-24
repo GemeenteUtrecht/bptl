@@ -421,7 +421,9 @@ SWAGGER_SETTINGS = {
 }
 
 # ValidSign Documents settings
-# The maximum size (in Mb) that all the documents combined can have
-MAX_TOT_DOCUMENT_SIZE = os.getenv("MAX_TOT_DOCUMENT_SIZE", 2000)
-# The maximum size (in Mb) that each document can have
-MAX_DOCUMENT_SIZE = os.getenv("MAX_DOCUMENT_SIZE", 2.5)
+# The maximum size (in bytes) that all the documents combined can have
+MAX_TOTAL_DOCUMENT_SIZE = os.getenv("MAX_TOTAL_DOCUMENT_SIZE", 250000000)
+# The maximum size (in bytes) that each document can have
+MAX_DOCUMENT_SIZE = os.getenv("MAX_DOCUMENT_SIZE", 2621440)
+# The size of the document chunks to load in memory
+CHUNK_SIZE = os.getenv("CHUNK_SIZE", 4096)
