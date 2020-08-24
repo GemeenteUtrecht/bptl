@@ -43,10 +43,8 @@ BPTL can be used to create tasks to electronically sign a set of documents using
 When the task ``CreateValidSignPackageTask`` is executed, the following steps are performed:
 
     1. A package is created. The signers specified in the task process variables are included in the package when it is created.
-    2. The documents are added to the package. All documents specified in the process variables are retrieved from their respective API. For each document, an 'approval' is created. This is a field where a signer will be able to sign.
+    2. The documents are added to the package. All documents specified in the process variables are retrieved from their respective API. For each document, an 'approval' is created. This is a field where a signer will be able to sign. The approval is a field of dimensions 50x150 (px?) placed by the bottom left corner of the string "Capture Signature" first occurrence.
     3. The package status is changed to SENT. This automatically sends an email to the signers with links to where they can sign the documents.
-
-.. TODO Add details on how to configure the approval
 
 
 .. _ValidSign: https://www.validsign.nl/
