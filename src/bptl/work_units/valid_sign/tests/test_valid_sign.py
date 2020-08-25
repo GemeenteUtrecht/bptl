@@ -1,5 +1,4 @@
 import json
-import os
 import re
 
 from django.core.files.uploadedfile import TemporaryUploadedFile

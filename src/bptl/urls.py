@@ -42,6 +42,10 @@ urlpatterns = [
     path("taskmappings/", include("bptl.tasks.urls")),
     path("api/", include("bptl.activiti.api.urls")),
     path("camunda/", include("bptl.camunda.urls")),
+    path(
+        "contrib/api/",
+        include([path("validsign/", include("bptl.work_units.valid_sign.urls")),]),
+    ),
 ]
 
 # NOTE: The staticfiles_urlpatterns also discovers static files (ie. no need to run collectstatic). Both the static

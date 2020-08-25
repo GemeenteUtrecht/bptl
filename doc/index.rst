@@ -42,6 +42,7 @@ Usage
    :maxdepth: 2
 
    usage
+   contrib/index
    camunda
    api
 
