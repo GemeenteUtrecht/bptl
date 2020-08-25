@@ -9,12 +9,31 @@ BPTL needs to receive callbacks from ValidSign.
 1. Navigate to the admin > **ValidSign configuration**
 2. There is a generated authentication key, and the callback URL you will need in
    ValidSign
-3. Navigate to the ValidSign dashboard. From there, navigate to the **admin**
+3. Navigate to the ValidSign `dashboard`_. From there, navigate to the **admin**
 4. Click **Integration**
 5. Enter the callback URL and authentication key in the relevant fields
 6. Select the **Transaction completed** event
 
-You also need to configure the ValidSign API key with the service in BPTL.
+You also need to configure the ValidSign API key with the service in BPTL:
+
+1. See the `integrator guide`_ (page 10) on where you can find your API key
+2. In BPTL, navigate to the admin > **Services**
+3. Add a service, with the following fields:
+
+    - Label: *ValidSign* (for example)
+    - Type: ORC (Overige)
+    - API root URL: ``https://try.validsign.nl/`` (sandbox) or
+      ``https://my.validsign.nl/`` (production)
+    - Authorization type: API key
+    - Header key: ``Authorization``
+    - Header value: ``Basic <api key>``
+    - OAS: ``https://apidocs.validsign.nl/validsign_openapi.yaml``
+
+Connecting to a topic
+---------------------
+
+When you connect a topic name and the valid sign task(s), you must add the ValidSign
+service with the alias ``ValidSignAPI``.
 
 Integration
 -----------
@@ -38,3 +57,5 @@ documents and signer information as input, and performs the following actions:
    process instance (Camunda only).
 
 .. _ValidSign: https://www.validsign.nl/
+.. _dashboard: https://my.validsign.nl/a/dashboard
+.. _integrator guide: https://apidocs.validsign.nl/validsign_integrator_guide.pdf

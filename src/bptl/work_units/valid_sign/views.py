@@ -13,7 +13,7 @@ class CallbackView(views.APIView):
     permission_classes = (permissions.IsAuthenticated,)
     parser_classes = (CamelCaseJSONParser,)
 
-    def post(self, request: Request):
+    def post(self, request: Request) -> Response:
         serializer = CallbackSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

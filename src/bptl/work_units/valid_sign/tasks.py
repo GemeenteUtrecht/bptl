@@ -35,7 +35,7 @@ class DoesNotExist(Exception):
 
 class ValidSignTask(WorkUnit):
     @property
-    def client(self):
+    def client(self) -> ZGWClient:
         if not hasattr(self, "_client"):
             self._client = self.get_validsign_client()
         return self._client
