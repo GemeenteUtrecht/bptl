@@ -45,7 +45,7 @@ class CreateRolTaskTests(TestCase):
             task_id="test-task-id",
             variables={
                 "zaakUrl": {"type": "String", "value": ZAAK, "valueInfo": {}},
-                "omschrijving": {"type": "String", "value": "initiator"},
+                "omschrijving": {"type": "String", "value": "roltype omschrijving"},
                 "betrokkene": json_variable(
                     {
                         "betrokkene": "http://some.api.nl/betrokkenen/12345",
@@ -64,7 +64,7 @@ class CreateRolTaskTests(TestCase):
         mock_service_oas_get(m, ZTC_URL, "ztc")
         m.get(ZAAK, json={"url": ZAAK, "zaaktype": ZAAKTYPE})
         m.get(
-            f"{ZTC_URL}roltypen?zaaktype={ZAAKTYPE}&omschrijvingGeneriek=initiator",
+            f"{ZTC_URL}roltypen?zaaktype={ZAAKTYPE}",
             json={
                 "count": 1,
                 "next": None,

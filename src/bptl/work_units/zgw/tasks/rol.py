@@ -43,6 +43,7 @@ class CreateRolTask(ZGWWorkUnit):
     def create_rol(self) -> dict:
         variables = self.task.get_variables()
         betrokkene = check_variable(variables, "betrokkene")
+        omschrijving = check_variable(variables, "omschrijving")
 
         zrc_client = self.get_client(APITypes.zrc)
         zaak_url = check_variable(variables, "zaakUrl")
@@ -51,12 +52,16 @@ class CreateRolTask(ZGWWorkUnit):
         ztc_client = self.get_client(APITypes.ztc)
         query_params = {
             "zaaktype": zaak["zaaktype"],
-            "omschrijvingGeneriek": check_variable(variables, "omschrijving"),
         }
         rol_typen = ztc_client.list("roltype", query_params)
+        rol_typen = [
+            rol_type
+            for rol_type in rol_typen["results"]
+            if rol_type["omschrijving"] == omschrijving
+        ]
         if not rol_typen:
             raise ValueError(
-                f"No matching roltype with query {query_params} found in the zaaktype."
+                f"No matching roltype with zaaktype = {zaak['zaaktype']} and omschrijving = {omschrijving} is found"
             )
 
         zrc_client = self.get_client(APITypes.zrc)
@@ -64,7 +69,7 @@ class CreateRolTask(ZGWWorkUnit):
             "zaak": zaak["url"],
             "betrokkene": betrokkene.get("betrokkene", ""),
             "betrokkeneType": betrokkene["betrokkeneType"],
-            "roltype": rol_typen["results"][0]["url"],
+            "roltype": rol_typen[0]["url"],
             "roltoelichting": betrokkene["roltoelichting"],
             "indicatieMachtiging": betrokkene.get("indicatieMachtiging", ""),
             "betrokkeneIdentificatie": betrokkene.get("betrokkeneIdentificatie", {}),
