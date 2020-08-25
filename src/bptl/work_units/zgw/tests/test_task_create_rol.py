@@ -46,14 +46,11 @@ class CreateRolTaskTests(TestCase):
             variables={
                 "zaakUrl": {"type": "String", "value": ZAAK, "valueInfo": {}},
                 "omschrijving": {"type": "String", "value": "initiator"},
-                "betrokkeneType": {"type": "String", "value": "natuurlijk_persoon"},
-                "roltoelichting": {"type": "String", "value": "A test roltoelichting"},
                 "betrokkene": json_variable(
                     {
-                        "inpBsn": "123456782",
-                        "geslachtsnaam": "Smith",
-                        "voornamen": "John",
-                        "geslachtsaanduiding": "m",
+                        "betrokkene": "http://some.api.nl/betrokkenen/12345",
+                        "betrokkeneType": "natuurlijk_persoon",
+                        "roltoelichting": "A test roltoelichting",
                     }
                 ),
                 "services": json_variable(
@@ -88,7 +85,7 @@ class CreateRolTaskTests(TestCase):
             json={
                 "url": ROL,
                 "zaak": ZAAK,
-                "betrokkene": "",
+                "betrokkene": "http://some.api.nl/betrokkenen/12345",
                 "betrokkeneType": "natuurlijk_persoon",
                 "roltype": ROLTYPE,
                 "roltoelichting": "A test roltoelichting",
@@ -106,15 +103,11 @@ class CreateRolTaskTests(TestCase):
             m.last_request.json(),
             {
                 "zaak": ZAAK,
+                "betrokkene": "http://some.api.nl/betrokkenen/12345",
                 "betrokkeneType": "natuurlijk_persoon",
                 "roltype": ROLTYPE,
                 "roltoelichting": "A test roltoelichting",
                 "indicatieMachtiging": "",
-                "betrokkeneIdentificatie": {
-                    "inpBsn": "123456782",
-                    "geslachtsnaam": "Smith",
-                    "voornamen": "John",
-                    "geslachtsaanduiding": "m",
-                },
+                "betrokkeneIdentificatie": {},
             },
         )

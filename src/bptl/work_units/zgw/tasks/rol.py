@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from zgw_consumers.constants import APITypes
 
@@ -19,11 +20,8 @@ class CreateRolTask(ZGWWorkUnit):
 
     * ``zaakUrl``: full URL of the ZAAK to create a new rol for
     * ``omschrijving``: roltype.omschrijving for the ROL
-    * ``betrokkeneType``: type of the betrokkene
-    * ``roltoelichting``: description of the ROL
-    * ``betrokkene``: JSON object containing the data for ROL.betrokkeneIdentificatie. See
-       https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties
-       available.
+    * ``betrokkene``: JSON object with data used to create a rol for a particular zaak. See
+        https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
     * ``services``: JSON Object of connection details for ZGW services:
 
         .. code-block:: json
@@ -32,10 +30,6 @@ class CreateRolTask(ZGWWorkUnit):
               "<zrc alias>": {"jwt": "Bearer <JWT value>"},
               "<ztc alias>": {"jwt": "Bearer <JWT value>"}
           }
-
-    **Optional process variables**
-
-    * ``indicatieMachtiging``: Authorization indication ("gemachtigde" or "machtiginggever")
 
     **Optional process variables (Camunda exclusive)**
 
@@ -48,6 +42,7 @@ class CreateRolTask(ZGWWorkUnit):
 
     def create_rol(self) -> dict:
         variables = self.task.get_variables()
+        betrokkene = check_variable(variables, "betrokkene")
 
         zrc_client = self.get_client(APITypes.zrc)
         zaak_url = check_variable(variables, "zaakUrl")
@@ -67,11 +62,12 @@ class CreateRolTask(ZGWWorkUnit):
         zrc_client = self.get_client(APITypes.zrc)
         data = {
             "zaak": zaak["url"],
-            "betrokkeneType": check_variable(variables, "betrokkeneType"),
+            "betrokkene": betrokkene.get("betrokkene", ""),
+            "betrokkeneType": betrokkene["betrokkeneType"],
             "roltype": rol_typen["results"][0]["url"],
-            "roltoelichting": check_variable(variables, "roltoelichting"),
-            "indicatieMachtiging": variables.get("indicatieMachtiging", ""),
-            "betrokkeneIdentificatie": check_variable(variables, "betrokkene"),
+            "roltoelichting": betrokkene["roltoelichting"],
+            "indicatieMachtiging": betrokkene.get("indicatieMachtiging", ""),
+            "betrokkeneIdentificatie": betrokkene.get("betrokkeneIdentificatie", {}),
         }
         rol = zrc_client.create("rol", data,)
         return rol
