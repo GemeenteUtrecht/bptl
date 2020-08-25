@@ -1,0 +1,6420 @@
+openapi: 3.0.0
+info:
+  title: ValidSign API
+  version: 7.2
+  contact:
+    name: API Support
+    email: support@validsign.nl
+    url: https://www.validsign.nl
+  x-logo:
+    url: 'images/logo.png'
+    altText: ValidSign logo
+  externalDocs:
+    description: Find out how to create Github repo for your OpenAPI spec.
+    url: 'https://github.com/Rebilly/generator-openapi-repo'
+
+  description: |
+    # Introduction
+    This API is documented in **OpenAPI format** and is based on the [ValidSign](https://www.validsign.nl/) API version 7.2. <br>
+    All functionalities that are available within the **ValidSign portal** can also be used within our REST API.
+
+    # ValidSign Integrator Guide
+    Do you not use the ValidSign REST API? No problem!<br>
+    ValidSign has extensive documentation for **JAVA** and **.NET**, including accompanying **SDKs**. <br>
+    Contact support@validsign.nl to receive our SDKs and tell us about your (future) integration.<br>
+    <a href="validsign_integrator_guide.pdf" target="_blank"><img src="images/download.png" style="max-width: 300px"></a>
+
+    # Minimum Integration Requirements
+    Integrate like a <strong>pro</strong>? Then the following components must at least be included in your integration:
+    <ul>
+      <li><strong>Allow multiple signers & documents</strong></li>
+      <li><a href="https://validsign.zendesk.com/hc/nl/articles/360001315531-Een-ondertekenvolgorde-en-of-documentvolgorde-instellen" target="_blank">Signing order</a></li>
+      <li><a href="https://validsign.zendesk.com/hc/nl/articles/360037747091-Text-tags-gebruiken-binnen-documenten" target="_blank">Text-Tags extraction</a></li>
+      <li><a href="https://validsign.zendesk.com/hc/nl/articles/360012292192-Hoe-stel-ik-een-extra-sms-authenticatie-in-2-factor-authentication-" target="_blank">SMS 2FA</a></li>
+      <li><strong>Download Signed Documents & Evidence Summary</strong></li>
+    </ul>
+
+    <SecurityDefinitions />
+
+servers:
+  - url: https://my.validsign.nl
+    description: Production
+  - url: https://try.validsign.nl
+    description: Staging
+x-tagGroups:
+  - name: Sending
+    tags:
+      - Packages
+      - Templates
+      - Layouts
+      - File Attachments
+      - Reminders
+      - Senders
+  - name: Signing
+    tags:
+      - Documents
+      - Roles
+      - Roles Verification
+      - Approvals
+      - Signing URL
+      - Signing Roles
+  - name: General
+    tags:
+      - Reports
+      - Callback
+      - Notifications
+      - Groups
+      - Sessions
+  - name: Account information
+    tags:
+      - Authentication Tokens
+      - Account Signing Themes
+      - Account Custom Fields
+      - Delegates
+paths:
+  /api/account/customfields:
+    get:
+      tags:
+        - Account Custom Fields
+      operationId: api.account.customFields.get
+      summary: Retrieves all custom fields in an account.
+      description: Retrieves all custom fields in an account. Custom fields can be sorted
+        using pagination.
+      parameters:
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - $ref: "#/components/parameters/dir"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomField"
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Account Custom Fields
+      operationId: api.account.customFields.put
+      summary: Updates an account custom field.
+      description: Updates an account custom field with information specified in the
+        parameters.
+      requestBody:
+        description: The custom field to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomField"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomField"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Account Custom Fields
+      operationId: api.account.customFields.post
+      summary: Adds a custom field to an account.
+      description: Adds a custom field to an account.
+      requestBody:
+        description: The custom field to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomField"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomField"
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/account/customfields/{customFieldId}":
+    get:
+      tags:
+        - Account Custom Fields
+      operationId: api.account.customFields._customFieldId.get
+      summary: Retrieves an account specified custom field.
+      description: Retrieves an account custom field by using the specified ID.
+      parameters:
+        - $ref: "#/components/parameters/customFieldId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomField"
+          description: OK
+        "400":
+          description: Invalid field Id
+    delete:
+      tags:
+        - Account Custom Fields
+      operationId: api.account.customFields.delete
+      summary: Deletes an account custom field by its ID.
+      description: Deletes a custom field using the specified ID.
+      parameters:
+        - $ref: "#/components/parameters/customFieldId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/account/senders:
+    get:
+      tags:
+        - Senders
+      operationId: api.account.senders.get
+      summary: Retrieves a list of the users in an account.
+      description: Retrieves a list of the users in a specified account. Optional query
+        parameters can be used to filter the list.
+      parameters:
+        - $ref: "#/components/parameters/search"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - $ref: "#/components/parameters/dir"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultSenders"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Senders
+      operationId: api.account.senders.post
+      summary: Creates a new user in an account.
+      description: Creates a new user in an account.
+      requestBody:
+        description: The account payload.
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Sender"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sender"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/account/senders/{senderId}":
+    get:
+      tags:
+        - Senders
+      operationId: api.account.senders._senderId.get
+      summary: Retrieves detailed Account information about a user.
+      description: Retrieves detailed Account information about a specified user.
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sender"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Senders
+      operationId: api.account.senders._senderId.post
+      summary: Updates a Sender's details.
+      description: Updates or modifies detail information for a specified Sender.
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/rawSignatureCapture"
+      requestBody:
+        description: The custom field to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Sender"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sender"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Senders
+      operationId: api.account.senders._senderId.delete
+      summary: Deletes a Sender from the account.
+      description: Deletes a specified Sender from an account.
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/account/senders/{senderId}/invite":
+    post:
+      tags:
+        - Senders
+      operationId: api.account.senders._senderId.invite.post
+      summary: Invites a user to join the account.
+      description: Sends an email invitation to a user. The user will receive an invitation
+        link and a token identifying the account.
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sender"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/account/senders/{senderId}/password":
+    post:
+      tags:
+        - Senders
+      operationId: api.account.senders._senderId.password.post
+      summary: Updates a Sender's password.
+      description: Helps users update or change their account password. Users can only
+        modify their own password.
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/rawSignatureCapture"
+      requestBody:
+        description: The custom field to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sender"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/account/senders/{senderId}/resetpassword":
+    post:
+      tags:
+        - Senders
+      operationId: api.account.senders._senderId.resetpassword.post
+      summary: Resets the password for a specified user.
+      description: Sends an email to a specified user, so that they can set a new password.
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sender"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/account/senders/{senderId}/delegates/{delegateId}":
+    post:
+      tags:
+        - Delegates
+      operationId: api.account.senders._senderId.delegates.delegateId.post
+      summary: Adds delegates to a Sender.
+      description: "A delegate can: (1) access the delegator's inbox, drafts, layouts, and
+        templates; (2) sign documents on behalf of the delegator."
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/delegateId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Delegates
+      operationId: api.account.senders._senderId.delegates.delegateId.delete
+      summary: Deletes a delegate from a specified Sender.
+      description: "Deletes a delegate. The delegate will no longer be able to: (1) access
+        the delegator's inbox, drafts, layouts, and templates; (2) sign
+        documents on behalf of the delegator."
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+        - $ref: "#/components/parameters/delegateId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/account/senders/{senderId}/delegates":
+    get:
+      tags:
+        - Delegates
+      operationId: api.account.senders._senderId.delegates.get
+      summary: Retrieves a list of users who have been designated as delegates for a
+        specified user.
+      description: "Retrieves a list of users who have been designated as delegates for a
+        specified user. A delegate can: (1) access the delegator's inbox,
+        drafts, layouts, and templates; (2) sign documents on behalf of the
+        delegator. "
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sender"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Delegates
+      operationId: api.account.senders._senderId.delegates.put
+      summary: Adds delegates to a specified user.
+      description: "A delegate can: (1) access the delegator's inbox, drafts, layouts, and
+        templates; (2) sign documents on behalf of the delegator. "
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+      requestBody:
+        description: The custom field to be updated.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sender"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Delegates
+      operationId: api.account.senders._senderId.delegates.delete
+      summary: Deletes all delegates from a Sender.
+      description: "Deletes all delegates that have been specified for a Sender. Delegates
+        will no longer be able to  (1) access the delegator's inbox, drafts,
+        layouts, and templates; (2) sign documents on behalf of the delegator. "
+      parameters:
+        - $ref: "#/components/parameters/senderId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/layouts:
+    get:
+      tags:
+        - Layouts
+      operationId: api.layouts.get
+      summary: Retrieves a list of available layouts.
+      description: Retrieves a list of existing layouts. The list can be filtered and
+        sorted by various criteria.
+      parameters:
+        - name: query
+          description: The folder to search for. If not set, it will search in all folders.
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - drafts
+              - inbox
+              - trashed
+        - name: type
+          in: query
+          description: If a template is needed, set to TEMPLATE.
+          required: false
+          schema:
+            type: string
+            enum:
+              - TEMPLATE
+        - name: search
+          in: query
+          description: Any text which is going to be used in conjunction with the
+            searchtype, if provided.
+          required: false
+          schema:
+            type: string
+        - name: searchtype
+          in: query
+          description: When empty, a wildcard search will be done in the layout name and
+            description for the search value,  otherwise the allowable values
+            will make more restrictive searches.
+          required: false
+          schema:
+            type: string
+            enum:
+              - exact
+              - exactname
+        - name: visibility
+          in: query
+          description: The visibility used to search for the layout.
+          required: false
+          schema:
+            type: string
+            enum:
+              - ACCOUNT
+              - SENDER
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - $ref: "#/components/parameters/dir"
+        - name: sort
+          in: query
+          description: The field according to which the data will be sorted.
+          required: false
+          schema:
+            type: string
+            enum:
+              - created
+              - updated
+              - name
+        - name: summary
+          in: query
+          description: If set to true, the response contains just a summary of the layouts.
+            Otherwise, the response contains the full objects.
+          required: false
+          schema:
+            type: boolean
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultLayouts"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Layouts
+      operationId: api.layouts.post
+      summary: Creates a new layout.
+      description: Creates a new layout.
+      requestBody:
+        description: Layout information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PackageLayout"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Package"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/groups:
+    get:
+      tags:
+        - Groups
+      operationId: api.groups.get
+      summary: Retrieves a list of all Groups in an account.
+      description: Retrieves a list of all groups in an Account. Results are returned as a
+        list of groups, and not as a simple group. Note that results can be
+        returned in a paginated form if the  'from', 'to' and 'dir' query
+        parameters are used.
+      parameters:
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - $ref: "#/components/parameters/dir"
+        - name: requestType
+          in: query
+          description: If the request type is manager, return only the groups that the
+            request user is a manager of.
+          required: false
+          schema:
+            type: string
+            enum:
+              - manager
+        - name: name
+          in: query
+          description: The name of the groups to return
+          required: false
+          schema:
+            type: string
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultGroups"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Groups
+      operationId: api.groups.post
+      summary: Creates a new Group using the specified parameters.
+      description: If specified, the id must be alphanumeric, and unique.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        description: Group information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Group"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/groups/summary:
+    get:
+      tags:
+        - Groups
+      operationId: api.groups.summary
+      summary: Retrieves summaries for all groups in the current account.
+      description: Retrieves basic information for all groups in the current account.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultGroupSummary"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/groups/{groupId}":
+    get:
+      tags:
+        - Groups
+      operationId: api.groups._groupId.get
+      summary: Retrieves a Group.
+      description: Retrieves detailed information about a specified group.
+      parameters:
+        - $ref: "#/components/parameters/groupId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "400":
+          description: Invalid Group Id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DefaultError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          description: The requested group could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DefaultError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Groups
+      operationId: api.groups._groupId.put
+      summary: Updates an existing Group.
+      description: Updates the members that are included in a specified Group. Updates can
+        include adding and removing members. Updates can also change other Group
+        information.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: "#/components/parameters/groupId"
+      requestBody:
+        description: Group information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Group"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "400":
+          description: The group name is already in use.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DefaultError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          description: Operation not allowed. Only Managers of this Account or Group can
+            update the Group.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DefaultError"
+        "404":
+          description: Either one of the members of the group could not be found in the
+            system, or the requested group could not be found.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/MemberNotFound"
+                  - $ref: "#/components/schemas/GroupNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Groups
+      operationId: api.groups._groupId.delete
+      summary: Deletes an existing Group.
+      description: Deletes an existing Group from the account.
+      parameters:
+        - $ref: "#/components/parameters/groupId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          description: Requested group could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/groups/{groupId}/invite":
+    post:
+      tags:
+        - Groups
+      operationId: api.groups._groupId.invite.post
+      summary: Invites an existing sender to join the Group.
+      description: Invites an existing account sender to join the Group.
+      parameters:
+        - $ref: "#/components/parameters/groupId"
+      requestBody:
+        description: Group information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "400":
+          description: Invalid Group Id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DefaultError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          description: Requested group could not be found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/groups/{groupId}/members":
+    post:
+      tags:
+        - Groups
+      operationId: api.groups._groupId.members.post
+      summary: Invites a new sender to the Group.
+      description: Invites a sender who is not yet part of any account to join a group. The
+        invitee will initially be prompted to register as an account sender.
+      parameters:
+        - $ref: "#/components/parameters/groupId"
+      requestBody:
+        description: The new group member.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupMember"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "400":
+          description: Either both the id and the email of the group member weren't
+            provided, or the groupId is invalid.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/MemberMustHaveIdOrEmail"
+                  - $ref: "#/components/schemas/DefaultError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          description: Either one of the members of the group could not be found in the
+            system, or the requested group could not be found.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/MemberNotFound"
+                  - $ref: "#/components/schemas/GroupNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/account/signingThemes:
+    get:
+      tags:
+        - Account Signing Themes
+      operationId: api.account.signingThemes.get
+      summary: Retrieves a customized signing theme.
+      description: Retrieves a customized signing theme so that it can be used. A
+        customized signing theme is a signing theme that was designed by your
+        organization using, for example, your corporate branding.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                $ref: "#/components/schemas/SigningThemesConfig"
+        "400":
+          $ref: "#/components/responses/ResourceNotFound"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Account Signing Themes
+      operationId: api.account.signingThemes.post
+      summary: Create a customized signing theme.
+      description: Creates a signing theme that uses the settings defined by you. A
+        customized signing theme is a signing theme that was designed by your
+        organization using, for example, your corporate branding.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        description: The sample Signing Themes payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
+              $ref: "#/components/schemas/SigningThemesConfig"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                $ref: "#/components/schemas/SigningThemesConfig"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Account Signing Themes
+      operationId: api.account.signingThemes.put
+      summary: Update an existing customized signing theme.
+      description: Updates an existing customized signing theme. A customized signing theme
+        is a signing theme that was designed by your organization using, for
+        example, your corporate branding.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        description: The sample Signing Themes payload.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
+              $ref: "#/components/schemas/SigningThemesConfig"
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Account Signing Themes
+      operationId: api.account.signingThemes.delete
+      summary: Deletes a customized signing theme. A customized signing theme is a
+        signing theme that was designed by your organization using, for example,
+        your corporate branding.
+      description: Delete a customized signing themes.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/packages:
+    get:
+      tags:
+        - Packages
+      operationId: api.packages.get
+      summary: Retrieves a list of packages.
+      description: Retrieves a list of document packages in an account.
+      parameters:
+        - name: query
+          description: The folder to search for. If not set, it will search in all folders.
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - drafts
+              - inbox
+              - trashed
+        - name: type
+          in: query
+          description: If a template is needed, set to TEMPLATE
+          required: false
+          schema:
+            type: string
+            enum:
+              - TEMPLATE
+        - $ref: "#/components/parameters/search"
+        - name: searchtype
+          in: query
+          description: When empty, a wildcard search will be done in the package name and
+            description for the search value, otherwise the allowable values
+            will make more restrictive searches
+          required: false
+          schema:
+            type: string
+            enum:
+              - exact
+              - exactname
+        - name: predefined
+          description: Filter the search result, by package status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - all
+              - awaitingSignature
+              - sent
+              - completed
+              - expiringSoon
+        - name: visibility
+          in: query
+          description: The visibility used to search for the template. ONLY used for
+            templates
+          required: false
+          schema:
+            type: string
+            enum:
+              - ACCOUNT
+              - SENDER
+        - name: lastUpdatedStartDate
+          in: query
+          description: "The date after which packages need to have been last updated in
+            order to be retrieved. Accepted date formats are ISO
+            8601.  Examples: 2018-12-12Z, 2018-01-01T12:30:00Z,
+            2018-01-01T12:30:00+01:30"
+          required: false
+          schema:
+            type: string
+        - name: lastUpdatedEndDate
+          in: query
+          description: "The date before which packages need to have been last updated in
+            order to be retrieved. Accepted date formats are ISO
+            8601.  Examples: 2018-12-12Z, 2018-01-01T12:30:00Z,
+            2018-01-01T12:30:00+01:30"
+          required: false
+          schema:
+            type: string
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - name: sort
+          in: query
+          description: The field according to which the data will be sorted
+          required: false
+          schema:
+            type: string
+            enum:
+              - APPROVAL_SIGNING_DATE
+              - attributeValue
+              - created
+              - completed
+              - updated
+              - due
+              - name
+              - status
+        - $ref: "#/components/parameters/dir"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultPackages"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Packages
+      operationId: api.packages.post
+      description: Creates a new package or a template. To create a template, set TYPE to
+        TEMPLATE.
+      summary: Creates a package.
+      requestBody:
+        description: Package initial information. It doesn't need to be fully filled.  It
+          should contains at least 'name' property
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Package"
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                payload:
+                  type: object
+                  $ref: "#/components/schemas/Package"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/PackageId"
+          links:
+            getPackageId:
+              $ref: "#/components/links/getPackageId"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}":
+    get:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.get
+      summary: Retrieves a specified package.
+      description: Retrieves information about a single document package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/rawSignatureCapture"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Package"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.post
+      summary: Updates a package.
+      description: Updates the information pertaining to a specified package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        description: Package initial information. It doesn't need to be fully filled. It
+          should contain at least 'name' property
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Package"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.delete
+      summary: Deletes a package.
+      description: Deletes a specified package or template.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/audit":
+    get:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.audit.get
+      summary: Retrieves audit details about a package.
+      description: Retrieves audit details about a package. The Audit Trail is embedded
+        directly in the package, and can be viewed any time.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportedAuditTrail"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/ExportedAuditTrail"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/clone":
+    post:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.clone.post
+      summary: Creates a package or template from an existing template or package.
+      description: Creates a package or template from an existing package or template. To
+        create a template, the "type" in the request body has to be set to
+        "TEMPLATE".
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        description: In case of template, a new name field must be provided. You can
+          overwrite any of the cloned package or template field, by adding it to
+          the body json following the Package structure.
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Package"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The new transaction id.
+                    example: Esdfasd0sdf08gdfg3njkfg0345dg=
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "406":
+          $ref: "#/components/responses/NotAcceptable"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/evidence/summary":
+    get:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.evidence.summary.get
+      summary: Retrieves an evidence summary.
+      description: Retrieves Evidence Summary information for a specified package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/utf8"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/pdf; esl-api-version=11:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/fieldSummary":
+    get:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.fieldSummary.get
+      summary: Retrieves a list of fields in a package.
+      description: Retrieves a list of form fields in a package. Fields are grouped by
+        document and by signer.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FieldSummary"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/signers/{signerId}/approvals":
+    get:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.signers._signerId.get
+      summary: Retrieves all approvals for a signer in a package.
+      description: Retrieves all approvals for a specified signer, in a specific package.
+      parameters:
+        - name: packageId
+          description: The unique package id.<br/>Note that when an unknown package id is
+            provided, the API will return an empty list.
+          in: path
+          required: true
+          schema:
+            type: string
+            example: asd0sdf08gdfg3njkfg0345dg=
+        - name: signerId
+          description: The unique signer id.<br/>Note that when an unknown signer id is
+            provided, the API will return an empty list.
+          in: path
+          required: true
+          schema:
+            type: string
+            example: lEuqLqc6ZzA6
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultRoles"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/signingStatus":
+    get:
+      tags:
+        - Packages
+      operationId: api.packages._packageId.signingStatus.get
+      summary: Retrieves the signing status of a package.
+      description: Retrieves the signing status of a package. Retrieved information can be
+        filter by signer, or by document.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - name: signerId
+          in: query
+          required: false
+          schema:
+            type: string
+            example: d9f7a89a-4be4-4664-999e-e518ecb151fc
+        - name: documentId
+          in: query
+          required: false
+          schema:
+            type: string
+            example: 84778418-116f-4116-a9ee-0e2609f3b0b7
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: The package status.
+                    example: COMPLETED
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{templateId}/bulk_send":
+    post:
+      tags:
+        - Templates
+      operationId: api.packages._packageId.bulk_send.post
+      summary: Creates multiple packages.
+      description: Creates and sends multiple packages, using a pre-defined template.
+      parameters:
+        - $ref: "#/components/parameters/templateId"
+      requestBody:
+        description: CVS file containing the bulk.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The CSV file to upload.
+                  type: string
+                  format: binary
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "406":
+          $ref: "#/components/responses/NotAcceptable"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/roles":
+    get:
+      tags:
+        - Roles
+      operationId: api.packages._packageId.roles.get
+      summary: Retrieves all roles for the package.
+      description: Retrieves all roles for the package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultRoles"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Roles
+      operationId: api.packages._packageId.roles.post
+      summary: Adds a new role.
+      description: Adds a new role to an existing package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        description: The new role data. If the id field is not set, it will be generated by
+          the system.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Role"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Roles
+      operationId: api.packages._packageId.roles.put
+      summary: Reorders the roles in a package.
+      description: Reorders the roles in a specified package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        description: The new role data. If the id field is not set, it will be generated by
+          the system.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Role"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultRoles"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/roles/{roleId}":
+    get:
+      tags:
+        - Roles
+      operationId: api.packages._packageId.roles._roleId.get
+      summary: Retrieves a single role.
+      description: Retrieves a single role associated with a package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Roles
+      operationId: api.packages._packageId.roles._roleId.put
+      description: Updates a single Role by overriding its existing values with those in
+        the JSON payload.
+      summary: Updates the roles in a package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      requestBody:
+        description: Role information. It doesn't need to be fully filled. It should
+          contain only the properties you want to change.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Role"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Roles
+      operationId: api.packages._packageId.roles._roleId.delete
+      description: Deletes a specified role.
+      summary: Deletes a role.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/roles/{roleId}/unlock":
+    post:
+      tags:
+        - Roles
+      operationId: api.packages._packageId.roles._roleId.unlock.post
+      description: Unlocks a specified role.
+      summary: Unlocks a role.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents":
+    post:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents.post
+      summary: Adds a new document to an existing package.
+      description: Adds a new document to an existing package by using a document resource.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The file to upload.
+                  type: string
+                  format: binary
+                payload:
+                  description: This is a JSON payload which must contain a "Document" model
+                    object. The only required field is 'name'.
+                  type: object
+                  example: '{"name":"NDA Document"}'
+              required:
+                - file
+                - payload
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Document"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents.put
+      summary: Updates documents.
+      description: Updates the documents in a package. For example, to re-order them.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Document"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents.delete
+      description: Deletes multiple existing documents from a specified package. Documents
+        are identified by the documentID.
+      summary: Deletes multiple documents from a package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/zip":
+    get:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents.zip.get
+      summary: Retrieves zipped documents.
+      description: Retrieves a zipped file that contains all documents that were added to
+        the package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/flatten"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/signConfirm":
+    post:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents.signConfirm.post
+      summary: Creates a signature confirmation.
+      description: Confirms that the application can execute the signing process on the
+        document.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        description: The document object (it might include only the id) and the autograph
+          string, if there are handwritten signatures.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignedDocument"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/signed_documents":
+    post:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.signed_documents.post
+      summary: Signs all documents in a package.
+      description: Signs all documents in a specified package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        description: The documents should include only the ids, and the autograph string,
+          if there are handwritten signatures.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignedDocuments"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/visibility":
+    get:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents.visibility.get
+      summary: Retrieves Document Visibility information.
+      description: Retrieves information about which recipients can view specific documents
+        in a package during a Signing Ceremony.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          $ref: "#/components/responses/ResultDocumentVisibility"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents.visibility.post
+      summary: Updates Document Visibility.
+      description: >-
+        Retrieves information about which recipients can view specific documents
+        in a package during a Signing Ceremony.
+
+        The response is a Document Visibility object that contains a list of configurations. Each configuration has&#58; (1) the Document ID of a specific document; (2) a list of Role IDs of the signers who can view the document.
+
+        Note that&#58;
+
+        Documents not in the Document Visibility object are visible to all recipients. The Package Owner can always see all documents in the package, regardless of its Document Visibility configuration.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        description: The document visibility object.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentVisibility"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}":
+    get:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.get
+      summary: Retrieves a specified document.
+      description: Retrieves all information related to a given document, including ID,
+        name, description, presentation index, any associated data elements,
+        approvals and fields.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.put
+      summary: Updates the specified document.
+      description: Updates the specified document.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Document"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.post
+      summary: Updates a single document.
+      description: Updates a single, specified document. This endpoint accepts multi-part
+        data, or the JSON structure of a document.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Document"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.delete
+      description: Deletes a document from a specified package.
+      summary: Deletes a document from a package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/original":
+    get:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.original.get
+      summary: Retrieves the original PDF document.
+      description: Retrieves the original PDF document that was included in a package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream; esl-api-version=11:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/pdf":
+    get:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.pdf.get
+      summary: Retrieves a specific document in PDF form.
+      description: Retrieves a specific document. This function always returns the PDF
+        version of the document, even if the document was originally submitted
+        in a different format.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/flatten"
+        - $ref: "#/components/parameters/utf8"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream; esl-api-version=11:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/layout":
+    post:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.layout.post
+      summary: Applies a layout to a document.
+      description: Applies a specific layout to a specified document. At least one
+        parameter needs to be applied, either layoutID, or layoutName.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/layoutId"
+        - $ref: "#/components/parameters/layoutName"
+        - in: query
+          name: removeOutOfBound
+          schema:
+            type: boolean
+            default: false
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/pages/{index}":
+    get:
+      tags:
+        - Documents
+      operationId: api.packages._packageId.documents._documentId.pages._index.get
+      summary: Retrieves a specific document page.
+      description: Retrieves a specific document page. The page is retrieved as a .png
+        image file.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - name: index
+          description: The page index.
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/reminders":
+    get:
+      tags:
+        - Reminders
+      operationId: api.packages._packageId.reminders.get
+      summary: Retrieves the Reminder Schedule of a package.
+      description: Retrieve the Reminder Schedule of a package. A Reminder Schedule for the
+        package must already exist.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageReminderSchedule"
+        "204":
+          description: OK. Empty Reminder Schedule.
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          description: Could not find a package
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Reminders
+      operationId: api.packages._packageId.reminders.post
+      summary: Creates a Reminder Schedule for a package.
+      description: The user can only create a reminder schedule on packages that are not
+        yet sent. All reminders are created automatically by the system when a
+        package is sent.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PackageReminderSchedule"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageReminderSchedule"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Reminders
+      operationId: api.packages._packageId.reminders.put
+      summary: Updates the Reminder Schedule of a package.
+      description: Updates the Reminder Schedule of a specified package. This resource is
+        not available for packages whose status is SENT.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PackageReminderSchedule"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PackageReminderSchedule"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Reminders
+      operationId: api.packages._packageId.reminders.delete
+      description: Deletes the Reminder Schedule of the specified package.
+      summary: Deletes the Reminder Schedule of a package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "204":
+          description: OK. Empty Reminder Schedule.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/reports/usage:
+    get:
+      tags:
+        - Reports
+      operationId: api.reports.usage.get
+      summary: Retrieves a Usage Report on the current sender.
+      description: Retrieves a Usage Report for the sender that is currently logged-in to
+        the account.
+      parameters:
+        - name: from
+          description: The date from which to produce the report.
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          description: The date up to which to produce the report.
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsageReport"
+            text/csv:
+              schema:
+                type: string
+                example: '"89ArAVjboS4S","account2@e-signlivetest.com","ESL","QA","483","160","299","500","9","9","40","500"'
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/reports/completion:
+    get:
+      tags:
+        - Reports
+      operationId: api.reports.completion.get
+      summary: Retrieves a Completion Report on a sender.
+      description: Retrieves a Completion Report for a specified sender.
+      parameters:
+        - name: from
+          description: The date from which to produce the report.
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          description: The date up to which to produce the report.
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: senderId
+          description: The sender for which to produce the report.
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          description: Status of the package on which you want to search.
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - DRAFT
+              - SENT
+              - COMPLETED
+              - ARCHIVED
+              - DECLINED
+              - OPTED_OUT
+              - TRASHED
+              - EXPIRED
+        - name: summary
+          description: "Get summarized report: omit signers and document information."
+          in: query
+          required: false
+          schema:
+            type: boolean
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                $ref: "#/components/schemas/CompletionReport"
+            text/csv:
+              schema:
+                type: string
+                example: '"89ArAVjboS4S","account2@e-signlivetest.com","ESL","QA","483","160","299","500","9","9","40","500"'
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/approvals/":
+    post:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals.post
+      summary: Creates a new approval.
+      description: Creates a new approval for a package or document. Note that text anchor
+        extraction cannot be used in this API call.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Approval"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Approval"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals.put
+      summary: Updates an existing approval.
+      description: Updates the approval requests that already exist on a package, or a
+        document.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Approval"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Approval"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/approvals/{approvalId}":
+    get:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals._approvalId.get
+      summary: Retrieves an existing approval.
+      description: Retrieves an approval that already exists for a package, or document.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Approval"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals._apporvalId.put
+      summary: Updates an existing approval.
+      description: Updates a specific approval that has already been created for a package
+        or document.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Approval"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Approval"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals._apporvalId.delete
+      summary: Deletes an existing approval.
+      description: Deletes a specific approval that already exists for a package or
+        document.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/approvals/{approvalId}/fields":
+    post:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals._apporvalId.fields.post
+      summary: Creates a new field with an autogenerated name related to an existing
+        approval.
+      description: Creates a new field for an existing approval. The new field is created
+        with an autogenerated name.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Field"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Field"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/approvals/{approvalId}/fields/{fieldId}":
+    get:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals._apporvalId.fields._fieldId.get
+      summary: Retrieves an existing field related to an existing approval.
+      description: Retrieves a field that exists on an already created approval.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+        - $ref: "#/components/parameters/fieldId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Field"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals._apporvalId.fields._fieldId.put
+      summary: Updates an existing field related to an existing approval.
+      description: Updates an existing field related to an existing approval. Note that the
+        JSON Field ID will be ignored and replaced by the one from the query
+        parameter.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+        - $ref: "#/components/parameters/fieldId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Field"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json; esl-api-version=11:
+              schema:
+                $ref: "#/components/schemas/Field"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals._apporvalId.fields._fieldId.post
+      summary: Creates a new field related to an existing approval.
+      description: Creates a new field that can then be added to an existing approval.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+        - $ref: "#/components/parameters/fieldId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Field"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.approvals._apporvalId.fields._fieldId.delete
+      summary: Deletes an existing field related to an existing approval.
+      description: Deletes an existing field that has already been added to an existing
+        approval.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+        - $ref: "#/components/parameters/fieldId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/signers/{signerId}/approvals":
+    get:
+      tags:
+        - Approvals
+      operationId: api.packages._packageId.documents._documentId.signers._signerId.approvals.get
+      summary: Retrieves all signable approvals.
+      description: Retrieves all aprovals that are eligible for signing.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/signerId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Approval"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/attachment/zip":
+    get:
+      tags:
+        - File Attachments
+      operationId: api.packages._packageId.attachment.zip.get
+      summary: Downloads all attachments.
+      description: Compresses all attachments into a zip file, which is then downloaded.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "406":
+          $ref: "#/components/responses/NotAcceptable"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/attachment/zip/{roleId}":
+    get:
+      tags:
+        - File Attachments
+      operationId: api.packages._packageId.attachment.zip._roleId.get
+      summary: Downloads all attachments for a specified Role.
+      description: Compresses all attachments into a zip file, and then downloads it. Only
+        attachments for the specified role are included.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "406":
+          $ref: "#/components/responses/NotAcceptable"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/attachment/{attachmentId}":
+    get:
+      tags:
+        - File Attachments
+      operationId: api.packages._packageId.attachment._attachmentId.get
+      summary: Downloads an attachment.
+      description: Downloads the specified attachment.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/attachmentId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream; esl-api-version=11:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "406":
+          $ref: "#/components/responses/NotAcceptable"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - File Attachments
+      operationId: api.packages._packageId.attachment._attachmentId.post
+      summary: Adds an attachment.
+      description: Uploads an attachment to the specified package.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/attachmentId"
+      requestBody:
+        description: An attachment data.
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The file to upload.
+                  type: string
+                  format: binary
+                fileName:
+                  description: The name of the attachment.
+                  type: string
+                attachmentUid:
+                  description: Optional id.
+                  type: string
+              required:
+                - file
+                - payload
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "406":
+          $ref: "#/components/responses/NotAcceptable"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/authenticationTokens/user:
+    post:
+      tags:
+        - Authentication Tokens
+      operationId: api.authenticationTokens.user.post
+      summary: Creates a new authentication token.
+      description: Creates a token that can be used to obtain a valid session for a
+        particular user of the system. This token is single-use, and expires
+        after 30 minutes (though this is configurable). This token allows you to
+        login through a get to the
+        /auth?authenticationToken=VALUE&target=http://environment/destination.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: string
+                    example: ZDk5ZjllYTYtMDUzYy00MzE4LTk4OGUtMWQ3ZjE3NmFjNzhk
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/authenticationTokens/sender:
+    post:
+      tags:
+        - Authentication Tokens
+      operationId: api.authenticationTokens.seender.post
+      summary: Creates a new sender authentication token.
+      description: Creates a token that can be used to obtain a valid session for the owner
+        of an existing package, so they can edit the package using the Designer
+        view, and then distribute it for signing. The destination must be a
+        valid destination for a sender and is restricted to a particular
+        package. It is single-use, and expires after 30 minutes (though this is
+        configurable). This token allows you to login through a get to the
+        /auth?authenticationToken=VALUE&target=http://environment/destination.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SenderAuthenticationToken"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SenderAuthenticationToken"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/authenticationTokens/signer/multiUse:
+    post:
+      tags:
+        - Authentication Tokens
+      operationId: api.authenticationTokens.signer.multiUse.post
+      summary: Creates a new multi-use signer authentication token.
+      description: Creates a token that can be used to obtain a valid session for a
+        particular signer of an existing package, so they can sign the package.
+        This token is restricted to a single package, and expires after 30
+        minutes (though this is configurable). However, it can be used multiple
+        times. This token allows you to login through a get to the
+        /auth?authenticationToken=VALUE&target=http://environment/destination.
+        The destination must be a valid destination for a signer.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignerAuthenticationToken"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignerAuthenticationToken"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/authenticationTokens/signer/singleUse:
+    post:
+      tags:
+        - Authentication Tokens
+      operationId: api.authenticationTokens.signer.singleUse.post
+      summary: Creates a new single use signer authentication token.
+      description: Creates a token that can be used to obtain a valid session for a
+        particular signer of an existing package, so they can sign the package.
+        This token is restricted to a single package. It is single-use, and
+        expires after 30 minutes (though this is configurable). This token
+        allows you to login through a get to the
+        /auth?authenticationToken=VALUE&target=http://environment/destination.
+        The destination must be a valid destination for a signer.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignerAuthenticationToken"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignerAuthenticationToken"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/callback:
+    get:
+      tags:
+        - Callback
+      operationId: api.callback.get
+      summary: Retrieves a list of all callbacks.
+      description: Callback event notifications allow you to be automatically notified of
+        events pertaining to a package. Upon a specific event, the system will
+        automatically call a specified URL.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Callback"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Callback
+      operationId: api.callback.post
+      summary: Creates a new callback.
+      description: Callback event notifications allow you to be automatically notified of
+        events pertaining to a package. Upon a specific event, the system will
+        automatically call a specified URL.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        description: Group information.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Callback"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Callback"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/session:
+    get:
+      tags:
+        - Sessions
+      operationId: api.session.get
+      summary: Retrieves the session object.
+      description: Retrieves the session object.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/roles/{roleId}/signingUrl":
+    get:
+      tags:
+        - Signing URL
+      operationId: api.package._packageId.roles._roleId.signingUrl.get
+      summary: Retrieves the url that a signer can use to sign a package.
+      description: Retrieves the url that a signer can use to sign a package. This can only
+        be done to a package which is not modifiable (e.g., a sent package). It
+        cannot be done to a package that is in a draft state.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SigningUrl"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/roles/{roleId}/verification":
+    get:
+      tags:
+        - Roles Verification
+      operationId: api.packages._packageId.roles._roleId.verification.get
+      summary: Retrieves information on the type of verification being used.
+      description: If an advanced form of verification is used, such as an external
+        verification method, then this call retrieves information about that
+        verification method, for the specified role.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Verification"
+        "204":
+          description: OK. No verification is assigned to the role.
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    put:
+      tags:
+        - Roles Verification
+      operationId: api.packages._packageId.roles._roleId.verification.put
+      summary: Updates an advanced verification method.
+      description: Updates an existing advanced form of verification, such as an external
+        verification method, for the specified role.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Verification"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Verification"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      tags:
+        - Roles Verification
+      operationId: api.packages._packageId.roles._roleId.verification.post
+      summary: Creates an advanced form of verification.
+      description: Creates an advanced form of verification for a role, such as an external
+        verification method role.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Verification"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Verification"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    delete:
+      tags:
+        - Roles Verification
+      operationId: api.packages._packageId.roles._roleId.verification.delete
+      summary: Deletes an advanced verification method, for a specified role.
+      description: If an advanced form of verification is used, such as an external
+        verification method, then this call deletes that verification method,
+        for the specified role.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/account/{accountId}/verificationTypes":
+    get:
+      tags:
+        - Roles Verification
+      operationId: api.account._accountId.verificationTypes.get
+      summary: Retrieves advanced verification types.
+      description: Retrieves a list of verification types that are available in the account.
+      parameters:
+        - $ref: "#/components/parameters/accountId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          $ref: "#/components/responses/ResultSenders"
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/notifications":
+    post:
+      tags:
+        - Notifications
+      operationId: api.packages._packageId.notifications.post
+      summary: Resends a notification to a signer.
+      description: Resends a notification to a signer.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+      requestBody:
+        description: The journal entry JSON.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: The signer email.
+                  example: john.smith@acme.com
+                message:
+                  type: string
+                  description: The message, that will be send to the signer.
+                  example: Please sign ASAP!
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/roles/{roleId}/notifications":
+    post:
+      tags:
+        - Notifications
+      operationId: api.packages._packageId.roles._roleId.notifications.post
+      description: Sends an email notification to the signers linked to a role.
+      summary: Sends a notification to the signers linked to a role.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/roles/{roleId}/sms_notification":
+    post:
+      tags:
+        - Notifications
+      operationId: api.packages._packageId.roles._roleId.sms_notifications.post
+      description: Sends an SMS notification to the signers linked to a role.
+      summary: Sends an SMS notification to the signers linked to a role.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/roleId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  "/api/packages/{packageId}/documents/{documentId}/approvals/{approvalId}/mobile_notification":
+    post:
+      tags:
+        - Notifications
+      operationId: api.packages._packageId.documents._documentId.approvals._apporvalId.mobile_notification.post
+      summary: Sends a mobile notification.
+      description: Sends a notification to yourself. Included in the notification is a
+        mobile-device signing link to an approval.
+      parameters:
+        - $ref: "#/components/parameters/packageId"
+        - $ref: "#/components/parameters/documentId"
+        - $ref: "#/components/parameters/approvalId"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /api/sms/resend:
+    post:
+      tags:
+        - Notifications
+      operationId: api.sms.resend.post
+      summary: Resends the SMS code to the signer.
+      description: Resends the SMS authentication code to the signer.
+      parameters:
+        - name: loginToken
+          in: query
+          schema:
+            type: string
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          $ref: "#/components/responses/NotAuthorized"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+components:
+  schemas:
+    Account:
+      type: object
+      required:
+        - company
+        - created
+        - customFields
+        - id
+        - licenses
+        - name
+        - owner
+        - timezoneId
+        - updated
+      properties:
+        name:
+          type: string
+          description: Name
+        created:
+          type: string
+          format: date-time
+          description: Created
+        owner:
+          type: string
+          description: Owner
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        customFields:
+          type: array
+          description: CustomFields
+          items:
+            $ref: "#/components/schemas/CustomField"
+        providers:
+          description: Providers
+          $ref: "#/components/schemas/AccountProviders"
+        timezoneId:
+          type: string
+          description: TimezoneId
+        licenses:
+          type: array
+          description: Licenses
+          items:
+            $ref: "#/components/schemas/License"
+        company:
+          description: Company
+          $ref: "#/components/schemas/Company"
+        updated:
+          type: string
+          format: date-time
+          description: Updated
+        logoUrl:
+          type: string
+          description: LogoUrl
+        logoAltTextKey:
+          type: string
+          description: LogoAltTextKey
+    AccountProviders:
+      type: object
+      required:
+        - documents
+        - users
+      properties:
+        documents:
+          type: array
+          description: Documents
+          items:
+            $ref: "#/components/schemas/Provider"
+        users:
+          type: array
+          description: Users
+          items:
+            $ref: "#/components/schemas/Provider"
+    Address:
+      type: object
+      properties:
+        state:
+          type: string
+          description: State
+        country:
+          type: string
+          description: Country
+        city:
+          type: string
+          description: City
+        address1:
+          type: string
+          description: Address1
+        address2:
+          type: string
+          description: Address2
+        zipcode:
+          type: string
+          description: Zipcode
+    Approval:
+      type: object
+      required:
+        - role
+      properties:
+        fields:
+          type: array
+          description: Fields
+          items:
+            $ref: "#/components/schemas/Field"
+        name:
+          type: string
+          description: Name
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        role:
+          type: string
+          description: Role
+        optional:
+          type: boolean
+          description: Optional
+        enforceCaptureSignature:
+          type: boolean
+          description: EnforceCaptureSignature
+        accepted:
+          type: string
+          format: date-time
+          description: Accepted
+        signed:
+          type: string
+          format: date-time
+          description: Signed
+    AttachmentRequirement:
+      type: object
+      required:
+        - id
+        - name
+        - required
+        - status
+      properties:
+        name:
+          type: string
+          description: Name
+        description:
+          type: string
+          description: Description
+        status:
+          type: string
+          description: Status
+          enum:
+            - INCOMPLETE
+            - REJECTED
+            - COMPLETE
+        comment:
+          type: string
+          description: Comment
+        id:
+          type: string
+          description: Id
+        required:
+          type: boolean
+          description: Required
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+    AuditEvent:
+      type: object
+      properties:
+        target-type:
+          type: string
+          description: The target type.
+          enum:
+            - Document
+            - Package
+            - AuthMethod
+            - Account
+            - CHALLENGE
+            - SMS
+            - SSO
+            - EMAIL_LINK
+            - Knowledge Based Authentication
+        date-time:
+          type: string
+          format: date-time
+          description: The time the event happened.
+        type:
+          type: string
+          description: The audit type.
+          enum:
+            - Accept
+            - Click To Sign
+            - Click To Initial
+            - Capture Signature
+            - Confirm
+            - Download
+            - Download Zip
+            - Form Field
+            - Login
+            - View
+            - Opt Out
+            - Signing Session For Recipient
+            - Decline
+        target:
+          type: string
+          description: The audit target.
+        user:
+          type: string
+          description: The signer full name.
+          example: John Smith
+        user-email:
+          type: string
+          description: The signer email.
+          example: john.smith@myemail.com
+        user-ip:
+          type: string
+          description: The signer ip.
+          example: 10.85.37.250
+        data:
+          type: string
+          description: The data signer enters.
+    Auth:
+      type: object
+      required:
+        - challenges
+        - scheme
+      properties:
+        scheme:
+          type: string
+          description: Scheme
+          enum:
+            - NONE
+            - PROVIDER
+            - CHALLENGE
+            - SMS
+            - SSO
+            - KBA
+        challenges:
+          type: array
+          description: Challenges
+          items:
+            $ref: "#/components/schemas/AuthChallenge"
+    AuthChallenge:
+      type: object
+      required:
+        - maskInput
+        - question
+      properties:
+        question:
+          type: string
+          description: Question
+        answer:
+          type: string
+          description: Answer
+        maskInput:
+          type: boolean
+          description: MaskInput
+    BaseMessage:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: Content
+    BrandingBarOptions:
+      type: object
+      properties:
+        logo:
+          description: Logo
+          $ref: "#/components/schemas/Image"
+    Callback:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+              - DOCUMENT_SIGNED
+              - EMAIL_BOUNCE
+              - KBA_FAILURE
+              - PACKAGE_ACTIVATE
+              - PACKAGE_ARCHIVE
+              - PACKAGE_ATTACHMENT
+              - PACKAGE_COMPLETE
+              - PACKAGE_CREATE
+              - PACKAGE_DEACTIVATE
+              - PACKAGE_DECLINE
+              - PACKAGE_DELETE
+              - PACKAGE_EXPIRE
+              - PACKAGE_OPT_OUT
+              - PACKAGE_READY_FOR_COMPLETE
+              - PACKAGE_RESTORE
+              - PACKAGE_TRASH
+              - ROLE_REASSIGN
+              - SIGNER_COMPLETE
+              - SIGNER_LOCKED
+              - TEMPLATE_CREATE
+        url:
+          type: string
+          description: The url, you want to be called.
+          example: https://your-server.com/callback-path
+        key:
+          type: string
+          description: Unique callback key.
+    CcExpiration:
+      type: object
+      required:
+        - month
+        - year
+      properties:
+        year:
+          type: integer
+          format: int32
+          description: Year
+        month:
+          type: integer
+          format: int32
+          description: Month
+    CeremonyEventComplete:
+      type: object
+      properties:
+        dialog:
+          type: boolean
+          description: Dialog
+        redirect:
+          type: string
+          description: Redirect
+    CeremonyEvents:
+      type: object
+      properties:
+        complete:
+          description: Complete
+          $ref: "#/components/schemas/CeremonyEventComplete"
+    CeremonySettings:
+      type: object
+      required:
+        - ada
+        - declineButton
+        - declineReasons
+        - disableDeclineOther
+        - disableDownloadForUncompletedPackage
+        - disableFirstInPersonAffidavit
+        - disableInPersonAffidavit
+        - disableOptOutOther
+        - disableSecondInPersonAffidavit
+        - enforceCaptureSignature
+        - extractAcroFields
+        - extractTextTags
+        - hideCaptureText
+        - hideLanguageDropdown
+        - hidePackageOwnerInPerson
+        - hideWatermark
+        - inPerson
+        - optOutButton
+        - optOutReasons
+      properties:
+        layout:
+          description: Layout
+          $ref: "#/components/schemas/LayoutOptions"
+        events:
+          description: Events
+          $ref: "#/components/schemas/CeremonyEvents"
+        handOver:
+          description: HandOver
+          $ref: "#/components/schemas/Link"
+        enforceCaptureSignature:
+          type: boolean
+          description: EnforceCaptureSignature
+        inPerson:
+          type: boolean
+          description: InPerson
+        declineButton:
+          type: boolean
+          description: DeclineButton
+        declineReasons:
+          type: array
+          description: DeclineReasons
+          items:
+            type: string
+        disableDeclineOther:
+          type: boolean
+          description: DisableDeclineOther
+        disableDownloadForUncompletedPackage:
+          type: boolean
+          description: DisableDownloadForUncompletedPackage
+        disableFirstInPersonAffidavit:
+          type: boolean
+          description: DisableFirstInPersonAffidavit
+        disableInPersonAffidavit:
+          type: boolean
+          description: DisableInPersonAffidavit
+        disableOptOutOther:
+          type: boolean
+          description: DisableOptOutOther
+        disableSecondInPersonAffidavit:
+          type: boolean
+          description: DisableSecondInPersonAffidavit
+        documentToolbarOptions:
+          description: DocumentToolbarOptions
+          $ref: "#/components/schemas/DocumentToolbarOptions"
+        hideCaptureText:
+          type: boolean
+          description: HideCaptureText
+        hideLanguageDropdown:
+          type: boolean
+          description: HideLanguageDropdown
+        hidePackageOwnerInPerson:
+          type: boolean
+          description: HidePackageOwnerInPerson
+        hideWatermark:
+          type: boolean
+          description: HideWatermark
+        maxAuthFailsAllowed:
+          type: integer
+          format: int32
+          description: MaxAuthFailsAllowed
+        optOutButton:
+          type: boolean
+          description: OptOutButton
+        optOutReasons:
+          type: array
+          description: OptOutReasons
+          items:
+            type: string
+        extractAcroFields:
+          type: boolean
+          description: ExtractAcroFields
+        extractTextTags:
+          type: boolean
+          description: ExtractTextTags
+        ada:
+          type: boolean
+          description: Ada
+        style:
+          description: Style
+          $ref: "#/components/schemas/LayoutStyle"
+    Company:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        address:
+          description: Address
+          $ref: "#/components/schemas/Address"
+        name:
+          type: string
+          description: Name
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+    CompletionReport:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        senders:
+          description: The usage list
+          type: array
+          items:
+            $ref: "#/components/schemas/Sender"
+    Credentials:
+      type: object
+      required:
+        - email
+        - newPassword
+        - password
+      properties:
+        email:
+          type: string
+          description: The user email.
+        newPassword:
+          type: string
+          description: The user new password.
+        password:
+          type: string
+          description: The user password.
+    CreditCard:
+      type: object
+      required:
+        - expiration
+        - name
+        - number
+        - type
+      properties:
+        name:
+          type: string
+          description: Name
+        type:
+          type: string
+          description: Type
+        number:
+          type: string
+          description: Number
+        expiration:
+          description: Expiration
+          $ref: "#/components/schemas/CcExpiration"
+        cvv:
+          type: string
+          description: Cvv
+    Currency:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        name:
+          type: string
+          description: Name
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+    CustomField:
+      type: object
+      required:
+        - id
+        - name
+        - required
+        - translations
+      properties:
+        value:
+          type: string
+          description: Value
+        name:
+          type: string
+          description: Name
+        id:
+          type: string
+          description: Id
+        required:
+          type: boolean
+          description: Required
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        translations:
+          type: array
+          description: Translations
+          items:
+            $ref: "#/components/schemas/Translation"
+    CycleCount:
+      type: object
+      required:
+        - count
+        - cycle
+      properties:
+        cycle:
+          type: string
+          description: Cycle
+          enum:
+            - DAY
+            - MONTH
+            - YEAR
+        count:
+          type: integer
+          format: int32
+          description: Count
+    DelegationUser:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        email:
+          type: string
+          description: Email
+        firstName:
+          type: string
+          description: Email
+        lastName:
+          type: string
+          description: Email
+        name:
+          type: string
+          description: Name
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+    Delivery:
+      type: object
+      required:
+        - download
+        - email
+        - provider
+      properties:
+        provider:
+          type: boolean
+          description: Provider
+        email:
+          type: boolean
+          description: Email
+        download:
+          type: boolean
+          description: Download
+    Document:
+      type: object
+      required:
+        - approvals
+        - description
+        - extract
+        - extractionTypes
+        - fields
+        - id
+        - index
+        - name
+        - pages
+        - size
+        - tagged
+      properties:
+        status:
+          type: string
+        fields:
+          type: array
+          description: Fields
+          items:
+            $ref: "#/components/schemas/Field"
+        name:
+          type: string
+          description: Name
+        size:
+          type: integer
+          format: int32
+          description: Size
+        description:
+          type: string
+          description: Description
+        index:
+          type: integer
+          format: int32
+          description: Index
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        signedHash:
+          type: string
+          description: SignedHash
+        extract:
+          type: boolean
+          description: Extract
+        extractionTypes:
+          type: array
+          description: ExtractionTypes
+          uniqueItems: true
+          items:
+            type: string
+        tagged:
+          type: boolean
+          description: Tagged
+        external:
+          description: External
+          $ref: "#/components/schemas/External"
+        approvals:
+          type: array
+          description: Approvals
+          items:
+            $ref: "#/components/schemas/Approval"
+        signerVerificationToken:
+          type: string
+          description: SignerVerificationToken
+        pages:
+          type: array
+          description: Pages
+          items:
+            $ref: "#/components/schemas/Page"
+    DocumentToolbarOptions:
+      type: object
+      required:
+        - downloadButton
+      properties:
+        downloadButton:
+          type: boolean
+          description: DownloadButton
+    DocumentVisibility:
+      type: object
+      properties:
+        configurations:
+          type: array
+          description: List of DocumentVisibilityConfigurations.
+          items:
+            $ref: "#/components/schemas/DocumentVisibilityConfiguration"
+        id:
+          type: string
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        name:
+          type: string
+    DocumentVisibilityConfiguration:
+      type: object
+      properties:
+        documentUid:
+          type: string
+          description: Document Id.
+        roleUids:
+          type: array
+          description: List of Role Ids that can view the identified Document.
+          items:
+            type: string
+        id:
+          type: string
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        name:
+          type: string
+    ExportedAuditTrail:
+      properties:
+        apckage-id:
+          type: string
+          description: The package id.
+          example: 9xZvSoqg-ksfWUMGUDjmt1D4tzA=
+        auditEvents:
+          type: array
+          description: Audit events.
+          items:
+            $ref: "#/components/schemas/AuditEvent"
+    External:
+      type: object
+      required:
+        - id
+        - provider
+      properties:
+        id:
+          type: string
+          description: Id
+        provider:
+          type: string
+          description: Provider
+        providerName:
+          type: string
+          description: ProviderName
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+    ExtractAnchor:
+      type: object
+      required:
+        - anchorPoint
+        - characterIndex
+        - height
+        - index
+        - leftOffset
+        - text
+        - topOffset
+        - width
+      properties:
+        topOffset:
+          type: integer
+          format: int32
+          description: An absolute offset applied to the final y value
+          example: 100
+        characterIndex:
+          type: integer
+          format: int32
+          description: The index of the character within the Anchor Text that will be used
+            to calculate position
+          example: 3
+        anchorPoint:
+          type: string
+          enum:
+            - TOPLEFT
+            - BOTTOMLEFT
+            - TOPRIGHT
+            - BOTTOMRIGHT
+          description: Which corner of the specified character to use as the base for
+            calculating position
+        index:
+          type: integer
+          format: int32
+          description: The "occurrence" of the string. For example, if index = 2, the
+            software will skip the first two occurrences of Anchor Text, and use
+            the third occurrence to calculate position.
+          example: 2
+        text:
+          type: string
+          description: The exact string that will be searched for in the uploaded document
+          example: "Signature:"
+        width:
+          type: integer
+          format: int32
+          description: The width of the field position to be calculated
+          example: 200
+        height:
+          type: integer
+          format: int32
+          description: The height of the field position to be calculated
+          example: 50
+        leftOffset:
+          type: integer
+          format: int32
+          description: An absolute offset applied to the final x value
+          example: 20
+    Features:
+      type: object
+      required:
+        - allowInPersonForAccountSenders
+        - allowIntegration
+        - allowUiSwitch
+        - attachments
+        - authenticatedInbox
+        - bulkSend
+        - certificateSigning
+        - conditionalFields
+        - customFields
+        - delegation
+        - disableFooter
+        - disableInPersonActivationEmail
+        - documentVisibility
+        - emailDocumentsAndEvidenceSummary
+        - enableNewUi
+        - enableSignerUi
+        - encryptDocuments
+        - enforceAuth
+        - equifaxCanada
+        - equifaxUsa
+        - evidenceSummary
+        - externalSignerVerification
+        - fastTrack
+        - flattenSignerDocuments
+        - forceLogin
+        - geteWitnessRecording
+        - groups
+        - inboxFiltering
+        - maskResponse
+        - mobileCapture
+        - mobileSigningCeremony
+        - mobileSigningCeremonyTablet
+        - notarize
+        - ofacBlacklist
+        - optionalSignature
+        - personalCertificateClient
+        - preventConsentRemoval
+        - qnaAuth
+        - qrCode
+        - sendToMobile
+        - showDocumentsPreview
+        - signerSso
+        - smsAuth
+        - ssoLogin
+        - tamperSealEvidence
+      properties:
+        tamperSealEvidence:
+          type: boolean
+          description: TamperSealEvidence
+        groups:
+          type: boolean
+          description: Groups
+        qrCode:
+          type: boolean
+          description: QrCode
+        authenticatedInbox:
+          type: boolean
+          description: AuthenticatedInbox
+        attachments:
+          type: boolean
+          description: Attachments
+        geteWitnessRecording:
+          type: boolean
+          description: EWitnessRecording
+        flattenSignerDocuments:
+          type: boolean
+          description: FlattenSignerDocuments
+        delegation:
+          type: boolean
+          description: Delegation
+        encryptDocuments:
+          type: boolean
+          description: EncryptDocuments
+        documentVisibility:
+          type: boolean
+          description: DocumentVisibility
+        customFields:
+          type: boolean
+          description: CustomFields
+        sendToMobile:
+          type: boolean
+          description: SendToMobile
+        optionalSignature:
+          type: boolean
+          description: OptionalSignature
+        certificateSigning:
+          type: boolean
+          description: CertificateSigning
+        evidenceSummary:
+          type: boolean
+          description: EvidenceSummary
+        fastTrack:
+          type: boolean
+          description: FastTrack
+        forceLogin:
+          type: boolean
+          description: ForceLogin
+        inboxFiltering:
+          type: boolean
+          description: InboxFiltering
+        notarize:
+          type: boolean
+          description: Notarize
+        showDocumentsPreview:
+          type: boolean
+          description: ShowDocumentsPreview
+        equifaxCanada:
+          type: boolean
+          description: equifaxCanada
+        equifaxUsa:
+          type: boolean
+          description: equifaxUsa
+        smsAuth:
+          type: boolean
+          description: smsAuth
+        qnaAuth:
+          type: boolean
+          description: qnaAuth
+        enforceAuth:
+          type: boolean
+          description: enforceAuth
+        ofacBlacklist:
+          type: boolean
+          description: ofacBlacklist
+        mobileCapture:
+          type: boolean
+          description: MobileCapture
+        maskResponse:
+          type: boolean
+          description: MaskResponse
+        allowInPersonForAccountSenders:
+          type: boolean
+          description: AllowInPersonForAccountSenders
+        mobileSigningCeremony:
+          type: boolean
+          description: MobileSigningCeremony
+        mobileSigningCeremonyTablet:
+          type: boolean
+          description: MobileSigningCeremonyTablet
+        disableInPersonActivationEmail:
+          type: boolean
+          description: DisableInPersonActivationEmail
+        emailDocumentsAndEvidenceSummary:
+          type: boolean
+          description: EmailDocumentsAndEvidenceSummary
+        bulkSend:
+          type: boolean
+          description: BulkSend
+        ssoLogin:
+          type: boolean
+          description: SsoLogin
+        signerSso:
+          type: boolean
+          description: SignerSso
+        allowUiSwitch:
+          type: boolean
+          description: AllowUiSwitch
+        enableNewUi:
+          type: boolean
+          description: EnableNewUi
+        enableSignerUi:
+          type: boolean
+          description: EnableSignerUi
+        disableFooter:
+          type: boolean
+          description: DisableFooter
+        externalSignerVerification:
+          type: boolean
+          description: ExternalSignerVerification
+        personalCertificateClient:
+          type: boolean
+          description: PersonalCertificateClient
+        allowIntegration:
+          type: boolean
+          description: AllowIntegration
+        preventConsentRemoval:
+          type: boolean
+          description: PreventConsentRemoval
+        conditionalFields:
+          type: boolean
+          description: ConditionalFields
+    Field:
+      type: object
+      required:
+        - extract
+        - id
+        - name
+        - page
+        - subtype
+        - type
+      properties:
+        value:
+          type: string
+          description: Value
+        name:
+          type: string
+          description: Name
+        type:
+          type: string
+          description: Type
+          enum:
+            - SIGNATURE
+            - INPUT
+            - IMAGE
+        validation:
+          description: Validation
+          $ref: "#/components/schemas/FieldValidation"
+        binding:
+          type: string
+          description: Binding
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        page:
+          type: integer
+          format: int32
+          description: Page
+        left:
+          type: number
+          format: double
+          description: Left
+        extractAnchor:
+          description: ExtractAnchor
+          $ref: "#/components/schemas/ExtractAnchor"
+        extract:
+          type: boolean
+          description: Extract
+        subtype:
+          type: string
+          description: Subtype
+          enum:
+            - FULLNAME
+            - INITIALS
+            - CAPTURE
+            - LABEL
+            - TEXTFIELD
+            - TEXTAREA
+            - CHECKBOX
+            - DATE
+            - RADIO
+            - LIST
+            - QRCODE
+            - CUSTOMFIELD
+            - SEAL
+            - MOBILE_CAPTURE
+            - RAW_CAPTURE
+            - DATEPICKER
+        width:
+          type: number
+          format: double
+          description: Width
+        top:
+          type: number
+          format: double
+          description: Top
+        height:
+          type: number
+          format: double
+          description: Height
+    FieldSummary:
+      type: object
+      required:
+        - signerId
+        - documentId
+        - fieldId
+        - fieldName
+      properties:
+        signerId:
+          type: string
+          description: Signer Id
+        documentId:
+          type: string
+          description: Document Id
+        fieldId:
+          type: string
+          description: Field Id
+        fieldName:
+          type: string
+          description: Field Name
+        fieldValue:
+          type: string
+          description: Field Value
+    FieldValidation:
+      type: object
+      required:
+        - required
+      properties:
+        maxLength:
+          type: integer
+          format: int32
+          description: MaxLength
+        pattern:
+          type: string
+          description: Pattern
+        required:
+          type: boolean
+          description: Required
+        errorMessage:
+          type: string
+          description: ErrorMessage
+        errorCode:
+          type: integer
+          format: int32
+          description: ErrorCode
+        enum:
+          type: array
+          description: Enum
+          items:
+            type: string
+        minLength:
+          type: integer
+          format: int32
+          description: MinLength
+    FooterOptions:
+      type: object
+    GlobalActionsOptions:
+      type: object
+      required:
+        - confirm
+        - download
+        - hideEvidenceSummary
+        - saveAsLayout
+      properties:
+        download:
+          type: boolean
+          description: Download
+        saveAsLayout:
+          type: boolean
+          description: SaveAsLayout
+        hideEvidenceSummary:
+          type: boolean
+          description: HideEvidenceSummary
+        confirm:
+          type: boolean
+          description: Confirm
+    Group:
+      type: object
+      required:
+        - created
+        - emailMembers
+        - id
+        - members
+        - name
+        - reciprocalDelegation
+        - updated
+      properties:
+        name:
+          type: string
+          description: Name
+        members:
+          type: array
+          description: Members
+          items:
+            $ref: "#/components/schemas/GroupMember"
+        account:
+          description: Account
+          $ref: "#/components/schemas/Account"
+        created:
+          type: string
+          format: date-time
+          description: Created
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        updated:
+          type: string
+          format: date-time
+          description: Updated
+        email:
+          type: string
+          description: Email
+        emailMembers:
+          type: boolean
+          description: EmailMembers
+        reciprocalDelegation:
+          type: boolean
+          description: Reciprocal Delegation
+    GroupMember:
+      type: object
+      required:
+        - email
+        - firstName
+        - lastName
+        - memberType
+        - pending
+        - userId
+      properties:
+        userId:
+          type: string
+          description: UserId
+        firstName:
+          type: string
+          description: FirstName
+        lastName:
+          type: string
+          description: LastName
+        email:
+          type: string
+          description: Email
+        memberType:
+          type: string
+          description: MemberType
+          enum:
+            - REGULAR
+            - MANAGER
+        pending:
+          type: boolean
+          description: Pending
+    GroupMembership:
+      type: object
+      required:
+        - groupId
+        - groupName
+        - memberType
+      properties:
+        groupId:
+          type: string
+          description: GroupId
+        groupName:
+          type: string
+          description: GroupName
+        memberType:
+          type: string
+          description: MemberType
+          enum:
+            - REGULAR
+            - MANAGER
+    GroupSummary:
+      type: object
+      required:
+        - id
+        - data
+        - email
+        - name
+      properties:
+        id:
+          type: string
+          description: Id
+        data:
+          type: string
+          description: Data
+        email:
+          type: string
+          description: Email
+        name:
+          type: string
+          description: Name
+    HeaderOptions:
+      type: object
+      required:
+        - breadcrumbs
+        - feedback
+        - globalNavigation
+        - sessionBar
+      properties:
+        feedback:
+          type: boolean
+          description: Feedback
+        breadcrumbs:
+          type: boolean
+          description: Breadcrumbs
+        globalActions:
+          description: GlobalActions
+          $ref: "#/components/schemas/GlobalActionsOptions"
+        globalNavigation:
+          type: boolean
+          description: GlobalNavigation
+        sessionBar:
+          type: boolean
+          description: SessionBar
+        titleBar:
+          description: TitleBar
+          $ref: "#/components/schemas/TitleBarOptions"
+    Image:
+      type: object
+      required:
+        - src
+      properties:
+        link:
+          type: string
+          description: Link
+        src:
+          type: string
+          description: Src
+        logoAltTextKey:
+          type: string
+          description: LogoAltTextKey
+    KnowledgeBasedAuthentication:
+      type: object
+      properties:
+        knowledgeBasedAuthenticationStatus:
+          type: string
+          description: SignerInformationForEquifaxCanada
+          enum:
+            - NOT_YET_ATTEMPTED
+            - PASSED
+            - FAILED
+            - INVALID_SIGNER
+            - UPDATED
+        signerInformationForEquifaxCanada:
+          description: SignerInformationForEquifaxCanada
+          $ref: "#/components/schemas/SignerInformationForEquifaxCanada"
+        signerInformationForEquifaxUSA:
+          description: SignerInformationForEquifaxUSA
+          $ref: "#/components/schemas/SignerInformationForEquifaxUSA"
+        equifaxCanada:
+          type: boolean
+        equifaxUSA:
+          type: boolean
+    LayoutOptions:
+      type: object
+      required:
+        - iframe
+        - navigator
+      properties:
+        header:
+          description: Header
+          $ref: "#/components/schemas/HeaderOptions"
+        brandingBar:
+          description: BrandingBar
+          $ref: "#/components/schemas/BrandingBarOptions"
+        navigator:
+          type: boolean
+          description: Navigator
+        iframe:
+          type: boolean
+          description: Iframe
+        footer:
+          description: Footer
+          $ref: "#/components/schemas/FooterOptions"
+    LayoutStyle:
+      type: object
+      properties:
+        brandingBar:
+          description: BrandingBar
+          $ref: "#/components/schemas/Image"
+        dialog:
+          description: Dialog
+          $ref: "#/components/schemas/Style"
+        toolbar:
+          description: Toolbar
+          $ref: "#/components/schemas/Style"
+        titleBar:
+          description: TitleBar
+          $ref: "#/components/schemas/Style"
+    License:
+      type: object
+      required:
+        - created
+        - plan
+        - status
+        - transactions
+      properties:
+        status:
+          type: string
+          description: Status
+          enum:
+            - ACTIVE
+            - PENDING
+            - GRACE
+        created:
+          type: string
+          format: date-time
+          description: Created
+        transactions:
+          type: array
+          description: Transactions
+          items:
+            $ref: "#/components/schemas/Transaction"
+        paidUntil:
+          type: string
+          format: date-time
+          description: PaidUntil
+        plan:
+          description: Plan
+          $ref: "#/components/schemas/Plan"
+    Link:
+      type: object
+      required:
+        - href
+        - text
+      properties:
+        text:
+          type: string
+          description: Text
+        title:
+          type: string
+          description: Title
+        href:
+          type: string
+          description: Href
+    Message:
+      type: object
+      required:
+        - content
+        - created
+        - documents
+        - from
+        - status
+        - to
+      properties:
+        status:
+          type: string
+          description: Status
+          enum:
+            - NEW
+            - READ
+            - TRASHED
+        from:
+          description: From
+          $ref: "#/components/schemas/User"
+        created:
+          type: string
+          format: date-time
+          description: Created
+        content:
+          type: string
+          description: Content
+        to:
+          type: array
+          description: To
+          items:
+            $ref: "#/components/schemas/User"
+        documents:
+          type: array
+          description: Documents
+          items:
+            $ref: "#/components/schemas/Document"
+    Package:
+      type: object
+      required:
+        - autocomplete
+        - bulkSendable
+        - created
+        - description
+        - documents
+        - emailMessage
+        - id
+        - messages
+        - name
+        - notarized
+        - roles
+        - sender
+        - status
+        - trashed
+        - type
+        - updated
+        - visibility
+      properties:
+        name:
+          type: string
+          description: Name of Transaction
+          example: YourTransaction
+        roles:
+          type: array
+          description: Roles
+          items:
+            $ref: "#/components/schemas/Role"
+        status:
+          type: string
+          description: Status
+          enum:
+            - DRAFT
+            - SENT
+            - COMPLETED
+            - ARCHIVED
+            - DECLINED
+            - OPTED_OUT
+            - EXPIRED
+        created:
+          type: string
+          format: date-time
+          description: Created
+        messages:
+          type: array
+          description: Messages
+          items:
+            $ref: "#/components/schemas/Message"
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        description:
+          type: string
+          description: Description
+        language:
+          type: string
+          description: Language
+        autocomplete:
+          type: boolean
+          description: Autocomplete
+        type:
+          type: string
+          description: Type
+          enum:
+            - PACKAGE
+            - TEMPLATE
+            - LAYOUT
+        due:
+          type: string
+          format: date-time
+          description: Due
+        visibility:
+          type: string
+          description: Visibility
+          enum:
+            - ACCOUNT
+            - SENDER
+        settings:
+          description: Settings
+          $ref: "#/components/schemas/PackageSettings"
+        consent:
+          type: string
+          description: Consent
+        notaryRoleId:
+          type: string
+          description: Notary Role
+        trashed:
+          type: boolean
+          description: Trashed
+        notarized:
+          type: boolean
+          description: Notarized
+        timezoneId:
+          type: string
+          description: TimezoneId
+        documents:
+          type: array
+          description: Documents
+          items:
+            $ref: "#/components/schemas/Document"
+        emailMessage:
+          type: string
+          description: EmailMessage
+        updated:
+          type: string
+          format: date-time
+          description: Updated
+        completed:
+          type: string
+          format: date-time
+          description: Completed
+        sender:
+          description: Sender
+          $ref: "#/components/schemas/Sender"
+        limits:
+          description: Limits
+          $ref: "#/components/schemas/PackageArtifactsLimits"
+        signedDocumentDelivery:
+          description: SignedDocumentDelivery
+          $ref: "#/components/schemas/SignedDocumentDelivery"
+        bulkSendable:
+          type: boolean
+          description: BulkSendable
+    PackageArtifactsLimits:
+      type: object
+      properties:
+        roles:
+          type: integer
+          format: int32
+          description: Roles
+        documents:
+          type: integer
+          format: int32
+          description: Documents
+    PackageLayout:
+      type: object
+      required:
+        - documents
+        - id
+        - name
+        - type
+        - visibility
+      properties:
+        name:
+          type: string
+          description: Name of the layout
+          example: YourLayout
+        id:
+          type: string
+          description: Id
+          example: asd0sdf08gdfg3njkfg0345dg=
+        description:
+          type: string
+          description: Description
+        type:
+          type: string
+          description: Type
+          enum:
+            - LAYOUT
+        visibility:
+          type: string
+          description: Visibility
+          enum:
+            - ACCOUNT
+            - SENDER
+        documents:
+          type: array
+          description: Document id. It MUST contains only one document id.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The document id of the package
+                example: b5d4e318c6f728f3b9d7e13393bb0f9a368de55744010385
+    PackageReminder:
+      type: object
+      required:
+        - date
+      properties:
+        date:
+          type: string
+          format: date-time
+          description: Date and time of the reminder
+        sentDate:
+          type: string
+          format: date-time
+          description: Date and time when the reminder was sent
+    PackageReminderSchedule:
+      type: object
+      required:
+        - packageId
+      properties:
+        intervalInDays:
+          type: integer
+          description: Number of days between reminders
+        packageId:
+          type: string
+          description: Package Id
+        reminders:
+          type: array
+          description: Reminders
+          readOnly: true
+          items:
+            $ref: "#/components/schemas/PackageReminder"
+        repetitionsCount:
+          type: integer
+          description: Number of repetition for the reminders
+        startInDaysDelay:
+          type: integer
+          description: Delay in days to wait before starting reminders
+    PackageSettings:
+      type: object
+      required:
+        - ceremony
+      properties:
+        ceremony:
+          description: Ceremony
+          $ref: "#/components/schemas/CeremonySettings"
+    Page:
+      type: object
+      required:
+        - id
+        - index
+        - version
+      properties:
+        id:
+          type: string
+          description: Id
+        index:
+          type: integer
+          format: int32
+          description: Index
+        version:
+          type: integer
+          format: int32
+          description: Version
+        left:
+          type: number
+          format: double
+          description: Left
+        width:
+          type: number
+          format: double
+          description: Width
+        top:
+          type: number
+          format: double
+          description: Top
+        height:
+          type: number
+          format: double
+          description: Height
+    Plan:
+      type: object
+      required:
+        - cycle
+        - description
+        - group
+        - id
+        - name
+        - price
+        - quotas
+      properties:
+        name:
+          type: string
+          description: Name
+        cycle:
+          type: string
+          description: Cycle
+          enum:
+            - DAY
+            - MONTH
+            - YEAR
+        description:
+          type: string
+          description: Description
+        features:
+          type: object
+          description: Features
+          additionalProperties:
+            type: object
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        group:
+          type: string
+          description: Group
+        price:
+          description: Price
+          $ref: "#/components/schemas/Price"
+        contract:
+          type: string
+          description: Contract
+          enum:
+            - DAY
+            - MONTH
+            - YEAR
+        freeCycles:
+          description: FreeCycles
+          $ref: "#/components/schemas/CycleCount"
+        quotas:
+          type: array
+          description: Quotas
+          items:
+            $ref: "#/components/schemas/Quota"
+        original:
+          type: string
+          description: Original
+    Price:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        currency:
+          description: Currency
+          $ref: "#/components/schemas/Currency"
+        amount:
+          type: integer
+          format: int32
+          description: Amount
+    ProfessionalIdentityField:
+      type: object
+      required:
+        - category
+        - id
+        - name
+      properties:
+        value:
+          type: string
+          description: Value
+        name:
+          type: string
+          description: Name
+        type:
+          type: string
+          description: Type
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        category:
+          type: string
+          description: Category
+        translations:
+          type: array
+          description: Translations
+          items:
+            $ref: "#/components/schemas/Translation"
+    Provider:
+      type: object
+      required:
+        - id
+        - name
+        - provides
+      properties:
+        name:
+          type: string
+          description: Name
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        provides:
+          type: string
+          description: Provides
+    Role:
+      type: object
+      required:
+        - attachmentRequirements
+        - id
+        - index
+        - name
+        - signers
+        - type
+      properties:
+        signers:
+          type: array
+          description: Signers
+          items:
+            $ref: "#/components/schemas/Signer"
+        name:
+          type: string
+          description: Name
+        type:
+          type: string
+          description: Type
+          enum:
+            - SIGNER
+            - SENDER
+        index:
+          type: integer
+          format: int32
+          description: Index
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        emailMessage:
+          description: EmailMessage
+          $ref: "#/components/schemas/BaseMessage"
+        reassign:
+          type: boolean
+          description: Reassign
+        attachmentRequirements:
+          type: array
+          description: AttachmentRequirements
+          items:
+            $ref: "#/components/schemas/AttachmentRequirement"
+        specialTypes:
+          type: array
+          description: Special Signer Types
+          items:
+            type: string
+            enum:
+              - NOTARY
+        locked:
+          type: boolean
+          description: Locked
+    Quota:
+      type: object
+      required:
+        - limit
+        - target
+      properties:
+        target:
+          type: string
+          description: Target
+          enum:
+            - SIGNER
+            - SENDER
+            - DOCUMENT
+            - PACKAGE
+            - STORAGE
+        cycle:
+          type: string
+          description: Cycle
+          enum:
+            - DAY
+            - MONTH
+            - YEAR
+        scope:
+          type: string
+          description: Scope
+          enum:
+            - SENDER
+            - DOCUMENT
+            - PACKAGE
+            - ACCOUNT
+        limit:
+          type: integer
+          format: int32
+          description: Limit
+    Sender:
+      type: object
+      required:
+        - company
+        - created
+        - email
+        - firstName
+        - hasDelegates
+        - id
+        - lastName
+        - memberships
+        - name
+        - professionalIdentityFields
+        - status
+        - timezoneId
+        - type
+        - updated
+        - userCustomFields
+      properties:
+        name:
+          type: string
+          description: Name
+        type:
+          type: string
+          description: Type
+          enum:
+            - REGULAR
+            - MANAGER
+        signature:
+          description: Signature
+          $ref: "#/components/schemas/SignatureStyle"
+        status:
+          type: string
+          description: Status
+          enum:
+            - INVITED
+            - ACTIVE
+            - LOCKED
+        account:
+          description: Account
+          $ref: "#/components/schemas/Account"
+        address:
+          description: Address
+          $ref: "#/components/schemas/Address"
+        created:
+          type: string
+          format: date-time
+          description: Created
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        language:
+          type: string
+          description: Language
+        timezoneId:
+          type: string
+          description: TimezoneId
+        external:
+          description: External
+          $ref: "#/components/schemas/External"
+        company:
+          type: string
+          description: Company
+        updated:
+          type: string
+          format: date-time
+          description: Updated
+        phone:
+          type: string
+          description: Phone
+        userCustomFields:
+          type: array
+          description: UserCustomFields
+          items:
+            $ref: "#/components/schemas/UserCustomField"
+        professionalIdentityFields:
+          type: array
+          description: ProfessionalIdentityFields
+          items:
+            $ref: "#/components/schemas/ProfessionalIdentityField"
+        title:
+          type: string
+          description: Title
+        firstName:
+          type: string
+          description: FirstName
+        lastName:
+          type: string
+          description: LastName
+        email:
+          type: string
+          description: Email
+        locked:
+          type: string
+          format: date-time
+          description: Locked
+        activated:
+          type: string
+          format: date-time
+          description: Activated
+        memberships:
+          type: array
+          description: Memberships
+          items:
+            $ref: "#/components/schemas/GroupMembership"
+        specialTypes:
+          type: array
+          description: Special User Types
+          items:
+            type: string
+            enum:
+              - NOTARY
+        hasDelegates:
+          type: boolean
+          description: Has Delegates
+    SenderAuthenticationToken:
+      type: object
+      required:
+        - packageId
+      properties:
+        packageId:
+          type: string
+          description: Package Id
+        value:
+          type: string
+          description: Value
+    Session:
+      type: object
+      required:
+        - certificateSigning
+        - delegationUser
+        - inPerson
+        - packages
+        - user
+      properties:
+        restricted:
+          type: boolean
+        packages:
+          type: array
+          description: Packages
+          items:
+            type: string
+        features:
+          description: Features
+          $ref: "#/components/schemas/Features"
+        user:
+          description: User
+          $ref: "#/components/schemas/User"
+        support:
+          description: SupportConfiguration
+          $ref: "#/components/schemas/SupportConfiguration"
+        delegationUser:
+          description: DelegationUser
+          $ref: "#/components/schemas/DelegationUser"
+        account:
+          description: Account
+          $ref: "#/components/schemas/Account"
+        inPerson:
+          type: boolean
+          description: InPerson
+        loginSessionTimeout:
+          type: integer
+          format: int32
+          description: loginSessionTimeout
+        certificateSigning:
+          type: boolean
+          description: CertificateSigning
+    SessionFields:
+      type: object
+      properties:
+        fields:
+          description: Fields
+          additionalProperties:
+            type: object
+    SignatureStyle:
+      type: object
+      properties:
+        handdrawn:
+          type: string
+          description: Handdrawn
+        textual:
+          description: Textual
+          $ref: "#/components/schemas/TextualSignatureStyle"
+    SignedDocument:
+      allOf:
+        - $ref: "#/components/schemas/Document"
+        - type: object
+          properties:
+            handdrawn:
+              type: string
+              description: Handdrawn signature string.
+    SignedDocuments:
+      type: object
+      required:
+        - handdrawn
+        - documents
+      properties:
+        handdrawn:
+          type: string
+          description: Handdrawn signature string.
+        documents:
+          type: array
+          description: Documents list.
+          items:
+            $ref: "#/components/schemas/Document"
+    SignedDocumentDelivery:
+      type: object
+      required:
+        - destinations
+        - excludedDocuments
+      properties:
+        filePrefix:
+          type: string
+          description: FilePrefix
+        destinations:
+          type: array
+          description: Destinations
+          items:
+            $ref: "#/components/schemas/External"
+        excludedDocuments:
+          type: array
+          description: ExcludedDocuments
+          items:
+            $ref: "#/components/schemas/Document"
+        fileSuffix:
+          type: string
+          description: FileSuffix
+    Signer:
+      type: object
+      required:
+        - auth
+        - company
+        - created
+        - delivery
+        - email
+        - firstName
+        - id
+        - knowledgeBasedAuthentication
+        - lastName
+        - name
+        - professionalIdentityFields
+        - signerType
+        - timezoneId
+        - updated
+        - userCustomFields
+      properties:
+        name:
+          type: string
+          description: Name
+        signature:
+          description: Signature
+          $ref: "#/components/schemas/SignatureStyle"
+        address:
+          description: Address
+          $ref: "#/components/schemas/Address"
+        created:
+          type: string
+          format: date-time
+          description: Created
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        group:
+          description: Group
+          $ref: "#/components/schemas/Group"
+        language:
+          type: string
+          description: Language
+        auth:
+          description: Auth
+          $ref: "#/components/schemas/Auth"
+        external:
+          description: External
+          $ref: "#/components/schemas/External"
+        company:
+          type: string
+          description: Company
+        delivery:
+          description: Delivery
+          $ref: "#/components/schemas/Delivery"
+        updated:
+          type: string
+          format: date-time
+          description: Updated
+        phone:
+          type: string
+          description: Phone
+        userCustomFields:
+          type: array
+          description: UserCustomFields
+          items:
+            $ref: "#/components/schemas/UserCustomField"
+        professionalIdentityFields:
+          type: array
+          description: ProfessionalIdentityFields
+          items:
+            $ref: "#/components/schemas/ProfessionalIdentityField"
+        title:
+          type: string
+          description: Title
+        firstName:
+          type: string
+          description: FirstName
+        lastName:
+          type: string
+          description: LastName
+        email:
+          type: string
+          description: Email
+        knowledgeBasedAuthentication:
+          description: KnowledgeBasedAuthentication
+          $ref: "#/components/schemas/KnowledgeBasedAuthentication"
+        signerType:
+          type: string
+          description: SignerType
+          enum:
+            - ACCOUNT_SENDER
+            - EXTERNAL_SENDER
+            - EXTERNAL_SIGNER
+            - GROUP_SIGNER
+        timezoneId:
+          type: string
+          description: TimezoneId
+        specialTypes:
+          type: array
+          description: Special User Types
+          items:
+            type: string
+            enum:
+              - NOTARY
+    SignerAuthenticationToken:
+      type: object
+      required:
+        - packageId
+        - signerId
+        - value
+      properties:
+        packageId:
+          type: string
+          description: Package Id
+        signerId:
+          type: string
+          description: Signer Id
+        sessionFields:
+          description: Session Fields
+          $ref: "#/components/schemas/SessionFields"
+        value:
+          type: string
+          description: Value
+    SignerInformationForEquifaxCanada:
+      type: object
+      required:
+        - city
+        - firstName
+        - lastName
+        - postalCode
+        - province
+        - streetAddress
+      properties:
+        streetAddress:
+          type: string
+          description: StreetAddress
+        city:
+          type: string
+          description: City
+        timeAtAddress:
+          type: integer
+          format: int32
+          description: TimeAtAddress
+        homePhoneNumber:
+          type: string
+          description: HomePhoneNumber
+        driversLicenseNumber:
+          type: string
+          description: DriversLicenseNumber
+        dateOfBirth:
+          type: string
+          format: date-time
+          description: DateOfBirth
+        province:
+          type: string
+          description: Province
+        postalCode:
+          type: string
+          description: PostalCode
+        socialInsuranceNumber:
+          type: string
+          description: SocialInsuranceNumber
+        firstName:
+          type: string
+          description: FirstName
+        lastName:
+          type: string
+          description: LastName
+    SignerInformationForEquifaxUSA:
+      type: object
+      required:
+        - city
+        - firstName
+        - lastName
+        - state
+        - streetAddress
+        - zip
+      properties:
+        state:
+          type: string
+          description: State
+        valid:
+          type: boolean
+        streetAddress:
+          type: string
+          description: StreetAddress
+        city:
+          type: string
+          description: City
+        zip:
+          type: string
+          description: Zip
+        timeAtAddress:
+          type: integer
+          format: int32
+          description: TimeAtAddress
+        socialSecurityNumber:
+          type: string
+          description: SocialSecurityNumber
+        homePhoneNumber:
+          type: string
+          description: HomePhoneNumber
+        driversLicenseNumber:
+          type: string
+          description: DriversLicenseNumber
+        dateOfBirth:
+          type: string
+          format: date-time
+          description: DateOfBirth
+        firstName:
+          type: string
+          description: FirstName
+        lastName:
+          type: string
+          description: LastName
+    SigningUrl:
+      type: object
+      properties:
+        packageId:
+          type: string
+          description: Package Id
+        roleId:
+          type: string
+          description: Role Id
+        url:
+          type: string
+          description: URL
+    Style:
+      type: object
+      properties:
+        color:
+          type: string
+          description: Color
+        backgroundColor:
+          type: string
+          description: BackgroundColor
+    SupportConfiguration:
+      type: object
+      properties:
+        phone:
+          type: string
+          description: Phone
+        email:
+          type: string
+          description: Email
+    TextualSignatureStyle:
+      type: object
+      properties:
+        color:
+          type: string
+          description: Color
+        font:
+          type: string
+          description: Font
+    TitleBarOptions:
+      type: object
+      required:
+        - progressBar
+        - title
+      properties:
+        title:
+          type: boolean
+          description: Title
+        progressBar:
+          type: boolean
+          description: ProgressBar
+    Transaction:
+      type: object
+      required:
+        - created
+        - creditCard
+        - price
+      properties:
+        created:
+          type: string
+          format: date-time
+          description: Created
+        price:
+          description: Price
+          $ref: "#/components/schemas/Price"
+        creditCard:
+          description: CreditCard
+          $ref: "#/components/schemas/CreditCard"
+    Translation:
+      type: object
+      required:
+        - language
+      properties:
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        description:
+          type: string
+          description: Description
+        id:
+          type: string
+          description: Id
+        language:
+          type: string
+          description: Language
+        name:
+          type: string
+          description: Name
+    UsageReport:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        senders:
+          description: The usage list
+          type: array
+          items:
+            $ref: "#/components/schemas/Sender"
+    User:
+      type: object
+      required:
+        - company
+        - created
+        - email
+        - firstName
+        - id
+        - lastName
+        - name
+        - professionalIdentityFields
+        - timezoneId
+        - updated
+        - userCustomFields
+      properties:
+        address:
+          description: Address
+          $ref: "#/components/schemas/Address"
+        language:
+          type: string
+          description: Language
+        name:
+          type: string
+          description: Name
+        signature:
+          description: Signature
+          $ref: "#/components/schemas/SignatureStyle"
+        created:
+          type: string
+          format: date-time
+          description: Created
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        title:
+          type: string
+          description: Title
+        userCustomFields:
+          type: array
+          description: UserCustomFields
+          items:
+            $ref: "#/components/schemas/UserCustomField"
+        timezoneId:
+          type: string
+          description: TimezoneId
+        external:
+          description: External
+          $ref: "#/components/schemas/External"
+        professionalIdentityFields:
+          type: array
+          description: ProfessionalIdentityFields
+          items:
+            $ref: "#/components/schemas/ProfessionalIdentityField"
+        company:
+          type: string
+          description: Company
+        updated:
+          type: string
+          format: date-time
+          description: Updated
+        phone:
+          type: string
+          description: Phone
+        specialTypes:
+          type: array
+          description: Special User Types
+          items:
+            type: string
+            enum:
+              - NOTARY
+        firstName:
+          type: string
+          description: FirstName
+        lastName:
+          type: string
+          description: LastName
+        email:
+          type: string
+          description: Email
+    UserCustomField:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        value:
+          type: string
+          description: Value
+        name:
+          type: string
+          description: Name
+        id:
+          type: string
+          description: Id
+        data:
+          type: object
+          description: Data
+          additionalProperties:
+            type: object
+        translations:
+          type: array
+          description: Translations
+          items:
+            $ref: "#/components/schemas/Translation"
+    Verification:
+      type: object
+      required:
+        - typeId
+        - payload
+      properties:
+        typeId:
+          type: string
+          description: Type id
+        payload:
+          type: string
+          description: Payload
+    SigningThemesConfig:
+      type: object
+      additionalProperties:
+        type: object
+        description: Signing Theme
+        $ref: "#/components/schemas/SigningTheme"
+    SigningTheme:
+      type: object
+      required:
+        - color
+      properties:
+        color:
+          type: object
+          description: Signing colors
+          $ref: "#/components/schemas/SigningColor"
+    SigningColor:
+      type: object
+      additionalProperties:
+        type: string
+    DefaultError:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        messageKey:
+          type: string
+        message:
+          type: string
+    GroupNotFound:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        messageKey:
+          type: string
+          enum:
+            - error.notFound.groupNotFound
+    MemberMustHaveIdOrEmail:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        messageKey:
+          type: string
+          enum:
+            - error.validation.group.groupMemberMustHaveIdOrEmail
+    MemberNotFound:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        messageKey:
+          type: string
+          enum:
+            - error.notFound.userNotFound
+  links:
+    getPackageId:
+      description: The id value retured in the response, can be used in get
+        /api/packages/{packageId} api call.
+      operationId: api.packages._packageId.get
+      parameters:
+        packageId: $response.body#/id
+  responses:
+    ResourceNotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DefaultError"
+    NotAuthorized:
+      description: Not Authorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DefaultError"
+    UnexpectedError:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DefaultError"
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DefaultError"
+    NotAcceptable:
+      description: Not acceptable error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DefaultError"
+    AccessDenied:
+      description: Access Denied error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DefaultError"
+    PackageId:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The new transaction id.
+                example: Esdfasd0sdf08gdfg3njkfg0345dg=
+    ResultDocumentVisibility:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              configurations:
+                description: The list of document visibility configurations
+                type: array
+                items:
+                  $ref: "#/components/schemas/DocumentVisibilityConfiguration"
+              id:
+                type: string
+              data:
+                type: object
+                description: Data
+                additionalProperties:
+                  type: object
+              name:
+                type: string
+    ResultGroups:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                minimum: 0
+              results:
+                description: The groups list
+                type: array
+                items:
+                  $ref: "#/components/schemas/Group"
+    ResultGroupSummary:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                minimum: 0
+              results:
+                description: The Group Summary list
+                type: array
+                items:
+                  $ref: "#/components/schemas/GroupSummary"
+    ResultPackages:
+      description: OK
+      content:
+        application/json; esl-api-version=11:
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                minimum: 0
+              results:
+                description: The transactions list
+                type: array
+                items:
+                  $ref: "#/components/schemas/Package"
+    ResultRoles:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                minimum: 0
+              results:
+                description: The roles list
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+    ResultLayouts:
+      description: OK
+      content:
+        application/json; esl-api-version=11:
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                minimum: 0
+              results:
+                description: The layouts list
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+    ResultSenders:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                minimum: 0
+              results:
+                description: The senders list
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sender"
+  parameters:
+    packageId:
+      name: packageId
+      description: The unique package id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: asd0sdf08gdfg3njkfg0345dg=
+    templateId:
+      name: templateId
+      description: The unique template id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: asd0sdf08gdfg3njkfg0345dg=
+    roleId:
+      name: roleId
+      description: The unique role id within the package.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: 97937dbd-2f19-4762-b91c-5d5572dff48e
+    documentId:
+      name: documentId
+      description: The unique document id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: 7fe707da80ed6347919b162eb05a63916028376dc991031f
+    approvalId:
+      name: approvalId
+      description: The unique approval id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: ibwzXn69GF0J
+    flatten:
+      name: flatten
+      description: Flatten the pdf.
+      in: query
+      schema:
+        type: boolean
+        default: false
+    utf8:
+      name: utf8
+      in: query
+      schema:
+        type: string
+      description: utf8
+    layoutId:
+      name: layoutId
+      description: The unique layout id.
+      in: query
+      schema:
+        type: string
+    layoutName:
+      name: layoutName
+      description: The unique layout name.
+      in: query
+      schema:
+        type: string
+    attachmentId:
+      name: attachmentId
+      description: The unique attachment id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: U4qeLnLhKgYM
+    groupId:
+      name: groupId
+      description: The unique group id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: dc7eac8b-3425-4716-a5a4-df74810d928b
+    fieldId:
+      name: fieldId
+      description: The unique field id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: zZCmIzF1U4U5
+    customFieldId:
+      name: customFieldId
+      description: ID of the Custom Field.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: DOB
+    from:
+      name: from
+      in: query
+      description: The first record that will be returned. Useful for pagination.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+    to:
+      name: to
+      in: query
+      description: The last record that will be returned. Useful for pagination.
+      required: false
+      schema:
+        type: integer
+        format: int32
+    dir:
+      name: dir
+      in: query
+      description: The direction according to which the data will be sorted. 'asc' for
+        ascending and 'desc' for descending.
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+    search:
+      name: search
+      in: query
+      description: Any text which is going to be used in conjunction with the searchtype if
+        provided
+      required: false
+      schema:
+        type: string
+    senderId:
+      name: senderId
+      description: The unique sender id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: lEuqLqc6ZzA6
+    rawSignatureCapture:
+      name: rawSignatureCapture
+      description: If set to true, the authograph signatures will be provided as a vector.
+      in: query
+      required: false
+      schema:
+        type: boolean
+        default: false
+    delegateId:
+      name: delegateId
+      description: The unique delegateId id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: ibwzXn69GF0J
+    signerId:
+      name: signerId
+      description: The unique signer id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: lEuqLqc6ZzA6
+    accountId:
+      name: accountId
+      description: The unique account id.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: ibwzXn69GF0J
+  examples:
+    packageIdExample:
+      value: asd0sdf08gdfg3njkfg0345dg=
+    packageNameExample:
+      value: YourTransaction
+    documentIdExample:
+      value: b5d4e318c6f728f3b9d7e13393bb0f9a368de55744010385
+  securitySchemes:
+    basicAuth:
+      description: Add the 'Authorization' key to the header, and add the 'Basic {API-KEY}' as Value.
+      type: http
+      scheme: Basic {API-KEY}

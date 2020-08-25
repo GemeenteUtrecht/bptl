@@ -48,6 +48,11 @@ Camunda
 .. automodule:: bptl.work_units.camunda_api.tasks
     :members:
 
+ValidSign
+---------
+
+.. automodule:: bptl.work_units.valid_sign.tasks
+    :members:
 
 Camunda tasks
 ==============

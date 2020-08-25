@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "bptl.work_units.kadaster",
     "bptl.work_units.kownsl",
     "bptl.work_units.zgw",
+    "bptl.work_units.valid_sign",
 ]
 
 MIDDLEWARE = [
@@ -431,3 +432,11 @@ SWAGGER_SETTINGS = {
         "Token": {"type": "apiKey", "name": "Authorization", "in": "header"}
     },
 }
+
+# ValidSign Documents settings
+# The maximum size (in bytes) that all the documents combined can have
+MAX_TOTAL_DOCUMENT_SIZE = os.getenv("MAX_TOTAL_DOCUMENT_SIZE", 250000000)
+# The maximum size (in bytes) that each document can have
+MAX_DOCUMENT_SIZE = os.getenv("MAX_DOCUMENT_SIZE", 2621440)
+# The size of the document chunks to load in memory
+CHUNK_SIZE = os.getenv("CHUNK_SIZE", 4096)
