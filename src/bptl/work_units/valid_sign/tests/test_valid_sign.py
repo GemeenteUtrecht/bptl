@@ -1,5 +1,4 @@
 import json
-import os
 import re
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
@@ -457,6 +456,63 @@ class ValidSignMultipleDocsAPITests(TestCase):
             self.assertIn(
                 'Content-Disposition: form-data; name="file"; filename="file"', body
             )
+
+    @override_settings(MAX_DOCUMENT_SIZE=10)
+    def test_add_large_documents_and_signers_to_package(self, m):
+        mock_service_oas_get(
+            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
+        )
+        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(
+            m=m, url=OTHER_DRC_URL, service="documenten", extension="json"
+        )
+
+        test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
+
+        # Two test documents are added to the package
+        m.get(DOCUMENT_1, json=RESPONSE_1)
+        m.get(
+            CONTENT_URL_1, content=CONTENT_1,
+        )
+        m.get(DOCUMENT_3, json=RESPONSE_3)
+        m.get(
+            CONTENT_URL_3, content=CONTENT_3,
+        )
+
+        # The task will retrieve the roles from ValidSign, so mock the call
+        mock_roles_get(m, test_package)
+
+        test_document_response = {
+            "id": "75204439c02fffeddaeb224a1ded0ea07016456c9069eadd",
+            "name": "Test Document",
+        }
+
+        m.post(
+            f"{VALIDSIGN_URL}api/packages/{test_package['id']}/documents",
+            json=test_document_response,
+        )
+
+        task = CreateValidSignPackageTask(self.fetched_task)
+        document_list = task.add_documents_and_approvals_to_package(test_package)
+
+        # Since there are two documents in the package, the document list should contain 2 docs
+        self.assertEqual(
+            document_list, [test_document_response, test_document_response]
+        )
+
+        # Check that the request headers and body for POSTing the documents were formatted correctly
+        for mocked_request in m.request_history[-2:]:
+            self.assertEqual(mocked_request._request.headers["Accept"], "*/*")
+            self.assertIn(
+                "multipart/form-data; boundary=",
+                mocked_request._request.headers["Content-Type"],
+            )
+            body = mocked_request._request.body.decode()
+            self.assertIn('Content-Disposition: form-data; name="payload"', body)
+            self.assertIn(
+                'Content-Disposition: form-data; name="file"; filename=', body
+            )
+            self.assertTrue("Test content ", body)
 
 
 @requests_mock.Mocker()
