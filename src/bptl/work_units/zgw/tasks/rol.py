@@ -64,7 +64,6 @@ class CreateRolTask(ZGWWorkUnit):
                 f"No matching roltype with zaaktype = {zaak['zaaktype']} and omschrijving = {omschrijving} is found"
             )
 
-        zrc_client = self.get_client(APITypes.zrc)
         data = {
             "zaak": zaak["url"],
             "betrokkene": betrokkene.get("betrokkene", ""),
