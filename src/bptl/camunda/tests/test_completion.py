@@ -27,7 +27,8 @@ class CompleteTests(TestCase):
         config.save()
 
         cls.task = ExternalTask.objects.create(
-            worker_id="test-worker-id", task_id="test-task-id",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
         )
 
     def test_complete_task_without_variables(self, m):
@@ -39,7 +40,11 @@ class CompleteTests(TestCase):
         complete_task(self.task)
 
         self.assertEqual(
-            m.last_request.json(), {"workerId": "test-worker-id", "variables": {},}
+            m.last_request.json(),
+            {
+                "workerId": "test-worker-id",
+                "variables": {},
+            },
         )
 
     def test_complete_task_with_variables(self, m):
@@ -101,7 +106,9 @@ class CompleteTests(TestCase):
 
     def test_retry_behaviour(self, m):
         task = ExternalTask.objects.create(
-            worker_id="test-worker-id", task_id="test-task-id", variables={},
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={},
         )
         m.post(
             "https://some.camunda.com/engine-rest/external-task/test-task-id/complete",
@@ -118,7 +125,9 @@ class CompleteTests(TestCase):
 
     def test_retries_failed_task_failed(self, m):
         task = ExternalTask.objects.create(
-            worker_id="test-worker-id", task_id="test-task-id", variables={},
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={},
         )
         m.post(
             "https://some.camunda.com/engine-rest/external-task/test-task-id/complete",

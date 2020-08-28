@@ -10,10 +10,28 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="servicetask", name="execution_error",),
-        migrations.RemoveField(model_name="servicetask", name="id",),
-        migrations.RemoveField(model_name="servicetask", name="result_variables",),
-        migrations.RemoveField(model_name="servicetask", name="status",),
-        migrations.RemoveField(model_name="servicetask", name="topic_name",),
-        migrations.RemoveField(model_name="servicetask", name="variables",),
+        migrations.RemoveField(
+            model_name="servicetask",
+            name="execution_error",
+        ),
+        migrations.RemoveField(
+            model_name="servicetask",
+            name="id",
+        ),
+        migrations.RemoveField(
+            model_name="servicetask",
+            name="result_variables",
+        ),
+        migrations.RemoveField(
+            model_name="servicetask",
+            name="status",
+        ),
+        migrations.RemoveField(
+            model_name="servicetask",
+            name="topic_name",
+        ),
+        migrations.RemoveField(
+            model_name="servicetask",
+            name="variables",
+        ),
     ]

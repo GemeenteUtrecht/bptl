@@ -52,7 +52,11 @@ class ZGWClientLogTests(TestCase):
                         "Accept-Encoding": "gzip, deflate",
                     },
                 },
-                "response": {"data": brp_mock_data, "status": 200, "headers": {},},
+                "response": {
+                    "data": brp_mock_data,
+                    "status": 200,
+                    "headers": {},
+                },
                 "service_base_url": BRP_API_ROOT,
             },
         )

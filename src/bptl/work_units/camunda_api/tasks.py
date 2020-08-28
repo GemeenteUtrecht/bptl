@@ -83,7 +83,10 @@ class CallActivity(WorkUnit):
             client = get_client()
             definitions = client.get(
                 "process-definition",
-                params={"key": subprocess_key, "version": subprocess_version,},
+                params={
+                    "key": subprocess_key,
+                    "version": subprocess_version,
+                },
             )
             if len(definitions) != 1:
                 raise ValueError(

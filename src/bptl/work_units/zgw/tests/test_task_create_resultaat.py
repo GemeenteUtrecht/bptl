@@ -44,7 +44,11 @@ class CreateResultaatTaskTests(TestCase):
                 },
                 "services": {
                     "type": "json",
-                    "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"},}),
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                        }
+                    ),
                 },
             },
         )

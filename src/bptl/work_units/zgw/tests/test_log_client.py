@@ -69,7 +69,11 @@ class ZGWClientLogTests(TestCase):
                         "Authorization": "Bearer 12345",
                     },
                 },
-                "response": {"data": mock_zaak_data, "status": 200, "headers": {},},
+                "response": {
+                    "data": mock_zaak_data,
+                    "status": 200,
+                    "headers": {},
+                },
             },
         )
 
@@ -103,6 +107,10 @@ class ZGWClientLogTests(TestCase):
                         "Authorization": "Bearer 12345",
                     },
                 },
-                "response": {"data": mock_zaak_data, "status": 201, "headers": {},},
+                "response": {
+                    "data": mock_zaak_data,
+                    "status": 201,
+                    "headers": {},
+                },
             },
         )

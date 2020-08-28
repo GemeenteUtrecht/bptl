@@ -183,7 +183,8 @@ class CreateValidSignPackageTask(ValidSignTask):
             document_client = self.get_document_client(document_url, document_clients)
             # Retrieving the document
             document_data = document_client.retrieve(
-                resource="enkelvoudiginformatieobject", url=document_url,
+                resource="enkelvoudiginformatieobject",
+                url=document_url,
             )
 
             # Retrieving the content of the document

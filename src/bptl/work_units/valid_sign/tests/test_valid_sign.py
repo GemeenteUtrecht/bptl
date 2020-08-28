@@ -105,7 +105,9 @@ def mock_roles_get(m, package):
 def mock_create_approval_post(m, package):
     url = f"{VALIDSIGN_URL}api/packages/{package['id']}/documents/(?:.*)/approvals"
     matcher = re.compile(url)
-    m.post(matcher,)
+    m.post(
+        matcher,
+    )
 
 
 @requests_mock.Mocker()
@@ -170,10 +172,12 @@ class ValidSignTests(TestCase):
         m.get(DOCUMENT_2, json=RESPONSE_2)
         # Mock calls to retrieve the content of the documents
         m.get(
-            CONTENT_URL_1, content=CONTENT_1,
+            CONTENT_URL_1,
+            content=CONTENT_1,
         )
         m.get(
-            CONTENT_URL_2, content=CONTENT_2,
+            CONTENT_URL_2,
+            content=CONTENT_2,
         )
 
         task = CreateValidSignPackageTask(self.fetched_task)
@@ -195,10 +199,12 @@ class ValidSignTests(TestCase):
 
         # Mock calls to retrieve the content of the documents
         m.get(
-            CONTENT_URL_1, content=CONTENT_1,
+            CONTENT_URL_1,
+            content=CONTENT_1,
         )
         m.get(
-            CONTENT_URL_2, content=CONTENT_2,
+            CONTENT_URL_2,
+            content=CONTENT_2,
         )
 
         task = CreateValidSignPackageTask(self.fetched_task)
@@ -223,10 +229,12 @@ class ValidSignTests(TestCase):
 
         # Mock calls to retrieve the content of the documents
         m.get(
-            CONTENT_URL_1, content=CONTENT_1,
+            CONTENT_URL_1,
+            content=CONTENT_1,
         )
         m.get(
-            CONTENT_URL_2, content=CONTENT_2,
+            CONTENT_URL_2,
+            content=CONTENT_2,
         )
 
         task = CreateValidSignPackageTask(self.fetched_task)
@@ -243,7 +251,8 @@ class ValidSignTests(TestCase):
         test_package_id = "BW5fsOKyhj48A-fRwjPyYmZ8Mno="
         path = "api/packages"
         m.post(
-            f"{VALIDSIGN_URL}{path}", json={"id": test_package_id},
+            f"{VALIDSIGN_URL}{path}",
+            json={"id": test_package_id},
         )
 
         task = CreateValidSignPackageTask(self.fetched_task)
@@ -274,11 +283,13 @@ class ValidSignTests(TestCase):
         # Two test documents are added to the package
         m.get(DOCUMENT_1, json=RESPONSE_1)
         m.get(
-            CONTENT_URL_1, content=CONTENT_1,
+            CONTENT_URL_1,
+            content=CONTENT_1,
         )
         m.get(DOCUMENT_2, json=RESPONSE_2)
         m.get(
-            CONTENT_URL_2, content=CONTENT_2,
+            CONTENT_URL_2,
+            content=CONTENT_2,
         )
 
         # The task will retrieve the roles from ValidSign, so mock the call
@@ -371,7 +382,10 @@ class ValidSignMultipleDocsAPITests(TestCase):
                 "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
                 "packageName": {"type": "String", "value": "Test package name"},
                 "services": json_variable(
-                    {"drc1": {"jwt": "Bearer 12345"}, "drc2": {"jwt": "Bearer 789"},}
+                    {
+                        "drc1": {"jwt": "Bearer 12345"},
+                        "drc2": {"jwt": "Bearer 789"},
+                    }
                 ),
             },
         )
@@ -387,10 +401,12 @@ class ValidSignMultipleDocsAPITests(TestCase):
         m.get(DOCUMENT_3, json=RESPONSE_3)
         # Mock calls to retrieve the content of the documents
         m.get(
-            CONTENT_URL_1, content=CONTENT_1,
+            CONTENT_URL_1,
+            content=CONTENT_1,
         )
         m.get(
-            CONTENT_URL_3, content=CONTENT_3,
+            CONTENT_URL_3,
+            content=CONTENT_3,
         )
 
         task = CreateValidSignPackageTask(self.fetched_task)
@@ -416,11 +432,13 @@ class ValidSignMultipleDocsAPITests(TestCase):
         # Two test documents are added to the package
         m.get(DOCUMENT_1, json=RESPONSE_1)
         m.get(
-            CONTENT_URL_1, content=CONTENT_1,
+            CONTENT_URL_1,
+            content=CONTENT_1,
         )
         m.get(DOCUMENT_3, json=RESPONSE_3)
         m.get(
-            CONTENT_URL_3, content=CONTENT_3,
+            CONTENT_URL_3,
+            content=CONTENT_3,
         )
 
         # The task will retrieve the roles from ValidSign, so mock the call
@@ -472,11 +490,13 @@ class ValidSignMultipleDocsAPITests(TestCase):
         # Two test documents are added to the package
         m.get(DOCUMENT_1, json=RESPONSE_1)
         m.get(
-            CONTENT_URL_1, content=CONTENT_1,
+            CONTENT_URL_1,
+            content=CONTENT_1,
         )
         m.get(DOCUMENT_3, json=RESPONSE_3)
         m.get(
-            CONTENT_URL_3, content=CONTENT_3,
+            CONTENT_URL_3,
+            content=CONTENT_3,
         )
 
         # The task will retrieve the roles from ValidSign, so mock the call

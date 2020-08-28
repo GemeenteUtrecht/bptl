@@ -91,7 +91,9 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
             },
         )
         m.post(
-            f"{ZRC_URL}zaken", status_code=201, json=RESPONSES[ZAAK],
+            f"{ZRC_URL}zaken",
+            status_code=201,
+            json=RESPONSES[ZAAK],
         )
         m.post(
             f"{ZRC_URL}statussen",
