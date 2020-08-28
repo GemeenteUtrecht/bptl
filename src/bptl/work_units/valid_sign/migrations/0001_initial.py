@@ -34,6 +34,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name": "ValidSign Configuration",},
+            options={
+                "verbose_name": "ValidSign Configuration",
+            },
         ),
     ]

@@ -79,6 +79,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False, "base_manager_name": "objects",},
+            options={
+                "abstract": False,
+                "base_manager_name": "objects",
+            },
         ),
     ]

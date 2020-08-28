@@ -59,10 +59,18 @@ class CreateDocumentRelationTaskTests(TestCase):
             task_id="test-task-id",
             variables={
                 "services": json_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 12345"},}
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 12345"},
+                    }
                 ),
                 "zaakUrl": {"type": "String", "value": ZAAK},
-                "eigenschap": json_variable({"naam": "start", "waarde": "2020-05-01",}),
+                "eigenschap": json_variable(
+                    {
+                        "naam": "start",
+                        "waarde": "2020-05-01",
+                    }
+                ),
             },
         )
 
@@ -123,7 +131,12 @@ class CreateDocumentRelationTaskTests(TestCase):
         # https://catalogi-api.vng.cloud/api/v1/schema/#operation/eigenschap_list
         m.get(
             f"{ZTC_URL}eigenschappen?zaaktype={ZAAKTYPE}",
-            json={"count": 0, "next": None, "previous": None, "results": [],},
+            json={
+                "count": 0,
+                "next": None,
+                "previous": None,
+                "results": [],
+            },
         )
 
         task = CreateEigenschap(self.fetched_task)

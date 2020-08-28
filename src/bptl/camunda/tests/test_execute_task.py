@@ -105,7 +105,9 @@ class ExecuteCommandTests(TestCase):
             },
         )
         m.post(
-            f"{ZRC_URL}zaken", status_code=201, json=RESPONSES[ZAAK],
+            f"{ZRC_URL}zaken",
+            status_code=201,
+            json=RESPONSES[ZAAK],
         )
         m.post(
             f"{ZRC_URL}statussen",
@@ -149,7 +151,10 @@ class ExecuteCommandTests(TestCase):
                 "zaaktype": {"value": ZAAKTYPE},
                 "organisatieRSIN": {"value": "123456788"},
                 "services": json_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    }
                 ),
             },
         )

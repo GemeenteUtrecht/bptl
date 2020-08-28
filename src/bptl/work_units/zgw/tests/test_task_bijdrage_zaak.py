@@ -43,14 +43,23 @@ class RelateerZaakTests(TestCase):
 
     def test_relate_zaken(self, m):
         mock_service_oas_get(m, ZRC_URL, "zrc")
-        m.get(ZAAK, json={"url": ZAAK, "relevanteAndereZaken": [],})
+        m.get(
+            ZAAK,
+            json={
+                "url": ZAAK,
+                "relevanteAndereZaken": [],
+            },
+        )
         m.patch(
             ZAAK,
             status_code=200,
             json={
                 "url": ZAAK,
                 "relevanteAndereZaken": [
-                    {"url": BIJDRAGE_ZAAK, "aardRelatie": "bijdrage",},
+                    {
+                        "url": BIJDRAGE_ZAAK,
+                        "aardRelatie": "bijdrage",
+                    },
                 ],
             },
         )
@@ -64,7 +73,10 @@ class RelateerZaakTests(TestCase):
             m.last_request.json(),
             {
                 "relevanteAndereZaken": [
-                    {"url": BIJDRAGE_ZAAK, "aardRelatie": "bijdrage",},
+                    {
+                        "url": BIJDRAGE_ZAAK,
+                        "aardRelatie": "bijdrage",
+                    },
                 ],
             },
         )

@@ -10,10 +10,28 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="externaltask", name="execution_error",),
-        migrations.RemoveField(model_name="externaltask", name="id",),
-        migrations.RemoveField(model_name="externaltask", name="result_variables",),
-        migrations.RemoveField(model_name="externaltask", name="status",),
-        migrations.RemoveField(model_name="externaltask", name="topic_name",),
-        migrations.RemoveField(model_name="externaltask", name="variables",),
+        migrations.RemoveField(
+            model_name="externaltask",
+            name="execution_error",
+        ),
+        migrations.RemoveField(
+            model_name="externaltask",
+            name="id",
+        ),
+        migrations.RemoveField(
+            model_name="externaltask",
+            name="result_variables",
+        ),
+        migrations.RemoveField(
+            model_name="externaltask",
+            name="status",
+        ),
+        migrations.RemoveField(
+            model_name="externaltask",
+            name="topic_name",
+        ),
+        migrations.RemoveField(
+            model_name="externaltask",
+            name="variables",
+        ),
     ]

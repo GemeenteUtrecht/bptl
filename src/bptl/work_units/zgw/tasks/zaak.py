@@ -113,7 +113,10 @@ class CreateZaakTask(ZGWWorkUnit):
             "indicatieMachtiging": initiator.get("indicatieMachtiging", ""),
             "betrokkeneIdentificatie": initiator.get("betrokkeneIdentificatie", {}),
         }
-        rol = zrc_client.create("rol", request_body,)
+        rol = zrc_client.create(
+            "rol",
+            request_body,
+        )
         return rol
 
     def create_status(self, zaak: dict) -> dict:

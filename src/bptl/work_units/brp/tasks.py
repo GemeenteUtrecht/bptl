@@ -52,7 +52,7 @@ class DegreeOfKinship(WorkUnit):
 
     **Sets the process variables**
 
-    * ``kinship``: integer, which represents the degree of kinship (blood relations). Values can be in 
+    * ``kinship``: integer, which represents the degree of kinship (blood relations). Values can be in
        range [1..4] or ``Null`` if the BSNs are identical.
     """
 

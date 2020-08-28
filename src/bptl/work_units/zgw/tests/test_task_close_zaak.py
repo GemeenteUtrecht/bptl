@@ -115,7 +115,10 @@ class CloseZaakTaskTests(TestCase):
                 "services": {
                     "type": "json",
                     "value": json.dumps(
-                        {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
                     ),
                 },
             },
@@ -158,7 +161,10 @@ class CloseZaakTaskTests(TestCase):
                 "services": {
                     "type": "json",
                     "value": json.dumps(
-                        {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
                     ),
                 },
             },

@@ -4,7 +4,10 @@ from typing import Optional
 
 from requests_mock import Mocker
 
-MOCK_FILES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "schemas",)
+MOCK_FILES_DIR = os.path.join(
+    os.path.abspath(os.path.dirname(__file__)),
+    "schemas",
+)
 
 
 def mock_service_oas_get(

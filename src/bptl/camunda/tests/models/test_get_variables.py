@@ -19,7 +19,11 @@ class FlatVariablesTests(TestCase):
                     "value": "002220647",
                     "valueInfo": {},
                 },
-                "foo": {"type": "Json", "value": '{"bar":"baz"}', "valueInfo": {},},
+                "foo": {
+                    "type": "Json",
+                    "value": '{"bar":"baz"}',
+                    "valueInfo": {},
+                },
             },
         )
 
@@ -28,13 +32,17 @@ class FlatVariablesTests(TestCase):
             {
                 "zaaktype": "http://ztc.com/api/v1/zaaktypen/b38fbc9f-1273-4a0e-8189-cbec1b1f408f",
                 "organisatieRSIN": "002220647",
-                "foo": {"bar": "baz",},
+                "foo": {
+                    "bar": "baz",
+                },
             },
         )
 
     def test_get_variables_none(self):
         task = ExternalTask.objects.create(
-            worker_id="test-worker-id", task_id="test-task-id", variables={},
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={},
         )
 
         self.assertEqual(task.get_variables(), {})

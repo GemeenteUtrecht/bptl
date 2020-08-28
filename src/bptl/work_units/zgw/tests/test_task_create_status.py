@@ -94,7 +94,10 @@ class CreateStatusTaskTests(TestCase):
                 "zaakUrl": serialize_variable(ZAAK),
                 "statusVolgnummer": serialize_variable(2),
                 "services": serialize_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 12345"},}
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 12345"},
+                    }
                 ),
                 "toelichting": serialize_variable("some description"),
             },
@@ -114,7 +117,11 @@ class CreateStatusTaskTests(TestCase):
                         "volgnummer": 1,
                         # rest is not relevant
                     },
-                    {"url": STATUSTYPE, "zaaktype": ZAAKTYPE, "volgnummer": 2,},
+                    {
+                        "url": STATUSTYPE,
+                        "zaaktype": ZAAKTYPE,
+                        "volgnummer": 2,
+                    },
                 ],
             },
         )

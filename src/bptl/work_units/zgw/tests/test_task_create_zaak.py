@@ -138,7 +138,10 @@ class CreateZaakTaskTests(TestCase):
                 },
                 "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
                 "services": json_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    }
                 ),
             },
         )
@@ -174,7 +177,9 @@ class CreateZaakTaskTests(TestCase):
 
     def test_extra_variables(self, m):
         self.fetched_task.variables["zaakDetails"] = json_variable(
-            {"omschrijving": "foo",}
+            {
+                "omschrijving": "foo",
+            }
         )
         self.fetched_task.save(0)
 
@@ -223,7 +228,10 @@ class CreateZaakTaskTests(TestCase):
                 },
                 "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
                 "services": json_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"},}
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    }
                 ),
                 "initiator": json_variable(
                     {

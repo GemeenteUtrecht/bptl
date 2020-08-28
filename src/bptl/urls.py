@@ -44,7 +44,11 @@ urlpatterns = [
     path("camunda/", include("bptl.camunda.urls")),
     path(
         "contrib/api/",
-        include([path("validsign/", include("bptl.work_units.valid_sign.urls")),]),
+        include(
+            [
+                path("validsign/", include("bptl.work_units.valid_sign.urls")),
+            ]
+        ),
     ),
 ]
 
@@ -57,4 +61,6 @@ urlpatterns += staticfiles_urlpatterns() + static(
 if settings.DEBUG and apps.is_installed("debug_toolbar"):
     import debug_toolbar
 
-    urlpatterns = [path("__debug__/", include(debug_toolbar.urls)),] + urlpatterns
+    urlpatterns = [
+        path("__debug__/", include(debug_toolbar.urls)),
+    ] + urlpatterns

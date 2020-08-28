@@ -49,6 +49,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name": "BRP Configuration",},
+            options={
+                "verbose_name": "BRP Configuration",
+            },
         ),
     ]

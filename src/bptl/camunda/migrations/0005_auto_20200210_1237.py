@@ -10,5 +10,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameModel(old_name="FetchedTask", new_name="ExternalTask",),
+        migrations.RenameModel(
+            old_name="FetchedTask",
+            new_name="ExternalTask",
+        ),
     ]

@@ -17,7 +17,10 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "service tasks",
             },
         ),
-        migrations.RemoveField(model_name="activiticonfig", name="rest_api_path",),
+        migrations.RemoveField(
+            model_name="activiticonfig",
+            name="rest_api_path",
+        ),
         migrations.AddField(
             model_name="activiticonfig",
             name="enterprise",

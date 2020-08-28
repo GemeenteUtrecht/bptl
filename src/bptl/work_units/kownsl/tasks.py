@@ -53,7 +53,9 @@ def finalize_review_request(task: BaseTask) -> dict:
     client = get_client(task)
 
     resp_data = client.partial_update(
-        "reviewrequest", data={"review_zaak": zaak_url}, uuid=request_id,
+        "reviewrequest",
+        data={"review_zaak": zaak_url},
+        uuid=request_id,
     )
 
     return {
@@ -99,7 +101,10 @@ def get_approval_status(task: BaseTask) -> dict:
 
     operation_id = "reviewrequest_approvals"
     url = get_operation_url(
-        client.schema, operation_id, base_url=client.base_url, uuid=review_request_id,
+        client.schema,
+        operation_id,
+        base_url=client.base_url,
+        uuid=review_request_id,
     )
 
     approvals = client.request(url, operation_id)

@@ -47,6 +47,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name": "Activiti configuration",},
+            options={
+                "verbose_name": "Activiti configuration",
+            },
         ),
     ]
