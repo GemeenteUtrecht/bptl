@@ -73,7 +73,10 @@ class CreateRolTask(ZGWWorkUnit):
             "indicatieMachtiging": betrokkene.get("indicatieMachtiging", ""),
             "betrokkeneIdentificatie": betrokkene.get("betrokkeneIdentificatie", {}),
         }
-        rol = zrc_client.create("rol", data,)
+        rol = zrc_client.create(
+            "rol",
+            data,
+        )
         return rol
 
     def perform(self):
