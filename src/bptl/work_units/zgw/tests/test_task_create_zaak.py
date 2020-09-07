@@ -1,9 +1,9 @@
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
-from bptl.camunda.tests.utils import json_variable
 from bptl.tasks.tests.factories import TaskMappingFactory
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
@@ -130,14 +130,10 @@ class CreateZaakTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaaktype": {"type": "String", "value": ZAAKTYPE, "valueInfo": {}},
-                "organisatieRSIN": {
-                    "type": "String",
-                    "value": "002220647",
-                    "valueInfo": {},
-                },
-                "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
-                "services": json_variable(
+                "zaaktype": serialize_variable(ZAAKTYPE),
+                "organisatieRSIN": serialize_variable("002220647"),
+                "NLXProcessId": serialize_variable("12345"),
+                "services": serialize_variable(
                     {
                         "ZRC": {"jwt": "Bearer 12345"},
                         "ZTC": {"jwt": "Bearer 789"},
@@ -160,7 +156,6 @@ class CreateZaakTaskTests(TestCase):
         self.assertEqual(
             result,
             {
-                "zaak": RESPONSES[ZAAK],
                 "zaakUrl": ZAAK,
                 "zaakIdentificatie": "ZAAK-2020-0000000013",
             },
@@ -176,7 +171,7 @@ class CreateZaakTaskTests(TestCase):
         self.assertEqual(request_zaak.headers["Authorization"], "Bearer 12345")
 
     def test_extra_variables(self, m):
-        self.fetched_task.variables["zaakDetails"] = json_variable(
+        self.fetched_task.variables["zaakDetails"] = serialize_variable(
             {
                 "omschrijving": "foo",
             }
@@ -220,20 +215,16 @@ class CreateZaakTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaaktype": {"type": "String", "value": ZAAKTYPE, "valueInfo": {}},
-                "organisatieRSIN": {
-                    "type": "String",
-                    "value": "002220647",
-                    "valueInfo": {},
-                },
-                "NLXProcessId": {"type": "String", "value": "12345", "valueInfo": {}},
-                "services": json_variable(
+                "zaaktype": serialize_variable(ZAAKTYPE),
+                "organisatieRSIN": serialize_variable("002220647"),
+                "NLXProcessId": serialize_variable("12345"),
+                "services": serialize_variable(
                     {
                         "ZRC": {"jwt": "Bearer 12345"},
                         "ZTC": {"jwt": "Bearer 789"},
                     }
                 ),
-                "initiator": json_variable(
+                "initiator": serialize_variable(
                     {
                         "betrokkeneType": "natuurlijk_persoon",
                         "roltoelichting": "A test roltoelichting",
@@ -248,7 +239,6 @@ class CreateZaakTaskTests(TestCase):
         self.assertEqual(
             result,
             {
-                "zaak": RESPONSES[ZAAK],
                 "zaakUrl": ZAAK,
                 "zaakIdentificatie": "ZAAK-2020-0000000013",
             },

@@ -1,9 +1,9 @@
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
-from bptl.camunda.tests.utils import json_variable
 from bptl.tasks.tests.factories import TaskMappingFactory
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
@@ -34,10 +34,10 @@ class RelateerZaakTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaakUrl": {"type": "String", "value": BIJDRAGE_ZAAK, "valueInfo": {}},
-                "hoofdZaakUrl": {"type": "String", "value": ZAAK},
-                "bijdrageAard": {"type": "String", "value": "bijdrage"},
-                "services": json_variable({"ZRC": {"jwt": "Bearer 12345"}}),
+                "zaakUrl": serialize_variable(BIJDRAGE_ZAAK),
+                "hoofdZaakUrl": serialize_variable(ZAAK),
+                "bijdrageAard": serialize_variable("bijdrage"),
+                "services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}}),
             },
         )
 

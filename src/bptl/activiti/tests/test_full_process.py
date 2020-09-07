@@ -120,7 +120,6 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
         data_response = response.json()
         expected_response = data.copy()
         expected_response["resultVars"] = {
-            "zaak": RESPONSES[ZAAK],
             "zaakUrl": ZAAK,
             "zaakIdentificatie": "ZAAK-2020-0000000013",
         }

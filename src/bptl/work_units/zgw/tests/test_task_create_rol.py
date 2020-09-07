@@ -1,11 +1,9 @@
-import json
-
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
-from bptl.camunda.tests.utils import json_variable
 from bptl.tasks.tests.factories import TaskMappingFactory
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
@@ -44,16 +42,16 @@ class CreateRolTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaakUrl": {"type": "String", "value": ZAAK, "valueInfo": {}},
-                "omschrijving": {"type": "String", "value": "roltype omschrijving"},
-                "betrokkene": json_variable(
+                "zaakUrl": serialize_variable(ZAAK),
+                "omschrijving": serialize_variable("roltype omschrijving"),
+                "betrokkene": serialize_variable(
                     {
                         "betrokkene": "http://some.api.nl/betrokkenen/12345",
                         "betrokkeneType": "natuurlijk_persoon",
                         "roltoelichting": "A test roltoelichting",
                     }
                 ),
-                "services": json_variable(
+                "services": serialize_variable(
                     {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
                 ),
             },

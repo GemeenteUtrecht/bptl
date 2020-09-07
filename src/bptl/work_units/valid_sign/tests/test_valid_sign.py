@@ -5,16 +5,15 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.test import TestCase, override_settings
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
-from bptl.camunda.tests.utils import json_variable
 from bptl.tasks.models import TaskMapping
-from bptl.work_units.valid_sign.tasks import (
-    CreateValidSignPackageTask,
-    ValidSignReminderTask,
-)
-from bptl.work_units.valid_sign.tests.utils import mock_service_oas_get
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.work_units.zgw.tests.utils import mock_service_oas_get
+
+from ..tasks import CreateValidSignPackageTask, ValidSignReminderTask
+from .utils import VALIDSIGN_API_DOCS, mock_validsign_oas_get
 
 VALIDSIGN_URL = "https://try.validsign.test.nl/"
 DRC_URL = "https://some.drc.nl/api/v1/"
@@ -130,6 +129,7 @@ class ValidSignTests(TestCase):
             task_mapping=mapping,
             service__api_root=VALIDSIGN_URL,
             service__api_type="orc",
+            service__oas=VALIDSIGN_API_DOCS,
             alias="ValidSignAPI",
         )
 
@@ -138,18 +138,15 @@ class ValidSignTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "documents": {"type": "List", "value": [DOCUMENT_1, DOCUMENT_2]},
-                "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
-                "packageName": {"type": "String", "value": "Test package name"},
-                "services": json_variable({"drc": {"jwt": "Bearer 12345"}}),
+                "documents": serialize_variable([DOCUMENT_1, DOCUMENT_2]),
+                "signers": serialize_variable([SIGNER_1, SIGNER_2]),
+                "packageName": serialize_variable("Test package name"),
+                "services": serialize_variable({"drc": {"jwt": "Bearer 12345"}}),
             },
         )
 
     def test_format_signers(self, m):
-        mock_service_oas_get(
-            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
-        )
-
+        mock_validsign_oas_get(m)
         task = CreateValidSignPackageTask(self.fetched_task)
 
         formatted_signer = task.format_signers([SIGNER_1])
@@ -165,7 +162,7 @@ class ValidSignTests(TestCase):
         )
 
     def test_get_documents_from_api(self, m):
-        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(m, DRC_URL, "drc")
 
         # Mock call to retrieve the documents from the API
         m.get(DOCUMENT_1, json=RESPONSE_1)
@@ -191,7 +188,7 @@ class ValidSignTests(TestCase):
 
     @override_settings(MAX_DOCUMENT_SIZE=10)
     def test_get_large_documents_from_api(self, m):
-        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(m, DRC_URL, "drc")
 
         # Mock call to retrieve the documents from the API
         m.get(DOCUMENT_1, json=RESPONSE_1)
@@ -221,7 +218,7 @@ class ValidSignTests(TestCase):
 
     @override_settings(MAX_TOTAL_DOCUMENT_SIZE=20)
     def test_many_documents_from_api(self, m):
-        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+        mock_service_oas_get(m, DRC_URL, "drc")
 
         # Mock call to retrieve the documents from the API
         m.get(DOCUMENT_1, json=RESPONSE_1)
@@ -244,9 +241,7 @@ class ValidSignTests(TestCase):
         self.assertTrue(isinstance(documents[1][1], TemporaryUploadedFile))
 
     def test_create_package(self, m):
-        mock_service_oas_get(
-            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
-        )
+        mock_validsign_oas_get(m)
 
         test_package_id = "BW5fsOKyhj48A-fRwjPyYmZ8Mno="
         path = "api/packages"
@@ -273,10 +268,8 @@ class ValidSignTests(TestCase):
             self.assertEqual(body["roles"], expected_roles)
 
     def test_add_documents_and_signers_to_package(self, m):
-        mock_service_oas_get(
-            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
-        )
-        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
+        mock_validsign_oas_get(m)
+        mock_service_oas_get(m, DRC_URL, "drc")
 
         test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
 
@@ -327,9 +320,7 @@ class ValidSignTests(TestCase):
             )
 
     def test_get_signers(self, m):
-        mock_service_oas_get(
-            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
-        )
+        mock_validsign_oas_get(m)
         test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
 
         # The task will retrieve the roles from ValidSign, so mock the call
@@ -370,6 +361,7 @@ class ValidSignMultipleDocsAPITests(TestCase):
             task_mapping=mapping,
             service__api_root=VALIDSIGN_URL,
             service__api_type="orc",
+            service__oas=VALIDSIGN_API_DOCS,
             alias="ValidSignAPI",
         )
 
@@ -378,10 +370,10 @@ class ValidSignMultipleDocsAPITests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "documents": {"type": "List", "value": [DOCUMENT_1, DOCUMENT_3]},
-                "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
-                "packageName": {"type": "String", "value": "Test package name"},
-                "services": json_variable(
+                "documents": serialize_variable([DOCUMENT_1, DOCUMENT_3]),
+                "signers": serialize_variable([SIGNER_1, SIGNER_2]),
+                "packageName": serialize_variable("Test package name"),
+                "services": serialize_variable(
                     {
                         "drc1": {"jwt": "Bearer 12345"},
                         "drc2": {"jwt": "Bearer 789"},
@@ -391,11 +383,8 @@ class ValidSignMultipleDocsAPITests(TestCase):
         )
 
     def test_get_documents_from_api(self, m):
-        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
-        mock_service_oas_get(
-            m=m, url=OTHER_DRC_URL, service="documenten", extension="json"
-        )
-
+        mock_service_oas_get(m, DRC_URL, "drc")
+        mock_service_oas_get(m, OTHER_DRC_URL, "drc")
         # Mock call to retrieve the documents from the API
         m.get(DOCUMENT_1, json=RESPONSE_1)
         m.get(DOCUMENT_3, json=RESPONSE_3)
@@ -419,14 +408,9 @@ class ValidSignMultipleDocsAPITests(TestCase):
         self.assertEqual(documents[1][1].read(), CONTENT_3)
 
     def test_add_documents_and_signers_to_package(self, m):
-        mock_service_oas_get(
-            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
-        )
-        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
-        mock_service_oas_get(
-            m=m, url=OTHER_DRC_URL, service="documenten", extension="json"
-        )
-
+        mock_validsign_oas_get(m)
+        mock_service_oas_get(m, DRC_URL, "drc")
+        mock_service_oas_get(m, OTHER_DRC_URL, "drc")
         test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
 
         # Two test documents are added to the package
@@ -477,14 +461,9 @@ class ValidSignMultipleDocsAPITests(TestCase):
 
     @override_settings(MAX_DOCUMENT_SIZE=10)
     def test_add_large_documents_and_signers_to_package(self, m):
-        mock_service_oas_get(
-            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
-        )
-        mock_service_oas_get(m=m, url=DRC_URL, service="documenten", extension="json")
-        mock_service_oas_get(
-            m=m, url=OTHER_DRC_URL, service="documenten", extension="json"
-        )
-
+        mock_validsign_oas_get(m)
+        mock_service_oas_get(m, DRC_URL, "drc")
+        mock_service_oas_get(m, OTHER_DRC_URL, "drc")
         test_package = {"id": "BW5fsOKyhj48A-fRwjPyYmZ8Mno="}
 
         # Two test documents are added to the package
@@ -550,6 +529,7 @@ class ValidSignReminderTests(TestCase):
             task_mapping=mapping,
             service__api_root=VALIDSIGN_URL,
             service__api_type="orc",
+            service__oas=VALIDSIGN_API_DOCS,
             alias="ValidSignAPI",
         )
 
@@ -558,18 +538,13 @@ class ValidSignReminderTests(TestCase):
             worker_id="reminder-worker-id",
             task_id="reminder-task-id",
             variables={
-                "packageId": {
-                    "type": "String",
-                    "value": "BW5fsOKyhj48A-fRwjPyYmZ8Mno=",
-                },
-                "email": {"type": "String", "value": "test@example.com"},
+                "packageId": serialize_variable("BW5fsOKyhj48A-fRwjPyYmZ8Mno="),
+                "email": serialize_variable("test@example.com"),
             },
         )
 
     def test_send_reminder(self, m):
-        mock_service_oas_get(
-            m=m, url=VALIDSIGN_URL, service="validsign", extension="yaml"
-        )
+        mock_validsign_oas_get(m)
         path = "api/packages/BW5fsOKyhj48A-fRwjPyYmZ8Mno=/notifications"
         m.post(f"{VALIDSIGN_URL}{path}")
 

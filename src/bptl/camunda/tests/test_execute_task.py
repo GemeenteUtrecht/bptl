@@ -6,6 +6,7 @@ from django.test import TestCase
 
 import requests_mock
 from django_camunda.models import CamundaConfig
+from django_camunda.utils import serialize_variable
 from requests.exceptions import ConnectionError
 
 from bptl.tasks.models import TaskMapping
@@ -14,7 +15,6 @@ from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
 from .factories import ExternalTaskFactory
-from .utils import json_variable
 
 ZTC_URL = "https://some.ztc.nl/api/v1/"
 ZRC_URL = "https://some.zrc.nl/api/v1/"
@@ -70,9 +70,9 @@ class ExecuteCommandTests(TestCase):
         task = ExternalTaskFactory.create(
             topic_name="zaak-initialize",
             variables={
-                "zaaktype": {"value": ZAAKTYPE},
-                "organisatieRSIN": {"value": "123456788"},
-                "services": json_variable(
+                "zaaktype": serialize_variable(ZAAKTYPE),
+                "organisatieRSIN": serialize_variable("123456788"),
+                "services": serialize_variable(
                     {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
                 ),
             },
@@ -134,12 +134,8 @@ class ExecuteCommandTests(TestCase):
         self.assertEqual(
             request_body["variables"],
             {
-                "zaakUrl": {"value": ZAAK, "type": "String"},
-                "zaakIdentificatie": {
-                    "value": "ZAAK-2020-0000000013",
-                    "type": "String",
-                },
-                "zaak": json_variable(RESPONSES[ZAAK]),
+                "zaakUrl": serialize_variable(ZAAK),
+                "zaakIdentificatie": serialize_variable("ZAAK-2020-0000000013"),
             },
         )
 
@@ -148,9 +144,9 @@ class ExecuteCommandTests(TestCase):
         task = ExternalTaskFactory.create(
             topic_name="zaak-initialize",
             variables={
-                "zaaktype": {"value": ZAAKTYPE},
-                "organisatieRSIN": {"value": "123456788"},
-                "services": json_variable(
+                "zaaktype": serialize_variable(ZAAKTYPE),
+                "organisatieRSIN": serialize_variable("123456788"),
+                "services": serialize_variable(
                     {
                         "ZRC": {"jwt": "Bearer 12345"},
                         "ZTC": {"jwt": "Bearer 789"},
