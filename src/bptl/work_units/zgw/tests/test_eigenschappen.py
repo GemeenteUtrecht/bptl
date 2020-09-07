@@ -1,9 +1,9 @@
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
-from bptl.camunda.tests.utils import json_variable
 from bptl.tasks.tests.factories import TaskMappingFactory
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
@@ -58,14 +58,14 @@ class CreateDocumentRelationTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "services": json_variable(
+                "services": serialize_variable(
                     {
                         "ZRC": {"jwt": "Bearer 12345"},
                         "ZTC": {"jwt": "Bearer 12345"},
                     }
                 ),
-                "zaakUrl": {"type": "String", "value": ZAAK},
-                "eigenschap": json_variable(
+                "zaakUrl": serialize_variable(ZAAK),
+                "eigenschap": serialize_variable(
                     {
                         "naam": "start",
                         "waarde": "2020-05-01",
