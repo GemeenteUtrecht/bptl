@@ -1,3 +1,4 @@
+from .documents import LockDocument, UnlockDocument  # noqa
 from .resultaat import CreateResultaatTask  # noqa
 from .rol import CreateRolTask  # noqa
 from .status import CreateStatusTask  # noqa
