@@ -1,4 +1,5 @@
 import json
+import warnings
 from typing import Dict, Union
 
 
@@ -27,5 +28,9 @@ def get_fetch_and_lock_response(topic="createOrder", variables=None):
 
 
 def json_variable(data: Union[dict, list]) -> Dict[str, str]:
+    warnings.warn(
+        "Use django_camunda.utils.serialize_variable instead of json_variable",
+        DeprecationWarning,
+    )
     serialized = json.dumps(data)
     return {"type": "Json", "value": serialized}

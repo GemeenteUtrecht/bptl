@@ -5,9 +5,9 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.test import TestCase, override_settings
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 
 from bptl.camunda.models import ExternalTask
-from bptl.camunda.tests.utils import json_variable
 from bptl.tasks.models import TaskMapping
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
@@ -138,10 +138,10 @@ class ValidSignTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "documents": {"type": "List", "value": [DOCUMENT_1, DOCUMENT_2]},
-                "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
-                "packageName": {"type": "String", "value": "Test package name"},
-                "services": json_variable({"drc": {"jwt": "Bearer 12345"}}),
+                "documents": serialize_variable([DOCUMENT_1, DOCUMENT_2]),
+                "signers": serialize_variable([SIGNER_1, SIGNER_2]),
+                "packageName": serialize_variable("Test package name"),
+                "services": serialize_variable({"drc": {"jwt": "Bearer 12345"}}),
             },
         )
 
@@ -370,10 +370,10 @@ class ValidSignMultipleDocsAPITests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "documents": {"type": "List", "value": [DOCUMENT_1, DOCUMENT_3]},
-                "signers": {"type": "List", "value": [SIGNER_1, SIGNER_2]},
-                "packageName": {"type": "String", "value": "Test package name"},
-                "services": json_variable(
+                "documents": serialize_variable([DOCUMENT_1, DOCUMENT_3]),
+                "signers": serialize_variable([SIGNER_1, SIGNER_2]),
+                "packageName": serialize_variable("Test package name"),
+                "services": serialize_variable(
                     {
                         "drc1": {"jwt": "Bearer 12345"},
                         "drc2": {"jwt": "Bearer 789"},
@@ -538,11 +538,8 @@ class ValidSignReminderTests(TestCase):
             worker_id="reminder-worker-id",
             task_id="reminder-task-id",
             variables={
-                "packageId": {
-                    "type": "String",
-                    "value": "BW5fsOKyhj48A-fRwjPyYmZ8Mno=",
-                },
-                "email": {"type": "String", "value": "test@example.com"},
+                "packageId": serialize_variable("BW5fsOKyhj48A-fRwjPyYmZ8Mno="),
+                "email": serialize_variable("test@example.com"),
             },
         )
 
