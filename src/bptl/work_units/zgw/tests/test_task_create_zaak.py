@@ -160,7 +160,6 @@ class CreateZaakTaskTests(TestCase):
         self.assertEqual(
             result,
             {
-                "zaak": RESPONSES[ZAAK],
                 "zaakUrl": ZAAK,
                 "zaakIdentificatie": "ZAAK-2020-0000000013",
             },
@@ -248,7 +247,6 @@ class CreateZaakTaskTests(TestCase):
         self.assertEqual(
             result,
             {
-                "zaak": RESPONSES[ZAAK],
                 "zaakUrl": ZAAK,
                 "zaakIdentificatie": "ZAAK-2020-0000000013",
             },

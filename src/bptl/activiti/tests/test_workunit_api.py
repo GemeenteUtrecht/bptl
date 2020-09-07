@@ -41,7 +41,6 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
         data_response = response.json()
         expected_response = data.copy()
         expected_response["resultVars"] = {
-            "zaak": {"url": "zaak_url", "identificatie": "foo"},
             "zaakUrl": "zaak_url",
             "zaakIdentificatie": "foo",
         }

@@ -139,7 +139,6 @@ class ExecuteCommandTests(TestCase):
                     "value": "ZAAK-2020-0000000013",
                     "type": "String",
                 },
-                "zaak": json_variable(RESPONSES[ZAAK]),
             },
         )
 

@@ -148,7 +148,6 @@ class CreateZaakTask(ZGWWorkUnit):
         self.create_rol(zaak)
 
         return {
-            "zaak": zaak,
             "zaakUrl": zaak["url"],
             "zaakIdentificatie": zaak["identificatie"],
         }
