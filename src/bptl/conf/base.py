@@ -410,6 +410,9 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 CELERY_TASK_ACKS_LATE = True
+# ensure that no tasks are scheduled to a worker that may be running a long-poll
+# TODO: use different queues for long-poll workers
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 
 CELERY_ONCE = {
     "backend": "celery_once.backends.Redis",
