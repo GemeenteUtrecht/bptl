@@ -60,6 +60,7 @@ WORKDIR /app
 COPY ./bin/docker_start.sh /start.sh
 COPY ./bin/celery_worker.sh /celery_worker.sh
 COPY ./bin/celery_beat.sh /celery_beat.sh
+COPY ./bin/celery_flower.sh /celery_flower.sh
 RUN mkdir /app/log
 RUN mkdir /app/media
 
