@@ -69,6 +69,7 @@ def task_schedule_new_fetch_and_lock():
 
 @app.task()
 def task_execute_and_complete(fetched_task_id):
+    logger.info("Received task execution request (ID %d)", fetched_task_id)
     fetched_task = ExternalTask.objects.get(id=fetched_task_id)
 
     # make task idempotent
