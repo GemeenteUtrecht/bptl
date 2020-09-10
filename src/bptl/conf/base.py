@@ -409,7 +409,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": schedule(run_every=10),
     },
 }
-CELERY_ACKS_LATE = True
+CELERY_TASK_ACKS_LATE = True
 
 CELERY_ONCE = {
     "backend": "celery_once.backends.Redis",
