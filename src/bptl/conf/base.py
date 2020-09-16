@@ -4,6 +4,7 @@ import os
 from django.urls import reverse_lazy
 
 from celery.schedules import schedule
+from kombu import Exchange, Queue
 from sentry_sdk.integrations import django, redis
 
 try:
@@ -190,7 +191,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = (os.path.join(DJANGO_PROJECT_DIR, "static"),)
 
 # List of finder classes that know how to find static files in
-# various locations.
+# various locations.    apply_async()
+
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -397,8 +399,30 @@ ELASTIC_APM = {
 # Celery
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+
 # Add a 30 minutes timeout to all Celery tasks.
 CELERY_TASK_SOFT_TIME_LIMIT = 30 * 60
+
+# Setup Celery queues: default & long
+CELERY_DEFAULT_QUEUE = "default"
+CELERY_DEFAULT_EXCHANGE = "default"
+CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
+CELERY_DEFAULT_ROUTING_KEY = "default"
+
+CELERY_QUEUES = (
+    Queue("default", Exchange("default"), routing_key="default"),
+    Queue("long-polling", Exchange("long-polling"), routing_key="long-polling"),
+)
+
+# Setup Celery routes for long-polling
+CELERY_TASK_ROUTES = {
+    "bptl.camunda.tasks.task_fetch_and_lock": {
+        "queue": "long-polling",
+        "exchange": "long-polling",
+        "routing_key": "long-polling",
+    }
+}
+
 CELERY_BEAT_SCHEDULE = {
     "task-pull": {
         "task": "bptl.camunda.tasks.task_fetch_and_lock",
@@ -407,8 +431,14 @@ CELERY_BEAT_SCHEDULE = {
         # start the polling after 10 seconds, and keep it running. The task itself
         # is marked graceful, so it'll just return None and not be scheduled again.
         "schedule": schedule(run_every=10),
+        "options": {
+            "queue": "long-polling",
+            "exchange": "long-polling",
+            "routing_key": "long-polling",
+        },
     },
 }
+
 CELERY_TASK_ACKS_LATE = True
 # ensure that no tasks are scheduled to a worker that may be running a long-poll
 # TODO: use different queues for long-poll workers
