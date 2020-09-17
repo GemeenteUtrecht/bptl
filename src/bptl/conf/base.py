@@ -4,7 +4,6 @@ import os
 from django.urls import reverse_lazy
 
 from celery.schedules import schedule
-from kombu import Exchange, Queue
 from sentry_sdk.integrations import django, redis
 
 try:
@@ -405,9 +404,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = 30 * 60
 
 # Setup Celery routes for long-polling
 CELERY_TASK_ROUTES = {
-    "bptl.camunda.tasks.task_fetch_and_lock": {
-        "queue": "long-polling"
-    }
+    "bptl.camunda.tasks.task_fetch_and_lock": {"queue": "long-polling"}
 }
 
 CELERY_BEAT_SCHEDULE = {

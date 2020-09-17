@@ -52,7 +52,7 @@ def task_fetch_and_lock():
     # a new long-poll! this needs to run _after_ the current task has exited, otherwise
     # the celery-once lock kicks in
     task_schedule_new_fetch_and_lock.apply_async(
-        countdown=0.5, 
+        countdown=0.5,
     )
     return num_tasks
 
