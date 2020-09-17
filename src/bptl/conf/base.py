@@ -191,7 +191,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = (os.path.join(DJANGO_PROJECT_DIR, "static"),)
 
 # List of finder classes that know how to find static files in
-# various locations.    apply_async()
+# various locations
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -403,23 +403,10 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:63
 # Add a 30 minutes timeout to all Celery tasks.
 CELERY_TASK_SOFT_TIME_LIMIT = 30 * 60
 
-# Setup Celery queues: default & long
-CELERY_DEFAULT_QUEUE = "default"
-CELERY_DEFAULT_EXCHANGE = "default"
-CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
-CELERY_DEFAULT_ROUTING_KEY = "default"
-
-CELERY_QUEUES = (
-    Queue("default", Exchange("default"), routing_key="default"),
-    Queue("long-polling", Exchange("long-polling"), routing_key="long-polling"),
-)
-
 # Setup Celery routes for long-polling
 CELERY_TASK_ROUTES = {
     "bptl.camunda.tasks.task_fetch_and_lock": {
-        "queue": "long-polling",
-        "exchange": "long-polling",
-        "routing_key": "long-polling",
+        "queue": "long-polling"
     }
 }
 
@@ -431,11 +418,6 @@ CELERY_BEAT_SCHEDULE = {
         # start the polling after 10 seconds, and keep it running. The task itself
         # is marked graceful, so it'll just return None and not be scheduled again.
         "schedule": schedule(run_every=10),
-        "options": {
-            "queue": "long-polling",
-            "exchange": "long-polling",
-            "routing_key": "long-polling",
-        },
     },
 }
 

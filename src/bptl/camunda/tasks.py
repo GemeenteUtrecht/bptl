@@ -29,8 +29,6 @@ __all__ = ("task_fetch_and_lock", "task_execute_and_complete")
             (settings.LONG_POLLING_TIMEOUT_MINUTES * 60) + 1
         ),  # timeout if something goes wrong, in seconds
     },
-    exchange="long-polling",
-    queue="long-polling",
 )
 def task_fetch_and_lock():
     logger.debug("Fetching and locking tasks (long poll)")
@@ -54,7 +52,7 @@ def task_fetch_and_lock():
     # a new long-poll! this needs to run _after_ the current task has exited, otherwise
     # the celery-once lock kicks in
     task_schedule_new_fetch_and_lock.apply_async(
-        countdown=0.5, queue="long-polling", routing_key="long-polling"
+        countdown=0.5, 
     )
     return num_tasks
 
