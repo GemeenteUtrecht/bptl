@@ -1,0 +1,33 @@
+{% extends "master.html" %}
+{% load i18n tasks %}
+
+{% block content-header-subtitle %}{% trans "List process definitions" %}{% endblock %}
+{% block content-header-title %}{% trans "Process definitions" %}{% endblock %}
+{% block content-header-explanation %}
+{% blocktrans trimmed %}
+    Display process definitions in Camunda.
+{% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+<table class="table">
+    <thead>
+        <tr>
+            <th class="table__header">#</th>
+            <th class="table__header">Name</th>
+            <th class="table__header">Active version</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for definition in process_definitions %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{% firstof definition.name definition.key %} </td>
+                <td>{{ definition.version }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

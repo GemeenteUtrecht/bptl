@@ -1,10 +1,14 @@
 from dataclasses import dataclass
+from typing import List
 
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
+from django_camunda.camunda_models import ProcessDefinition, factory
 from django_camunda.client import get_client
+
+# from django_camunda.api import get_process_definitions
 
 
 @dataclass
@@ -13,6 +17,15 @@ class ProcessInstance:
     business_key: str
     definition_id: str
     definition_name: str
+
+
+def get_process_definitions_last_version() -> List[ProcessDefinition]:
+    client = get_client()
+    response = client.get(
+        "process-definition",
+        {"sortBy": "key", "sortOrder": "asc", "latestVersion": "true"},
+    )
+    return factory(ProcessDefinition, response)
 
 
 def get_process_instances():
@@ -36,6 +49,15 @@ def get_process_instances():
         )
         for instance in instances
     ]
+
+
+class ProcessDefinitionListView(TemplateView):
+    template_name = "camunda/process_definition_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["process_definitions"] = get_process_definitions_last_version()
+        return context
 
 
 class ProcessInstanceListView(UserPassesTestMixin, TemplateView):
