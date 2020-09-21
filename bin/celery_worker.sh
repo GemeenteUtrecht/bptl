@@ -20,3 +20,4 @@ celery worker \
     --workdir src \
     -O fair \
     -c $CONCURRENCY
+
