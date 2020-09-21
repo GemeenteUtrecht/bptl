@@ -190,7 +190,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = (os.path.join(DJANGO_PROJECT_DIR, "static"),)
 
 # List of finder classes that know how to find static files in
-# various locations.
+# various locations
+
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -397,8 +398,15 @@ ELASTIC_APM = {
 # Celery
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+
 # Add a 30 minutes timeout to all Celery tasks.
 CELERY_TASK_SOFT_TIME_LIMIT = 30 * 60
+
+# Setup Celery routes for long-polling
+CELERY_TASK_ROUTES = {
+    "bptl.camunda.tasks.task_fetch_and_lock": {"queue": "long-polling"}
+}
+
 CELERY_BEAT_SCHEDULE = {
     "task-pull": {
         "task": "bptl.camunda.tasks.task_fetch_and_lock",
@@ -409,6 +417,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": schedule(run_every=10),
     },
 }
+
 CELERY_TASK_ACKS_LATE = True
 # ensure that no tasks are scheduled to a worker that may be running a long-poll
 # TODO: use different queues for long-poll workers
