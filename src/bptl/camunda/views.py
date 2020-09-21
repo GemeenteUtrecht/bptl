@@ -19,12 +19,8 @@ def get_process_instances():
     camunda = get_client()
     instances = camunda.get("process-instance")
 
-    def_ids = {instance["definition_id"] for instance in instances}
     definitions = camunda.get(
         "process-definition",
-        params={
-            "processDefinitionIdIn": ",".join(def_ids),
-        },
     )
 
     definition_names = {
