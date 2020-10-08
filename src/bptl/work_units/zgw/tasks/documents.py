@@ -39,7 +39,7 @@ class GetDRCMixin:
         try:
             return self.get_client(APITypes.drc)
         except NoService:
-            client = Service.objects.get_client(document_url)
+            client = Service.get_client(document_url)
             client._log.task = self.task
             return client
 
