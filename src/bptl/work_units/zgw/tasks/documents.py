@@ -4,10 +4,12 @@ from urllib.parse import urlparse
 from uuid import UUID
 
 from zgw_consumers.constants import APITypes
+from zgw_consumers.models import Service
 
 from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
+from ..client import NoService
 from .base import ZGWWorkUnit
 
 logger = logging.getLogger(__name__)
@@ -24,8 +26,26 @@ def get_document_uuid(document_url: str) -> str:
     return _uuid
 
 
+class GetDRCMixin:
+    """
+    Temp workaround to get credentials for the relevant DRC.
+
+    The services var should contain a DRC alias key with credentials, but that's
+    currently a massive spaghetti. So, we'll allow for the time being that DRCs are
+    all configured in BPTL, and we grab the right one from the document URL.
+    """
+
+    def get_drc_client(self, document_url: str) -> Service:
+        try:
+            return self.get_client(APITypes.drc)
+        except NoService:
+            client = Service.objects.get_client(document_url)
+            client._log.task = self.task
+            return client
+
+
 @register
-class LockDocument(ZGWWorkUnit):
+class LockDocument(GetDRCMixin, ZGWWorkUnit):
     """
     Lock a Documenten API document.
 
@@ -56,7 +76,7 @@ class LockDocument(ZGWWorkUnit):
 
         # Retrieve document
         document_url = check_variable(variables, "informatieobject")
-        drc_client = self.get_client(APITypes.drc)
+        drc_client = self.get_drc_client(document_url)
 
         # Lock document
         response = drc_client.operation(
@@ -69,7 +89,7 @@ class LockDocument(ZGWWorkUnit):
 
 
 @register
-class UnlockDocument(ZGWWorkUnit):
+class UnlockDocument(GetDRCMixin, ZGWWorkUnit):
     """
     Unlock a Documenten API document.
 
@@ -99,7 +119,7 @@ class UnlockDocument(ZGWWorkUnit):
         # Retrieve document
         document_url = check_variable(variables, "informatieobject")
         lock_id = check_variable(variables, "lockId")
-        drc_client = self.get_client(APITypes.drc)
+        drc_client = self.get_drc_client(document_url)
 
         # Unock document
         drc_client.operation(
