@@ -7,7 +7,7 @@ from zgw_consumers.api_models.base import factory
 from bptl.tasks.base import WorkUnit, check_variable
 from bptl.tasks.registry import register
 
-from .data import EmailPerson, Email
+from .data import Email, EmailPerson
 
 __all__ = ["SendEmail"]
 
@@ -59,7 +59,7 @@ class SendEmailTask(WorkUnit):
         email_message = email_template.render(email_context)
         send_mail(
             subject=email.subject,
-            message = email_message,
+            message=email_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[receiver.email]
+            recipient_list=[receiver.email],
         )
