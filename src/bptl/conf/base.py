@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     "bptl.accounts",
     "bptl.activiti",
     "bptl.camunda",
+    "bptl.credentials",
     "bptl.dashboard",
     "bptl.tasks",
     "bptl.dummy",
