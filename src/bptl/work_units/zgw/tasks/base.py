@@ -1,6 +1,6 @@
 import warnings
 
-from bptl.credentials.api import get_auth_headers
+from bptl.credentials.api import get_credentials
 from bptl.tasks.base import WorkUnit
 from bptl.work_units.zgw.models import DefaultService
 
@@ -39,7 +39,7 @@ class ZGWWorkUnit(WorkUnit):
 
         if PROCESS_VAR_NAME in task_variables:
             app_id = task_variables[PROCESS_VAR_NAME]
-            auth_headers = get_auth_headers(app_id, service)
+            auth_headers = get_credentials(app_id, service)[service]
             if auth_headers:
                 client.set_auth_value(auth_headers)
 

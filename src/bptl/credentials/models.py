@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -110,3 +111,33 @@ class AppServiceCredentials(models.Model):
                 )
             else:
                 logger.warning("Unknown service auth_type specified: %s", auth_type)
+
+    def get_auth_headers(self) -> Dict[str, str]:
+        old_values = (
+            self.service.client_id,
+            self.service.secret,
+            self.service.header_key,
+            self.service.header_value,
+        )
+
+        # overwrite the python object service. so those attributes are used in credential
+        # generation
+        if self.service.auth_type == AuthTypes.zgw:
+            self.service.client_id = self.client_id
+            self.service.secret = self.secret
+        elif self.service.auth_type == AuthTypes.api_key:
+            self.service.header_key = self.header_key
+            self.service.header_value = self.header_value
+
+        _client = self.service.build_client()
+        auth_header = _client.auth_header
+
+        # restore the possible direct-service-configured credentials
+        (
+            self.service.client_id,
+            self.service.secret,
+            self.service.header_key,
+            self.service.header_value,
+        ) = old_values
+
+        return auth_header
