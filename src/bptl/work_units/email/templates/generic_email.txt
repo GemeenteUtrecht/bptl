@@ -1,7 +1,2 @@
-{% load i18n %}Dear {{ receiver.name }},
-
-{{ email.body }}
-{% blocktrans %}
-Kind regards,
-{% endblocktrans %}
-{{ sender.name }}
+{% extends "base.txt" %}
+{% load i18n %}{% block body %}{{ email.content }}{% endblock %}

@@ -1,0 +1,8 @@
+{% load i18n %}Beste {{ receiver.name }},
+
+{% block body %}
+{% endblock %}
+
+Met vriendelijke groeten,
+
+{{ sender.name }}
