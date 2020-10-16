@@ -1,4 +1,4 @@
-{% extends "base.txt" %}
+{% extends "email/mails/base.txt" %}
 {% load i18n %}{% block body %}{% if reminder %}HERINNERING: {% endif %}Uw {{ review_type }} is vereist. {% if deadline %}U heeft tot {{ deadline }} om te reageren.{% endif %}
 
 Klik alstublieft <a href="{{ kownslFrontendUrl }}">hier</a>.

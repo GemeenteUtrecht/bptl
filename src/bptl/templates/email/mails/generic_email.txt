@@ -1,2 +1,2 @@
-{% extends "base.txt" %}
+{% extends "email/mails/base.txt" %}
 {% load i18n %}{% block body %}{{ email.content }}{% endblock %}

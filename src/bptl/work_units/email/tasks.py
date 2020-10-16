@@ -1,16 +1,18 @@
 from django.conf import settings
 from django.core.mail import send_mail
+from django.forms.models import model_to_dict
 from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
-
+from rest_framework.serializers import ValidationError
 from zgw_consumers.api_models.base import factory
 
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
-from .serializers import SendEmailSerializer, ValidTemplateChoices
+from .serializers import SendEmailSerializer, VALID_TEMPLATE_CHOICES
+from .data import SendEmail
 
-__all__ = ["SendEmail"]
+__all__ = ["SendEmailTask"]
 
 
 @register
@@ -19,44 +21,47 @@ class SendEmailTask(WorkUnit):
 
     **Required process variables**
 
-    * ``sender``: JSON with email and name of sender.
+    * ``sender``: JSON with required fields email\* and name\* of sender.
         .. code-block:: json
                 {
                     "email": "kees@example.com",
                     "name": "Kees Koos"
                 }
 
-    * ``receiver``: JSON with email and name of receiver.
+    * ``receiver``: JSON with required fields email\* and name\* of receiver.
         .. code-block:: json
                 {
                     "email": "jan@example.com",
                     "name": "Jan Janssen"
                 }
 
-    * ``email``: JSON with email variables:
+    * ``email``: JSON with required fields email subject\* and email content\*:
         .. code-block:: json
                 {
                     "subject": "This is an example subject.",
                     "content": "This is an example body."
                 }
 
-    * ``template``: string with template name. Choices:
+    * ``template``: string with template name. Valid choices are:
         .. code-block:: list
                 [
                     generiek, accordering, advies,
                 ]
 
-    **Optional process variables**
-
-    * ``kownslFrontendUrl``: string with full URL for end users to submit their review.
-                Valid choices are currently: generic/approval/advice.
-    * ``reminder``: boolean.
-    * ``deadline``: datetime: "2020-04-20 16:20:00".
+    * ``context``: JSON with optional fields:
+        .. code-block:: json
+                {
+                    "kownslFrontendUrl": "https://kownsl.utrechtproeftuin.nl/kownsl/<uuid>/",
+                    "reminder": True/False,
+                    "deadline`": "2020-04-20 16:20:00+00:00",
+                }
     """
 
     def perform(self):
         variables = self.task.get_variables()
-        send_email = SendEmailSerializer(data=variables)
+        send_email = factory(SendEmail, {'variables':variables})
+        print(model_to_dict(send_email))
+        send_email = SendEmailSerializer(data=send_email)
         send_email.is_valid(raise_exception=True)
         send_email = send_email.validated_data
 
@@ -66,15 +71,15 @@ class SendEmailTask(WorkUnit):
             "receiver": send_email["receiver"],
             "email": send_email["email"],
             "review_type": send_email["template"],
-            **send_email["kwargs"],
+            **send_email["context"],
         }
 
         # Get email template
-        template_path = ValidTemplateChoices.labels[send_email["template"]]
+        template_path = VALID_TEMPLATE_CHOICES[send_email["template"]]
         email_template = get_template(template_path)
 
         # If email is a reminder, add reminder to subject line
-        if send_email["kwargs"]["reminder"]:
+        if send_email["context"]["reminder"]:
             send_email["email"][
                 "subject"
             ] = f"HERINNERING: {send_email['email']['subject']}"
