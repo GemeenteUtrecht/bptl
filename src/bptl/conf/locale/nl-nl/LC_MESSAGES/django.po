@@ -1,0 +1,491 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-10-13 15:39+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/bptl/accounts/models.py:15
+msgid "username"
+msgstr "gebruikersnaam"
+
+#: src/bptl/accounts/models.py:18
+msgid "Required. 150 characters or fewer."
+msgstr "Verplicht. Maximaal 150 karakters."
+
+#: src/bptl/accounts/models.py:20
+msgid "A user with that username already exists."
+msgstr "Een gebruiker met die gebruikersnaam bestaat al."
+
+#: src/bptl/accounts/models.py:23
+msgid "first name"
+msgstr "voornaam"
+
+#: src/bptl/accounts/models.py:24
+msgid "last name"
+msgstr "achternaam"
+
+#: src/bptl/accounts/models.py:25
+msgid "email address"
+msgstr "emailadres"
+
+#: src/bptl/accounts/models.py:27
+msgid "staff status"
+msgstr ""
+
+#: src/bptl/accounts/models.py:29
+msgid "Designates whether the user can log into this admin site."
+msgstr "Bepaalt of de gebruiker in de admin site kan inloggen."
+
+#: src/bptl/accounts/models.py:32
+msgid "active"
+msgstr "actief"
+
+#: src/bptl/accounts/models.py:35
+msgid ""
+"Designates whether this user should be treated as active. Unselect this "
+"instead of deleting accounts."
+msgstr ""
+"Bepaalt of de gebruiker als actief beschouwd moet worden. Deselecteer dit i."
+"p.v. de account te verwijderen."
+
+#: src/bptl/accounts/models.py:39
+msgid "date joined"
+msgstr "datum ingeschreven"
+
+#: src/bptl/accounts/models.py:47
+msgid "user"
+msgstr "gebruiker"
+
+#: src/bptl/accounts/models.py:48
+msgid "users"
+msgstr "gebruikers"
+
+#: src/bptl/activiti/api/views.py:36
+msgid "The execution of the task failed with error: {}"
+msgstr "De taak heeft gefaald met error: {}"
+
+#: src/bptl/activiti/models.py:13
+msgid "activiti root"
+msgstr ""
+
+#: src/bptl/activiti/models.py:15
+msgid ""
+"Root URL where activiti is installed. The REST api path is appended to this."
+msgstr ""
+
+#: src/bptl/activiti/models.py:21
+msgid "authorization header"
+msgstr ""
+
+#: src/bptl/activiti/models.py:24 src/bptl/work_units/brp/models.py:27
+msgid "HTTP Authorization header value, required if the API is not open."
+msgstr ""
+
+#: src/bptl/activiti/models.py:28
+msgid "is enterprise"
+msgstr ""
+
+#: src/bptl/activiti/models.py:30
+msgid "Boolean indicating if the enterprise edition of Activiti is used"
+msgstr ""
+
+#: src/bptl/activiti/models.py:34
+msgid "Activiti configuration"
+msgstr ""
+
+#: src/bptl/activiti/models.py:46
+msgid "service task"
+msgstr "service taak"
+
+#: src/bptl/activiti/models.py:47
+msgid "service tasks"
+msgstr "service taken"
+
+#: src/bptl/camunda/models.py:37
+msgid ""
+"The worker ID that picked up the task. Only the same worker ID is allowed to "
+"unlock/modify the task. Used as a lock."
+msgstr ""
+
+#: src/bptl/camunda/models.py:41
+msgid "priority"
+msgstr "prioriteit"
+
+#: src/bptl/camunda/models.py:42 src/bptl/camunda/models.py:43
+msgid "task id"
+msgstr "taak id"
+
+#: src/bptl/camunda/models.py:44
+msgid "lock expires at"
+msgstr "slot verloopt op"
+
+#: src/bptl/camunda/models.py:47
+msgid "external task"
+msgstr "externe taak"
+
+#: src/bptl/camunda/models.py:48
+msgid "external tasks"
+msgstr "externe taken"
+
+#: src/bptl/camunda/templates/camunda/process_instance_list.html:4
+msgid "Manage running process instances"
+msgstr "Beheer"
+
+#: src/bptl/camunda/templates/camunda/process_instance_list.html:5
+msgid "Process instances"
+msgstr "procesinstanties"
+
+#: src/bptl/camunda/templates/camunda/process_instance_list.html:7
+msgid "View and manage running process instances in Camunda."
+msgstr "Bekijk en beheer de lopende procesinstanties in Camunda."
+
+#: src/bptl/dashboard/templates/dashboard/task_detail.html:4
+msgid "View task details"
+msgstr "Bekijk taakdetails"
+
+#: src/bptl/dashboard/templates/dashboard/task_detail.html:5
+msgid "Task "
+msgstr "Taak"
+
+#: src/bptl/dashboard/templates/dashboard/task_list.html:4
+msgid "View external tasks"
+msgstr "Bekijk externe taken."
+
+#: src/bptl/dashboard/templates/dashboard/task_list.html:6
+msgid "Tasks"
+msgstr "Taken"
+
+#: src/bptl/dashboard/templates/dashboard/task_list.html:7
+msgid "total amount of tasks"
+msgstr "totale hoeveelheid taken"
+
+#: src/bptl/dashboard/templates/dashboard/task_list.html:17
+msgid "Task"
+msgstr "Taken"
+
+#: src/bptl/dashboard/templates/dashboard/task_list.html:21
+msgid "Type"
+msgstr ""
+
+#: src/bptl/dashboard/templates/dashboard/task_list.html:25
+msgid "Topic name"
+msgstr "Topicnaam"
+
+#: src/bptl/dashboard/templates/dashboard/task_list.html:29
+msgid "Status"
+msgstr ""
+
+#: src/bptl/dashboard/templates/dashboard/task_list.html:60
+msgid "Submit"
+msgstr "Versturen"
+
+#: src/bptl/tasks/apps.py:9
+msgid "Task configuration"
+msgstr "Taakconfiguratie"
+
+#: src/bptl/tasks/forms.py:60
+msgid "Service"
+msgstr ""
+
+#: src/bptl/tasks/forms.py:61
+msgid "ZGW Service to connect with"
+msgstr "ZGW service te verbinden met"
+
+#: src/bptl/tasks/models.py:21 src/bptl/tasks/models.py:62
+msgid "topic name"
+msgstr "topicnaam"
+
+#: src/bptl/tasks/models.py:25
+msgid ""
+"Topic as defined in the Task of external Business Process engine. Topics are "
+"used to decide which listener to run for a task."
+msgstr ""
+
+#: src/bptl/tasks/models.py:30
+msgid "callback"
+msgstr ""
+
+#: src/bptl/tasks/models.py:33
+msgid ""
+"Listener to connect to the topic. This is a specialized piece of code that "
+"will run for each task with the configured topic."
+msgstr ""
+
+#: src/bptl/tasks/models.py:37
+msgid "active flag"
+msgstr ""
+
+#: src/bptl/tasks/models.py:47
+msgid "task mapping"
+msgstr ""
+
+#: src/bptl/tasks/models.py:48
+msgid "task mappings"
+msgstr ""
+
+#: src/bptl/tasks/models.py:64
+msgid "Topics determine which functions need to run for a task."
+msgstr ""
+
+#: src/bptl/tasks/models.py:68
+msgid "status"
+msgstr ""
+
+#: src/bptl/tasks/models.py:72
+msgid "The current status of task processing"
+msgstr "De huidige status van de processerende taak"
+
+#: src/bptl/tasks/models.py:76
+msgid "execution error"
+msgstr ""
+
+#: src/bptl/tasks/models.py:78
+msgid "The error that occurred during execution."
+msgstr ""
+
+#: src/bptl/tasks/templates/tasks/taskmapping_form.html:4
+msgid "Configure a new topic listener"
+msgstr "Configureer een nieuwe listener"
+
+#: src/bptl/tasks/templates/tasks/taskmapping_form.html:5
+#: src/bptl/tasks/templates/tasks/taskmapping_list.html:46
+msgid "Add listener"
+msgstr "Voeg een listener toe"
+
+#: src/bptl/tasks/templates/tasks/taskmapping_form.html:7
+msgid ""
+"Connect an executable function to a topic name. <br> Topic names are defined "
+"in the Camunda process model - look for the External Tasks and determine the "
+"configured topic."
+msgstr ""
+
+#: src/bptl/tasks/templates/tasks/taskmapping_form.html:41
+msgid "Connect listener to topic"
+msgstr "Verbind een listener aan topic"
+
+#: src/bptl/tasks/templates/tasks/taskmapping_list.html:4
+msgid "View configured topic listeners"
+msgstr "Bekijk de configureerde topic listeners"
+
+#: src/bptl/tasks/templates/tasks/taskmapping_list.html:5
+msgid "Active listeners"
+msgstr "Actieve listeners"
+
+#: src/bptl/tasks/templates/tasks/taskmapping_list.html:7
+msgid ""
+"Inspect which topic listeners are configured. <br> A topic listener is an "
+"executable function that will only run for the configured topic. External "
+"Tasks in Camunda get assigned to a topic."
+msgstr ""
+
+#: src/bptl/tasks/templates/tasks/taskmapping_list.html:19
+msgid "Topics"
+msgstr ""
+
+#: src/bptl/tasks/templates/tasks/taskmapping_list.html:23
+msgid "Handler and description"
+msgstr ""
+
+#: src/bptl/tasks/templates/tasks/taskmapping_list.html:37
+msgid "Responsible code"
+msgstr ""
+
+#: src/bptl/tasks/templates/tasks/taskmapping_list.html:51
+msgid ""
+"You can see which topics are handled by this application and what the "
+"handler function does for each topic. Topics are unique, but the same "
+"handler may be bound to different topics. <br> <br> Task handlers often "
+"require some variables to be set in the process before they can be invoked. "
+"The task documentation describes those requirements."
+msgstr ""
+
+#: src/bptl/templates/admin/base_site.html:4
+#: src/bptl/templates/admin/base_site.html:13
+msgid "Administration"
+msgstr "Administratie"
+
+#: src/bptl/templates/admin/login.html:11
+msgid "Login with ADFS"
+msgstr ""
+
+#: src/bptl/templates/includes/pagination.html:20
+msgid "first"
+msgstr "eerste"
+
+#: src/bptl/templates/includes/pagination.html:26
+msgid "previous"
+msgstr "vorige"
+
+#: src/bptl/templates/includes/pagination.html:33
+msgid "current page"
+msgstr "huidige pagina"
+
+#: src/bptl/templates/includes/pagination.html:34
+#, python-format
+msgid "page %(n)s"
+msgstr "pagina %(n)s"
+
+#: src/bptl/templates/includes/pagination.html:41
+msgid "next"
+msgstr "volgende"
+
+#: src/bptl/templates/includes/pagination.html:46
+msgid "last"
+msgstr "laatste"
+
+#: src/bptl/templates/index.html:7
+msgid "Manage BPTL building blocks"
+msgstr "Beheer de BPTL bouwblokken"
+
+#: src/bptl/templates/index.html:8
+msgid "BP Task Library Configuration"
+msgstr "BP Taak Bibliotheek configuratie"
+
+#: src/bptl/templates/index.html:10
+msgid ""
+"De BPTL pikt taken op van externe processen. <br> In deze omgeving kan je "
+"bestaande functies/bouwblokken configureren voor je processen, en die "
+"opnemen in je procesmodel."
+msgstr ""
+
+#: src/bptl/templates/index.html:35
+msgid "View tasks details"
+msgstr "Bekijk taakdetails"
+
+#: src/bptl/templates/index.html:41
+msgid "View task mappings"
+msgstr "Bekijk taak mappings"
+
+#: src/bptl/templates/index.html:45
+msgid "Camunda process instances"
+msgstr "Camunda procesinstanties"
+
+#: src/bptl/utils/constants.py:7
+msgid "Initial"
+msgstr "Initiele"
+
+#: src/bptl/utils/constants.py:8
+msgid "In progress"
+msgstr "Bezig"
+
+#: src/bptl/utils/constants.py:9
+msgid "Performed"
+msgstr "Gedaan"
+
+#: src/bptl/utils/constants.py:10
+msgid "Failed"
+msgstr "Gefaald"
+
+#: src/bptl/utils/constants.py:11
+msgid "Completed"
+msgstr "Succesvol afgerond"
+
+#: src/bptl/work_units/brp/models.py:11
+msgid "API-root"
+msgstr ""
+
+#: src/bptl/work_units/brp/models.py:12
+msgid "Root URL if BRP api"
+msgstr ""
+
+#: src/bptl/work_units/brp/models.py:17
+msgid "header key"
+msgstr ""
+
+#: src/bptl/work_units/brp/models.py:20
+msgid "HTTP Authorization header name, required if the API is not open."
+msgstr ""
+
+#: src/bptl/work_units/brp/models.py:23
+msgid "header value"
+msgstr ""
+
+#: src/bptl/work_units/brp/models.py:32
+msgid "BRP Configuration"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/admin.py:21
+msgid "Callback URL"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/authentication.py:28
+msgid "Invalid basic header. No credentials provided."
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/authentication.py:32
+msgid "Invalid basic header. Credentials string should not contain spaces."
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/models.py:16
+msgid "authentication key"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/models.py:20
+msgid ""
+"The unique authentication key for ValidSign. This maps to the 'key' field in "
+"the callback creation (https://apidocs.validsign.nl/#operation/api.callback."
+"post). You should fill in this key when you configure the callback URL in "
+"the dashboard."
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/models.py:27
+msgid "ValidSign Configuration"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/models.py:42
+#: src/bptl/work_units/valid_sign/serializers.py:35
+msgid "package ID"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/models.py:46
+msgid "created package"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/models.py:47
+msgid "created packages"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/serializers.py:33
+msgid "event"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/serializers.py:37
+msgid "document ID"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/serializers.py:40
+msgid "new role ID"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/serializers.py:42
+msgid "message"
+msgstr ""
+
+#: src/bptl/work_units/valid_sign/serializers.py:43
+msgid "created"
+msgstr ""
+
+#: src/bptl/work_units/zgw/models.py:11
+msgid "alias"
+msgstr ""
+
+#: src/bptl/work_units/zgw/models.py:17
+msgid "default service"
+msgstr ""
+
+#: src/bptl/work_units/zgw/models.py:18
+msgid "default services"
+msgstr ""

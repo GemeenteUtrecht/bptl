@@ -91,12 +91,13 @@ INSTALLED_APPS = [
     "bptl.work_units.kownsl",
     "bptl.work_units.zgw",
     "bptl.work_units.valid_sign",
+    "bptl.work_units.email",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    # 'django.middleware.locale.LocaleMiddleware',
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
