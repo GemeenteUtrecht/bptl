@@ -49,20 +49,21 @@ class SendEmailTests(TestCase):
             },
         }
 
-    # def test_send_email_happy(self):
-    #     task = ExternalTask.objects.create(**self.task_dict)
-    #     send_mail = SendEmailTask(task)
-    #     send_mail.perform()
+    def test_send_email_happy(self):
+        task = ExternalTask.objects.create(**self.task_dict)
+        send_mail = SendEmailTask(task)
+        send_mail.perform()
 
-    #     self.assertEqual(len(mail.outbox), 1)
-    #     email = mail.outbox[0]
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
 
-    #     self.assertEqual(
-    #         email.body,
-    #         """Beste Jan Janssen,\n\nDit is pas leuk.\n\nMet vriendelijke groeten,\n\nKees Koos""",
-    #     )
-    #     self.assertEqual(email.subject, "HERINNERING: Vakantiepret")
-    #     self.assertEqual(email.to, ["jan.janssen@test.test"])
+        self.assertEqual(
+            email.body,
+            """Beste Jan Janssen,\n\nDit is pas leuk.\n\nMet vriendelijke groeten,\n\nKees Koos""",
+        )
+        self.assertEqual(email.subject, "HERINNERING: Vakantiepret")
+        self.assertEqual(email.to, ["jan.janssen@test.test"])
+        self.assertEqual(email.reply_to, ["kees.koos@test.test"])
 
     def test_send_email_missing_variable(self):
         task_dict = copy.deepcopy(self.task_dict)
@@ -70,65 +71,75 @@ class SendEmailTests(TestCase):
         task = ExternalTask.objects.create(**task_dict)
         send_mail = SendEmailTask(task)
 
-        #with self.assertRaises(Exception) as e:
-        send_mail.perform()
-
+        with self.assertRaises(Exception) as e:
+            send_mail.perform()
         self.assertEqual(type(e.exception), MissingVariable)
-        self.assertTrue("The variable receiver is missing or empty." in str(e.exception))
+        self.assertTrue("receiver" in e.exception.args[0])
+        self.assertTrue("Dit veld is vereist." in e.exception.args[0]["receiver"][0])
 
         task_dict = copy.deepcopy(self.task_dict)
         task_dict["variables"]["sender"] = {
-                    "type": "Json",
-                    "value": '{"email":"", "name":"Kees Koos"}',
-                    "valueInfo": {},
-                }
+            "type": "Json",
+            "value": '{"email":"", "name":"Kees Koos"}',
+            "valueInfo": {},
+        }
+        task = ExternalTask.objects.create(**task_dict)
+        send_mail = SendEmailTask(task)
+        with self.assertRaises(Exception) as e:
+            send_mail.perform()
+
+        self.assertEqual(type(e.exception), MissingVariable)
+        self.assertTrue("sender" in e.exception.args[0])
+        self.assertTrue("email" in e.exception.args[0]["sender"])
+        self.assertTrue(
+            "Dit veld mag niet leeg zijn." in e.exception.args[0]["sender"]["email"][0]
+        )
+
+    def test_send_email_review_template(self):
+        task_dict = copy.deepcopy(self.task_dict)
+        task_dict["variables"]["template"] = {
+            "type": "String",
+            "value": "advies",
+            "valueInfo": {},
+        }
         task = ExternalTask.objects.create(**task_dict)
         send_mail = SendEmailTask(task)
         send_mail.perform()
 
-#     def test_send_email_review_template(self):
-#         task_dict = copy.deepcopy(self.task_dict)
-#         task_dict["variables"]["template"] = {
-#             "type": "String",
-#             "value": "advies",
-#             "valueInfo": {},
-#         }
-#         task = ExternalTask.objects.create(**task_dict)
-#         send_mail = SendEmailTask(task)
-#         send_mail.perform()
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
 
-#         self.assertEqual(len(mail.outbox), 1)
-#         email = mail.outbox[0]
+        self.assertEqual(
+            email.body,
+            """Beste Jan Janssen,
 
-#         self.assertEqual(
-#             email.body,
-#             """Beste Jan Janssen,
+HERINNERING: Uw advies is vereist. U heeft tot 20 april 2020 16:20 om te reageren.
 
-# HERINNERING: Uw advies is vereist. U heeft tot 20 april 2020 16:20 om te reageren.
+Ga alstublieft hierheen: test.com
 
-# Klik alstublieft <a href="test.com">hier</a>.
+Dit is pas leuk.
 
-# Dit is pas leuk.
+Met vriendelijke groeten,
 
-# Met vriendelijke groeten,
+Kees Koos""",
+        )
+        self.assertEqual(email.subject, "HERINNERING: Vakantiepret")
+        self.assertEqual(email.to, ["jan.janssen@test.test"])
 
-# Kees Koos""",
-#         )
-#         self.assertEqual(email.subject, "HERINNERING: Vakantiepret")
-#         self.assertEqual(email.to, ["jan.janssen@test.test"])
+    def test_send_email_invalid_review_template(self):
+        task_dict = copy.deepcopy(self.task_dict)
+        task_dict["variables"]["template"] = {
+            "type": "String",
+            "value": "lelijk",
+            "valueInfo": {},
+        }
+        task = ExternalTask.objects.create(**task_dict)
+        send_mail = SendEmailTask(task)
 
-#     def test_send_email_invalid_review_template(self):
-#         task_dict = copy.deepcopy(self.task_dict)
-#         task_dict["variables"]["template"] = {
-#             "type": "String",
-#             "value": "lelijk",
-#             "valueInfo": {},
-#         }
-#         task = ExternalTask.objects.create(**task_dict)
-#         send_mail = SendEmailTask(task)
+        with self.assertRaises(Exception) as e:
+            send_mail.perform()
 
-#         with self.assertRaises(Exception) as e:
-#             send_mail.perform()
-
-#         self.assertEqual(type(e.exception), ValidationError)
-#         self.assertTrue('"lelijk" is een ongeldige keuze.' in str(e.exception))
+        self.assertEqual(type(e.exception), MissingVariable)
+        self.assertTrue(
+            '"lelijk" is een ongeldige keuze.' in e.exception.args[0]["template"][0]
+        )

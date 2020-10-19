@@ -1,16 +1,16 @@
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.forms.models import model_to_dict
 from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
+
 from rest_framework.serializers import ValidationError
 from zgw_consumers.api_models.base import factory
 
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
-from .serializers import SendEmailSerializer, VALID_TEMPLATE_CHOICES
-from .data import SendEmail
+from .serializers import VALID_TEMPLATE_CHOICES, SendEmailSerializer
 
 __all__ = ["SendEmailTask"]
 
@@ -59,9 +59,7 @@ class SendEmailTask(WorkUnit):
 
     def perform(self):
         variables = self.task.get_variables()
-        send_email = factory(SendEmail, {'variables':variables})
-        print(model_to_dict(send_email))
-        send_email = SendEmailSerializer(data=send_email)
+        send_email = SendEmailSerializer(data=variables)
         send_email.is_valid(raise_exception=True)
         send_email = send_email.validated_data
 
@@ -86,9 +84,11 @@ class SendEmailTask(WorkUnit):
 
         # Render and send
         email_message = email_template.render(email_context)
-        send_mail(
+        email = EmailMessage(
             subject=send_email["email"]["subject"],
-            message=email_message,
+            body=email_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[send_email["receiver"]["email"]],
+            reply_to=[send_email["sender"]["email"]],
+            to=[send_email["receiver"]["email"]],
         )
+        email.send(fail_silently=False)
