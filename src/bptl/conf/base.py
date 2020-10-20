@@ -11,6 +11,8 @@ try:
 except ImportError:  # no celery in this proejct
     celery = None
 
+from .environ import config
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 DJANGO_PROJECT_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), os.path.pardir)
@@ -205,8 +207,18 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 
 FIXTURE_DIRS = (os.path.join(DJANGO_PROJECT_DIR, "fixtures"),)
 
-DEFAULT_FROM_EMAIL = "bptl@example.com"
+#
+# Sending EMAIL
+#
+EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+# disabled on Google Cloud, use 487 instead
+EMAIL_PORT = config("EMAIL_PORT", default=25)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False)
 EMAIL_TIMEOUT = 10
+
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "bptl@example.com")
 
 LOGGING_DIR = os.path.join(BASE_DIR, "log")
 
