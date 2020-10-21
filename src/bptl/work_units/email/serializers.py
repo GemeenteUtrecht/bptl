@@ -26,7 +26,7 @@ class ContextSerializer(serializers.Serializer):
 
 class EmailSerializer(serializers.Serializer):
     subject = serializers.CharField(required=True)
-    content = serializers.CharField(required=True)
+    content = serializers.CharField(required=True, allow_blank=True)
 
 
 class SendEmailSerializer(serializers.Serializer):
