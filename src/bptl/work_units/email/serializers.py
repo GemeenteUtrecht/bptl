@@ -21,7 +21,7 @@ class EmailPersonSerializer(serializers.Serializer):
 class ContextSerializer(serializers.Serializer):
     kownslFrontendUrl = serializers.CharField(required=False)
     reminder = serializers.BooleanField(required=False)
-    deadline = serializers.DateTimeField(required=False)
+    deadline = serializers.DateField(required=False)
 
 
 class EmailSerializer(serializers.Serializer):

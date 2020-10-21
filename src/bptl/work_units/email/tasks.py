@@ -53,7 +53,7 @@ class SendEmailTask(WorkUnit):
                 {
                     "kownslFrontendUrl": "https://kownsl.utrechtproeftuin.nl/kownsl/<uuid>/",
                     "reminder": True/False,
-                    "deadline`": "2020-04-20 16:20:00+00:00",
+                    "deadline`": "2020-04-20",
                 }
     """
 

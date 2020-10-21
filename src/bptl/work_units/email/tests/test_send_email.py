@@ -43,7 +43,7 @@ class SendEmailTests(TestCase):
                 },
                 "context": {
                     "type": "Json",
-                    "value": '{"reminder": "True", "deadline": "2020-04-20 16:20", "kownslFrontendUrl":"test.com"}',
+                    "value": '{"reminder": "True", "deadline": "2020-04-20", "kownslFrontendUrl":"test.com"}',
                     "valueInfo": {},
                 },
             },
@@ -113,7 +113,7 @@ class SendEmailTests(TestCase):
             email.body,
             """Beste Jan Janssen,
 
-HERINNERING: Uw advies is vereist. U heeft tot 20 april 2020 16:20 om te reageren.
+HERINNERING: Uw advies is vereist. U heeft tot 20 april 2020 om te reageren.
 
 Ga alstublieft hierheen: test.com
 
