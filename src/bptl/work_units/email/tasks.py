@@ -1,11 +1,6 @@
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.forms.models import model_to_dict
 from django.template.loader import get_template
-from django.utils.translation import ugettext_lazy as _
-
-from rest_framework.serializers import ValidationError
-from zgw_consumers.api_models.base import factory
 
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
@@ -13,7 +8,6 @@ from bptl.tasks.registry import register
 from .serializers import VALID_TEMPLATE_CHOICES, SendEmailSerializer
 
 __all__ = ["SendEmailTask"]
-
 
 @register
 class SendEmailTask(WorkUnit):
