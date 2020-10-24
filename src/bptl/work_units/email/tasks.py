@@ -9,6 +9,7 @@ from .serializers import VALID_TEMPLATE_CHOICES, SendEmailSerializer
 
 __all__ = ["SendEmailTask"]
 
+
 @register
 class SendEmailTask(WorkUnit):
     """This task sends an email to ``receiver`` signed by ``sender``.

@@ -9,6 +9,7 @@ import requests
 
 from .models import ZACConfig
 
+
 class ZACClient:
     task = None
 
@@ -19,7 +20,6 @@ class ZACClient:
 
     def get(self, path: str, *args, **kwargs):
         url = urljoin(self.api_root, path)
-
         # add the API headers
         headers = kwargs.pop("headers", {})
         headers.update(self.auth)
@@ -28,5 +28,4 @@ class ZACClient:
 
         response = requests.get(url, *args, **kwargs)
         response.raise_for_status()
-
-        return response.json()
+        return response
