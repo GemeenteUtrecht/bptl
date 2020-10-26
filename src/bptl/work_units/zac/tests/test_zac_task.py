@@ -26,7 +26,7 @@ class ZacTaskTests(TestCase):
             "worker_id": "test-worker-id",
             "task_id": "test-task-id",
             "variables": {
-                "kownslUsers": {
+                "usernames": {
                     "type": "Json",
                     "value": '["thor", "loki"]',
                     "valueInfo": {},

@@ -28,7 +28,7 @@ def get_review_request(task: BaseTask) -> dict:
     """
     variables = task.get_variables()
 
-    zaak_url = check_variable(variables, "zaakUrl")
+    zaak_url = check_variable(variables, "hoofdZaakUrl")
     client = get_client(task)
     resp_data = client.list(
         "reviewrequest",
@@ -161,7 +161,7 @@ def get_review_response_status(task: BaseTask) -> list:
 
     * ``reviewRequestId``: the identifier of the Kowns review request, used to update
       the object in the API.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
+    * ``hoofdZaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**
@@ -230,7 +230,7 @@ def get_review_request_reminder_date(task: BaseTask) -> str:
 
     * ``reviewRequestId``: the identifier of the Kowns review request, used to update
       the object in the API.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
+    * ``hoofdZaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**

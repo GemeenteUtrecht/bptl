@@ -51,7 +51,7 @@ class UserDetailsTask(WorkUnit):
     def get_client_response(self) -> Response:
         client = ZACClient()
         variables = self.task.get_variables()
-        usernames = check_variable(variables, "kownslUsers")
+        usernames = check_variable(variables, "usernames")
         url = f"accounts/api/users?filter_users={','.join(usernames)}&include=True"
         response = client.get(url)
         return response

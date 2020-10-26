@@ -53,7 +53,7 @@ class KownslAPITests(TestCase):
             "worker_id": "test-worker-id",
             "task_id": "test-task-id",
             "variables": {
-                "zaakUrl": {
+                "hoofdZaakUrl": {
                     "type": "String",
                     "value": "https://zaken.nl/api/v1/zaak/123",
                     "valueInfo": {},
