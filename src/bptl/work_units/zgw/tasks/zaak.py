@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from zgw_consumers.constants import APITypes
 
+from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
@@ -231,3 +232,61 @@ class CloseZaakTask(ZGWWorkUnit):
             "archiefnominatie": resultaat["archiefnominatie"],
             "archiefactiedatum": resultaat["archiefactiedatum"],
         }
+
+
+@register
+class LookupZaak(ZGWWorkUnit):
+    """
+    Look up a single ZAAK by identificatie and bronorganisatie.
+
+    This task looks up the referenced zaak, and if found sets the zaakUrl as a
+    process variable. If not found, the variable will be empty.
+
+    You can use this to check if the referenced ZAAK does indeed exist, and relate
+    it to other objects.
+
+    **Required process variables**
+
+    * ``identificatie``: identification of the zaak, commonly known as "zaaknummer"
+    * ``bronorganisatie``: RSIN of the source organization for the zaak. The combination
+        of identificatie and bronorganisatie uniquely identifies a zaak.
+    * ``services``: JSON Object of connection details for ZGW services:
+
+        .. code-block:: json
+
+          {
+              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
+          }
+
+    **Optional process variables (Camunda exclusive)**
+
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+
+    **Sets the process variables**
+
+    * ``zaakUrl``: the URL reference of the retrieved zaak, if retrieved at all. If the
+        zaak was not found, the value will be ``null``
+    """
+
+    def perform(self) -> Dict[str, Optional[str]]:
+        variables = self.task.get_variables()
+        client_zrc = self.get_client(APITypes.zrc)
+
+        identificatie = check_variable(variables, "identificatie")
+        bronorganisatie = check_variable(variables, "bronorganisatie")
+
+        zaken: dict = client_zrc.list(
+            "zaak",
+            {
+                "bronorganisatie": bronorganisatie,
+                "identificatie": identificatie,
+            },
+        )
+
+        # paginated response
+        if zaken["results"]:
+            zaak_url = zaken["results"][0]["url"]
+        else:
+            zaak_url = None
+
+        return {"zaakUrl": zaak_url}
