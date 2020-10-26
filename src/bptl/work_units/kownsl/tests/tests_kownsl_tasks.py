@@ -29,8 +29,7 @@ class KownslAPITests(TestCase):
         super().setUpTestData()
 
         mapping = TaskMapping.objects.create(
-            topic_name="get-review-response-status",
-            callback="bptl.work_units.kownsl.tasks.zaak.get_review_response_status",
+            topic_name="some-topic",
         )
 
         cls.service = Service.objects.create(
@@ -50,7 +49,7 @@ class KownslAPITests(TestCase):
         )
 
         cls.task_dict = {
-            "topic_name": "get-review-response-status",
+            "topic_name": "some-topic",
             "worker_id": "test-worker-id",
             "task_id": "test-task-id",
             "variables": {
