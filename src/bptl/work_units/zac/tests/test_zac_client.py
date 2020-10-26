@@ -2,7 +2,6 @@ from django.test import TestCase
 
 import requests_mock
 
-from bptl.camunda.models import ExternalTask
 from bptl.work_units.zac.client import ZACClient
 from bptl.work_units.zac.models import ZACConfig
 
@@ -36,7 +35,7 @@ class ZacTaskTests(TestCase):
             "Token ThisIsNotTheGreatestTokenInTheWorldThisIsJustATribute",
         )
 
-        m.get(ZAC_API_ROOT, json={"lol": "lol"})
+        m.get(ZAC_API_ROOT, json={})
 
         response = self.client.get("")
         self.assertEqual(response.status_code, 200)

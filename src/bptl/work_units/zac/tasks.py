@@ -12,27 +12,40 @@ from .serializers import ZacUsersDetailsSerializer
 @register
 class UserDetailsTask(WorkUnit):
     """
-    In the camunda process model we have a list of usernames from
-    the zac. In order to send the emails, we will need to fetch
+    Requests email and name data from usernames from the zac.
+
+    In the camunda process models accorderen/adviseren we have a list of usernames from
+    the zac. In order to send signalling emails, we will need to fetch
     the email addresses and names from the zac and feed it back to the camunda process.
 
     In this first implementation a simple and direct get request is done
     at the zac.accounts.api endpoint.
 
-    In following iterations we will have to make use of OAS or maybe
-    communicate through camunda.
-
-    This task requests email and name data from usernames from the zac.
+    The task requires the service with alias "zac" to be configured in the work_unit
+    services and be registered in the ZAC where the token will be set.
 
     **Required process variables**
 
     * ``usernames``: JSON with usernames.
         .. code-block:: json
                 [
-                    "thor",
-                    "loki",
-                    "odin",
+                    "user1",
+                    "user2",
+                    "user3",
                 ]
+
+    **Sets the process variables**
+
+    * ``userData``: a JSON-object containing a list of user names and emails:
+
+      .. code-block:: json
+            [
+                {
+                    "name": "FirstName LastName"
+                    "email": "test@test.nl"
+                },
+            ]
+
     """
 
     def get_client_response(self) -> Response:
@@ -51,4 +64,7 @@ class UserDetailsTask(WorkUnit):
     def perform(self) -> dict:
         response = self.get_client_response()
         validated_data = self.validate_data(response.json())
-        return json.dumps(validated_data["results"])
+        validated_data = json.dumps(validated_data["results"])
+        return {
+            "userData": json.loads(validated_data),
+        }

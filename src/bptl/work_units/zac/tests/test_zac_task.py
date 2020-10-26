@@ -70,9 +70,9 @@ class ZacTaskTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), zac_mock_data)
 
-        cleaned_data = json.loads(task.perform())
-        self.assertEqual(len(cleaned_data), 2)
-        for user in cleaned_data:
+        cleaned_data = task.perform()
+        self.assertEqual(len(cleaned_data["userData"]), 2)
+        for user in cleaned_data["userData"]:
             self.assertTrue("name" in user)
             self.assertTrue("email" in user)
 
@@ -101,9 +101,9 @@ class ZacTaskTests(TestCase):
 
         m.get(FILTER_USERS_URL, json=zac_mock_data)
         task = UserDetailsTask(self.task)
-        cleaned_data = json.loads(task.perform())
-        self.assertEqual(len(cleaned_data), 2)
-        for user in cleaned_data:
+        cleaned_data = task.perform()
+        self.assertEqual(len(cleaned_data["userData"]), 2)
+        for user in cleaned_data["userData"]:
             self.assertEqual(user["name"], "Medewerker")
 
     def test_get_user_details_missing_first_and_last_names_alternatively(self, m):
@@ -131,9 +131,9 @@ class ZacTaskTests(TestCase):
 
         m.get(FILTER_USERS_URL, json=zac_mock_data)
         task = UserDetailsTask(self.task)
-        cleaned_data = json.loads(task.perform())
-        self.assertEqual(len(cleaned_data), 2)
-        for user in cleaned_data:
+        cleaned_data = task.perform()
+        self.assertEqual(len(cleaned_data["userData"]), 2)
+        for user in cleaned_data["userData"]:
             if user["firstName"] == "loki":
                 self.assertEqual(user["name"], "Loki")
             elif user["lastName"] == "Odinson":
