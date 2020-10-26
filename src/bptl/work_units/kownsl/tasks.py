@@ -149,7 +149,7 @@ def get_approval_status(task: BaseTask) -> dict:
 
 
 @register
-def get_review_response_status(task: BaseTask) -> list:
+def get_review_response_status(task: BaseTask) -> dict:
     """
     Get the reviewers who have not yet responded to a review request so that
     a reminder email can be sent to them if they exist.
@@ -218,7 +218,7 @@ def get_review_response_status(task: BaseTask) -> list:
 
 
 @register
-def get_review_request_reminder_date(task: BaseTask) -> str:
+def get_review_request_reminder_date(task: BaseTask) -> dict:
     """
     Get the reminder for the set of reviewers who are requested.
     The returned value is the deadline minus one day.
