@@ -15,7 +15,7 @@ class UserDetailsTask(WorkUnit):
     Requests email and name data from usernames from the zac.
 
     In the camunda process models accorderen/adviseren we have a list of usernames from
-    the zac. In order to send signalling emails, we will need to fetch
+    the zac. In order to send signaling emails, we will need to fetch
     the email addresses and names from the zac and feed it back to the camunda process.
 
     In this first implementation a simple and direct get request is done
@@ -28,6 +28,7 @@ class UserDetailsTask(WorkUnit):
 
     * ``usernames``: JSON with usernames.
         .. code-block:: json
+        
                 [
                     "user1",
                     "user2",
@@ -39,11 +40,12 @@ class UserDetailsTask(WorkUnit):
     * ``userData``: a JSON-object containing a list of user names and emails:
 
       .. code-block:: json
+      
             [
                 {
                     "name": "FirstName LastName"
                     "email": "test@test.nl"
-                },
+                }
             ]
 
     """

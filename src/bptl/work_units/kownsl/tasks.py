@@ -169,6 +169,7 @@ def get_review_response_status(task: BaseTask) -> dict:
     * ``remindThese``: a JSON-object containing a list of usernames who need reminding:
 
       .. code-block:: json
+
             [
                 "user1",
                 "user2",
@@ -178,10 +179,10 @@ def get_review_response_status(task: BaseTask) -> dict:
     # Get the review request with id as given in variables
     review_request = get_review_request(task)
 
-    review_request_id = review_request.get("id")
+    review_request_id = review_request["id"]
 
     # Get review request type to set operation_id
-    review_type = review_request.get("review_type")
+    review_type = review_request["review_type"]
     if review_type == "approval":
         operation_id = "reviewrequest_approvals"
     else:
