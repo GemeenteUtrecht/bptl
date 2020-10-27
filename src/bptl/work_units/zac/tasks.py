@@ -21,14 +21,11 @@ class UserDetailsTask(WorkUnit):
     In this first implementation a simple and direct get request is done
     at the zac.accounts.api endpoint.
 
-    The task requires the service with alias "zac" to be configured in the work_unit
-    services and be registered in the ZAC where the token will be set.
-
     **Required process variables**
 
     * ``usernames``: JSON with usernames.
         .. code-block:: json
-        
+
                 [
                     "user1",
                     "user2",
@@ -40,10 +37,10 @@ class UserDetailsTask(WorkUnit):
     * ``userData``: a JSON-object containing a list of user names and emails:
 
       .. code-block:: json
-      
+
             [
                 {
-                    "name": "FirstName LastName"
+                    "name": "FirstName LastName",
                     "email": "test@test.nl"
                 }
             ]
@@ -54,8 +51,9 @@ class UserDetailsTask(WorkUnit):
         client = ZACClient()
         variables = self.task.get_variables()
         usernames = check_variable(variables, "usernames")
-        url = f"accounts/api/users?filter_users={','.join(usernames)}&include=True"
-        response = client.get(url)
+        url = f"accounts/api/users"
+        params = {"filter_users": ",".join(usernames), "include": True}
+        response = client.get(url, params=params)
         return response
 
     def validate_data(self, data: dict) -> dict:

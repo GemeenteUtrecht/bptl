@@ -28,7 +28,7 @@ def get_review_request(task: BaseTask) -> dict:
     """
     variables = task.get_variables()
 
-    zaak_url = check_variable(variables, "hoofdZaakUrl")
+    zaak_url = check_variable(variables, "zaakUrl")
     client = get_client(task)
     resp_data = client.list(
         "reviewrequest",
@@ -59,8 +59,7 @@ def finalize_review_request(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``reviewRequestId``: the identifier of the Kowns review request, used to update
-      the object in the API.
+    * ``reviewRequestId``: the identifier of the Kownsl review request.
     * ``zaakUrl``: URL reference to the zaak used for the review itself.
 
     **Sets the process variables**
@@ -100,8 +99,7 @@ def get_approval_status(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``reviewRequestId``: the identifier of the Kowns review request, used to update
-      the object in the API.
+    * ``reviewRequestId``: the identifier of the Kownsl review request.
     * ``zaakUrl``: URL reference to the zaak used for the review itself.
 
     **Sets the process variables**
@@ -159,9 +157,8 @@ def get_review_response_status(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``reviewRequestId``: the identifier of the Kowns review request, used to update
-      the object in the API.
-    * ``hoofdZaakUrl``: URL reference to the zaak used for the review itself.
+    * ``reviewRequestId``: the identifier of the Kownsl review request.
+    * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**
@@ -229,9 +226,8 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``reviewRequestId``: the identifier of the Kowns review request, used to update
-      the object in the API.
-    * ``hoofdZaakUrl``: URL reference to the zaak used for the review itself.
+    * ``reviewRequestId``: the identifier of the Kownsl review request.
+    * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**
@@ -254,5 +250,87 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
     reminder = deadline - datetime.timedelta(days=1)
     reminder_str = reminder.strftime("%Y-%m-%d")
     return {
+        "deadline": deadline_str,
         "reminderDate": reminder_str,
+    }
+
+
+@register
+def get_email_details(task: BaseTask) -> dict:
+    """
+    Get email details required to build the email that is sent from the
+    accordeer/adviseer sub processes in Camunda.
+
+    **Required process variables**
+
+    * ``reviewRequestId``: the identifier of the Kownsl review request.
+    * ``zaakUrl``: URL reference to the zaak used for the review itself.
+    * ``deadline``: deadline of the review request.
+    * ``kownslFrontendUrl``: URL that takes you to the review request.
+
+    **Sets the process variables**
+
+    * ``email``: a JSON that holds the email content and subject.
+      .. code-block:: json
+
+            {
+                "subject": "Email subject",
+                "content": "Email content",
+            }
+
+    * ``context``: a JSON that holds data relevant to the email:
+      .. code-block:: json
+
+            {
+                "deadline": "2020-12-31",
+                "kownslFrontendUrl": "somekownslurl",
+                "reminder": True/False,
+            }
+
+    * ``template``: a string that determines which template will be used for the email.
+    * ``senderUsername``: a list that holds a string of the review requester's username.
+    This is used to determine the email's sender's details.
+    """
+    # Get review request
+    review_request = get_review_request(task)
+
+    # Get review request requester
+    requester = review_request["requester"]
+
+    # Set template
+    template = (
+        "accordering" if review_request["review_type"] == "approval" else "advies"
+    )
+
+    # Get other variables
+    variables = task.get_variables()
+
+    # Get kownslFrontendUrl
+    kownsl_frontend_url = check_variable(variables, "kownslFrontendUrl")
+
+    # Get deadline
+    deadline_str = check_variable(variables, "deadline")
+
+    # Get reminder
+    deadline = datetime.datetime.strptime(deadline_str, "%Y-%m-%d")
+    reminder = datetime.datetime.now() + datetime.timedelta(days=1) >= deadline
+
+    # Set email process variable
+    email = {
+        "subject": f"Uw {template} wordt gevraagd",
+        "content": "",
+    }
+
+    # Set context process variable
+    context = {
+        "deadline": deadline_str,
+        "kownslFrontendUrl": kownsl_frontend_url,
+        "reminder": reminder,
+    }
+
+    return {
+        "email": email,
+        "context": context,
+        "template": template,
+        "senderUsername": requester,
     }

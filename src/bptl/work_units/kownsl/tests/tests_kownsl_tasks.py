@@ -1,4 +1,5 @@
 import copy
+import datetime
 import json
 
 from django.test import TestCase
@@ -11,6 +12,7 @@ from bptl.camunda.models import ExternalTask
 from bptl.tasks.models import TaskMapping
 from bptl.work_units.kownsl.tasks import (
     get_client,
+    get_email_details,
     get_review_request,
     get_review_request_reminder_date,
     get_review_response_status,
@@ -53,7 +55,7 @@ class KownslAPITests(TestCase):
             "worker_id": "test-worker-id",
             "task_id": "test-task-id",
             "variables": {
-                "hoofdZaakUrl": {
+                "zaakUrl": {
                     "type": "String",
                     "value": "https://zaken.nl/api/v1/zaak/123",
                     "valueInfo": {},
@@ -181,3 +183,65 @@ class KownslAPITests(TestCase):
 
         reminderDate = get_review_request_reminder_date(task)
         self.assertEqual(reminderDate["reminderDate"], "2020-04-19")
+
+    def test_get_email_details(self, m):
+        rr_response = [
+            {
+                "id": "1",
+                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
+                "review_type": "advice",
+                "requester": "Pietje",
+            },
+        ]
+        m.get(
+            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            json=rr_response,
+        )
+
+        task_dict = copy.deepcopy(self.task_dict)
+        task_dict["variables"].update(
+            {
+                "kownslFrontendUrl": {
+                    "type": "String",
+                    "value": "a-url.test",
+                    "valueInfo": {},
+                },
+                "deadline": {
+                    "type": "String",
+                    "value": "2020-04-01",
+                    "valueInfo": {},
+                },
+            }
+        )
+
+        task = ExternalTask.objects.create(
+            **task_dict,
+        )
+
+        email_details = get_email_details(task)
+        self.assertTrue("email" in email_details)
+        self.assertEqual(
+            email_details["email"],
+            {
+                "subject": "Uw advies wordt gevraagd",
+                "content": "",
+            },
+        )
+
+        reminder = datetime.datetime.now() + datetime.timedelta(
+            days=1
+        ) >= datetime.datetime(2020, 4, 20, 0, 0, 0)
+        self.assertEqual(
+            email_details["context"],
+            {
+                "deadline": "2020-04-01",
+                "kownslFrontendUrl": "a-url.test",
+                "reminder": reminder,
+            },
+        )
+
+        self.assertTrue("template" in email_details)
+        self.assertEqual(email_details["template"], "advies")
+
+        self.assertTrue("senderUsername" in email_details)
+        self.assertEqual(email_details["senderUsername"], ["Pietje"])
