@@ -17,7 +17,7 @@ chardet==3.0.4            # via -r requirements/base.txt, requests
 coreapi==2.3.3            # via -r requirements/base.txt, drf-yasg
 coreschema==0.0.4         # via -r requirements/base.txt, coreapi, drf-yasg
 coverage==4.5.4           # via -r requirements/test-tools.in
-cryptography==2.8         # via -r requirements/base.txt, django-auth-adfs
+cryptography==3.2         # via -r requirements/base.txt, django-auth-adfs
 cssselect==1.1.0          # via pyquery
 defusedxml==0.6.0         # via -r requirements/base.txt, django-camunda
 django-admin-index==1.2.3  # via -r requirements/base.txt
