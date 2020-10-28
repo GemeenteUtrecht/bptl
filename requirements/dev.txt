@@ -21,7 +21,7 @@ click==7.1.2              # via black, pip-tools
 coreapi==2.3.3            # via -r requirements/ci.txt, drf-yasg
 coreschema==0.0.4         # via -r requirements/ci.txt, coreapi, drf-yasg
 coverage==4.5.4           # via -r requirements/ci.txt
-cryptography==2.8         # via -r requirements/ci.txt, django-auth-adfs
+cryptography==3.2.1       # via -r requirements/ci.txt, django-auth-adfs
 cssselect==1.1.0          # via -r requirements/ci.txt, pyquery
 defusedxml==0.6.0         # via -r requirements/ci.txt, django-camunda
 django-admin-index==1.2.3  # via -r requirements/ci.txt
@@ -64,7 +64,6 @@ freezegun==0.3.12         # via -r requirements/ci.txt
 gemma-zds-client==0.13.2  # via -r requirements/ci.txt, zgw-consumers
 idna==2.8                 # via -r requirements/ci.txt, requests
 imagesize==1.2.0          # via -r requirements/ci.txt, sphinx
-importlib-metadata==1.7.0  # via -r requirements/ci.txt, kombu
 inflection==0.3.1         # via -r requirements/ci.txt, django-camunda, drf-yasg
 isort==5.0.5              # via -r requirements/dev.in
 itypes==1.1.0             # via -r requirements/ci.txt, coreapi
@@ -126,7 +125,6 @@ webob==1.8.5              # via -r requirements/ci.txt, webtest
 webtest==2.0.33           # via -r requirements/ci.txt, django-webtest
 wheel==0.29.0             # via -r requirements/ci.txt, django-docutils
 zgw-consumers==0.12.2     # via -r requirements/ci.txt
-zipp==3.1.0               # via -r requirements/ci.txt, importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip

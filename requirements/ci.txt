@@ -17,7 +17,7 @@ chardet==3.0.4            # via -r requirements/base.txt, requests
 coreapi==2.3.3            # via -r requirements/base.txt, drf-yasg
 coreschema==0.0.4         # via -r requirements/base.txt, coreapi, drf-yasg
 coverage==4.5.4           # via -r requirements/test-tools.in
-cryptography==2.8         # via -r requirements/base.txt, django-auth-adfs
+cryptography==3.2.1       # via -r requirements/base.txt, django-auth-adfs
 cssselect==1.1.0          # via pyquery
 defusedxml==0.6.0         # via -r requirements/base.txt, django-camunda
 django-admin-index==1.2.3  # via -r requirements/base.txt
@@ -56,7 +56,6 @@ freezegun==0.3.12         # via -r requirements/test-tools.in
 gemma-zds-client==0.13.2  # via -r requirements/base.txt, zgw-consumers
 idna==2.8                 # via -r requirements/base.txt, requests
 imagesize==1.2.0          # via -r requirements/base.txt, sphinx
-importlib-metadata==1.7.0  # via -r requirements/base.txt, kombu
 inflection==0.3.1         # via -r requirements/base.txt, django-camunda, drf-yasg
 itypes==1.1.0             # via -r requirements/base.txt, coreapi
 jinja2==2.11.1            # via -r requirements/base.txt, coreschema, sphinx
@@ -106,7 +105,6 @@ webob==1.8.5              # via webtest
 webtest==2.0.33           # via django-webtest
 wheel==0.29.0             # via -r requirements/base.txt, django-docutils
 zgw-consumers==0.12.2     # via -r requirements/base.txt
-zipp==3.1.0               # via -r requirements/base.txt, importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
