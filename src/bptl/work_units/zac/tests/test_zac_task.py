@@ -10,9 +10,7 @@ from bptl.work_units.zac.models import ZACConfig
 from bptl.work_units.zac.tasks import UserDetailsTask
 
 ZAC_API_ROOT = "https://zac.example.com/"
-FILTER_USERS_URL = (
-    f"{ZAC_API_ROOT}accounts/api/users?filter_users=thor,loki&Include=True"
-)
+FILTER_USERS_URL = f"{ZAC_API_ROOT}accounts/api/users?include=thor&include=loki"
 
 
 @requests_mock.Mocker()

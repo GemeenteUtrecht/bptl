@@ -51,9 +51,8 @@ class UserDetailsTask(WorkUnit):
         client = ZACClient()
         variables = self.task.get_variables()
         usernames = check_variable(variables, "usernames")
-        url = f"accounts/api/users"
-        params = {"filter_users": ",".join(usernames), "include": True}
-        response = client.get(url, params=params)
+        params = {"include": usernames}
+        response = client.get("accounts/api/users", params=params)
         return response
 
     def validate_data(self, data: dict) -> dict:
