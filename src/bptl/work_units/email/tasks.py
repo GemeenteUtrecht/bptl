@@ -18,38 +18,43 @@ class SendEmailTask(WorkUnit):
 
     * ``sender``: JSON with required fields email\* and name\* of sender.
         .. code-block:: json
-                {
-                    "email": "kees@example.com",
-                    "name": "Kees Koos"
-                }
+
+              {
+                "email": "kees@example.com",
+                "name": "Kees Koos"
+              }
 
     * ``receiver``: JSON with required fields email\* and name\* of receiver.
         .. code-block:: json
-                {
-                    "email": "jan@example.com",
-                    "name": "Jan Janssen"
-                }
+
+              {
+                "email": "jan@example.com",
+                "name": "Jan Janssen"
+              }
 
     * ``email``: JSON with required fields email subject\* and email content\*:
         .. code-block:: json
-                {
-                    "subject": "This is an example subject.",
-                    "content": "This is an example body."
-                }
+
+              {
+                "subject": "This is an example subject.",
+                "content": "This is an example body."
+              }
 
     * ``template``: string with template name. Valid choices are:
         .. code-block:: list
-                [
-                    generiek, accordering, advies,
-                ]
+
+              [
+                generiek, accordering, advies,
+              ]
 
     * ``context``: JSON with optional fields:
         .. code-block:: json
-                {
-                    "kownslFrontendUrl": "https://kownsl.utrechtproeftuin.nl/kownsl/<uuid>/",
-                    "reminder": True/False,
-                    "deadline`": "2020-04-20",
-                }
+
+              {
+                "kownslFrontendUrl": "https://kownsl.utrechtproeftuin.nl/kownsl/<uuid>/",
+                "reminder": True/False,
+                "deadline`": "2020-04-20",
+              }
     """
 
     def perform(self):

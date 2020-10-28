@@ -35,7 +35,7 @@ def get_review_request(task: BaseTask) -> dict:
         query_params={"for_zaak": zaak_url},
     )
 
-    request_id = check_variable(variables, "reviewRequestId")
+    request_id = check_variable(variables, "kownslReviewRequestId")
     for review_request in resp_data:
         if review_request["id"] == request_id:
             return review_request
@@ -99,7 +99,7 @@ def get_approval_status(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``reviewRequestId``: the identifier of the Kownsl review request.
+    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
     * ``zaakUrl``: URL reference to the zaak used for the review itself.
 
     **Sets the process variables**
@@ -118,7 +118,7 @@ def get_approval_status(task: BaseTask) -> dict:
     variables = task.get_variables()
 
     # TODO: switch from zaak-based retrieval to review-request based
-    review_request_id = check_variable(variables, "reviewRequestId")
+    review_request_id = check_variable(variables, "kownslReviewRequestId")
 
     operation_id = "reviewrequest_approvals"
     url = get_operation_url(
@@ -157,7 +157,7 @@ def get_review_response_status(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``reviewRequestId``: the identifier of the Kownsl review request.
+    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
     * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
@@ -226,13 +226,14 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``reviewRequestId``: the identifier of the Kownsl review request.
+    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
     * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**
 
-    * ``reminderDate``: a string containing the reminder date: "2020-02-29"
+    * ``reminderDate``: a string containing the reminder date: "2020-02-29".
+    * ``deadline``: a string containing the deadline date: "2020-03-01".
     """
     # Get kownslUsers
     variables = task.get_variables()
@@ -263,7 +264,7 @@ def get_email_details(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``reviewRequestId``: the identifier of the Kownsl review request.
+    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
     * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``deadline``: deadline of the review request.
     * ``kownslFrontendUrl``: URL that takes you to the review request.
@@ -332,5 +333,5 @@ def get_email_details(task: BaseTask) -> dict:
         "email": email,
         "context": context,
         "template": template,
-        "senderUsername": requester,
+        "senderUsername": [requester],
     }

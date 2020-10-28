@@ -60,7 +60,7 @@ class KownslAPITests(TestCase):
                     "value": "https://zaken.nl/api/v1/zaak/123",
                     "valueInfo": {},
                 },
-                "reviewRequestId": {
+                "kownslReviewRequestId": {
                     "type": "String",
                     "value": "1",
                     "valueInfo": {},
