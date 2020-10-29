@@ -244,7 +244,7 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
     user_deadlines = review_request["user_deadlines"]
 
     # Get deadline belonging to that specific set of kownslUsers
-    deadline_str = user_deadlines.get(kownsl_users[0])
+    deadline_str = user_deadlines[kownsl_users[0]]
     deadline = datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
 
     # Set reminder date - 1 day less than deadline

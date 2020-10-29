@@ -53,6 +53,7 @@ class UserDetailsTask(WorkUnit):
         usernames = check_variable(variables, "usernames")
         params = {"include": usernames}
         response = client.get("accounts/api/users", params=params)
+        response.raise_for_status()
         return response
 
     def validate_data(self, data: dict) -> dict:
@@ -63,7 +64,6 @@ class UserDetailsTask(WorkUnit):
     def perform(self) -> dict:
         response = self.get_client_response()
         validated_data = self.validate_data(response.json())
-        validated_data = json.dumps(validated_data["results"])
         return {
-            "userData": json.loads(validated_data),
+            "userData": validated_data["results"],
         }
