@@ -1,11 +1,6 @@
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.forms.models import model_to_dict
 from django.template.loader import get_template
-from django.utils.translation import ugettext_lazy as _
-
-from rest_framework.serializers import ValidationError
-from zgw_consumers.api_models.base import factory
 
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
@@ -23,38 +18,43 @@ class SendEmailTask(WorkUnit):
 
     * ``sender``: JSON with required fields email\* and name\* of sender.
         .. code-block:: json
-                {
-                    "email": "kees@example.com",
-                    "name": "Kees Koos"
-                }
+
+              {
+                "email": "kees@example.com",
+                "name": "Kees Koos"
+              }
 
     * ``receiver``: JSON with required fields email\* and name\* of receiver.
         .. code-block:: json
-                {
-                    "email": "jan@example.com",
-                    "name": "Jan Janssen"
-                }
+
+              {
+                "email": "jan@example.com",
+                "name": "Jan Janssen"
+              }
 
     * ``email``: JSON with required fields email subject\* and email content\*:
         .. code-block:: json
-                {
-                    "subject": "This is an example subject.",
-                    "content": "This is an example body."
-                }
+
+              {
+                "subject": "This is an example subject.",
+                "content": "This is an example body."
+              }
 
     * ``template``: string with template name. Valid choices are:
         .. code-block:: list
-                [
-                    generiek, accordering, advies,
-                ]
+
+              [
+                generiek, accordering, advies,
+              ]
 
     * ``context``: JSON with optional fields:
         .. code-block:: json
-                {
-                    "kownslFrontendUrl": "https://kownsl.utrechtproeftuin.nl/kownsl/<uuid>/",
-                    "reminder": True/False,
-                    "deadline`": "2020-04-20 16:20:00+00:00",
-                }
+
+              {
+                "kownslFrontendUrl": "https://kownsl.utrechtproeftuin.nl/kownsl/<uuid>/",
+                "reminder": True/False,
+                "deadline`": "2020-04-20",
+              }
     """
 
     def perform(self):
