@@ -14,6 +14,7 @@ services:
 
   web:
     build: .
+    image: scrumteamzgw/bptl:${IMAGE_TAG:-latest}
     environment: &web_env
       - DJANGO_SETTINGS_MODULE=bptl.conf.docker
       - SECRET_KEY=${SECRET_KEY:-8n47ma!3%cfdm3cgt)@1ozjo7+^!j+z18@+0f-2+!p6ba^kof_}
