@@ -1,6 +1,8 @@
 from django.test import TestCase
 
 import requests_mock
+from zgw_consumers.constants import APITypes, AuthTypes
+from zgw_consumers.models import Service
 
 from bptl.activiti.models import ServiceTask
 
@@ -22,9 +24,13 @@ class IsAboveAgeTaskTests(TestCase):
             variables={"burgerservicenummer": "999999011", "age": 18},
         )
         config = BRPConfig.get_solo()
-        config.api_root = BRP_API_ROOT
-        config.header_key = "X-Api-Key"
-        config.header_value = "12345"
+        config.service = Service.objects.create(
+            api_root=BRP_API_ROOT,
+            api_type=APITypes.orc,
+            auth_type=AuthTypes.api_key,
+            header_value="12345",
+            header_key="X-Api-Key",
+        )
         config.save()
 
     def test_above_age(self, m):

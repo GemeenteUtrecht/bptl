@@ -13,8 +13,8 @@ class ZACClient:
 
     def __init__(self, config=None):
         self.config = config or ZACConfig.get_solo()
-        self.api_root = self.config.api_root
-        self.auth = self.config.auth_header
+        self.api_root = self.config.service.api_root
+        self.auth = self.config.service.get_auth_header(self.api_root)
 
     def get(self, path: str, *args, **kwargs):
         url = urljoin(self.api_root, path)

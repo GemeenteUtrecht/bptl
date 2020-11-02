@@ -27,8 +27,8 @@ class BRPClient:
 
     def __init__(self, config=None):
         self.config = config or BRPConfig.get_solo()
-        self.api_root = self.config.api_root
-        self.auth = self.config.auth_header
+        self.api_root = self.config.service.api_root
+        self.auth = self.config.service.get_auth_header(self.api_root)
 
     def get(self, path: str, *args, **kwargs):
         url = urljoin(self.api_root, path)
@@ -53,7 +53,7 @@ class BRPClient:
         response_data = resp.json() if resp.content else None
 
         extra_data = {
-            "service_base_url": config.api_root,
+            "service_base_url": config.service.api_root,
             "request": {
                 "url": resp.url,
                 "method": resp.request.method,

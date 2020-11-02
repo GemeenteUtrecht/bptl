@@ -3,6 +3,8 @@ import json
 from django.test import TestCase
 
 import requests_mock
+from zgw_consumers.constants import APITypes, AuthTypes
+from zgw_consumers.models import Service
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import MissingVariable
@@ -36,7 +38,11 @@ class ZacTaskTests(TestCase):
         )
 
         config = ZACConfig.get_solo()
-        config.api_root = ZAC_API_ROOT
+        config.service = Service.objects.create(
+            api_root=ZAC_API_ROOT,
+            api_type=APITypes.orc,
+            auth_type=AuthTypes.no_auth,
+        )
         config.save()
 
     def test_get_user_details_happy(self, m):
