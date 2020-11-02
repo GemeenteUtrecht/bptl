@@ -1,6 +1,8 @@
 from django.test import TestCase
 
 import requests_mock
+from zgw_consumers.constants import APITypes, AuthTypes
+from zgw_consumers.models import Service
 
 from bptl.activiti.models import ServiceTask
 
@@ -18,7 +20,11 @@ class DegreeOfKinshipTests(TestCase):
         super().setUpTestData()
 
         config = BRPConfig.get_solo()
-        config.api_root = BRP_API_ROOT
+        config.service = Service.objects.create(
+            api_root=BRP_API_ROOT,
+            api_type=APITypes.orc,
+            auth_type=AuthTypes.no_auth,
+        )
         config.save()
 
     def test_same_bsn(self, m):
