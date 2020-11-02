@@ -1,5 +1,3 @@
-import json
-
 from requests import Response
 
 from bptl.tasks.base import WorkUnit, check_variable

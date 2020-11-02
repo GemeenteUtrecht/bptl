@@ -3,8 +3,6 @@ Implements a ZAC client.
 """
 from urllib.parse import urljoin
 
-from django.conf import settings
-
 import requests
 
 from .models import ZACConfig
@@ -24,7 +22,6 @@ class ZACClient:
         headers = kwargs.pop("headers", {})
         headers.update(self.auth)
         kwargs["headers"] = headers
-        params = kwargs.get("params")
 
         response = requests.get(url, *args, **kwargs)
         response.raise_for_status()
