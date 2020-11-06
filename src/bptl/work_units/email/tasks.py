@@ -77,7 +77,7 @@ class SendEmailTask(WorkUnit):
         email_template = get_template(template_path)
 
         # If email is a reminder, add reminder to subject line
-        if send_email["context"]["reminder"]:
+        if send_email["context"].get("reminder", ""):
             send_email["email"][
                 "subject"
             ] = f"HERINNERING: {send_email['email']['subject']}"
