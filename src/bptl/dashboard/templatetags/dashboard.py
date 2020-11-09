@@ -1,5 +1,6 @@
 import json
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.template import Library
 
 from bptl.tasks.constants import ENGINETYPE_MODEL_MAPPING, EngineTypes
@@ -18,7 +19,7 @@ def task_type(task) -> str:
 
 @register.filter
 def pretty_json(value: str) -> str:
-    return json.dumps(value, indent=4)
+    return json.dumps(value, indent=4, cls=DjangoJSONEncoder)
 
 
 @register.filter
