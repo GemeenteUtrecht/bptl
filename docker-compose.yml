@@ -6,6 +6,8 @@ services:
     # NOTE: No persistance storage configured.
     # See: https://hub.docker.com/_/postgres/
     image: postgres:12
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
     # NOTE: this works for bitnami, not sure if this works for regular
     # postgres image
     volumes:
