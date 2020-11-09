@@ -9,7 +9,7 @@ QUEUE=${1:-${CELERY_WORKER_QUEUE:=celery}}
 WORKER_NAME=${2:-${CELERY_WORKER_NAME:="${QUEUE}"@%n}}
 
 echo "Starting celery worker $WORKER_NAME with queue $QUEUE"
-celery worker \
+exec celery worker \
     --app bptl \
     -Q $QUEUE \
     -n $WORKER_NAME \
