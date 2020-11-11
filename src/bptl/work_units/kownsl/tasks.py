@@ -44,48 +44,6 @@ def get_review_request(task: BaseTask) -> dict:
 
 
 @register
-def finalize_review_request(task: BaseTask) -> dict:
-    """
-    Update a review request in Kownsl.
-
-    DEPRECATED - do not use anymore.
-
-    Review requests can be requests for advice or approval. This tasks registers the
-    case used for the actual review with the review request, and derives the frontend
-    URL for end-users where they can submit their review.
-
-    In the task binding, the service with alias ``kownsl`` must be connected, so that
-    this task knows which endpoints to contact.
-
-    **Required process variables**
-
-    * ``reviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
-
-    **Sets the process variables**
-
-    * ``doReviewUrl``: the frontend URL that reviewers visit to submit the review
-
-    """
-    variables = task.get_variables()
-
-    request_id = check_variable(variables, "reviewRequestId")
-    zaak_url = check_variable(variables, "zaakUrl")
-
-    client = get_client(task)
-
-    resp_data = client.partial_update(
-        "reviewrequest",
-        data={"review_zaak": zaak_url},
-        uuid=request_id,
-    )
-
-    return {
-        "doReviewUrl": resp_data["frontend_url"],
-    }
-
-
-@register
 def get_approval_status(task: BaseTask) -> dict:
     """
     Get the result of an approval review request.
@@ -272,6 +230,7 @@ def get_email_details(task: BaseTask) -> dict:
     **Sets the process variables**
 
     * ``email``: a JSON that holds the email content and subject.
+
       .. code-block:: json
 
             {
@@ -280,6 +239,7 @@ def get_email_details(task: BaseTask) -> dict:
             }
 
     * ``context``: a JSON that holds data relevant to the email:
+
       .. code-block:: json
 
             {
@@ -290,7 +250,7 @@ def get_email_details(task: BaseTask) -> dict:
 
     * ``template``: a string that determines which template will be used for the email.
     * ``senderUsername``: a list that holds a string of the review requester's username.
-    This is used to determine the email's sender's details.
+      This is used to determine the email's sender's details.
     """
     # Get review request
     review_request = get_review_request(task)
@@ -335,3 +295,40 @@ def get_email_details(task: BaseTask) -> dict:
         "template": template,
         "senderUsername": [requester],
     }
+
+
+@register
+def set_review_request_metadata(task: BaseTask) -> dict:
+    """
+    Set the metadata for a Kownsl review request.
+
+    Metadata is a set of arbitrary key-value labels, allowing you to attach extra data
+    required for your process routing/handling.
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
+    * ``metadata``: a JSON structure holding key-values of the metadata. This will be
+      set directly on the matching review request. Example:
+
+      .. code-block:: json
+
+            {
+                "processInstanceId": "aProcessInstanceId"
+            }
+
+    **Sets no process variables**
+
+    """
+    variables = task.get_variables()
+    review_request_id = check_variable(variables, "kownslReviewRequestId")
+    metadata = check_variable(variables, "metadata")
+
+    client = get_client(task)
+    client.partial_update(
+        "reviewrequest",
+        data={"metadata": metadata},
+        uuid=review_request_id,
+    )
+
+    return {}

@@ -51,6 +51,11 @@ paths:
                       enum:
                       - advice
                       - approval
+                    documents:
+                      type: array
+                      items:
+                        type: string
+                        format: uri
                     frontend_url:
                       type: string
                       readOnly: true
@@ -70,6 +75,17 @@ paths:
                       type: integer
                       maximum: 32767
                       minimum: 0
+                    toelichting:
+                      type: string
+                    user_deadlines:
+                      type: object
+                    requester:
+                      type: string
+                      description: Username of user who requested review request
+                      maxLength: 100
+                    metadata:
+                      type: object
+                      description: Metadata that may be relevant for the process.
                   required:
                   - for_zaak
                   - review_type
@@ -101,10 +117,26 @@ paths:
                   enum:
                   - advice
                   - approval
+                documents:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
                 num_assigned_users:
                   type: integer
                   maximum: 32767
                   minimum: 0
+                toelichting:
+                  type: string
+                user_deadlines:
+                  type: object
+                requester:
+                  type: string
+                  description: Username of user who requested review request
+                  maxLength: 100
+                metadata:
+                  type: object
+                  description: Metadata that may be relevant for the process.
               required:
               - for_zaak
               - review_type
@@ -137,6 +169,11 @@ paths:
                     enum:
                     - advice
                     - approval
+                  documents:
+                    type: array
+                    items:
+                      type: string
+                      format: uri
                   frontend_url:
                     type: string
                     readOnly: true
@@ -155,9 +192,380 @@ paths:
                     type: integer
                     maximum: 32767
                     minimum: 0
+                  toelichting:
+                    type: string
+                  user_deadlines:
+                    type: object
+                  requester:
+                    type: string
+                    description: Username of user who requested review request
+                    maxLength: 100
+                  metadata:
+                    type: object
+                    description: Metadata that may be relevant for the process.
                 required:
                 - for_zaak
                 - review_type
+          description: ''
+  /api/v1/review-requests/{uuid}:
+    get:
+      operationId: reviewrequest_retrieve
+      description: 'CRUD operations on review requests.
+
+
+        Note that the list endpoint _requires_ a filter parameter.'
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: for_zaak
+        required: false
+        in: query
+        description: for_zaak
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                  for_zaak:
+                    type: string
+                    format: uri
+                    description: URL reference to the zaak in the API.
+                    maxLength: 1000
+                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
+                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
+                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
+                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
+                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                  review_type:
+                    enum:
+                    - advice
+                    - approval
+                  documents:
+                    type: array
+                    items:
+                      type: string
+                      format: uri
+                  frontend_url:
+                    type: string
+                    readOnly: true
+                    description: The frontend URL for reviewers to submit their review.
+                  num_advices:
+                    type: integer
+                    readOnly: true
+                    description: The number of advices registered for this request.
+                  num_approvals:
+                    type: integer
+                    readOnly: true
+                    description: The number of approvals registered for this request.
+                      Note that does not mean they are all positive approvals - this
+                      includes the rejections.
+                  num_assigned_users:
+                    type: integer
+                    maximum: 32767
+                    minimum: 0
+                  toelichting:
+                    type: string
+                  user_deadlines:
+                    type: object
+                  requester:
+                    type: string
+                    description: Username of user who requested review request
+                    maxLength: 100
+                  metadata:
+                    type: object
+                    description: Metadata that may be relevant for the process.
+                required:
+                - for_zaak
+                - review_type
+          description: ''
+    put:
+      operationId: reviewrequest_update
+      description: 'CRUD operations on review requests.
+
+
+        Note that the list endpoint _requires_ a filter parameter.'
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: for_zaak
+        required: false
+        in: query
+        description: for_zaak
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: &id002
+              properties:
+                for_zaak:
+                  type: string
+                  format: uri
+                  description: URL reference to the zaak in the API.
+                  maxLength: 1000
+                  pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
+                    d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
+                    [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                    -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
+                    -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
+                    d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                review_type:
+                  enum:
+                  - advice
+                  - approval
+                documents:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                num_assigned_users:
+                  type: integer
+                  maximum: 32767
+                  minimum: 0
+                toelichting:
+                  type: string
+                user_deadlines:
+                  type: object
+                requester:
+                  type: string
+                  description: Username of user who requested review request
+                  maxLength: 100
+                metadata:
+                  type: object
+                  description: Metadata that may be relevant for the process.
+              required:
+              - for_zaak
+              - review_type
+          application/x-www-form-urlencoded:
+            schema: *id002
+          multipart/form-data:
+            schema: *id002
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                  for_zaak:
+                    type: string
+                    format: uri
+                    description: URL reference to the zaak in the API.
+                    maxLength: 1000
+                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
+                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
+                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
+                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
+                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                  review_type:
+                    enum:
+                    - advice
+                    - approval
+                  documents:
+                    type: array
+                    items:
+                      type: string
+                      format: uri
+                  frontend_url:
+                    type: string
+                    readOnly: true
+                    description: The frontend URL for reviewers to submit their review.
+                  num_advices:
+                    type: integer
+                    readOnly: true
+                    description: The number of advices registered for this request.
+                  num_approvals:
+                    type: integer
+                    readOnly: true
+                    description: The number of approvals registered for this request.
+                      Note that does not mean they are all positive approvals - this
+                      includes the rejections.
+                  num_assigned_users:
+                    type: integer
+                    maximum: 32767
+                    minimum: 0
+                  toelichting:
+                    type: string
+                  user_deadlines:
+                    type: object
+                  requester:
+                    type: string
+                    description: Username of user who requested review request
+                    maxLength: 100
+                  metadata:
+                    type: object
+                    description: Metadata that may be relevant for the process.
+                required:
+                - for_zaak
+                - review_type
+          description: ''
+    patch:
+      operationId: reviewrequest_partial_update
+      description: 'CRUD operations on review requests.
+
+
+        Note that the list endpoint _requires_ a filter parameter.'
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: for_zaak
+        required: false
+        in: query
+        description: for_zaak
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: &id003
+              properties:
+                for_zaak:
+                  type: string
+                  format: uri
+                  description: URL reference to the zaak in the API.
+                  maxLength: 1000
+                  pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
+                    d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
+                    [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                    -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
+                    -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
+                    d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                review_type:
+                  enum:
+                  - advice
+                  - approval
+                documents:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                num_assigned_users:
+                  type: integer
+                  maximum: 32767
+                  minimum: 0
+                toelichting:
+                  type: string
+                user_deadlines:
+                  type: object
+                requester:
+                  type: string
+                  description: Username of user who requested review request
+                  maxLength: 100
+                metadata:
+                  type: object
+                  description: Metadata that may be relevant for the process.
+          application/x-www-form-urlencoded:
+            schema: *id003
+          multipart/form-data:
+            schema: *id003
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    readOnly: true
+                  for_zaak:
+                    type: string
+                    format: uri
+                    description: URL reference to the zaak in the API.
+                    maxLength: 1000
+                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
+                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
+                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
+                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
+                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                  review_type:
+                    enum:
+                    - advice
+                    - approval
+                  documents:
+                    type: array
+                    items:
+                      type: string
+                      format: uri
+                  frontend_url:
+                    type: string
+                    readOnly: true
+                    description: The frontend URL for reviewers to submit their review.
+                  num_advices:
+                    type: integer
+                    readOnly: true
+                    description: The number of advices registered for this request.
+                  num_approvals:
+                    type: integer
+                    readOnly: true
+                    description: The number of approvals registered for this request.
+                      Note that does not mean they are all positive approvals - this
+                      includes the rejections.
+                  num_assigned_users:
+                    type: integer
+                    maximum: 32767
+                    minimum: 0
+                  toelichting:
+                    type: string
+                  user_deadlines:
+                    type: object
+                  requester:
+                    type: string
+                    description: Username of user who requested review request
+                    maxLength: 100
+                  metadata:
+                    type: object
+                    description: Metadata that may be relevant for the process.
+                required:
+                - for_zaak
+                - review_type
+          description: ''
+    delete:
+      operationId: reviewrequest_destroy
+      description: 'CRUD operations on review requests.
+
+
+        Note that the list endpoint _requires_ a filter parameter.'
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: for_zaak
+        required: false
+        in: query
+        description: for_zaak
+        schema:
+          type: string
+      responses:
+        '204':
           description: ''
   /api/v1/review-requests/{uuid}/advices:
     get:
@@ -280,200 +688,11 @@ paths:
                     approved:
                       type: boolean
                       description: Vink dit aan om akkoord te gaan met het/de document(en).
+                    toelichting:
+                      type: string
+                      description: Voeg een toelichting toe aan de accordering.
                   required:
                   - author
-          description: ''
-  /api/v1/review-requests/{uuid}:
-    put:
-      operationId: reviewrequest_update
-      description: 'CRUD operations on review requests.
-
-
-        Note that the list endpoint _requires_ a filter parameter.'
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - name: for_zaak
-        required: false
-        in: query
-        description: for_zaak
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema: &id002
-              properties:
-                for_zaak:
-                  type: string
-                  format: uri
-                  description: URL reference to the zaak in the API.
-                  maxLength: 1000
-                  pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                    d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                    [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                    -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
-                    -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
-                    d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                review_type:
-                  enum:
-                  - advice
-                  - approval
-                num_assigned_users:
-                  type: integer
-                  maximum: 32767
-                  minimum: 0
-              required:
-              - for_zaak
-              - review_type
-          application/x-www-form-urlencoded:
-            schema: *id002
-          multipart/form-data:
-            schema: *id002
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  for_zaak:
-                    type: string
-                    format: uri
-                    description: URL reference to the zaak in the API.
-                    maxLength: 1000
-                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                  review_type:
-                    enum:
-                    - advice
-                    - approval
-                  frontend_url:
-                    type: string
-                    readOnly: true
-                    description: The frontend URL for reviewers to submit their review.
-                  num_advices:
-                    type: integer
-                    readOnly: true
-                    description: The number of advices registered for this request.
-                  num_approvals:
-                    type: integer
-                    readOnly: true
-                    description: The number of approvals registered for this request.
-                      Note that does not mean they are all positive approvals - this
-                      includes the rejections.
-                  num_assigned_users:
-                    type: integer
-                    maximum: 32767
-                    minimum: 0
-                required:
-                - for_zaak
-                - review_type
-          description: ''
-    patch:
-      operationId: reviewrequest_partial_update
-      description: 'CRUD operations on review requests.
-
-
-        Note that the list endpoint _requires_ a filter parameter.'
-      parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
-      - name: for_zaak
-        required: false
-        in: query
-        description: for_zaak
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema: &id003
-              properties:
-                for_zaak:
-                  type: string
-                  format: uri
-                  description: URL reference to the zaak in the API.
-                  maxLength: 1000
-                  pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                    d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                    [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                    -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
-                    -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
-                    d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                review_type:
-                  enum:
-                  - advice
-                  - approval
-                num_assigned_users:
-                  type: integer
-                  maximum: 32767
-                  minimum: 0
-          application/x-www-form-urlencoded:
-            schema: *id003
-          multipart/form-data:
-            schema: *id003
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  for_zaak:
-                    type: string
-                    format: uri
-                    description: URL reference to the zaak in the API.
-                    maxLength: 1000
-                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                  review_type:
-                    enum:
-                    - advice
-                    - approval
-                  frontend_url:
-                    type: string
-                    readOnly: true
-                    description: The frontend URL for reviewers to submit their review.
-                  num_advices:
-                    type: integer
-                    readOnly: true
-                    description: The number of advices registered for this request.
-                  num_approvals:
-                    type: integer
-                    readOnly: true
-                    description: The number of approvals registered for this request.
-                      Note that does not mean they are all positive approvals - this
-                      includes the rejections.
-                  num_assigned_users:
-                    type: integer
-                    maximum: 32767
-                    minimum: 0
-                required:
-                - for_zaak
-                - review_type
           description: ''
 servers:
 - url: https://kownsl.utrechtproeftuin.nl

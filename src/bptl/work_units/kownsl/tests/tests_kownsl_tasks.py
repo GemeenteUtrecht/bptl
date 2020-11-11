@@ -1,24 +1,26 @@
 import copy
 import datetime
-import json
+import uuid
 
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.models import TaskMapping
-from bptl.work_units.kownsl.tasks import (
+from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+
+from ..tasks import (
     get_client,
     get_email_details,
     get_review_request,
     get_review_request_reminder_date,
     get_review_response_status,
+    set_review_request_metadata,
 )
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
-
 from .utils import mock_service_oas_get
 
 KOWNSL_API_ROOT = "https://kownsl.nl/"
@@ -245,3 +247,32 @@ class KownslAPITests(TestCase):
 
         self.assertTrue("senderUsername" in email_details)
         self.assertEqual(email_details["senderUsername"], ["Pietje"])
+
+    def test_setting_review_request_metadata(self, m):
+        kownsl_id = str(uuid.uuid4())
+        m.patch(
+            f"https://kownsl.nl/api/v1/review-requests/{kownsl_id}", status_code=200
+        )
+        task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "kownslReviewRequestId": serialize_variable(kownsl_id),
+                "metadata": serialize_variable(
+                    {"key1": "value1", "nested": {"key": "value"}}
+                ),
+            },
+        )
+
+        result = set_review_request_metadata(task)
+
+        self.assertEqual(result, {})
+        self.assertEqual(len(m.request_history), 1)
+        self.assertEqual(m.last_request.method, "PATCH")
+        self.assertEqual(
+            m.last_request.json(),
+            {
+                "metadata": {"key1": "value1", "nested": {"key": "value"}},
+            },
+        )
