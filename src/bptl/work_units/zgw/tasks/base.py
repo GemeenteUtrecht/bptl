@@ -4,7 +4,7 @@ from bptl.credentials.api import get_credentials
 from bptl.tasks.base import WorkUnit
 from bptl.work_units.zgw.models import DefaultService
 
-from ..client import MultipleServices, NoService
+from ..client import MultipleServices, NoAuth, NoService
 
 PROCESS_VAR_NAME = "bptlAppId"
 
@@ -52,7 +52,10 @@ class ZGWWorkUnit(WorkUnit):
                 DeprecationWarning,
             )
             services_vars = task_variables["services"]
-            jwt = services_vars.get(default_services[0].alias, {}).get("jwt")
+            alias = default_services[0].alias
+            jwt = services_vars.get(alias, {}).get("jwt")
+            if not jwt:
+                raise NoAuth(f"Expected 'jwt' key for service with alias '{alias}'")
             client.set_auth_value({"Authorization": jwt})
 
         return client
