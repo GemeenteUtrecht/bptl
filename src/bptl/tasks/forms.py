@@ -2,7 +2,7 @@ from typing import Tuple
 
 from django import forms
 from django.contrib.admin.widgets import AdminRadioSelect
-from django.forms.models import inlineformset_factory
+from django.forms.models import BaseInlineFormSet, inlineformset_factory
 from django.utils.html import format_html, mark_safe, urlize
 from django.utils.translation import ugettext_lazy as _
 
@@ -71,6 +71,32 @@ class DefaultServiceForm(forms.ModelForm):
         self.fields["alias"].required = False
 
 
+class BaseDefaultServiceFormset(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+
+        # selected callback - this is not validated because we don't have access to the
+        # form.
+        # TODO: check if django-extra-views CreateWithInlines has a proper solution for
+        # this
+        callback = self.data["callback"]
+        if not callback:
+            return  # won't validate the main form anyway
+
+        try:
+            task = register[self.data["callback"]]
+        except KeyError:
+            return  # won't validate the main form anyway
+
+        import bpdb
+
+        bpdb.set_trace()
+
+
 DefaultServiceFormset = inlineformset_factory(
-    TaskMapping, DefaultService, form=DefaultServiceForm, extra=2
+    TaskMapping,
+    DefaultService,
+    form=DefaultServiceForm,
+    formset=BaseDefaultServiceFormset,
+    extra=2,
 )
