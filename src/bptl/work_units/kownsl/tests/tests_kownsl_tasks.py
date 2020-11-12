@@ -14,6 +14,7 @@ from bptl.tasks.models import TaskMapping
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
 from ..tasks import (
+    get_approval_toelichtingen,
     get_client,
     get_email_details,
     get_review_request,
@@ -57,16 +58,8 @@ class KownslAPITests(TestCase):
             "worker_id": "test-worker-id",
             "task_id": "test-task-id",
             "variables": {
-                "zaakUrl": {
-                    "type": "String",
-                    "value": "https://zaken.nl/api/v1/zaak/123",
-                    "valueInfo": {},
-                },
-                "kownslReviewRequestId": {
-                    "type": "String",
-                    "value": "1",
-                    "valueInfo": {},
-                },
+                "zaakUrl": serialize_variable("https://zaken.nl/api/v1/zaak/123"),
+                "kownslReviewRequestId": serialize_variable("1"),
             },
         }
 
@@ -126,11 +119,9 @@ class KownslAPITests(TestCase):
         )
 
         task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"]["kownslUsers"] = {
-            "type": "Json",
-            "value": '["Zeus","Poseidon","Hades"]',
-            "valueInfo": {},
-        }
+        task_dict["variables"]["kownslUsers"] = serialize_variable(
+            ["Zeus", "Poseidon", "Hades"]
+        )
 
         task = ExternalTask.objects.create(
             **task_dict,
@@ -173,11 +164,9 @@ class KownslAPITests(TestCase):
         )
 
         task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"]["kownslUsers"] = {
-            "type": "Json",
-            "value": '["Zeus","Poseidon","Hades"]',
-            "valueInfo": {},
-        }
+        task_dict["variables"]["kownslUsers"] = serialize_variable(
+            ["Zeus", "Poseidon", "Hades"]
+        )
 
         task = ExternalTask.objects.create(
             **task_dict,
@@ -203,16 +192,8 @@ class KownslAPITests(TestCase):
         task_dict = copy.deepcopy(self.task_dict)
         task_dict["variables"].update(
             {
-                "kownslFrontendUrl": {
-                    "type": "String",
-                    "value": "a-url.test",
-                    "valueInfo": {},
-                },
-                "deadline": {
-                    "type": "String",
-                    "value": "2020-04-01",
-                    "valueInfo": {},
-                },
+                "kownslFrontendUrl": serialize_variable("a-url.test"),
+                "deadline": serialize_variable("2020-04-01"),
             }
         )
 
@@ -274,5 +255,43 @@ class KownslAPITests(TestCase):
             m.last_request.json(),
             {
                 "metadata": {"key1": "value1", "nested": {"key": "value"}},
+            },
+        )
+
+    def test_get_approval_toelichtingen(self, m):
+        rr_response = [
+            {
+                "id": "1",
+                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
+                "review_type": "approval",
+            },
+        ]
+        m.get(
+            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            json=rr_response,
+        )
+
+        approvals = [
+            {
+                "author": "Ik",
+                "toelichting": "Beste voorstel ooit.",
+            },
+            {
+                "author": "Jij",
+                "toelichting": "Echt niet mee eens.",
+            },
+        ]
+        m.get(f"{KOWNSL_API_ROOT}api/v1/review-requests/1/approvals", json=approvals)
+
+        task = ExternalTask.objects.create(
+            **self.task_dict,
+        )
+
+        result = get_approval_toelichtingen(task)
+        self.assertEqual(len(m.request_history), 2)
+        self.assertEqual(
+            result,
+            {
+                "toelichtingen": "Accordeur: Ik\nToelichting: Beste voorstel ooit.\n\nAccordeur: Jij\nToelichting: Echt niet mee eens."
             },
         )
