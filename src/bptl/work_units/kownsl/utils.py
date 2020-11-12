@@ -1,7 +1,7 @@
 from zds_client.schema import get_operation_url
 from zgw_consumers.client import ZGWClient
 
-from bptl.tasks.base import BaseTask, MissingVariable, check_variable
+from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.models import TaskMapping
 
 

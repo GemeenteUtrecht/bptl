@@ -1,6 +1,9 @@
 import datetime
 
+from django.utils.translation import gettext_lazy as _
+
 from zds_client.schema import get_operation_url
+from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
@@ -8,7 +11,13 @@ from bptl.tasks.registry import register
 from .utils import get_client, get_review_request
 
 
+require_kownsl_service = register.require_service(
+    APITypes.orc, description=_("The Kownsl instance to use."), alias="kownsl"
+)
+
+
 @register
+@require_kownsl_service
 def get_approval_status(task: BaseTask) -> dict:
     """
     Get the result of an approval review request.
@@ -69,6 +78,7 @@ def get_approval_status(task: BaseTask) -> dict:
 
 
 @register
+@require_kownsl_service
 def get_review_response_status(task: BaseTask) -> dict:
     """
     Get the reviewers who have not yet responded to a review request so that
@@ -134,6 +144,7 @@ def get_review_response_status(task: BaseTask) -> dict:
 
 
 @register
+@require_kownsl_service
 def get_review_request_reminder_date(task: BaseTask) -> dict:
     """
     Get the reminder for the set of reviewers who are requested.
@@ -174,6 +185,7 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
 
 
 @register
+@require_kownsl_service
 def get_email_details(task: BaseTask) -> dict:
     """
     Get email details required to build the email that is sent from the
@@ -256,6 +268,7 @@ def get_email_details(task: BaseTask) -> dict:
 
 
 @register
+@require_kownsl_service
 def set_review_request_metadata(task: BaseTask) -> dict:
     """
     Set the metadata for a Kownsl review request.
@@ -293,6 +306,7 @@ def set_review_request_metadata(task: BaseTask) -> dict:
 
 
 @register
+@require_kownsl_service
 def get_approval_toelichtingen(task: BaseTask) -> dict:
     """
     Get the "toelichtingen" of all reviewers that responded to the review request.

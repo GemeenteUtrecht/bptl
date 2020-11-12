@@ -30,6 +30,13 @@ class Task:
         return render_docstring(self.documentation)
 
 
+@dataclass
+class RequiredService:
+    service_type: str
+    description: str = ""
+    alias: str = ""
+
+
 class WorkUnitRegistry:
     def __init__(self):
         self._registry = {}
@@ -43,8 +50,6 @@ class WorkUnitRegistry:
 
         Registration performs some validation to enforce correct API usage,
         and grabs the docstring for a discription of the task.
-
-        TODO: render docstring with sphinx
         """
         from .models import BaseTask
 
@@ -87,6 +92,28 @@ class WorkUnitRegistry:
 
     def __getitem__(self, key: str):
         return self._registry[key]
+
+    def require_service(
+        self, service_type: str, description: str = "", alias: str = ""
+    ):
+        """
+        Decorate a callback with the required service definitions.
+
+        Used to validate the task mappings to ensure the required services are present.
+        This self-documents which service aliases must be used for the callback to be
+        able to function.
+        """
+        required_service = RequiredService(
+            service_type=service_type, description=description, alias=alias
+        )
+
+        def decorator(func_or_class: callable):
+            if not hasattr(func_or_class, "_required_services"):
+                func_or_class._required_services = []
+            func_or_class._required_services.append(required_service)
+            return func_or_class
+
+        return decorator
 
     def get_for(self, func_or_class: callable) -> str:
         """
