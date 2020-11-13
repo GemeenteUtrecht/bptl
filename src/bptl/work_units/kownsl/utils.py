@@ -1,3 +1,4 @@
+from zds_client.schema import get_operation_url
 from zgw_consumers.client import ZGWClient
 
 from bptl.tasks.base import BaseTask, MissingVariable, check_variable
@@ -22,18 +23,19 @@ def get_review_request(task: BaseTask) -> dict:
     """
     Get a single review request from kownsl.
     """
+
+    # Get variables
     variables = task.get_variables()
 
-    zaak_url = check_variable(variables, "zaakUrl")
+    # Build url
     client = get_client(task)
-    resp_data = client.list(
-        "reviewrequest",
-        query_params={"for_zaak": zaak_url},
+    review_request_id = check_variable(variables, "kownslReviewRequestId")
+    operation_id = "reviewrequest_retrieve"
+    url = get_operation_url(
+        client.schema,
+        operation_id,
+        base_url=client.base_url,
+        uuid=review_request_id,
     )
-
-    request_id = check_variable(variables, "kownslReviewRequestId")
-    for review_request in resp_data:
-        if review_request["id"] == request_id:
-            return review_request
-
-    raise MissingVariable(f"Review request: {request_id} not found.")
+    review_requests = client.request(url, operation_id)
+    return review_requests[0]

@@ -23,7 +23,6 @@ def get_approval_status(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
 
     **Sets the process variables**
 
@@ -81,7 +80,6 @@ def get_review_response_status(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**
@@ -95,11 +93,8 @@ def get_review_response_status(task: BaseTask) -> dict:
                 "user2",
             ]
     """
-
     # Get the review request with id as given in variables
     review_request = get_review_request(task)
-
-    review_request_id = review_request["id"]
 
     # Get review request type to set operation_id
     review_type = review_request["review_type"]
@@ -113,7 +108,7 @@ def get_review_response_status(task: BaseTask) -> dict:
         client.schema,
         operation_id,
         base_url=client.base_url,
-        uuid=review_request_id,
+        uuid=review_request["id"],
     )
 
     # Get approvals/advices belonging to review request
@@ -150,7 +145,6 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**
@@ -162,7 +156,7 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
     variables = task.get_variables()
     kownsl_users = check_variable(variables, "kownslUsers")
 
-    # Get the review request with id as given in variables
+    # Get user deadlines
     review_request = get_review_request(task)
     user_deadlines = review_request["user_deadlines"]
 
@@ -188,7 +182,6 @@ def get_email_details(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``deadline``: deadline of the review request.
     * ``kownslFrontendUrl``: URL that takes you to the review request.
 
@@ -228,7 +221,7 @@ def get_email_details(task: BaseTask) -> dict:
         "accordering" if review_request["review_type"] == "approval" else "advies"
     )
 
-    # Get other variables
+    # Get variables
     variables = task.get_variables()
 
     # Get kownslFrontendUrl
@@ -307,16 +300,13 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
 
     **Sets the process variables**
 
     * ``toelichtingen``: a string containing the "toelichtingen" of all reviewers.
     """
-
-    # Get the review request with id as given in variables
-    review_request = get_review_request(task)
-    review_request_id = review_request["id"]
+    variables = task.get_variables()
+    review_request_id = check_variable(variables, "kownslReviewRequestId")
     operation_id = "reviewrequest_approvals"
     client = get_client(task)
     url = get_operation_url(
@@ -330,12 +320,6 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
     approvals = client.request(url, operation_id)
 
     # Get their toelichtingen
-    toelichtingen = []
-    for approval in approvals:
-        toelichtingen.append(
-            "Accordeur: {author}\nToelichting: {toelichting}".format(
-                author=approval["author"], toelichting=approval["toelichting"]
-            )
-        )
+    toelichtingen = [approval["toelichting"] or "Geen" for approval in approvals]
 
     return {"toelichtingen": "\n\n".join(toelichtingen)}

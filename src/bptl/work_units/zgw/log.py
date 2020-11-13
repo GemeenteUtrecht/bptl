@@ -16,7 +16,6 @@ class DBLog:
         response_data: dict,
         params: dict = None,
     ):
-
         extra_data = {
             "service_base_url": service,
             "request": {
@@ -32,4 +31,5 @@ class DBLog:
                 "data": response_data,
             },
         }
+
         TimelineLog.objects.create(content_object=self.task, extra_data=extra_data)

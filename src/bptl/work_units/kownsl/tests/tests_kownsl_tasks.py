@@ -58,7 +58,6 @@ class KownslAPITests(TestCase):
             "worker_id": "test-worker-id",
             "task_id": "test-task-id",
             "variables": {
-                "zaakUrl": serialize_variable("https://zaken.nl/api/v1/zaak/123"),
                 "kownslReviewRequestId": serialize_variable("1"),
             },
         }
@@ -86,24 +85,14 @@ class KownslAPITests(TestCase):
                 "for_zaak": "https://zaken.nl/api/v1/zaak/123",
                 "review_type": "advice",
             },
-            {
-                "id": "2",
-                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-                "review_type": "advice",
-            },
         ]
         m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=response,
         )
 
         review_requests = get_review_request(task)
-
-        request = review_requests
-        self.assertEqual(request["id"], "1")
-        self.assertEqual(
-            m.last_request.qs["for_zaak"][0], "https://zaken.nl/api/v1/zaak/123"
-        )
+        self.assertEqual(review_requests["id"], "1")
 
     def test_get_review_response_status(self, m):
         rr_response = [
@@ -114,7 +103,7 @@ class KownslAPITests(TestCase):
             },
         ]
         m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,
         )
 
@@ -159,7 +148,7 @@ class KownslAPITests(TestCase):
             },
         ]
         m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,
         )
 
@@ -185,7 +174,7 @@ class KownslAPITests(TestCase):
             },
         ]
         m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,
         )
 
@@ -259,26 +248,15 @@ class KownslAPITests(TestCase):
         )
 
     def test_get_approval_toelichtingen(self, m):
-        rr_response = [
-            {
-                "id": "1",
-                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-                "review_type": "approval",
-            },
-        ]
-        m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
-            json=rr_response,
-        )
-
         approvals = [
             {
-                "author": "Ik",
                 "toelichting": "Beste voorstel ooit.",
             },
             {
-                "author": "Jij",
                 "toelichting": "Echt niet mee eens.",
+            },
+            {
+                "toelichting": "",
             },
         ]
         m.get(f"{KOWNSL_API_ROOT}api/v1/review-requests/1/approvals", json=approvals)
@@ -288,10 +266,8 @@ class KownslAPITests(TestCase):
         )
 
         result = get_approval_toelichtingen(task)
-        self.assertEqual(len(m.request_history), 2)
+        self.assertEqual(len(m.request_history), 1)
         self.assertEqual(
             result,
-            {
-                "toelichtingen": "Accordeur: Ik\nToelichting: Beste voorstel ooit.\n\nAccordeur: Jij\nToelichting: Echt niet mee eens."
-            },
+            {"toelichtingen": "Beste voorstel ooit.\n\nEcht niet mee eens.\n\nGeen"},
         )
