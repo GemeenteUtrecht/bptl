@@ -6,6 +6,7 @@ performs a unit of work.
 """
 import inspect
 from dataclasses import dataclass
+from typing import List
 
 from django.utils.functional import cached_property
 from django.utils.module_loading import autodiscover_modules
@@ -28,6 +29,12 @@ class Task:
         Return the docstring rendered as HTML by Sphinx.
         """
         return render_docstring(self.documentation)
+
+    @property
+    def required_services(self) -> List["RequiredService"]:
+        if not hasattr(self.callback, "_required_services"):
+            return []
+        return self.callback._required_services
 
 
 @dataclass
