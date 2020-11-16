@@ -65,7 +65,7 @@ class ZGWClientLogTests(TestCase):
                     "url": PERSON_URL,
                     "data": None,
                     "method": "GET",
-                    "params": {"fields": "leeftijd"},
+                    "params": {"fields": ["leeftijd"]},
                     "headers": {
                         "Accept": "*/*",
                         "Connection": "keep-alive",

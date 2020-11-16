@@ -62,7 +62,6 @@ class BRPClient:
     task = None
 
     def __init__(self, service: Service, auth_header: Dict[str, str]):
-        self.service = service
         self.api_root = service.api_root
         self.auth = auth_header
 
@@ -73,18 +72,14 @@ class BRPClient:
         headers = kwargs.pop("headers", {})
         headers.update(self.auth)
         kwargs["headers"] = headers
-        params = kwargs.get("params")
+        kwargs["hooks"] = {"response": self.log}
 
         response = requests.get(url, *args, **kwargs)
-
-        # can't use requests.hooks, therefore direct logging
-        self.log(response, params)
-
         response.raise_for_status()
 
         return response.json()
 
-    def log(self, resp, params):
+    def log(self, resp, *args, **kwargs):
         response_data = resp.json() if resp.content else None
 
         extra_data = {
@@ -94,7 +89,7 @@ class BRPClient:
                 "method": resp.request.method,
                 "headers": dict(resp.request.headers),
                 "data": resp.request.body,
-                "params": params,
+                "params": resp.request.qs,
             },
             "response": {
                 "status": resp.status_code,
