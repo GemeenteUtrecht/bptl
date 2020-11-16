@@ -1,13 +1,14 @@
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
-from .client import get_client_class
+from .client import get_client, require_brp_service
 from .utils import Relations
 
 __all__ = ["IsAboveAge", "DegreeOfKinship"]
 
 
 @register
+@require_brp_service
 class IsAboveAge(WorkUnit):
     """
     Fetches BRP API and returns whether a person is exactly, or older than, a certain age.
@@ -28,8 +29,7 @@ class IsAboveAge(WorkUnit):
         bsn = variables["burgerservicenummer"]
         age = variables["age"]
 
-        client = get_client_class()()
-        client.task = self.task
+        client = get_client(self.task)
         url = f"ingeschrevenpersonen/{bsn}"
 
         response = client.get(url, params={"fields": "leeftijd"})
@@ -41,6 +41,7 @@ class IsAboveAge(WorkUnit):
 
 
 @register
+@require_brp_service
 class DegreeOfKinship(WorkUnit):
     """
     Retrieve the degree of kinship from the BRP API.
@@ -64,8 +65,7 @@ class DegreeOfKinship(WorkUnit):
         if bsn1 == bsn2:
             return {"kinship": None}
 
-        client = get_client_class()()
-        client.task = self.task
+        client = get_client(self.task)
 
         # set up classes for storing parent and child relations of one node
         rel1 = Relations(bsn1)

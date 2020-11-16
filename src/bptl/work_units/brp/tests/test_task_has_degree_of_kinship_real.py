@@ -5,8 +5,8 @@ from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 
 from bptl.activiti.models import ServiceTask
+from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
-from ..models import BRPConfig
 from ..tasks import DegreeOfKinship
 from .utils import NAMES, mock_family
 
@@ -19,13 +19,16 @@ class DegreeOfKinshipTests(TestCase):
     def setUpTestData(cls):
         super().setUpTestData()
 
-        config = BRPConfig.get_solo()
-        config.service = Service.objects.create(
+        brp = Service.objects.create(
             api_root=BRP_API_ROOT,
             api_type=APITypes.orc,
             auth_type=AuthTypes.no_auth,
         )
-        config.save()
+        DefaultServiceFactory.create(
+            task_mapping__topic_name="some-topic",
+            service=brp,
+            alias="brp",
+        )
 
     def test_same_bsn(self, m):
         fetched_task = ServiceTask.objects.create(
