@@ -1,8 +1,16 @@
+from django.utils.translation import gettext_lazy as _
+
 from zds_client.schema import get_operation_url
 from zgw_consumers.client import ZGWClient
+from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.models import TaskMapping
+from bptl.tasks.registry import register
+
+require_kownsl_service = register.require_service(
+    APITypes.orc, description=_("The Kownsl instance to use."), alias="kownsl"
+)
 
 
 def get_client(task: BaseTask, alias: str = "kownsl") -> ZGWClient:

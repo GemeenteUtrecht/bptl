@@ -1,19 +1,11 @@
 import datetime
 
-from django.utils.translation import gettext_lazy as _
-
 from zds_client.schema import get_operation_url
-from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
-from .utils import get_client, get_review_request
-
-
-require_kownsl_service = register.require_service(
-    APITypes.orc, description=_("The Kownsl instance to use."), alias="kownsl"
-)
+from .utils import get_client, get_review_request, require_kownsl_service
 
 
 @register
