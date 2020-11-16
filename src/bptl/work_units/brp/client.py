@@ -10,8 +10,6 @@ from django.utils.module_loading import import_string
 import requests
 from timeline_logger.models import TimelineLog
 
-from .models import BRPConfig
-
 logger = logging.getLogger(__name__)
 
 
