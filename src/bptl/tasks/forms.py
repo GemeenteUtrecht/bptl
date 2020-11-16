@@ -132,6 +132,11 @@ class BaseDefaultServiceFormset(BaseInlineFormSet):
                     ),
                 )
 
+        # if any form errors are introduced, the formset is no longer valid and has no
+        # cleaned_data anymore -> so bypass the remaning validation
+        if not self.is_valid():
+            return
+
         # second round validates the free aliases
         candidates = [
             form_data
