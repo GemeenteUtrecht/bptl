@@ -1,46 +1,11 @@
 import datetime
 
 from zds_client.schema import get_operation_url
-from zgw_consumers.client import ZGWClient
 
-from bptl.tasks.base import BaseTask, MissingVariable, check_variable
-from bptl.tasks.models import TaskMapping
+from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
-
-def get_client(task: BaseTask, alias: str = "kownsl") -> ZGWClient:
-    default_services = TaskMapping.objects.get(
-        topic_name=task.topic_name
-    ).defaultservice_set.select_related("service")
-    services_by_alias = {svc.alias: svc.service for svc in default_services}
-    if alias not in services_by_alias:
-        raise RuntimeError(f"Service alias '{alias}' not found.")
-
-    client = services_by_alias[alias].build_client()
-    client._log.task = task
-
-    return client
-
-
-def get_review_request(task: BaseTask) -> dict:
-    """
-    Get a single review request from kownsl.
-    """
-    variables = task.get_variables()
-
-    zaak_url = check_variable(variables, "zaakUrl")
-    client = get_client(task)
-    resp_data = client.list(
-        "reviewrequest",
-        query_params={"for_zaak": zaak_url},
-    )
-
-    request_id = check_variable(variables, "kownslReviewRequestId")
-    for review_request in resp_data:
-        if review_request["id"] == request_id:
-            return review_request
-
-    raise MissingVariable(f"Review request: {request_id} not found.")
+from .utils import get_client, get_review_request
 
 
 @register
@@ -58,7 +23,6 @@ def get_approval_status(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
 
     **Sets the process variables**
 
@@ -116,7 +80,6 @@ def get_review_response_status(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**
@@ -130,11 +93,8 @@ def get_review_response_status(task: BaseTask) -> dict:
                 "user2",
             ]
     """
-
     # Get the review request with id as given in variables
     review_request = get_review_request(task)
-
-    review_request_id = review_request["id"]
 
     # Get review request type to set operation_id
     review_type = review_request["review_type"]
@@ -148,10 +108,10 @@ def get_review_response_status(task: BaseTask) -> dict:
         client.schema,
         operation_id,
         base_url=client.base_url,
-        uuid=review_request_id,
+        uuid=review_request["id"],
     )
 
-    # Get approvals/advices belong to review request
+    # Get approvals/advices belonging to review request
     reviews = client.request(url, operation_id)
 
     # Build a list of users that have responded
@@ -185,7 +145,6 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
     **Sets the process variables**
@@ -197,7 +156,7 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
     variables = task.get_variables()
     kownsl_users = check_variable(variables, "kownslUsers")
 
-    # Get the review request with id as given in variables
+    # Get user deadlines
     review_request = get_review_request(task)
     user_deadlines = review_request["user_deadlines"]
 
@@ -223,7 +182,6 @@ def get_email_details(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``zaakUrl``: URL reference to the zaak used for the review itself.
     * ``deadline``: deadline of the review request.
     * ``kownslFrontendUrl``: URL that takes you to the review request.
 
@@ -263,7 +221,7 @@ def get_email_details(task: BaseTask) -> dict:
         "accordering" if review_request["review_type"] == "approval" else "advies"
     )
 
-    # Get other variables
+    # Get variables
     variables = task.get_variables()
 
     # Get kownslFrontendUrl
@@ -332,3 +290,36 @@ def set_review_request_metadata(task: BaseTask) -> dict:
     )
 
     return {}
+
+
+@register
+def get_approval_toelichtingen(task: BaseTask) -> dict:
+    """
+    Get the "toelichtingen" of all reviewers that responded to the review request.
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
+
+    **Sets the process variables**
+
+    * ``toelichtingen``: a string containing the "toelichtingen" of all reviewers.
+    """
+    variables = task.get_variables()
+    review_request_id = check_variable(variables, "kownslReviewRequestId")
+    operation_id = "reviewrequest_approvals"
+    client = get_client(task)
+    url = get_operation_url(
+        client.schema,
+        operation_id,
+        base_url=client.base_url,
+        uuid=review_request_id,
+    )
+
+    # Get approvals belonging to review request
+    approvals = client.request(url, operation_id)
+
+    # Get their toelichtingen
+    toelichtingen = [approval["toelichting"] or "Geen" for approval in approvals]
+
+    return {"toelichtingen": "\n\n".join(toelichtingen)}

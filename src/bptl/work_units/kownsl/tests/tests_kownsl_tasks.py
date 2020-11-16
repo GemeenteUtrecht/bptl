@@ -14,6 +14,7 @@ from bptl.tasks.models import TaskMapping
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 
 from ..tasks import (
+    get_approval_toelichtingen,
     get_client,
     get_email_details,
     get_review_request,
@@ -57,16 +58,7 @@ class KownslAPITests(TestCase):
             "worker_id": "test-worker-id",
             "task_id": "test-task-id",
             "variables": {
-                "zaakUrl": {
-                    "type": "String",
-                    "value": "https://zaken.nl/api/v1/zaak/123",
-                    "valueInfo": {},
-                },
-                "kownslReviewRequestId": {
-                    "type": "String",
-                    "value": "1",
-                    "valueInfo": {},
-                },
+                "kownslReviewRequestId": serialize_variable("1"),
             },
         }
 
@@ -93,24 +85,14 @@ class KownslAPITests(TestCase):
                 "for_zaak": "https://zaken.nl/api/v1/zaak/123",
                 "review_type": "advice",
             },
-            {
-                "id": "2",
-                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-                "review_type": "advice",
-            },
         ]
         m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=response,
         )
 
         review_requests = get_review_request(task)
-
-        request = review_requests
-        self.assertEqual(request["id"], "1")
-        self.assertEqual(
-            m.last_request.qs["for_zaak"][0], "https://zaken.nl/api/v1/zaak/123"
-        )
+        self.assertEqual(review_requests["id"], "1")
 
     def test_get_review_response_status(self, m):
         rr_response = [
@@ -121,16 +103,14 @@ class KownslAPITests(TestCase):
             },
         ]
         m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,
         )
 
         task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"]["kownslUsers"] = {
-            "type": "Json",
-            "value": '["Zeus","Poseidon","Hades"]',
-            "valueInfo": {},
-        }
+        task_dict["variables"]["kownslUsers"] = serialize_variable(
+            ["Zeus", "Poseidon", "Hades"]
+        )
 
         task = ExternalTask.objects.create(
             **task_dict,
@@ -168,16 +148,14 @@ class KownslAPITests(TestCase):
             },
         ]
         m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,
         )
 
         task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"]["kownslUsers"] = {
-            "type": "Json",
-            "value": '["Zeus","Poseidon","Hades"]',
-            "valueInfo": {},
-        }
+        task_dict["variables"]["kownslUsers"] = serialize_variable(
+            ["Zeus", "Poseidon", "Hades"]
+        )
 
         task = ExternalTask.objects.create(
             **task_dict,
@@ -196,23 +174,15 @@ class KownslAPITests(TestCase):
             },
         ]
         m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests?for_zaak=https://zaken.nl/api/v1/zaak/123",
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,
         )
 
         task_dict = copy.deepcopy(self.task_dict)
         task_dict["variables"].update(
             {
-                "kownslFrontendUrl": {
-                    "type": "String",
-                    "value": "a-url.test",
-                    "valueInfo": {},
-                },
-                "deadline": {
-                    "type": "String",
-                    "value": "2020-04-01",
-                    "valueInfo": {},
-                },
+                "kownslFrontendUrl": serialize_variable("a-url.test"),
+                "deadline": serialize_variable("2020-04-01"),
             }
         )
 
@@ -275,4 +245,29 @@ class KownslAPITests(TestCase):
             {
                 "metadata": {"key1": "value1", "nested": {"key": "value"}},
             },
+        )
+
+    def test_get_approval_toelichtingen(self, m):
+        approvals = [
+            {
+                "toelichting": "Beste voorstel ooit.",
+            },
+            {
+                "toelichting": "Echt niet mee eens.",
+            },
+            {
+                "toelichting": "",
+            },
+        ]
+        m.get(f"{KOWNSL_API_ROOT}api/v1/review-requests/1/approvals", json=approvals)
+
+        task = ExternalTask.objects.create(
+            **self.task_dict,
+        )
+
+        result = get_approval_toelichtingen(task)
+        self.assertEqual(len(m.request_history), 1)
+        self.assertEqual(
+            result,
+            {"toelichtingen": "Beste voorstel ooit.\n\nEcht niet mee eens.\n\nGeen"},
         )
