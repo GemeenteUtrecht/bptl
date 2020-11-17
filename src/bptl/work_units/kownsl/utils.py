@@ -37,5 +37,5 @@ def get_review_request(task: BaseTask) -> dict:
         base_url=client.base_url,
         uuid=review_request_id,
     )
-    review_requests = client.request(url, operation_id)
-    return review_requests[0]
+    review_request = client.request(url, operation_id)
+    return review_request
