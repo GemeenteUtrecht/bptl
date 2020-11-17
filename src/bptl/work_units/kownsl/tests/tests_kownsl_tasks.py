@@ -79,13 +79,11 @@ class KownslAPITests(TestCase):
             **self.task_dict,
         )
 
-        response = [
-            {
-                "id": "1",
-                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-                "review_type": "advice",
-            },
-        ]
+        response = {
+            "id": "1",
+            "for_zaak": "https://zaken.nl/api/v1/zaak/123",
+            "review_type": "advice",
+        }
         m.get(
             f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=response,
@@ -95,13 +93,11 @@ class KownslAPITests(TestCase):
         self.assertEqual(review_requests["id"], "1")
 
     def test_get_review_response_status(self, m):
-        rr_response = [
-            {
-                "id": "1",
-                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-                "review_type": "advice",
-            },
-        ]
+        rr_response = {
+            "id": "1",
+            "for_zaak": "https://zaken.nl/api/v1/zaak/123",
+            "review_type": "advice",
+        }
         m.get(
             f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,
@@ -133,20 +129,18 @@ class KownslAPITests(TestCase):
         self.assertTrue(remindThese["remindThese"][0], "Hades")
 
     def test_get_review_request_reminder_date(self, m):
-        rr_response = [
-            {
-                "id": "1",
-                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-                "review_type": "advice",
-                "user_deadlines": {
-                    "Zeus": "2020-04-20",
-                    "Poseidon": "2020-04-20",
-                    "Hades": "2020-04-20",
-                    "Hera": "2021-04-20",
-                    "Demeter": "2021-04-20",
-                },
+        rr_response = {
+            "id": "1",
+            "for_zaak": "https://zaken.nl/api/v1/zaak/123",
+            "review_type": "advice",
+            "user_deadlines": {
+                "Zeus": "2020-04-20",
+                "Poseidon": "2020-04-20",
+                "Hades": "2020-04-20",
+                "Hera": "2021-04-20",
+                "Demeter": "2021-04-20",
             },
-        ]
+        }
         m.get(
             f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,
@@ -165,14 +159,12 @@ class KownslAPITests(TestCase):
         self.assertEqual(reminderDate["reminderDate"], "2020-04-19")
 
     def test_get_email_details(self, m):
-        rr_response = [
-            {
-                "id": "1",
-                "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-                "review_type": "advice",
-                "requester": "Pietje",
-            },
-        ]
+        rr_response = {
+            "id": "1",
+            "for_zaak": "https://zaken.nl/api/v1/zaak/123",
+            "review_type": "advice",
+            "requester": "Pietje",
+        }
         m.get(
             f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
             json=rr_response,

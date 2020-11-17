@@ -16,7 +16,7 @@ class DBLog:
         response_data: dict,
         params: dict = None,
     ):
-        
+
         extra_data = {
             "service_base_url": service,
             "request": {
