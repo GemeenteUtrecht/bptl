@@ -44,7 +44,7 @@ class SendEmailTask(WorkUnit):
         .. code-block:: list
 
               [
-                generiek, accordering, advies,
+                generiek, accordering, advies, nen2580,
               ]
 
     * ``context``: JSON with optional fields:
