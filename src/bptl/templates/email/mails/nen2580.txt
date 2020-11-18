@@ -1,0 +1,6 @@
+{% extends "email/mails/base.txt" %}
+{% load i18n %}{% block body %}Wij hebben de door u aangeleverde documenten bekeken en vragen u onderstaande wijzigingen hier te doen:
+
+{{ email.content }}
+
+De gewijzigde documenten kunt u opnieuw indienen.{% endblock %}

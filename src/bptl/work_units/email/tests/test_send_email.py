@@ -3,6 +3,7 @@ import copy
 from django.core import mail
 from django.test import TestCase
 
+from django_camunda.utils import serialize_variable
 from rest_framework.exceptions import ValidationError
 
 from bptl.camunda.models import ExternalTask
@@ -21,31 +22,11 @@ class SendEmailTests(TestCase):
             "worker_id": "test-worker-id",
             "task_id": "test-task-id",
             "variables": {
-                "sender": {
-                    "type": "Json",
-                    "value": '{"email":"kees.koos@test.test","name":"Kees Koos"}',
-                    "valueInfo": {},
-                },
-                "receiver": {
-                    "type": "Json",
-                    "value": '{"email":"jan.janssen@test.test","name":"Jan Janssen"}',
-                    "valueInfo": {},
-                },
-                "email": {
-                    "type": "Json",
-                    "value": '{"subject": "Vakantiepret","content": "Dit is pas leuk."}',
-                    "valueInfo": {},
-                },
-                "template": {
-                    "type": "String",
-                    "value": "generiek",
-                    "valueInfo": {},
-                },
-                "context": {
-                    "type": "Json",
-                    "value": '{"reminder": "True", "deadline": "2020-04-20", "kownslFrontendUrl":"test.com"}',
-                    "valueInfo": {},
-                },
+                "sender": serialize_variable({"email":"kees.koos@test.test","name":"Kees Koos"}),
+                "receiver": serialize_variable({"email":"jan.janssen@test.test","name":"Jan Janssen"}),
+                "email": serialize_variable({"subject": "Vakantiepret","content": "Dit is pas leuk."}),
+                "template": serialize_variable("generiek"),
+                "context": serialize_variable({"reminder": "True", "deadline": "2020-04-20", "kownslFrontendUrl":"test.com"}),
             },
         }
 
@@ -78,11 +59,7 @@ class SendEmailTests(TestCase):
         self.assertTrue("Dit veld is vereist." in e.exception.args[0]["receiver"][0])
 
         task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"]["sender"] = {
-            "type": "Json",
-            "value": '{"email":"", "name":"Kees Koos"}',
-            "valueInfo": {},
-        }
+        task_dict["variables"]["sender"] = serialize_variable({"email":"", "name":"Kees Koos"})
         task = ExternalTask.objects.create(**task_dict)
         send_mail = SendEmailTask(task)
         with self.assertRaises(Exception) as e:
@@ -97,11 +74,7 @@ class SendEmailTests(TestCase):
 
     def test_send_email_review_template(self):
         task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"]["template"] = {
-            "type": "String",
-            "value": "advies",
-            "valueInfo": {},
-        }
+        task_dict["variables"]["template"] = serialize_variable("advies")
         task = ExternalTask.objects.create(**task_dict)
         send_mail = SendEmailTask(task)
         send_mail.perform()
@@ -128,11 +101,7 @@ Kees Koos""",
 
     def test_send_email_invalid_review_template(self):
         task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"]["template"] = {
-            "type": "String",
-            "value": "lelijk",
-            "valueInfo": {},
-        }
+        task_dict["variables"]["template"] = serialize_variable('lelijk')
         task = ExternalTask.objects.create(**task_dict)
         send_mail = SendEmailTask(task)
 
@@ -143,3 +112,31 @@ Kees Koos""",
         self.assertTrue(
             '"lelijk" is een ongeldige keuze.' in e.exception.args[0]["template"][0]
         )
+
+    def test_send_email_nen2580_template(self):
+        task_dict = copy.deepcopy(self.task_dict)
+        task_dict['variables']["email"] = serialize_variable({"subject": "Toelichting op niet akkoord","content": "Ik kan hier echt niet mee akkoord gaan."})
+        task_dict["variables"]["template"] = serialize_variable("nen2580")
+        task_dict['variables']['context'] = serialize_variable({})
+        task = ExternalTask.objects.create(**task_dict)
+        send_mail = SendEmailTask(task)
+        send_mail.perform()
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+
+        self.assertEqual(
+            email.body,
+            """Beste Jan Janssen,
+
+Wij hebben de door u aangeleverde documenten bekeken en vragen u onderstaande wijzigingen hier te doen:
+
+Ik kan hier echt niet mee akkoord gaan.
+
+De gewijzigde documenten kunt u opnieuw indienen.
+
+Met vriendelijke groeten,
+
+Kees Koos""",
+        )
+        self.assertEqual(email.subject, "Toelichting op niet akkoord")

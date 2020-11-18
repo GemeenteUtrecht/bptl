@@ -10,6 +10,7 @@ VALID_TEMPLATE_CHOICES = {
     "generiek": "email/mails/generic_email.txt",
     "accordering": "email/mails/review.txt",
     "advies": "email/mails/review.txt",
+    "nen2580": "email/mails/nen2580.txt",
 }
 
 
