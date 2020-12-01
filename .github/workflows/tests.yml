@@ -1,0 +1,51 @@
+name: Run testsuite
+
+# Run this workflow every time a new commit pushed to your repository
+on:
+  push:
+    branches:
+      - master
+    tags:
+    paths:
+      - 'src/**'
+  pull_request:
+    paths:
+      - 'src/**'
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Run the Django test suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: '10'
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+
+      - name: Install dependencies
+        run: pip install -r requirements/dev.txt codecov
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Run tests
+        run: |
+          python src/manage.py collectstatic --noinput --link
+          coverage run src/manage.py test src
+        env:
+          DJANGO_SETTINGS_MODULE: bptl.conf.dev
+          SECRET_KEY: dummy
+          DB_USER: postgres
+          DB_PASSWORD: ''
+
+      - name: Publish coverage report
+        uses: codecov/codecov-action@v1
