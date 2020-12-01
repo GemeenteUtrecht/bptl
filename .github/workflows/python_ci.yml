@@ -26,9 +26,7 @@ jobs:
       - uses: isort/isort-action@v0.1.0
         with:
           requirementsFiles: requirements/dev.txt
-          sortPaths:
-            - src
-            - doc
+          sortPaths: "src doc"
           configuration: '--check-only --diff'
 
   black:
