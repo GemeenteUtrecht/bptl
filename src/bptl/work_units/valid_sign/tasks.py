@@ -16,6 +16,7 @@ from bptl.tasks.base import WorkUnit, check_variable
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.registry import register
 
+from .client import get_client, require_validsign_service
 from .models import CreatedPackage
 
 logger = logging.getLogger(__name__)
@@ -37,27 +38,12 @@ class ValidSignTask(WorkUnit):
     @property
     def client(self) -> ZGWClient:
         if not hasattr(self, "_client"):
-            self._client = self.get_validsign_client()
+            self._client = get_client(self.task)
         return self._client
-
-    def get_validsign_client(self) -> ZGWClient:
-        topic_name = self.task.topic_name
-        default_services = TaskMapping.objects.get(
-            topic_name=topic_name
-        ).defaultservice_set.select_related("service")
-        services_by_alias = {svc.alias: svc.service for svc in default_services}
-
-        alias = "ValidSignAPI"
-        if alias not in services_by_alias:
-            raise RuntimeError(f"Service alias '{alias}' not found.")
-
-        return services_by_alias[alias].build_client()
-
-    def perform(self) -> dict:
-        raise NotImplementedError
 
 
 @register
+@require_validsign_service
 class CreateValidSignPackageTask(ValidSignTask):
     """Create a ValidSign package with signers and documents and send a signing request to the signers.
 
@@ -359,6 +345,7 @@ class CreateValidSignPackageTask(ValidSignTask):
 
 
 @register
+@require_validsign_service
 class ValidSignReminderTask(ValidSignTask):
     """Email a reminder (with links) to signers that they need to sign documents through ValidSign.
 

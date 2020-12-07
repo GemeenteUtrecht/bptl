@@ -6,13 +6,15 @@ from django.test import TestCase, override_settings
 
 import requests_mock
 from django_camunda.utils import serialize_variable
+from zgw_consumers.constants import APITypes, AuthTypes
 
 from bptl.camunda.models import ExternalTask
+from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import TaskMapping
 from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
-from ..tasks import CreateValidSignPackageTask, ValidSignReminderTask
+from ..tasks import CreateValidSignPackageTask, ValidSignReminderTask, ValidSignTask
 from .utils import VALIDSIGN_API_DOCS, mock_validsign_oas_get
 
 VALIDSIGN_URL = "https://try.validsign.test.nl/"
@@ -556,3 +558,58 @@ class ValidSignReminderTests(TestCase):
                 continue
             body = json.loads(request_body.text)
             self.assertEqual({"email": "test@example.com"}, body)
+
+
+class CredentialsStoreAuthTests(TestCase):
+    """
+    Test the 1.0 credentials store functionality.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        default_service = DefaultServiceFactory.create(
+            task_mapping__topic_name="some-topic",
+            service__api_root=VALIDSIGN_URL,
+            service__api_type=APITypes.orc,
+            service__auth_type=AuthTypes.api_key,
+            service__oas=VALIDSIGN_API_DOCS,
+            service__header_key="default-header",
+            service__header_value="bar",
+            alias="ValidSignAPI",
+        )
+        AppServiceCredentialsFactory.create(
+            app__app_id="some-app",
+            service=default_service.service,
+            header_key="custom-header",
+            header_value="baz",
+        )
+
+    def test_base_service_auth(self):
+        fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            variables={},
+        )
+
+        work_unit = ValidSignTask(fetched_task)
+
+        self.assertEqual(
+            work_unit.client.auth_header,
+            {"default-header": "bar"},
+        )
+
+    def test_app_specific_service_auth(self):
+        fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            variables={
+                "bptlAppId": serialize_variable("some-app"),
+            },
+        )
+
+        work_unit = ValidSignTask(fetched_task)
+
+        self.assertEqual(
+            work_unit.client.auth_header,
+            {"custom-header": "baz"},
+        )
