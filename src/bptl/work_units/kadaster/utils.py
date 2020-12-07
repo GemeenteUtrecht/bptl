@@ -7,9 +7,10 @@ from zgw_consumers.models import Service
 
 from bptl.credentials.api import get_credentials
 from bptl.tasks.base import BaseTask, check_variable
-from bptl.tasks.models import DefaultService
 from bptl.tasks.registry import register
+from bptl.work_units.zgw.tasks.base import NoService
 
+from ..services import get_alias_service
 from .client import BRTClient
 
 # support old situation until 1.1
@@ -28,16 +29,8 @@ def get_brt_service(task: BaseTask) -> Service:
     Extract the BRT Service object to use for the client.
     """
     try:
-        default_service = (
-            DefaultService.objects.filter(
-                task_mapping__topic_name=task.topic_name,
-                service__api_type=APITypes.orc,
-                alias=ALIAS,
-            )
-            .select_related("service")
-            .get()
-        )
-    except DefaultService.DoesNotExist:
+        return get_alias_service(task, ALIAS, service__api_type=APITypes.orc)
+    except NoService:
         warnings.warn(
             "Falling back to static configuration, this support will be removed "
             "in BPTL 1.1",
@@ -52,7 +45,6 @@ def get_brt_service(task: BaseTask) -> Service:
             header_value=check_variable(variables, "BRTKey"),
             oas=API_ROOT,
         )
-    return default_service.service
 
 
 def get_client(task: BaseTask) -> BRTClient:
