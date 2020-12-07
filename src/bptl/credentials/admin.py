@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
+from .forms import AppForm
 from .models import App, AppServiceCredentials
 
 
@@ -15,6 +16,7 @@ class AppServiceCredentialsInline(admin.TabularInline):
 class AppAdmin(admin.ModelAdmin):
     list_display = ("label", "app_id")
     search_fields = ("app_id", "label")
+    form = AppForm
     inlines = [AppServiceCredentialsInline]
 
 
