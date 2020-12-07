@@ -58,9 +58,8 @@ class ZacTaskTests(TestCase):
 
         m.get(ZAC_API_ROOT, json={})
 
-        response = client.get("")
+        client.get("")
 
-        self.assertEqual(response.status_code, 200)
         self.assertTrue("Other-Header" in m.request_history[0].headers)
         self.assertEqual(
             m.request_history[0].headers["Other-Header"],

@@ -29,10 +29,10 @@ class IsAboveAge(WorkUnit):
         bsn = variables["burgerservicenummer"]
         age = variables["age"]
 
-        client = get_client(self.task)
         url = f"ingeschrevenpersonen/{bsn}"
 
-        response = client.get(url, params={"fields": "leeftijd"})
+        with get_client(self.task) as client:
+            response = client.get(url, params={"fields": "leeftijd"})
 
         leeftijd = response.get("leeftijd")
         is_above_age = None if leeftijd is None else leeftijd >= age
@@ -65,25 +65,24 @@ class DegreeOfKinship(WorkUnit):
         if bsn1 == bsn2:
             return {"kinship": None}
 
-        client = get_client(self.task)
-
         # set up classes for storing parent and child relations of one node
         rel1 = Relations(bsn1)
         rel2 = Relations(bsn2)
 
-        # 1. request 1-level relations (child-parend kinship)
-        rel1.expand(client, 1)
-        rel2.expand(client, 1)
+        with get_client(self.task) as client:
+            # 1. request 1-level relations (child-parend kinship)
+            rel1.expand(client, 1)
+            rel2.expand(client, 1)
 
-        # search for intersectipns between two relations sets
-        kinship = rel1.kinship(rel2)
+            # search for intersectipns between two relations sets
+            kinship = rel1.kinship(rel2)
 
-        if kinship:
-            return {"kinship": kinship}
+            if kinship:
+                return {"kinship": kinship}
 
-        # 2. Request 2-level relations (siblings and grandparents-grandchildren kinship)
-        rel1.expand(client, 2)
-        rel2.expand(client, 2)
+            # 2. Request 2-level relations (siblings and grandparents-grandchildren kinship)
+            rel1.expand(client, 2)
+            rel2.expand(client, 2)
 
         # search for intersectipns between two relations sets
         kinship = rel1.kinship(rel2)

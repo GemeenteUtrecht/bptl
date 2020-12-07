@@ -69,8 +69,7 @@ class ZacTaskTests(TestCase):
 
         task = UserDetailsTask(self.task)
         response = task.get_client_response()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), zac_mock_data)
+        self.assertEqual(response, zac_mock_data)
 
         cleaned_data = task.perform()
         self.assertEqual(len(cleaned_data["userData"]), 2)

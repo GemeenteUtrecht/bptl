@@ -46,20 +46,21 @@ def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
     headers = {
         "Accept-Crs": "epsg:4258",  # ~ WGS84
     }
-    client = get_client()
 
-    def fetch(resource: str, formatter: callable):
-        resp_data = client.post(
-            resource,
-            params={"pageSize": 50},
-            json=body,
-            headers=headers,
-        )
-        results = resp_data["_embedded"][resource]
-        results = [formatter(result) for result in results]
-        return results
+    with get_client() as client:
 
-    features = [fetch(resource, formatters[resource]) for resource in resources]
+        def fetch(resource: str, formatter: callable):
+            resp_data = client.post(
+                resource,
+                params={"pageSize": 50},
+                json=body,
+                headers=headers,
+            )
+            results = resp_data["_embedded"][resource]
+            results = [formatter(result) for result in results]
+            return results
+
+        features = [fetch(resource, formatters[resource]) for resource in resources]
     return {"features": features}
 
 

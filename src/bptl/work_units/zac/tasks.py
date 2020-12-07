@@ -47,13 +47,11 @@ class UserDetailsTask(WorkUnit):
     """
 
     def get_client_response(self) -> Response:
-        client = get_client(self.task)
         variables = self.task.get_variables()
         usernames = check_variable(variables, "usernames")
         params = {"include": usernames}
-        response = client.get("accounts/api/users", params=params)
-        response.raise_for_status()
-        return response
+        with get_client(self.task) as client:
+            return client.get("accounts/api/users", params=params)
 
     def validate_data(self, data: dict) -> dict:
         serializer = ZacUsersDetailsSerializer(data=data)
@@ -62,7 +60,7 @@ class UserDetailsTask(WorkUnit):
 
     def perform(self) -> dict:
         response = self.get_client_response()
-        validated_data = self.validate_data(response.json())
+        validated_data = self.validate_data(response)
         return {
             "userData": validated_data["results"],
         }
