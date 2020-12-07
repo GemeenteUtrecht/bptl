@@ -5,11 +5,11 @@ from django.utils.translation import gettext_lazy as _
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 
-from bptl.credentials.api import get_credentials
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 from bptl.work_units.zgw.tasks.base import NoService
 
+from ..clients import get_client as _get_client
 from ..services import get_alias_service
 from .client import BRTClient
 
@@ -17,7 +17,6 @@ from .client import BRTClient
 API_ROOT = "https://brt.basisregistraties.overheid.nl/api/v2"
 
 ALIAS = "BRT"
-PROCESS_VAR_NAME = "bptlAppId"
 
 require_brt_service = register.require_service(
     APITypes.orc, description=_("The BRT instance to use."), alias=ALIAS
@@ -49,12 +48,4 @@ def get_brt_service(task: BaseTask) -> Service:
 
 def get_client(task: BaseTask) -> BRTClient:
     service = get_brt_service(task)
-    app_id = task.get_variables().get(PROCESS_VAR_NAME)
-    auth_header = get_credentials(app_id, service)[service] if app_id else {}
-    if not auth_header:
-        auth_header = service.build_client().auth_header
-
-    # export the client
-    client = BRTClient(service, auth_header)
-    client.task = task
-    return client
+    return _get_client(task, service, cls=BRTClient)

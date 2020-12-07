@@ -10,6 +10,32 @@ import requests
 from timeline_logger.models import TimelineLog
 from zgw_consumers.models import Service
 
+from bptl.credentials.api import get_credentials
+from bptl.tasks.base import BaseTask
+
+APP_ID_PROCESS_VAR_NAME = "bptlAppId"
+
+
+def get_client(task: BaseTask, service: Service, cls=None) -> "JSONClient":
+    """
+    Get a client instance for the given task and service.
+
+    :param task: An instance of the work unit task being executed
+    :param service: The service to build an authenticated client for
+    :param cls: The particular (sub)class to use for the client instance. Defaults to
+      :class:`JSONClient`.
+    """
+    cls = cls or JSONClient
+    app_id = task.get_variables().get(APP_ID_PROCESS_VAR_NAME)
+    auth_header = get_credentials(app_id, service)[service] if app_id else {}
+    if not auth_header:
+        auth_header = service.build_client().auth_header
+
+    # export the client
+    client = cls(service, auth_header)
+    client.task = task
+    return client
+
 
 class JSONClient:
     task = None
