@@ -63,7 +63,6 @@ class DefaultService(models.Model):
     )
 
     class Meta:
-        db_table = "tasks_defaultservice"
         verbose_name = _("default service")
         verbose_name_plural = _("default services")
         unique_together = (
