@@ -5,18 +5,15 @@ from typing import List, Tuple
 
 from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.db.models.functions import Length
 from django.utils.crypto import get_random_string
 
 import requests
 from zgw_consumers.client import ZGWClient
-from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import WorkUnit, check_variable
-from bptl.tasks.models import TaskMapping
 from bptl.tasks.registry import register
 
-from .client import get_client, require_validsign_service
+from .client import DRCClientPool, get_client, require_validsign_service
 from .models import CreatedPackage
 
 logger = logging.getLogger(__name__)
@@ -93,59 +90,6 @@ class CreateValidSignPackageTask(ValidSignTask):
     * ``packageId``: string. ID of the ValidSign package created by the task.
     """
 
-    _document_clients = None
-
-    def build_document_clients(self) -> List[ZGWClient]:
-        if self._document_clients is None:
-            default_services = TaskMapping.objects.get(
-                topic_name=self.task.topic_name
-            ).defaultservice_set.filter(service__api_type=APITypes.drc)
-
-            if default_services.count() == 0:
-                raise NoService(
-                    f"No {APITypes.drc} service is configured for topic {self.task.topic_name}"
-                )
-
-            services_vars = self.task.get_variables().get("services", {})
-            if not services_vars and not settings.DEBUG:
-                raise NoService(f"Expected service aliases in process variables")
-
-            aliases_vars = list(services_vars.keys())
-            if aliases_vars:
-                # Order based on the length of the api_root (longest first)
-                # For 2 APIs with root URL http://drc1/api/v1 and http://drc1/api/ a URL http://drc1/api/v1/document/1
-                # will match both clients, but should use the first one
-                default_services = default_services.filter(
-                    alias__in=aliases_vars
-                ).order_by(Length("service__api_root").desc())
-
-            clients = []
-            for default_service in default_services:
-                client = default_service.service.build_client()
-                # add authorization header
-                jwt = services_vars.get(default_service.alias, {}).get("jwt")
-                if not jwt and not settings.DEBUG:
-                    raise NoAuth(
-                        f"Expected 'jwt' variable for {default_service.alias} in process variables"
-                    )
-                elif jwt:
-                    client.set_auth_value(jwt)
-                clients.append(client)
-
-            self._document_clients = clients
-        return self._document_clients
-
-    @staticmethod
-    def get_document_client(url: str, candidates: List[ZGWClient]) -> ZGWClient:
-        for candidate in candidates:
-            if url.startswith(candidate.base_url):
-                client = candidate
-                break
-        else:
-            raise DoesNotExist(f"No service found for url '{url}'")
-
-        return client
-
     def format_signers(self, signers: List[dict]) -> List[dict]:
         """Format the signer information into an array of JSON objects as needed by ValidSign."""
 
@@ -158,15 +102,16 @@ class CreateValidSignPackageTask(ValidSignTask):
 
         variables = self.task.get_variables()
         document_urls = check_variable(variables, "documents")
-        # Building the document clients for all DRC services
-        document_clients = self.build_document_clients()
+
+        client_pool = DRCClientPool(variables)
+        client_pool.populate_clients(self.task, document_urls)
 
         documents = []
 
         current_total_documents_size = 0
         for document_url in document_urls:
             # Getting the appropriate client
-            document_client = self.get_document_client(document_url, document_clients)
+            document_client = client_pool.get_client_for(document_url)
             # Retrieving the document
             document_data = document_client.retrieve(
                 resource="enkelvoudiginformatieobject",

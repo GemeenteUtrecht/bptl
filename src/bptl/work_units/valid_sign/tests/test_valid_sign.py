@@ -2,7 +2,7 @@ import json
 import re
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.test import TestCase, override_settings, tag
+from django.test import TestCase, override_settings
 
 import jwt
 import requests_mock
@@ -165,7 +165,6 @@ class ValidSignTests(TestCase):
             ],
         )
 
-    @tag("this")
     def test_get_documents_from_api(self, m):
         mock_service_oas_get(m, DRC_URL, "drc")
 
@@ -193,9 +192,19 @@ class ValidSignTests(TestCase):
 
         self.assertEqual(m.request_history[-1].headers["Authorization"], "Bearer 12345")
 
-    @tag("this")
     def test_get_documents_from_api_credentials_store(self, m):
         mock_service_oas_get(m, DRC_URL, "drc")
+        task = ExternalTask.objects.create(
+            topic_name="CreateValidSignPackage",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "documents": serialize_variable([DOCUMENT_1, DOCUMENT_2]),
+                "signers": serialize_variable([SIGNER_1, SIGNER_2]),
+                "packageName": serialize_variable("Test package name"),
+                "bptlAppId": serialize_variable("some-app"),
+            },
+        )
         AppServiceCredentialsFactory.create(
             app__app_id="some-app",
             service=self.drc,
@@ -216,7 +225,7 @@ class ValidSignTests(TestCase):
             content=CONTENT_2,
         )
 
-        task = CreateValidSignPackageTask(self.fetched_task)
+        task = CreateValidSignPackageTask(task)
         task._get_documents_from_api()
 
         token = m.request_history[-1].headers["Authorization"].split(" ")[1]
