@@ -31,7 +31,7 @@ require_brp_service = register.require_service(
 )
 
 
-def get_brp_service(task: BaseTask):
+def get_brp_service(task: BaseTask) -> Service:
     """
     Extract the BRP Service object to use for the client.
     """

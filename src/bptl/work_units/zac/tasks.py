@@ -3,11 +3,12 @@ from requests import Response
 from bptl.tasks.base import WorkUnit, check_variable
 from bptl.tasks.registry import register
 
-from .client import ZACClient
+from .client import get_client, require_zac_service
 from .serializers import ZacUsersDetailsSerializer
 
 
 @register
+@require_zac_service
 class UserDetailsTask(WorkUnit):
     """
     Requests email and name data from usernames from the zac.
@@ -46,7 +47,7 @@ class UserDetailsTask(WorkUnit):
     """
 
     def get_client_response(self) -> Response:
-        client = ZACClient()
+        client = get_client(self.task)
         variables = self.task.get_variables()
         usernames = check_variable(variables, "usernames")
         params = {"include": usernames}
