@@ -2,8 +2,9 @@ import json
 import re
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, tag
 
+import jwt
 import requests_mock
 from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes, AuthTypes
@@ -121,12 +122,13 @@ class ValidSignTests(TestCase):
             topic_name="CreateValidSignPackage",
             callback="bptl.work_units.valid_sign.tasks.CreateValidSignPackage",
         )
-        DefaultServiceFactory.create(
+        drc_svc = DefaultServiceFactory.create(
             task_mapping=mapping,
             service__api_root=DRC_URL,
             service__api_type="drc",
             alias="drc",
         )
+        cls.drc = drc_svc.service
         DefaultServiceFactory.create(
             task_mapping=mapping,
             service__api_root=VALIDSIGN_URL,
@@ -163,6 +165,7 @@ class ValidSignTests(TestCase):
             ],
         )
 
+    @tag("this")
     def test_get_documents_from_api(self, m):
         mock_service_oas_get(m, DRC_URL, "drc")
 
@@ -187,6 +190,39 @@ class ValidSignTests(TestCase):
         self.assertEqual(documents[0][1].read(), CONTENT_1)
         self.assertEqual(documents[1][0], RESPONSE_2["titel"])
         self.assertEqual(documents[1][1].read(), CONTENT_2)
+
+        self.assertEqual(m.request_history[-1].headers["Authorization"], "Bearer 12345")
+
+    @tag("this")
+    def test_get_documents_from_api_credentials_store(self, m):
+        mock_service_oas_get(m, DRC_URL, "drc")
+        AppServiceCredentialsFactory.create(
+            app__app_id="some-app",
+            service=self.drc,
+            client_id="foo",
+            secret="bar",
+        )
+
+        # Mock call to retrieve the documents from the API
+        m.get(DOCUMENT_1, json=RESPONSE_1)
+        m.get(DOCUMENT_2, json=RESPONSE_2)
+        # Mock calls to retrieve the content of the documents
+        m.get(
+            CONTENT_URL_1,
+            content=CONTENT_1,
+        )
+        m.get(
+            CONTENT_URL_2,
+            content=CONTENT_2,
+        )
+
+        task = CreateValidSignPackageTask(self.fetched_task)
+        task._get_documents_from_api()
+
+        token = m.request_history[-1].headers["Authorization"].split(" ")[1]
+        claims = jwt.decode(token, key="bar", algorithms=["HS256"])
+
+        self.assertEqual(claims["client_id"], "foo")
 
     @override_settings(MAX_DOCUMENT_SIZE=10)
     def test_get_large_documents_from_api(self, m):
