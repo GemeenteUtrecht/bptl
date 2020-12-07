@@ -5,7 +5,7 @@ from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 
 from bptl.activiti.models import ServiceTask
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory
 
 from ..tasks import DegreeOfKinship
 from .utils import NAMES, mock_family

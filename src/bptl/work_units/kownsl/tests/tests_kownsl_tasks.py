@@ -14,7 +14,7 @@ from zgw_consumers.models import Service
 from bptl.camunda.models import ExternalTask
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import TaskMapping
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory
 
 from ..tasks import (
     get_approval_toelichtingen,

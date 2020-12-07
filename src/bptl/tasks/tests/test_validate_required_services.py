@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from zgw_consumers.constants import APITypes
 
 from bptl.tasks.registry import WorkUnitRegistry
-from bptl.work_units.zgw.tests.factories import ServiceFactory
+from bptl.tasks.tests.factories import ServiceFactory
 
 from ..forms import DefaultServiceFormset
 

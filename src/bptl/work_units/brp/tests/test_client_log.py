@@ -6,7 +6,7 @@ from zgw_consumers.models import Service
 
 from bptl.activiti.models import ServiceTask
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory
 
 from ..tasks import IsAboveAge
 

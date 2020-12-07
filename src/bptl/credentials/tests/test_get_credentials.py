@@ -3,7 +3,7 @@ from django.test import TestCase
 import jwt
 from zgw_consumers.constants import APITypes, AuthTypes
 
-from bptl.work_units.zgw.tests.factories import ServiceFactory
+from bptl.tasks.tests.factories import ServiceFactory
 
 from ..api import get_credentials
 from .factories import AppFactory, AppServiceCredentialsFactory

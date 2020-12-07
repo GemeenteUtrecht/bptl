@@ -5,7 +5,7 @@ from zgw_consumers.constants import APITypes, AuthTypes
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import MissingVariable
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory
 
 from ..tasks import UserDetailsTask
 

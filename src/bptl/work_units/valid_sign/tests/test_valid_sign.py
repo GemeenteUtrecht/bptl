@@ -12,7 +12,7 @@ from zgw_consumers.constants import APITypes, AuthTypes
 from bptl.camunda.models import ExternalTask
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import TaskMapping
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
 from ..tasks import CreateValidSignPackageTask, ValidSignReminderTask, ValidSignTask

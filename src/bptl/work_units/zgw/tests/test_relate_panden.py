@@ -5,8 +5,7 @@ from django.test import TestCase
 import requests_mock
 
 from bptl.camunda.models import ExternalTask
-from bptl.tasks.tests.factories import TaskMappingFactory
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks import RelatePand
 from .utils import mock_service_oas_get
