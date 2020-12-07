@@ -1,7 +1,3 @@
-import copy
-
-from django.utils.translation import ugettext_lazy as _
-
 from rest_framework import exceptions, serializers
 
 from bptl.tasks.base import MissingVariable
