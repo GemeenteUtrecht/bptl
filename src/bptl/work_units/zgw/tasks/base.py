@@ -2,7 +2,7 @@ import warnings
 
 from bptl.credentials.api import get_credentials
 from bptl.tasks.base import WorkUnit
-from bptl.work_units.zgw.models import DefaultService
+from bptl.tasks.models import DefaultService
 
 from ..client import MultipleServices, NoAuth, NoService
 

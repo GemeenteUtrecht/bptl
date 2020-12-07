@@ -9,9 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
 
-from bptl.work_units.zgw.models import DefaultService
-
-from .models import TaskMapping
+from .models import DefaultService, TaskMapping
 from .registry import register
 
 

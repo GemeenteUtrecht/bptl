@@ -7,8 +7,8 @@ from zgw_consumers.models import Service
 
 from bptl.credentials.api import get_credentials
 from bptl.tasks.base import BaseTask, check_variable
+from bptl.tasks.models import DefaultService
 from bptl.tasks.registry import register
-from bptl.work_units.zgw.models import DefaultService
 
 from .client import BRTClient
 

@@ -4,14 +4,14 @@ from polymorphic.admin import PolymorphicChildModelFilter, PolymorphicParentMode
 
 from bptl.activiti.models import ServiceTask
 from bptl.camunda.models import ExternalTask
-from bptl.work_units.zgw.models import DefaultService
 
 from .forms import AdminTaskMappingForm
-from .models import BaseTask, TaskMapping
+from .models import BaseTask, DefaultService, TaskMapping
 
 
 class DefaultServiceInline(admin.TabularInline):
     model = DefaultService
+    autocomplete_fields = ("service",)
     extra = 1
 
 

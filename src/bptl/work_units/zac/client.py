@@ -13,9 +13,8 @@ from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
 
 from bptl.credentials.api import get_credentials
-from bptl.tasks.models import BaseTask
+from bptl.tasks.models import BaseTask, DefaultService
 from bptl.tasks.registry import register
-from bptl.work_units.zgw.models import DefaultService
 from bptl.work_units.zgw.tasks.base import NoService
 
 logger = logging.getLogger(__name__)

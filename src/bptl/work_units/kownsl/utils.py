@@ -6,11 +6,11 @@ from zgw_consumers.constants import APITypes
 
 from bptl.credentials.api import get_credentials
 from bptl.tasks.base import BaseTask, check_variable
+from bptl.tasks.models import DefaultService
 from bptl.tasks.registry import register
 from bptl.work_units.zgw.client import (  # TODO: move exceptions to more generic place
     NoService,
 )
-from bptl.work_units.zgw.models import DefaultService
 
 ALIAS = "kownsl"
 PROCESS_VAR_NAME = "bptlAppId"

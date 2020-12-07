@@ -7,10 +7,8 @@ from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
 
 from bptl.accounts.models import User
-from bptl.work_units.zgw.models import DefaultService
 
-from ..forms import DefaultServiceFormset
-from ..models import TaskMapping
+from ..models import DefaultService, TaskMapping
 from ..registry import WorkUnitRegistry
 
 # Set up an isolated registry for tests
