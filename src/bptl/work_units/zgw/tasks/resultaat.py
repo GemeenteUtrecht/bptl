@@ -3,10 +3,11 @@ from zgw_consumers.constants import APITypes
 from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
-from .base import ZGWWorkUnit
+from .base import ZGWWorkUnit, require_zrc
 
 
 @register
+@require_zrc
 class CreateResultaatTask(ZGWWorkUnit):
     """
     Set the RESULTAAT for the ZAAK in the process.

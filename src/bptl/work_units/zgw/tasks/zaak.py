@@ -10,13 +10,15 @@ from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
-from .base import ZGWWorkUnit
+from .base import ZGWWorkUnit, require_zrc, require_ztc
 from .resultaat import CreateResultaatTask
 
 logger = logging.getLogger(__name__)
 
 
 @register
+@require_zrc
+@require_ztc
 class CreateZaakTask(ZGWWorkUnit):
     """
     Create a ZAAK in the configured Zaken API and set the initial status.
@@ -150,6 +152,8 @@ class CreateZaakTask(ZGWWorkUnit):
 
 
 @register
+@require_zrc
+@require_ztc
 class CloseZaakTask(ZGWWorkUnit):
     """
     Close the ZAAK by setting the final STATUS.
@@ -225,6 +229,7 @@ class CloseZaakTask(ZGWWorkUnit):
 
 
 @register
+@require_zrc
 class LookupZaak(ZGWWorkUnit):
     """
     Look up a single ZAAK by identificatie and bronorganisatie.

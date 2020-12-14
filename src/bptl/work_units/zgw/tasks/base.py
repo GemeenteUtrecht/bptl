@@ -1,12 +1,31 @@
 import warnings
 
+from django.utils.translation import gettext_lazy as _
+
+from zgw_consumers.constants import APITypes
+
 from bptl.credentials.api import get_credentials
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.models import DefaultService
+from bptl.tasks.registry import register
 
 from ..client import MultipleServices, NoAuth, NoService
 
 PROCESS_VAR_NAME = "bptlAppId"
+
+
+require_zrc = register.require_service(
+    APITypes.zrc, description=_("The Zaken API to use.")
+)
+require_ztc = register.require_service(
+    APITypes.ztc, description=_("The Catalogi API to use.")
+)
+require_drc = register.require_service(
+    APITypes.drc, description=_("The Documenten API to use.")
+)
+require_brc = register.require_service(
+    APITypes.brc, description=_("The Besluiten API to use.")
+)
 
 
 class ZGWWorkUnit(WorkUnit):

@@ -10,12 +10,13 @@ from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
 from ..utils import get_paginated_results
-from .base import ZGWWorkUnit
+from .base import ZGWWorkUnit, require_zrc, require_ztc
 
 logger = logging.getLogger(__name__)
 
 
 @register
+@require_zrc
 class RelateDocumentToZaakTask(ZGWWorkUnit):
     """
     Create relations between ZAAK and INFORMATIEOBJECT
@@ -63,6 +64,7 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
 
 
 @register
+@require_zrc
 class RelatePand(ZGWWorkUnit):
     """
     Relate Pand objects from the BAG to a ZAAK as ZAAKOBJECTs.
@@ -137,6 +139,8 @@ class RelatePand(ZGWWorkUnit):
 
 
 @register
+@require_zrc
+@require_ztc
 class CreateEigenschap(ZGWWorkUnit):
     """
     Set a particular EIGENSCHAP value for a given zaak.
@@ -230,6 +234,7 @@ class CreateEigenschap(ZGWWorkUnit):
 
 
 @register
+@require_zrc
 class RelateerZaak(ZGWWorkUnit):
     """
     Relate a zaak to another zaak.
@@ -299,6 +304,7 @@ class RelateerZaak(ZGWWorkUnit):
 
 
 @register
+@require_zrc
 class CreateZaakObject(ZGWWorkUnit):
     """
     Create a new ZAAKOBJECT for the ZAAK in the process.

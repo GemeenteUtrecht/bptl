@@ -7,12 +7,14 @@ from zgw_consumers.constants import APITypes
 from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
-from .base import ZGWWorkUnit
+from .base import ZGWWorkUnit, require_zrc, require_ztc
 
 logger = logging.getLogger(__name__)
 
 
 @register
+@require_zrc
+@require_ztc
 class CreateStatusTask(ZGWWorkUnit):
     """
     Create a new STATUS for the ZAAK in the process.
