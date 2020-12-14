@@ -19,6 +19,11 @@ class AppAdmin(admin.ModelAdmin):
     form = AppForm
     inlines = [AppServiceCredentialsInline]
 
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj=obj)
+        form = self.get_form(request, obj, fields=None)()
+        return [field for field in fields if field in form.fields]
+
 
 @admin.register(AppServiceCredentials)
 class AppServiceCredentialsAdmin(admin.ModelAdmin):

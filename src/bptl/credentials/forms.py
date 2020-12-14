@@ -53,6 +53,7 @@ class AppForm(forms.ModelForm):
         # if there's no data, no point in showing the field at all
         if not all_apps:
             del self.fields["autorisaties_application"]
+            return
 
         self.fields["autorisaties_application"].choices = BLANK_CHOICE_DASH + [
             (application["url"], application["label"]) for application in all_apps
