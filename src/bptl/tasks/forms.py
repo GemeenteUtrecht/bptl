@@ -83,7 +83,7 @@ class BaseDefaultServiceFormset(BaseInlineFormSet):
             return  # won't validate the main form anyway
 
         try:
-            task = register[self.data["callback"]]
+            task = register[callback]
         except KeyError:
             return  # won't validate the main form anyway
 
@@ -94,23 +94,18 @@ class BaseDefaultServiceFormset(BaseInlineFormSet):
         # first round validates all the explicitly expected aliases
         for required_service in task.required_services:
             # if a particular alias is required, validate it as such
-            if not required_service.alias:
+            alias = required_service.alias
+            if not alias:
                 continue
             # check that the alias is present
             service_data = next(
-                (
-                    data
-                    for data in self.cleaned_data
-                    if data.get("alias") == required_service.alias
-                ),
+                (data for data in self.cleaned_data if data.get("alias") == alias),
                 None,
             )
 
             if service_data is None:
                 raise forms.ValidationError(
-                    _("Missing service alias '{alias}'").format(
-                        alias=required_service.alias
-                    )
+                    _("Missing service alias '{alias}'").format(alias=alias)
                 )
 
             _pinned_alias_services.append(service_data)
@@ -125,7 +120,7 @@ class BaseDefaultServiceFormset(BaseInlineFormSet):
                     _(
                         "The service for alias '{alias}' must be a '{api_type}' service."
                     ).format(
-                        alias=required_service.alias,
+                        alias=alias,
                         api_type=APITypes.labels[required_service.service_type],
                     ),
                 )

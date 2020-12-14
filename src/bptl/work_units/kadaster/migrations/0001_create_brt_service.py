@@ -9,7 +9,7 @@ from bptl.tasks.registry import register
 from ..tasks import retrieve_openbare_ruimten
 from ..utils import ALIAS
 
-API_ROOT = "https://brt.basisregistraties.overheid.nl/api/v2"
+API_ROOT = "https://brt.basisregistraties.overheid.nl/api/v2/"
 
 
 def create_brt_service(apps, schema_editor):

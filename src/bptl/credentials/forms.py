@@ -58,6 +58,10 @@ class AppForm(forms.ModelForm):
         self.fields["autorisaties_application"].choices = BLANK_CHOICE_DASH + [
             (application["url"], application["label"]) for application in all_apps
         ]
+        # the fields themselves are always required, but if an Autorisaties API app is
+        # selected the user does not need to input them explicitly, we can derive them.
+        # The ``def clean`` validation validates that these fields are filled out if
+        # there's no Autorisaties API app selected.
         self.fields["label"].required = False
         self.fields["app_id"].required = False
 
@@ -71,8 +75,8 @@ class AppForm(forms.ModelForm):
         label = self.cleaned_data.get("label")
         app_id = self.cleaned_data.get("app_id")
 
-        # if there's no application specified that we can derive the values from, the
-        # other fields become required fields
+        # the other fields become required fields if there's no application specified
+        # that we can derive the values from
         if not app:
             for field in ["label", "app_id"]:
                 value = self.cleaned_data.get(field)

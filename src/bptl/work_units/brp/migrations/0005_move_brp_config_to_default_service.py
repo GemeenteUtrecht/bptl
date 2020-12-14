@@ -19,8 +19,8 @@ def move_brpconfig_to_default_services(apps, schema_editor):
     ).exclude(default_services=service)
 
     # migrate the credentials to a placeholder app
-    app = App.objects.get_or_create(app_id="BRP_MIGRATION_FIXME")
-    AppServiceCredentials.create(
+    app, created = App.objects.get_or_create(app_id="BRP_MIGRATION_FIXME")
+    AppServiceCredentials.objects.create(
         app=app,
         service=service,
         client_id=service.client_id,
