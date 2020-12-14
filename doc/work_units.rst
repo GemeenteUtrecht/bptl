@@ -127,9 +127,9 @@ BPTL executes work units on behalf of another application, often through a proce
 engine. For auditing purposes, you should not interface to external services with
 "blanket" BPTL credentials, but instead use application specific credentials.
 
-BPTL has a credential store containing the credentials for a particular application (
-identified by an "App ID") for each service it needs to interact with. To use this, you
-must:
+BPTL has a credential store containing the credentials for a particular application
+(identified by an "App ID") for each service it needs to interact with. To use this,
+you must:
 
 1. Extract the ``bptlAppId`` process variable from the task:
 

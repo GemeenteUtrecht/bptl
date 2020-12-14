@@ -18,13 +18,9 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     * ``zaakUrl``: full URL of the ZAAK to set the RESULTAAT for
     * ``resultaattype``: full URL of the RESULTAATTYPE to set
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 

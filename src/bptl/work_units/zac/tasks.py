@@ -31,6 +31,11 @@ class UserDetailsTask(WorkUnit):
                     "user3",
                 ]
 
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
+
     **Sets the process variables**
 
     * ``userData``: a JSON-object containing a list of user names and emails:

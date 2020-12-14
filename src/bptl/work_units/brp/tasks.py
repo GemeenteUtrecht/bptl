@@ -13,12 +13,17 @@ class IsAboveAge(WorkUnit):
     """
     Fetches BRP API and returns whether a person is exactly, or older than, a certain age.
 
-    Required process variables:
+    **Required process variables**
 
     * ``burgerservicenummer``: BSN of the person
     * ``age``: integer, which represents the number of years
 
-    The task sets the process variables:
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
+
+    **The task sets the process variables**
 
     * ``isAboveAge``: boolean, which indicate if the requested person is equal or above a certain age.
       If the information about person's age is not found, ``isAboveAge`` will be set as ``none``
@@ -46,10 +51,15 @@ class DegreeOfKinship(WorkUnit):
     """
     Retrieve the degree of kinship from the BRP API.
 
-    Required process variables:
+    **Required process variables**
 
     * ``burgerservicenummer1``: BSN of the first person
     * ``burgerservicenummer2``: BSN of the second person
+
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the process variables**
 

@@ -57,13 +57,10 @@ class LockDocument(GetDRCMixin, ZGWWorkUnit):
       The API must comply with the Documenten API 1.0.x
       (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
 
-    * ``services``: JSON Object of connection details for ZGW service:
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
 
-        .. code-block:: json
-
-          {
-              "<drc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Sets the process variables**
 
@@ -102,13 +99,10 @@ class UnlockDocument(GetDRCMixin, ZGWWorkUnit):
     * ``lockId``: String, Lock ID for the locked DRC document, obtained from locking the
       document.
 
-    * ``services``: JSON Object of connection details for ZGW services:
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
 
-        .. code-block:: json
-
-          {
-              "<drc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Sets no process variables**
     """

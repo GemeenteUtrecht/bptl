@@ -30,14 +30,9 @@ class CreateZaakTask(ZGWWorkUnit):
 
     * ``zaaktype``: the full URL of the ZAAKTYPE
     * ``organisatieRSIN``: RSIN of the organisation
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -164,14 +159,9 @@ class CloseZaakTask(ZGWWorkUnit):
     **Required process variables**
 
     * ``zaakUrl``: full URL of the ZAAK
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -250,13 +240,9 @@ class LookupZaak(ZGWWorkUnit):
     * ``identificatie``: identification of the zaak, commonly known as "zaaknummer"
     * ``bronorganisatie``: RSIN of the source organization for the zaak. The combination
         of identificatie and bronorganisatie uniquely identifies a zaak.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 

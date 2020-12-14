@@ -26,6 +26,11 @@ def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
 
     * ``geometry``: A GeoJSON geometry that is checked for overlap.
 
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
+
     **Sets the following return/process variables**
 
     * ``features``: a list of GeoJSON features, in EPSG:4258 CRS. Properties contain

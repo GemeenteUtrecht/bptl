@@ -25,6 +25,11 @@ def get_approval_status(task: BaseTask) -> dict:
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
 
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
+
     **Sets the process variables**
 
     * ``approvalResult``: a JSON-object containing meta-data about the result:
@@ -83,6 +88,11 @@ def get_review_response_status(task: BaseTask) -> dict:
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
+
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the process variables**
 
@@ -150,6 +160,11 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
 
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
+
     **Sets the process variables**
 
     * ``reminderDate``: a string containing the reminder date: "2020-02-29".
@@ -188,6 +203,11 @@ def get_email_details(task: BaseTask) -> dict:
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
     * ``deadline``: deadline of the review request.
     * ``kownslFrontendUrl``: URL that takes you to the review request.
+
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the process variables**
 
@@ -280,6 +300,11 @@ def set_review_request_metadata(task: BaseTask) -> dict:
                 "processInstanceId": "aProcessInstanceId"
             }
 
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
+
     **Sets no process variables**
 
     """
@@ -306,6 +331,11 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
+
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the process variables**
 

@@ -81,6 +81,9 @@ class CreateValidSignPackageTask(ValidSignTask):
 
     **Optional process variables**
 
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
+
     * ``messageId``: string. The message ID to send back into the process when the
         package is signed by everyone. You can use this to continue process execution.
         If left empty, then no message will be sent.
@@ -298,6 +301,11 @@ class ValidSignReminderTask(ValidSignTask):
 
     * ``packageId``: string with the ValidSign Id of a package
     * ``email``: the email address of the signer who needs a reminder
+
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
 
     **Sets no process variables**
 

@@ -25,13 +25,9 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
     * ``zaakUrl``: full URL of the ZAAK
     * ``informatieobject``: full URL of the INFORMATIEOBJECT. If empty, no relation
        will be created.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 
@@ -77,13 +73,9 @@ class RelatePand(ZGWWorkUnit):
 
     * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. The PANDen are related to this.
     * ``panden``: list of URL references to PANDen in BAG API.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-      .. code-block:: json
-
-        {
-            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
-        }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -165,15 +157,9 @@ class CreateEigenschap(ZGWWorkUnit):
             "waarde": "<value to set>"
         }
 
-
-    * ``services``: JSON Object of connection details for ZGW services:
-
-      .. code-block:: json
-
-        {
-            "<ztc alias>": {"jwt": "Bearer <JWT value>"}
-            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
-        }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -260,13 +246,9 @@ class RelateerZaak(ZGWWorkUnit):
       to ``zaakUrl``.
     * ``bijdrageAard``: the type of relation. One of ``vervolg``, ``onderwerp`` or
       ``bijdrage``.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-      .. code-block:: json
-
-        {
-            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
-        }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -326,13 +308,9 @@ class CreateZaakObject(ZGWWorkUnit):
     * ``zaakUrl``: full URL of the ZAAK to create a new ZaakObject for
     * ``objectUrl``: full URL of the OBJECT to set
     * ``objectType``: type of the OBJECT
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
