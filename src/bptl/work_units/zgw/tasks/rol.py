@@ -1,17 +1,18 @@
 import logging
-from typing import Optional
 
 from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
-from .base import ZGWWorkUnit
+from .base import ZGWWorkUnit, require_zrc, require_ztc
 
 logger = logging.getLogger(__name__)
 
 
 @register
+@require_zrc
+@require_ztc
 class CreateRolTask(ZGWWorkUnit):
     """
     Create a new ROL for the ZAAK in the process.
@@ -22,14 +23,9 @@ class CreateRolTask(ZGWWorkUnit):
     * ``omschrijving``: roltype.omschrijving for the ROL
     * ``betrokkene``: JSON object with data used to create a rol for a particular zaak. See
         https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 

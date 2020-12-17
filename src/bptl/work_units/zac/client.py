@@ -1,28 +1,34 @@
 """
 Implements a ZAC client.
 """
-from urllib.parse import urljoin
+import logging
 
-import requests
+from django.utils.translation import gettext_lazy as _
 
-from .models import ZACConfig
+from zgw_consumers.constants import APITypes
+
+from bptl.tasks.models import BaseTask
+from bptl.tasks.registry import register
+
+from ..clients import JSONClient, get_client as _get_client
+from ..services import get_alias_service
+
+logger = logging.getLogger(__name__)
+
+ALIAS = "zac"
+
+require_zac_service = register.require_service(
+    APITypes.orc,
+    description=_("The ZAC API to use."),
+    alias=ALIAS,
+)
 
 
-class ZACClient:
-    task = None
+def get_client(task: BaseTask) -> "ZACClient":
+    # get the service and credentials
+    service = get_alias_service(task, ALIAS)
+    return _get_client(task, service, cls=ZACClient)
 
-    def __init__(self, config=None):
-        self.config = config or ZACConfig.get_solo()
-        self.api_root = self.config.service.api_root
-        self.auth = self.config.service.get_auth_header(self.api_root)
 
-    def get(self, path: str, *args, **kwargs):
-        url = urljoin(self.api_root, path)
-        # add the API headers
-        headers = kwargs.pop("headers", {})
-        headers.update(self.auth)
-        kwargs["headers"] = headers
-
-        response = requests.get(url, *args, **kwargs)
-        response.raise_for_status()
-        return response
+class ZACClient(JSONClient):
+    pass

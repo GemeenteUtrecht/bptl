@@ -2,16 +2,19 @@ import copy
 import datetime
 import uuid
 
+from django.core.cache import caches
 from django.test import TestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
+from zgw_consumers.cache import install_schema_fetcher_cache
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 
 from bptl.camunda.models import ExternalTask
+from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import TaskMapping
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory
 
 from ..tasks import (
     get_approval_toelichtingen,
@@ -62,7 +65,15 @@ class KownslAPITests(TestCase):
             },
         }
 
-    def test_client(self, m):
+    def setUp(self):
+        super().setUp()
+
+        # installs new, empty cache instance for each test
+        install_schema_fetcher_cache()
+        for cache in caches.all():
+            cache.clear()
+
+    def test_get_client_old_auth(self, m):
         mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         task = ExternalTask.objects.create(
             **self.task_dict,
@@ -74,7 +85,24 @@ class KownslAPITests(TestCase):
         self.assertEqual(len(m.request_history), 1)
         self.assertEqual(m.last_request.url, f"{self.service.oas}?v=3")
 
+    def test_client_auth(self, m):
+        task_kwargs = copy.deepcopy(self.task_dict)
+        task_kwargs["variables"]["bptlAppId"] = serialize_variable("some-app-id")
+        task = ExternalTask.objects.create(**task_kwargs)
+        AppServiceCredentialsFactory.create(
+            app__app_id="some-app-id",
+            service=self.service,
+            header_key="Other-Header",
+            header_value="foobarbaz",
+        )
+
+        client = get_client(task)
+
+        self.assertIsNone(client.auth)
+        self.assertEqual(client.auth_header, {"Other-Header": "foobarbaz"})
+
     def test_get_review_request(self, m):
+        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         task = ExternalTask.objects.create(
             **self.task_dict,
         )
@@ -93,6 +121,7 @@ class KownslAPITests(TestCase):
         self.assertEqual(review_requests["id"], "1")
 
     def test_get_review_response_status(self, m):
+        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         rr_response = {
             "id": "1",
             "for_zaak": "https://zaken.nl/api/v1/zaak/123",
@@ -129,6 +158,7 @@ class KownslAPITests(TestCase):
         self.assertTrue(remindThese["remindThese"][0], "Hades")
 
     def test_get_review_request_reminder_date(self, m):
+        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         rr_response = {
             "id": "1",
             "for_zaak": "https://zaken.nl/api/v1/zaak/123",
@@ -159,6 +189,7 @@ class KownslAPITests(TestCase):
         self.assertEqual(reminderDate["reminderDate"], "2020-04-19")
 
     def test_get_email_details(self, m):
+        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         rr_response = {
             "id": "1",
             "for_zaak": "https://zaken.nl/api/v1/zaak/123",
@@ -211,6 +242,7 @@ class KownslAPITests(TestCase):
         self.assertEqual(email_details["senderUsername"], ["Pietje"])
 
     def test_setting_review_request_metadata(self, m):
+        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         kownsl_id = str(uuid.uuid4())
         m.patch(
             f"https://kownsl.nl/api/v1/review-requests/{kownsl_id}", status_code=200
@@ -230,7 +262,7 @@ class KownslAPITests(TestCase):
         result = set_review_request_metadata(task)
 
         self.assertEqual(result, {})
-        self.assertEqual(len(m.request_history), 1)
+        self.assertEqual(len(m.request_history), 2)  # 1 for client schema
         self.assertEqual(m.last_request.method, "PATCH")
         self.assertEqual(
             m.last_request.json(),
@@ -240,6 +272,7 @@ class KownslAPITests(TestCase):
         )
 
     def test_get_approval_toelichtingen(self, m):
+        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         approvals = [
             {
                 "toelichting": "Beste voorstel ooit.",
@@ -258,7 +291,7 @@ class KownslAPITests(TestCase):
         )
 
         result = get_approval_toelichtingen(task)
-        self.assertEqual(len(m.request_history), 1)
+        self.assertEqual(len(m.request_history), 2)  # one for client schema
         self.assertEqual(
             result,
             {"toelichtingen": "Beste voorstel ooit.\n\nEcht niet mee eens.\n\nGeen"},

@@ -1,14 +1,13 @@
 from typing import Any, Dict
 
-import requests
-
-from bptl.tasks.models import BaseTask
+from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
-API_ROOT = "https://brt.basisregistraties.overheid.nl/api/v2"
+from .utils import get_client, require_brt_service
 
 
 @register
+@require_brt_service
 def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
     """
     Given a bounding box (or other polygon), retrieve the 'public space' objects
@@ -26,7 +25,11 @@ def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
     **Required process variables**
 
     * ``geometry``: A GeoJSON geometry that is checked for overlap.
-    * ``BRTKey``: API key to use to query the BRT
+
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the following return/process variables**
 
@@ -37,30 +40,32 @@ def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
        work unit takes a considerable time to execute.
     """
     variables = task.get_variables()
+    geo = check_variable(variables, "geometry")
 
     resources = ["wegdelen"]  # , "inrichtingselementen"]
     formatters = {
         "wegdelen": format_wegdeel,
     }
 
-    body = {"geometrie": {"intersects": variables["geometry"]}}
+    body = {"geometrie": {"intersects": geo}}
     headers = {
         "Accept-Crs": "epsg:4258",  # ~ WGS84
-        "X-Api-Key": variables["BRTKey"],
     }
 
-    def fetch(resource: str, formatter: callable):
-        response = requests.post(
-            f"{API_ROOT}/{resource}",
-            params={"pageSize": 50},
-            json=body,
-            headers=headers,
-        )
-        results = response.json()["_embedded"][resource]
-        results = [formatter(result) for result in results]
-        return results
+    with get_client() as client:
 
-    features = [fetch(resource, formatters[resource]) for resource in resources]
+        def fetch(resource: str, formatter: callable):
+            resp_data = client.post(
+                resource,
+                params={"pageSize": 50},
+                json=body,
+                headers=headers,
+            )
+            results = resp_data["_embedded"][resource]
+            results = [formatter(result) for result in results]
+            return results
+
+        features = [fetch(resource, formatters[resource]) for resource in resources]
     return {"features": features}
 
 

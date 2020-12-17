@@ -5,8 +5,9 @@ from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 
 from bptl.activiti.models import ServiceTask
+from bptl.credentials.tests.factories import AppServiceCredentialsFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory
 
-from ..models import BRPConfig
 from ..tasks import IsAboveAge
 
 BRP_API_ROOT = "http://brp.example.com/"
@@ -21,16 +22,30 @@ class ZGWClientLogTests(TestCase):
 
         cls.fetched_task = ServiceTask.objects.create(
             topic_name="some-topic",
-            variables={"burgerservicenummer": "999999011", "age": 18},
+            variables={
+                "burgerservicenummer": "999999011",
+                "age": 18,
+                "bptlAppId": "some-app-id",
+            },
         )
-
-        config = BRPConfig.get_solo()
-        config.service = Service.objects.create(
+        brp = Service.objects.create(
             api_root=BRP_API_ROOT,
             api_type=APITypes.orc,
-            auth_type=AuthTypes.no_auth,
+            auth_type=AuthTypes.api_key,
+            header_value="12345",
+            header_key="X-Api-Key",
         )
-        config.save()
+        DefaultServiceFactory.create(
+            task_mapping__topic_name="some-topic",
+            service=brp,
+            alias="brp",
+        )
+        AppServiceCredentialsFactory.create(
+            app__app_id="some-app-id",
+            service=brp,
+            header_key="Other-Header",
+            header_value="foobarbaz",
+        )
 
     def test_log_client_retrieve(self, m):
         brp_mock_data = {"leeftijd": 36, "_links": {"self": {"href": PERSON_URL}}}
@@ -50,12 +65,13 @@ class ZGWClientLogTests(TestCase):
                     "url": PERSON_URL,
                     "data": None,
                     "method": "GET",
-                    "params": {"fields": "leeftijd"},
+                    "params": {"fields": ["leeftijd"]},
                     "headers": {
                         "Accept": "*/*",
                         "Connection": "keep-alive",
                         "User-Agent": "python-requests/2.22.0",
                         "Accept-Encoding": "gzip, deflate",
+                        "Other-Header": "foobarbaz",
                     },
                 },
                 "response": {

@@ -7,12 +7,14 @@ from zgw_consumers.constants import APITypes
 from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
-from .base import ZGWWorkUnit
+from .base import ZGWWorkUnit, require_zrc, require_ztc
 
 logger = logging.getLogger(__name__)
 
 
 @register
+@require_zrc
+@require_ztc
 class CreateStatusTask(ZGWWorkUnit):
     """
     Create a new STATUS for the ZAAK in the process.
@@ -22,14 +24,9 @@ class CreateStatusTask(ZGWWorkUnit):
     * ``zaakUrl``: full URL of the ZAAK to create a new status for
     * ``statusVolgnummer``: volgnummer of the status type as it occurs in the catalogus OR
     * ``statustype``: full URL of the STATUSTYPE to set
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     Note that either ``statusVolgnummer`` or ``statustype`` are sufficient.
 

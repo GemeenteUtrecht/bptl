@@ -1,3 +1,5 @@
+from typing import Union
+
 from timeline_logger.models import TimelineLog
 from zgw_consumers.client import ZGWClient as _ZGWClient
 
@@ -19,9 +21,13 @@ class NoAuth(Exception):
 class ZGWClient(_ZGWClient):
     _log = DBLog()
 
-    def set_auth_value(self, auth_value):
+    def set_auth_value(self, auth_value: Union[str, dict]):
         self.auth = None
-        self.auth_value = {"Authorization": auth_value}
+
+        if isinstance(auth_value, dict):
+            self.auth_value = auth_value
+        else:
+            self.auth_value = {"Authorization": auth_value}
 
     @property
     def log(self):

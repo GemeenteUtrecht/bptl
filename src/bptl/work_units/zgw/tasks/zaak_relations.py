@@ -10,12 +10,13 @@ from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
 from ..utils import get_paginated_results
-from .base import ZGWWorkUnit
+from .base import ZGWWorkUnit, require_zrc, require_ztc
 
 logger = logging.getLogger(__name__)
 
 
 @register
+@require_zrc
 class RelateDocumentToZaakTask(ZGWWorkUnit):
     """
     Create relations between ZAAK and INFORMATIEOBJECT
@@ -25,13 +26,9 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
     * ``zaakUrl``: full URL of the ZAAK
     * ``informatieobject``: full URL of the INFORMATIEOBJECT. If empty, no relation
        will be created.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 
@@ -67,6 +64,7 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
 
 
 @register
+@require_zrc
 class RelatePand(ZGWWorkUnit):
     """
     Relate Pand objects from the BAG to a ZAAK as ZAAKOBJECTs.
@@ -77,13 +75,9 @@ class RelatePand(ZGWWorkUnit):
 
     * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. The PANDen are related to this.
     * ``panden``: list of URL references to PANDen in BAG API.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-      .. code-block:: json
-
-        {
-            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
-        }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -145,6 +139,8 @@ class RelatePand(ZGWWorkUnit):
 
 
 @register
+@require_zrc
+@require_ztc
 class CreateEigenschap(ZGWWorkUnit):
     """
     Set a particular EIGENSCHAP value for a given zaak.
@@ -165,15 +161,9 @@ class CreateEigenschap(ZGWWorkUnit):
             "waarde": "<value to set>"
         }
 
-
-    * ``services``: JSON Object of connection details for ZGW services:
-
-      .. code-block:: json
-
-        {
-            "<ztc alias>": {"jwt": "Bearer <JWT value>"}
-            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
-        }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -244,6 +234,7 @@ class CreateEigenschap(ZGWWorkUnit):
 
 
 @register
+@require_zrc
 class RelateerZaak(ZGWWorkUnit):
     """
     Relate a zaak to another zaak.
@@ -260,13 +251,9 @@ class RelateerZaak(ZGWWorkUnit):
       to ``zaakUrl``.
     * ``bijdrageAard``: the type of relation. One of ``vervolg``, ``onderwerp`` or
       ``bijdrage``.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-      .. code-block:: json
-
-        {
-            "<zrc alias>": {"jwt": "Bearer <JWT value>"}
-        }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -317,6 +304,7 @@ class RelateerZaak(ZGWWorkUnit):
 
 
 @register
+@require_zrc
 class CreateZaakObject(ZGWWorkUnit):
     """
     Create a new ZAAKOBJECT for the ZAAK in the process.
@@ -326,13 +314,9 @@ class CreateZaakObject(ZGWWorkUnit):
     * ``zaakUrl``: full URL of the ZAAK to create a new ZaakObject for
     * ``objectUrl``: full URL of the OBJECT to set
     * ``objectType``: type of the OBJECT
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 

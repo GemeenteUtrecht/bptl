@@ -10,6 +10,7 @@ flake8
 # Debug tooling
 django-debug-toolbar
 django-extensions
+ddt-api-calls
 
 # Documentation
 sphinx_rtd_theme

@@ -4,15 +4,18 @@ import re
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.test import TestCase, override_settings
 
+import jwt
 import requests_mock
 from django_camunda.utils import serialize_variable
+from zgw_consumers.constants import APITypes, AuthTypes
 
 from bptl.camunda.models import ExternalTask
+from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import TaskMapping
-from bptl.work_units.zgw.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
-from ..tasks import CreateValidSignPackageTask, ValidSignReminderTask
+from ..tasks import CreateValidSignPackageTask, ValidSignReminderTask, ValidSignTask
 from .utils import VALIDSIGN_API_DOCS, mock_validsign_oas_get
 
 VALIDSIGN_URL = "https://try.validsign.test.nl/"
@@ -119,12 +122,13 @@ class ValidSignTests(TestCase):
             topic_name="CreateValidSignPackage",
             callback="bptl.work_units.valid_sign.tasks.CreateValidSignPackage",
         )
-        DefaultServiceFactory.create(
+        drc_svc = DefaultServiceFactory.create(
             task_mapping=mapping,
             service__api_root=DRC_URL,
             service__api_type="drc",
             alias="drc",
         )
+        cls.drc = drc_svc.service
         DefaultServiceFactory.create(
             task_mapping=mapping,
             service__api_root=VALIDSIGN_URL,
@@ -185,6 +189,49 @@ class ValidSignTests(TestCase):
         self.assertEqual(documents[0][1].read(), CONTENT_1)
         self.assertEqual(documents[1][0], RESPONSE_2["titel"])
         self.assertEqual(documents[1][1].read(), CONTENT_2)
+
+        self.assertEqual(m.request_history[-1].headers["Authorization"], "Bearer 12345")
+
+    def test_get_documents_from_api_credentials_store(self, m):
+        mock_service_oas_get(m, DRC_URL, "drc")
+        task = ExternalTask.objects.create(
+            topic_name="CreateValidSignPackage",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "documents": serialize_variable([DOCUMENT_1, DOCUMENT_2]),
+                "signers": serialize_variable([SIGNER_1, SIGNER_2]),
+                "packageName": serialize_variable("Test package name"),
+                "bptlAppId": serialize_variable("some-app"),
+            },
+        )
+        AppServiceCredentialsFactory.create(
+            app__app_id="some-app",
+            service=self.drc,
+            client_id="foo",
+            secret="bar",
+        )
+
+        # Mock call to retrieve the documents from the API
+        m.get(DOCUMENT_1, json=RESPONSE_1)
+        m.get(DOCUMENT_2, json=RESPONSE_2)
+        # Mock calls to retrieve the content of the documents
+        m.get(
+            CONTENT_URL_1,
+            content=CONTENT_1,
+        )
+        m.get(
+            CONTENT_URL_2,
+            content=CONTENT_2,
+        )
+
+        task = CreateValidSignPackageTask(task)
+        task._get_documents_from_api()
+
+        token = m.request_history[-1].headers["Authorization"].split(" ")[1]
+        claims = jwt.decode(token, key="bar", algorithms=["HS256"])
+
+        self.assertEqual(claims["client_id"], "foo")
 
     @override_settings(MAX_DOCUMENT_SIZE=10)
     def test_get_large_documents_from_api(self, m):
@@ -556,3 +603,58 @@ class ValidSignReminderTests(TestCase):
                 continue
             body = json.loads(request_body.text)
             self.assertEqual({"email": "test@example.com"}, body)
+
+
+class CredentialsStoreAuthTests(TestCase):
+    """
+    Test the 1.0 credentials store functionality.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        default_service = DefaultServiceFactory.create(
+            task_mapping__topic_name="some-topic",
+            service__api_root=VALIDSIGN_URL,
+            service__api_type=APITypes.orc,
+            service__auth_type=AuthTypes.api_key,
+            service__oas=VALIDSIGN_API_DOCS,
+            service__header_key="default-header",
+            service__header_value="bar",
+            alias="ValidSignAPI",
+        )
+        AppServiceCredentialsFactory.create(
+            app__app_id="some-app",
+            service=default_service.service,
+            header_key="custom-header",
+            header_value="baz",
+        )
+
+    def test_base_service_auth(self):
+        fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            variables={},
+        )
+
+        work_unit = ValidSignTask(fetched_task)
+
+        self.assertEqual(
+            work_unit.client.auth_header,
+            {"default-header": "bar"},
+        )
+
+    def test_app_specific_service_auth(self):
+        fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            variables={
+                "bptlAppId": serialize_variable("some-app"),
+            },
+        )
+
+        work_unit = ValidSignTask(fetched_task)
+
+        self.assertEqual(
+            work_unit.client.auth_header,
+            {"custom-header": "baz"},
+        )

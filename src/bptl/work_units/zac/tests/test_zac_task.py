@@ -1,15 +1,13 @@
-import json
-
 from django.test import TestCase
 
 import requests_mock
 from zgw_consumers.constants import APITypes, AuthTypes
-from zgw_consumers.models import Service
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import MissingVariable
-from bptl.work_units.zac.models import ZACConfig
-from bptl.work_units.zac.tasks import UserDetailsTask
+from bptl.tasks.tests.factories import DefaultServiceFactory
+
+from ..tasks import UserDetailsTask
 
 ZAC_API_ROOT = "https://zac.example.com/"
 FILTER_USERS_URL = f"{ZAC_API_ROOT}accounts/api/users?include=thor&include=loki"
@@ -37,13 +35,13 @@ class ZacTaskTests(TestCase):
             **cls.task_dict,
         )
 
-        config = ZACConfig.get_solo()
-        config.service = Service.objects.create(
-            api_root=ZAC_API_ROOT,
-            api_type=APITypes.orc,
-            auth_type=AuthTypes.no_auth,
+        DefaultServiceFactory.create(
+            task_mapping__topic_name="send-email",
+            service__api_root=ZAC_API_ROOT,
+            service__api_type=APITypes.orc,
+            service__auth_type=AuthTypes.no_auth,
+            alias="zac",
         )
-        config.save()
 
     def test_get_user_details_happy(self, m):
         zac_mock_data = {
@@ -71,8 +69,7 @@ class ZacTaskTests(TestCase):
 
         task = UserDetailsTask(self.task)
         response = task.get_client_response()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), zac_mock_data)
+        self.assertEqual(response, zac_mock_data)
 
         cleaned_data = task.perform()
         self.assertEqual(len(cleaned_data["userData"]), 2)

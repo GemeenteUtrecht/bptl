@@ -10,13 +10,15 @@ from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
-from .base import ZGWWorkUnit
+from .base import ZGWWorkUnit, require_zrc, require_ztc
 from .resultaat import CreateResultaatTask
 
 logger = logging.getLogger(__name__)
 
 
 @register
+@require_zrc
+@require_ztc
 class CreateZaakTask(ZGWWorkUnit):
     """
     Create a ZAAK in the configured Zaken API and set the initial status.
@@ -30,14 +32,9 @@ class CreateZaakTask(ZGWWorkUnit):
 
     * ``zaaktype``: the full URL of the ZAAKTYPE
     * ``organisatieRSIN``: RSIN of the organisation
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -155,6 +152,8 @@ class CreateZaakTask(ZGWWorkUnit):
 
 
 @register
+@require_zrc
+@require_ztc
 class CloseZaakTask(ZGWWorkUnit):
     """
     Close the ZAAK by setting the final STATUS.
@@ -164,14 +163,9 @@ class CloseZaakTask(ZGWWorkUnit):
     **Required process variables**
 
     * ``zaakUrl``: full URL of the ZAAK
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-              "<ztc alias>": {"jwt": "Bearer <JWT value>"}
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -235,6 +229,7 @@ class CloseZaakTask(ZGWWorkUnit):
 
 
 @register
+@require_zrc
 class LookupZaak(ZGWWorkUnit):
     """
     Look up a single ZAAK by identificatie and bronorganisatie.
@@ -250,13 +245,9 @@ class LookupZaak(ZGWWorkUnit):
     * ``identificatie``: identification of the zaak, commonly known as "zaaknummer"
     * ``bronorganisatie``: RSIN of the source organization for the zaak. The combination
         of identificatie and bronorganisatie uniquely identifies a zaak.
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<zrc alias>": {"jwt": "Bearer <JWT value>"},
-          }
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 
