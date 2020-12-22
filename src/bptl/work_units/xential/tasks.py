@@ -61,7 +61,7 @@ def start_xential_template(task: BaseTask) -> dict:
         "variables": template_variables,
     }
 
-    start_response = xential_client.post(start_url, data=data)
+    start_response = xential_client.post(start_url, json=data)
 
     return {
         "buildId": start_response.get("buildId"),

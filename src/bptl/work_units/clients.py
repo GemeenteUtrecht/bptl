@@ -3,6 +3,7 @@ Provide base client implementations, based on requests.
 
 Note that for the time being only get/post are implemented.
 """
+import json
 from typing import Dict
 from urllib.parse import parse_qs, urljoin, urlparse
 
@@ -54,6 +55,7 @@ class JSONClient:
         url = urljoin(self.api_root, path)
         # add the API headers
         headers = kwargs.pop("headers", {})
+        headers.setdefault("Accept", "application/json")
         headers.update(self.auth)
         kwargs["headers"] = headers
         kwargs["hooks"] = {"response": self.log}
@@ -72,13 +74,14 @@ class JSONClient:
     def log(self, resp, *args, **kwargs):
         response_data = resp.json() if resp.content else None
 
+        body = json.loads(resp.request.body) if resp.request.body else None
         extra_data = {
             "service_base_url": self.api_root,
             "request": {
                 "url": resp.url,
                 "method": resp.request.method,
                 "headers": dict(resp.request.headers),
-                "data": resp.request.body,
+                "data": body,
                 "params": parse_qs(urlparse(resp.request.url).query),
             },
             "response": {
