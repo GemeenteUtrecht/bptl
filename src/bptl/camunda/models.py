@@ -6,6 +6,7 @@ can pick up work load again.
 """
 import uuid
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -42,6 +43,12 @@ class ExternalTask(BaseTask):
     task_id = models.CharField(_("task id"), max_length=50)
     instance_id = models.CharField(_("task id"), max_length=50)
     lock_expires_at = models.DateTimeField(_("lock expires at"), null=True, blank=True)
+    camunda_error = JSONField(
+        _("camunda error"),
+        blank=True,
+        null=True,
+        default=None,
+    )
 
     class Meta:
         verbose_name = _("external task")

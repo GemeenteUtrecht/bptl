@@ -8,6 +8,7 @@ import requests
 from dateutil import parser
 from django_camunda.client import get_client
 from django_camunda.utils import serialize_variable
+from timeline_logger.models import TimelineLog
 
 from bptl.tasks.models import TaskMapping
 from bptl.utils.decorators import retry
@@ -114,7 +115,25 @@ def complete_task(
         "workerId": task.worker_id,
         "variables": serialized_variables,
     }
-    camunda.post(f"external-task/{task.task_id}/complete", json=body)
+    try:
+        response = camunda.post(f"external-task/{task.task_id}/complete", json=body)
+    except requests.RequestException as exc:
+        # log Camunda errors if we get any at all
+        response = getattr(exc, "response", None)
+        if response:
+            is_json = response.headers["Content-Type"].startswith("application/json")
+            error = response.json() if is_json else None
+            TimelineLog.objects.create(
+                content_object=task,
+                template="timeline_logger/camunda/failed_complete.txt",
+                extra_data={
+                    "status_code": response.status_code,
+                    "body": error,
+                },
+            )
+            task.camunda_error = error
+            task.save(upate_fields=["camunda_error"])
+        raise
 
     callback_url = task_variables.get("callbackUrl", "")
     assert isinstance(callback_url, str), "URLs must be of the type string"
