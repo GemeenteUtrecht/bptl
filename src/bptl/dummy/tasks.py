@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 @register
-def dummy(task: BaseTask) -> None:
+def dummy(task: BaseTask) -> {}:
     """
     A dummy task to demonstrate the registry machinery.
 
