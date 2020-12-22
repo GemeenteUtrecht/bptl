@@ -41,7 +41,9 @@ def start_xential_template(task: BaseTask) -> dict:
     node_ref = check_variable(variables, "nodeRef")
     template_uuid = check_variable(variables, "templateUuid")
     file_name = check_variable(variables, "filename")
-    template_variables = check_variable(variables, "templateVariables")
+    template_variables = (
+        check_variable(variables, "templateVariables", empty_allowed=True) or {}
+    )
 
     xential_client = get_client(task)
 
