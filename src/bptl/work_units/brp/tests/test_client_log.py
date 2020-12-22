@@ -67,7 +67,7 @@ class ZGWClientLogTests(TestCase):
                     "method": "GET",
                     "params": {"fields": ["leeftijd"]},
                     "headers": {
-                        "Accept": "*/*",
+                        "Accept": "application/json",
                         "Connection": "keep-alive",
                         "User-Agent": "python-requests/2.22.0",
                         "Accept-Encoding": "gzip, deflate",

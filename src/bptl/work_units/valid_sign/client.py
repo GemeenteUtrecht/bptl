@@ -76,7 +76,7 @@ class DRCClientPool:
             client = drc.build_client()
 
             auth_headers = service_credentials.get(drc)
-            if auth_headers:
+            if self.app_id and auth_headers:
                 client.set_auth_value(auth_headers)
             elif self._services:
                 warnings.warn(

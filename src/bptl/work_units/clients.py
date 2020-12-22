@@ -28,7 +28,7 @@ def get_client(task: BaseTask, service: Service, cls=None) -> "JSONClient":
     """
     cls = cls or JSONClient
     app_id = task.get_variables().get(APP_ID_PROCESS_VAR_NAME)
-    auth_header = get_credentials(app_id, service)[service] if app_id else {}
+    auth_header = get_credentials(app_id, service)[service]
 
     # export the client
     client = cls(service, auth_header)
