@@ -162,3 +162,34 @@ class CompleteTests(TestCase):
                 "retryTimeout": 0,
             },
         )
+
+    def test_complete_error_in_process_definition(self, m):
+        """
+        Assert that process execution errors are logged.
+
+        Camunda returns information on HTTP 500 responses. These happen when the service
+        task is completed, but the subsequent process execution step has errors unrelated
+        to the service task itself. Looking up the traceback on the machine where
+        Camunda is running is very debug-unfriendly. so we extract the error and display
+        it to the process modeler.
+        """
+        task = ExternalTask.objects.create(
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={},
+        )
+        m.post(
+            "https://some.camunda.com/engine-rest/external-task/test-task-id/complete",
+            status_code=500,
+            json={"some": "error"},
+            headers={"Content-Type": "application/json"},
+        )
+
+        with patch("bptl.utils.decorators.time.sleep"), patch(
+            "bptl.camunda.utils.fail_task"
+        ):
+            with self.assertRaises(requests.HTTPError):
+                complete_task(task)
+
+        task.refresh_from_db()
+        self.assertEqual(task.camunda_error, {"some": "error"})

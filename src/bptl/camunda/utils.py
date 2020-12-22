@@ -117,7 +117,7 @@ def complete_task(
     }
     try:
         response = camunda.post(f"external-task/{task.task_id}/complete", json=body)
-    except requests.RequestException as exc:
+    except requests.HTTPError as exc:
         # log Camunda errors if we get any at all
         response = getattr(exc, "response", None)
         if response is not None:
