@@ -4,7 +4,7 @@ Provide base client implementations, based on requests.
 Note that for the time being only get/post are implemented.
 """
 from typing import Dict
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
 from timeline_logger.models import TimelineLog
@@ -28,8 +28,6 @@ def get_client(task: BaseTask, service: Service, cls=None) -> "JSONClient":
     cls = cls or JSONClient
     app_id = task.get_variables().get(APP_ID_PROCESS_VAR_NAME)
     auth_header = get_credentials(app_id, service)[service] if app_id else {}
-    if not auth_header:
-        auth_header = service.build_client().auth_header
 
     # export the client
     client = cls(service, auth_header)
@@ -81,7 +79,7 @@ class JSONClient:
                 "method": resp.request.method,
                 "headers": dict(resp.request.headers),
                 "data": resp.request.body,
-                "params": resp.request.qs,
+                "params": parse_qs(urlparse(resp.request.url).query),
             },
             "response": {
                 "status": resp.status_code,
