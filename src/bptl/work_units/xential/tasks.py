@@ -53,7 +53,6 @@ def start_xential_template(task: BaseTask) -> dict:
     session_id = list_response["data"]["params"]["sessionId"]
 
     # start template
-    start_url = f"xential/templates/start?nodeRef={node_ref}"
     data = {
         "templateUuid": template_uuid,
         "sessionId": session_id,
@@ -61,7 +60,11 @@ def start_xential_template(task: BaseTask) -> dict:
         "variables": template_variables,
     }
 
-    start_response = xential_client.post(start_url, json=data)
+    start_response = xential_client.post(
+        "xential/templates/start",
+        params={"nodeRef": node_ref},
+        json=data,
+    )
 
     return {
         "buildId": start_response.get("buildId"),
