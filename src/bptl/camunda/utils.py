@@ -1,6 +1,7 @@
 """
 Module for Camunda API interaction.
 """
+import json
 import logging
 from typing import List, Optional, Tuple
 
@@ -116,23 +117,9 @@ def complete_task(
         "variables": serialized_variables,
     }
     try:
-        response = camunda.post(f"external-task/{task.task_id}/complete", json=body)
+        camunda.post(f"external-task/{task.task_id}/complete", json=body)
     except requests.HTTPError as exc:
-        # log Camunda errors if we get any at all
-        response = getattr(exc, "response", None)
-        if response is not None:
-            is_json = response.headers["Content-Type"].startswith("application/json")
-            error = response.json() if is_json else None
-            TimelineLog.objects.create(
-                content_object=task,
-                template="timeline_logger/camunda/failed_complete.txt",
-                extra_data={
-                    "status_code": response.status_code,
-                    "body": error,
-                },
-            )
-            task.camunda_error = error
-            task.save(update_fields=["camunda_error"])
+        log_camunda_error(task, exc)
         raise
 
     callback_url = task_variables.get("callbackUrl", "")
@@ -168,3 +155,26 @@ def fail_task(task: ExternalTask, reason: str = "") -> None:
     }
 
     camunda.post(f"external-task/{task.task_id}/failure", json=body)
+
+
+def log_camunda_error(task: ExternalTask, exc: requests.HTTPError) -> None:
+    # log Camunda errors if we get any at all
+    response = getattr(exc, "response", None)
+    if response is None:
+        return
+
+    try:
+        error_information = response.json()
+    except json.JSONDecodeError:
+        error_information = None
+
+    TimelineLog.objects.create(
+        content_object=task,
+        template="timeline_logger/camunda/failed_complete.txt",
+        extra_data={
+            "status_code": response.status_code,
+            "body": error_information,
+        },
+    )
+    task.camunda_error = error_information
+    task.save(update_fields=["camunda_error"])
