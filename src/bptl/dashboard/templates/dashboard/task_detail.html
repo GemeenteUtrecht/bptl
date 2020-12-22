@@ -67,6 +67,10 @@
                 </time>
             {% endnested %}
 
+            {% nested_widget 'kv:kv-row' name=_("Camunda error") long=True %}
+                <pre>{{ task.camunda_error | pretty_json }}</pre>
+            {% endnested %}
+
         {% else %}
             <p>There is no additional data</p>
         {% endif %}

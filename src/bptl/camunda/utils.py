@@ -120,7 +120,7 @@ def complete_task(
     except requests.RequestException as exc:
         # log Camunda errors if we get any at all
         response = getattr(exc, "response", None)
-        if response:
+        if response is not None:
             is_json = response.headers["Content-Type"].startswith("application/json")
             error = response.json() if is_json else None
             TimelineLog.objects.create(
@@ -132,7 +132,7 @@ def complete_task(
                 },
             )
             task.camunda_error = error
-            task.save(upate_fields=["camunda_error"])
+            task.save(update_fields=["camunda_error"])
         raise
 
     callback_url = task_variables.get("callbackUrl", "")
