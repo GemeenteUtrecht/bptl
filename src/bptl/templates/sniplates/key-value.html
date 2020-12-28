@@ -1,0 +1,8 @@
+{% block kv-row %}
+<div class="task-desc__row">
+    <div class="task-desc__name">{{ name }}</div>
+    <div class="task-desc__value {% if long %}task-desc__value--long{% endif %}">
+        {{ content }}
+    </div>
+</div>
+{% endblock kv-row %}

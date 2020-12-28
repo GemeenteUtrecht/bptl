@@ -1,5 +1,5 @@
 {% extends "master.html" %}
-{% load i18n dashboard humanize %}
+{% load i18n dashboard humanize sniplates %}
 
 {% block content-header-subtitle %}{% trans "View task details" %}{% endblock %}
 {% block content-header-title %}{% trans "Task " %}{{ task.id }}{% endblock %}
@@ -11,103 +11,65 @@
 
 {% block content %}
 
+{% load_widgets kv='sniplates/key-value.html' %}
+
 <article class="task-desc">
 
     <section class="task-desc__section">
         <h2>General information</h2>
-        <div class="task-desc__row">
-            <div class="task-desc__name">
-                Type
-            </div>
-            <div class="task-desc__value">
-                {{ task|task_type }}
-            </div>
-        </div>
+        {% nested_widget 'kv:kv-row' name=_("Type") %}
+            {{ task|task_type }}
+        {% endnested %}
 
-        <div class="task-desc__row">
-            <div class="task-desc__name">
-                Status
-            </div>
-            <div class="task-desc__value">
-                {{ task.get_status_display }}
-            </div>
-        </div>
+        {% nested_widget 'kv:kv-row' name=_("Status") %}
+            {{ task.get_status_display }}
+        {% endnested %}
 
-        <div class="task-desc__row">
-            <div class="task-desc__name">
-                Topic name
-            </div>
-            <div class="task-desc__value">
-                {{ task.topic_name }}
-            </div>
-        </div>
+        {% nested_widget 'kv:kv-row' name=_("Topic name") %}
+                <code>{{ task.topic_name }}</code>
+        {% endnested %}
 
-        <div class="task-desc__row">
-            <div class="task-desc__name">
-                Variables
-            </div>
-            <div class="task-desc__value task-desc__value--long">
-                <pre>{{ task.get_variables | pretty_json }}</pre>
-            </div>
-        </div>
+        {% nested_widget 'kv:kv-row' name=_("Variables") long=True %}
+            <pre>{{ task.get_variables | pretty_json }}</pre>
+        {% endnested %}
 
-        <div class="task-desc__row">
-            <div class="task-desc__name">
-                Result variables
-            </div>
-            <div class="task-desc__value task-desc__value--long">
-                <pre>{{ task.result_variables | pretty_json }}</pre>
-            </div>
-        </div>
+        {% nested_widget 'kv:kv-row' name=_("Result variables") long=True %}
+            <pre>{{ task.result_variables | pretty_json }}</pre>
+        {% endnested %}
 
-        <div class="task-desc__row">
-            <div class="task-desc__name">
-                Execution error
-            </div>
-            <div class="task-desc__value task-desc__value--long">
-                <pre>{{ task.execution_error }}</pre>
-            </div>
-        </div>
+        {% nested_widget 'kv:kv-row' name=_("Execution error") long=True %}
+            <pre>{{ task.execution_error }}</pre>
+        {% endnested %}
+
     </section>
 
     <section class="task-desc__section">
         <h2>Engine specific information</h2>
+
         {% if task|task_type == 'Camunda' %}
-            <div class="task-desc__row">
-                <div class="task-desc__name">
-                    Worker ID
-                </div>
-                <div class="task-desc__value">
-                    {{ task.worker_id }}
-                </div>
-            </div>
+            {% nested_widget 'kv:kv-row' name=_("Worker ID") %}
+                <code>{{ task.worker_id }}</code>
+            {% endnested %}
 
-            <div class="task-desc__row">
-                <div class="task-desc__name">
-                    Priority
-                </div>
-                <div class="task-desc__value">
-                    {{ task.priority }}
-                </div>
-            </div>
+            {% nested_widget 'kv:kv-row' name=_("Priority") %}
+                {{ task.priority }}
+            {% endnested %}
 
-            <div class="task-desc__row">
-                <div class="task-desc__name">
-                    Task ID
-                </div>
-                <div class="task-desc__value">
-                    {{ task.task_id }}
-                </div>
-            </div>
+            {% nested_widget 'kv:kv-row' name=_("Task ID") %}
+                <code>{{ task.task_id }}</code>
+            {% endnested %}
 
-            <div class="task-desc__row">
-                <div class="task-desc__name">
-                    Lock expires at
-                </div>
-                <div class="task-desc__value">
-                    {{ task.lock_expires_at }}
-                </div>
-            </div>
+            {% nested_widget 'kv:kv-row' name=_("Lock expiry") %}
+                <time datetime="{{ task.lock_expires_at.isoformat }}">
+                    {% blocktrans with expiry=task.lock_expires_at since=task.lock_expires_at|timesince trimmed %}
+                        {{ expiry }} ({{ since }} ago)
+                    {% endblocktrans %}
+                </time>
+            {% endnested %}
+
+            {% nested_widget 'kv:kv-row' name=_("Camunda error") long=True %}
+                <pre>{{ task.camunda_error | pretty_json }}</pre>
+            {% endnested %}
 
         {% else %}
             <p>There is no additional data</p>

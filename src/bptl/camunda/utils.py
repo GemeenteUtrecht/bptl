@@ -1,6 +1,7 @@
 """
 Module for Camunda API interaction.
 """
+import json
 import logging
 from typing import List, Optional, Tuple
 
@@ -8,6 +9,7 @@ import requests
 from dateutil import parser
 from django_camunda.client import get_client
 from django_camunda.utils import serialize_variable
+from timeline_logger.models import TimelineLog
 
 from bptl.tasks.models import TaskMapping
 from bptl.utils.decorators import retry
@@ -114,7 +116,11 @@ def complete_task(
         "workerId": task.worker_id,
         "variables": serialized_variables,
     }
-    camunda.post(f"external-task/{task.task_id}/complete", json=body)
+    try:
+        camunda.post(f"external-task/{task.task_id}/complete", json=body)
+    except requests.HTTPError as exc:
+        log_camunda_error(task, exc)
+        raise
 
     callback_url = task_variables.get("callbackUrl", "")
     assert isinstance(callback_url, str), "URLs must be of the type string"
@@ -149,3 +155,26 @@ def fail_task(task: ExternalTask, reason: str = "") -> None:
     }
 
     camunda.post(f"external-task/{task.task_id}/failure", json=body)
+
+
+def log_camunda_error(task: ExternalTask, exc: requests.HTTPError) -> None:
+    # log Camunda errors if we get any at all
+    response = getattr(exc, "response", None)
+    if response is None:
+        return
+
+    try:
+        error_information = response.json()
+    except json.JSONDecodeError:
+        error_information = None
+
+    TimelineLog.objects.create(
+        content_object=task,
+        template="timeline_logger/camunda/failed_complete.txt",
+        extra_data={
+            "status_code": response.status_code,
+            "body": error_information,
+        },
+    )
+    task.camunda_error = error_information
+    task.save(update_fields=["camunda_error"])

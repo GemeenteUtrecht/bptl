@@ -1,0 +1,6 @@
+{% load i18n %}{% blocktrans trimmed with timestamp=log.timestamp|date:'DATETIME_FORMAT'  object=log.content_object error=log.extra_data.body %}
+{{ timestamp }} - {{ object }} failed to complete in Camunda.
+
+Error:
+{{ error }}
+{% endblocktrans %}
