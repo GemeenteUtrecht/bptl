@@ -32,6 +32,10 @@ paths:
                 type: array
                 items:
                   properties:
+                    created:
+                      type: string
+                      format: date-time
+                      readOnly: true
                     id:
                       type: string
                       format: uuid
@@ -86,6 +90,15 @@ paths:
                     metadata:
                       type: object
                       description: Metadata that may be relevant for the process.
+                    zaak_documents:
+                      type: string
+                      readOnly: true
+                      description: The documents with their download url and relevant
+                        metadata.
+                    reviews:
+                      type: string
+                      readOnly: true
+                      description: Previous advices or approvals.
                   required:
                   - for_zaak
                   - review_type
@@ -150,6 +163,10 @@ paths:
             application/json:
               schema:
                 properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
                   id:
                     type: string
                     format: uuid
@@ -203,6 +220,15 @@ paths:
                   metadata:
                     type: object
                     description: Metadata that may be relevant for the process.
+                  zaak_documents:
+                    type: string
+                    readOnly: true
+                    description: The documents with their download url and relevant
+                      metadata.
+                  reviews:
+                    type: string
+                    readOnly: true
+                    description: Previous advices or approvals.
                 required:
                 - for_zaak
                 - review_type
@@ -233,6 +259,10 @@ paths:
             application/json:
               schema:
                 properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
                   id:
                     type: string
                     format: uuid
@@ -286,6 +316,15 @@ paths:
                   metadata:
                     type: object
                     description: Metadata that may be relevant for the process.
+                  zaak_documents:
+                    type: string
+                    readOnly: true
+                    description: The documents with their download url and relevant
+                      metadata.
+                  reviews:
+                    type: string
+                    readOnly: true
+                    description: Previous advices or approvals.
                 required:
                 - for_zaak
                 - review_type
@@ -362,6 +401,10 @@ paths:
             application/json:
               schema:
                 properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
                   id:
                     type: string
                     format: uuid
@@ -415,6 +458,15 @@ paths:
                   metadata:
                     type: object
                     description: Metadata that may be relevant for the process.
+                  zaak_documents:
+                    type: string
+                    readOnly: true
+                    description: The documents with their download url and relevant
+                      metadata.
+                  reviews:
+                    type: string
+                    readOnly: true
+                    description: Previous advices or approvals.
                 required:
                 - for_zaak
                 - review_type
@@ -488,6 +540,10 @@ paths:
             application/json:
               schema:
                 properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
                   id:
                     type: string
                     format: uuid
@@ -541,6 +597,15 @@ paths:
                   metadata:
                     type: object
                     description: Metadata that may be relevant for the process.
+                  zaak_documents:
+                    type: string
+                    readOnly: true
+                    description: The documents with their download url and relevant
+                      metadata.
+                  reviews:
+                    type: string
+                    readOnly: true
+                    description: Previous advices or approvals.
                 required:
                 - for_zaak
                 - review_type
@@ -567,12 +632,12 @@ paths:
       responses:
         '204':
           description: ''
-  /api/v1/review-requests/{uuid}/advices:
+  /api/v1/review-requests/{parent_lookup_request__uuid}/approvals:
     get:
-      operationId: reviewrequest_advices
-      description: Get a collection of all the advices for a given review request
+      operationId: approval_list
+      description: ''
       parameters:
-      - name: uuid
+      - name: parent_lookup_request__uuid
         in: path
         required: true
         description: ''
@@ -605,7 +670,314 @@ paths:
                       required:
                       - username
                       type: object
-                      description: Author of the advice
+                      readOnly: true
+                      description: Author of the review
+                    approved:
+                      type: boolean
+                      description: Vink dit aan om akkoord te gaan met het/de document(en).
+                    toelichting:
+                      type: string
+                      description: Voeg een toelichting toe aan de accordering.
+          description: ''
+    post:
+      operationId: approval_create
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: &id004
+              properties:
+                approved:
+                  type: boolean
+                  description: Vink dit aan om akkoord te gaan met het/de document(en).
+                toelichting:
+                  type: string
+                  description: Voeg een toelichting toe aan de accordering.
+          application/x-www-form-urlencoded:
+            schema: *id004
+          multipart/form-data:
+            schema: *id004
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  author:
+                    properties:
+                      username:
+                        type: string
+                        description: Required. 150 characters or fewer.
+                        maxLength: 150
+                      first_name:
+                        type: string
+                        maxLength: 255
+                      last_name:
+                        type: string
+                        maxLength: 255
+                    required:
+                    - username
+                    type: object
+                    readOnly: true
+                    description: Author of the review
+                  approved:
+                    type: boolean
+                    description: Vink dit aan om akkoord te gaan met het/de document(en).
+                  toelichting:
+                    type: string
+                    description: Voeg een toelichting toe aan de accordering.
+          description: ''
+  /api/v1/review-requests/{parent_lookup_request__uuid}/approvals/{id}:
+    get:
+      operationId: approval_retrieve
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this accordering.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  author:
+                    properties:
+                      username:
+                        type: string
+                        description: Required. 150 characters or fewer.
+                        maxLength: 150
+                      first_name:
+                        type: string
+                        maxLength: 255
+                      last_name:
+                        type: string
+                        maxLength: 255
+                    required:
+                    - username
+                    type: object
+                    readOnly: true
+                    description: Author of the review
+                  approved:
+                    type: boolean
+                    description: Vink dit aan om akkoord te gaan met het/de document(en).
+                  toelichting:
+                    type: string
+                    description: Voeg een toelichting toe aan de accordering.
+          description: ''
+    put:
+      operationId: approval_update
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this accordering.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: &id005
+              properties:
+                approved:
+                  type: boolean
+                  description: Vink dit aan om akkoord te gaan met het/de document(en).
+                toelichting:
+                  type: string
+                  description: Voeg een toelichting toe aan de accordering.
+          application/x-www-form-urlencoded:
+            schema: *id005
+          multipart/form-data:
+            schema: *id005
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  author:
+                    properties:
+                      username:
+                        type: string
+                        description: Required. 150 characters or fewer.
+                        maxLength: 150
+                      first_name:
+                        type: string
+                        maxLength: 255
+                      last_name:
+                        type: string
+                        maxLength: 255
+                    required:
+                    - username
+                    type: object
+                    readOnly: true
+                    description: Author of the review
+                  approved:
+                    type: boolean
+                    description: Vink dit aan om akkoord te gaan met het/de document(en).
+                  toelichting:
+                    type: string
+                    description: Voeg een toelichting toe aan de accordering.
+          description: ''
+    patch:
+      operationId: approval_partial_update
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this accordering.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: &id006
+              properties:
+                approved:
+                  type: boolean
+                  description: Vink dit aan om akkoord te gaan met het/de document(en).
+                toelichting:
+                  type: string
+                  description: Voeg een toelichting toe aan de accordering.
+          application/x-www-form-urlencoded:
+            schema: *id006
+          multipart/form-data:
+            schema: *id006
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  author:
+                    properties:
+                      username:
+                        type: string
+                        description: Required. 150 characters or fewer.
+                        maxLength: 150
+                      first_name:
+                        type: string
+                        maxLength: 255
+                      last_name:
+                        type: string
+                        maxLength: 255
+                    required:
+                    - username
+                    type: object
+                    readOnly: true
+                    description: Author of the review
+                  approved:
+                    type: boolean
+                    description: Vink dit aan om akkoord te gaan met het/de document(en).
+                  toelichting:
+                    type: string
+                    description: Voeg een toelichting toe aan de accordering.
+          description: ''
+    delete:
+      operationId: approval_destroy
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this accordering.
+        schema:
+          type: string
+      responses:
+        '204':
+          description: ''
+  /api/v1/review-requests/{parent_lookup_request__uuid}/advices:
+    get:
+      operationId: advice_list
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    created:
+                      type: string
+                      format: date-time
+                      readOnly: true
+                    author:
+                      properties:
+                        username:
+                          type: string
+                          description: Required. 150 characters or fewer.
+                          maxLength: 150
+                        first_name:
+                          type: string
+                          maxLength: 255
+                        last_name:
+                          type: string
+                          maxLength: 255
+                      required:
+                      - username
+                      type: object
+                      readOnly: true
+                      description: Author of the review
                     advice:
                       type: string
                       description: Het inhoudelijke advies
@@ -614,6 +986,20 @@ paths:
                       type: array
                       items:
                         properties:
+                          content:
+                            type: string
+                            format: binary
+                            writeOnly: true
+                            description: Content of file
+                          size:
+                            type: integer
+                            writeOnly: true
+                            description: Size of file
+                            minimum: 0
+                          name:
+                            type: string
+                            writeOnly: true
+                            description: Name of file
                           document:
                             type: string
                             format: uri
@@ -630,31 +1016,177 @@ paths:
                               .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
                           source_version:
                             type: integer
-                            maximum: 32767
-                            minimum: 0
+                            readOnly: true
                           advice_version:
                             type: integer
-                            maximum: 32767
-                            minimum: 0
+                            readOnly: true
                         required:
+                        - content
+                        - size
+                        - name
                         - document
-                        - source_version
-                        - advice_version
                       description: (New) versions of documents that were uploaded
                         as part of the advice round.
-                  required:
-                  - author
-                  - documents
           description: ''
-  /api/v1/review-requests/{uuid}/approvals:
-    get:
-      operationId: reviewrequest_approvals
-      description: Get a collection of all the approvals for a given review request
+    post:
+      operationId: advice_create
+      description: ''
       parameters:
-      - name: uuid
+      - name: parent_lookup_request__uuid
         in: path
         required: true
         description: ''
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: &id007
+              properties:
+                advice:
+                  type: string
+                  description: Het inhoudelijke advies
+                  maxLength: 1000
+                documents:
+                  type: array
+                  items:
+                    properties:
+                      content:
+                        type: string
+                        format: binary
+                        writeOnly: true
+                        description: Content of file
+                      size:
+                        type: integer
+                        writeOnly: true
+                        description: Size of file
+                        minimum: 0
+                      name:
+                        type: string
+                        writeOnly: true
+                        description: Name of file
+                      document:
+                        type: string
+                        format: uri
+                        description: URL-referentie naar het brondocument in de Documenten
+                          API. Deze mag de 'versie' querystring parameter bevatten.
+                        maxLength: 1000
+                        pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
+                          s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\\
+                          d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF\
+                          0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1-\uFFFF0-9])?(?:\\\
+                          .(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
+                          -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
+                          d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                      source_version:
+                        type: integer
+                        readOnly: true
+                      advice_version:
+                        type: integer
+                        readOnly: true
+                    required:
+                    - content
+                    - size
+                    - name
+                    - document
+                  description: (New) versions of documents that were uploaded as part
+                    of the advice round.
+          application/x-www-form-urlencoded:
+            schema: *id007
+          multipart/form-data:
+            schema: *id007
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  author:
+                    properties:
+                      username:
+                        type: string
+                        description: Required. 150 characters or fewer.
+                        maxLength: 150
+                      first_name:
+                        type: string
+                        maxLength: 255
+                      last_name:
+                        type: string
+                        maxLength: 255
+                    required:
+                    - username
+                    type: object
+                    readOnly: true
+                    description: Author of the review
+                  advice:
+                    type: string
+                    description: Het inhoudelijke advies
+                    maxLength: 1000
+                  documents:
+                    type: array
+                    items:
+                      properties:
+                        content:
+                          type: string
+                          format: binary
+                          writeOnly: true
+                          description: Content of file
+                        size:
+                          type: integer
+                          writeOnly: true
+                          description: Size of file
+                          minimum: 0
+                        name:
+                          type: string
+                          writeOnly: true
+                          description: Name of file
+                        document:
+                          type: string
+                          format: uri
+                          description: URL-referentie naar het brondocument in de
+                            Documenten API. Deze mag de 'versie' querystring parameter
+                            bevatten.
+                          maxLength: 1000
+                          pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
+                            s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
+                            .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
+                            .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                            -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
+                            .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
+                            .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                        source_version:
+                          type: integer
+                          readOnly: true
+                        advice_version:
+                          type: integer
+                          readOnly: true
+                      required:
+                      - content
+                      - size
+                      - name
+                      - document
+                    description: (New) versions of documents that were uploaded as
+                      part of the advice round.
+          description: ''
+  /api/v1/review-requests/{parent_lookup_request__uuid}/advices/{id}:
+    get:
+      operationId: advice_retrieve
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this advies.
         schema:
           type: string
       responses:
@@ -662,37 +1194,396 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  properties:
-                    created:
-                      type: string
-                      format: date-time
-                      readOnly: true
-                    author:
+                properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  author:
+                    properties:
+                      username:
+                        type: string
+                        description: Required. 150 characters or fewer.
+                        maxLength: 150
+                      first_name:
+                        type: string
+                        maxLength: 255
+                      last_name:
+                        type: string
+                        maxLength: 255
+                    required:
+                    - username
+                    type: object
+                    readOnly: true
+                    description: Author of the review
+                  advice:
+                    type: string
+                    description: Het inhoudelijke advies
+                    maxLength: 1000
+                  documents:
+                    type: array
+                    items:
                       properties:
-                        username:
+                        content:
                           type: string
-                          description: Required. 150 characters or fewer.
-                          maxLength: 150
-                        first_name:
+                          format: binary
+                          writeOnly: true
+                          description: Content of file
+                        size:
+                          type: integer
+                          writeOnly: true
+                          description: Size of file
+                          minimum: 0
+                        name:
                           type: string
-                          maxLength: 255
-                        last_name:
+                          writeOnly: true
+                          description: Name of file
+                        document:
                           type: string
-                          maxLength: 255
+                          format: uri
+                          description: URL-referentie naar het brondocument in de
+                            Documenten API. Deze mag de 'versie' querystring parameter
+                            bevatten.
+                          maxLength: 1000
+                          pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
+                            s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
+                            .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
+                            .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                            -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
+                            .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
+                            .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                        source_version:
+                          type: integer
+                          readOnly: true
+                        advice_version:
+                          type: integer
+                          readOnly: true
                       required:
-                      - username
-                      type: object
-                      description: Author of the approval
-                    approved:
-                      type: boolean
-                      description: Vink dit aan om akkoord te gaan met het/de document(en).
-                    toelichting:
-                      type: string
-                      description: Voeg een toelichting toe aan de accordering.
-                  required:
-                  - author
+                      - content
+                      - size
+                      - name
+                      - document
+                    description: (New) versions of documents that were uploaded as
+                      part of the advice round.
+          description: ''
+    put:
+      operationId: advice_update
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this advies.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: &id008
+              properties:
+                advice:
+                  type: string
+                  description: Het inhoudelijke advies
+                  maxLength: 1000
+                documents:
+                  type: array
+                  items:
+                    properties:
+                      content:
+                        type: string
+                        format: binary
+                        writeOnly: true
+                        description: Content of file
+                      size:
+                        type: integer
+                        writeOnly: true
+                        description: Size of file
+                        minimum: 0
+                      name:
+                        type: string
+                        writeOnly: true
+                        description: Name of file
+                      document:
+                        type: string
+                        format: uri
+                        description: URL-referentie naar het brondocument in de Documenten
+                          API. Deze mag de 'versie' querystring parameter bevatten.
+                        maxLength: 1000
+                        pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
+                          s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\\
+                          d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF\
+                          0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1-\uFFFF0-9])?(?:\\\
+                          .(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
+                          -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
+                          d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                      source_version:
+                        type: integer
+                        readOnly: true
+                      advice_version:
+                        type: integer
+                        readOnly: true
+                    required:
+                    - content
+                    - size
+                    - name
+                    - document
+                  description: (New) versions of documents that were uploaded as part
+                    of the advice round.
+          application/x-www-form-urlencoded:
+            schema: *id008
+          multipart/form-data:
+            schema: *id008
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  author:
+                    properties:
+                      username:
+                        type: string
+                        description: Required. 150 characters or fewer.
+                        maxLength: 150
+                      first_name:
+                        type: string
+                        maxLength: 255
+                      last_name:
+                        type: string
+                        maxLength: 255
+                    required:
+                    - username
+                    type: object
+                    readOnly: true
+                    description: Author of the review
+                  advice:
+                    type: string
+                    description: Het inhoudelijke advies
+                    maxLength: 1000
+                  documents:
+                    type: array
+                    items:
+                      properties:
+                        content:
+                          type: string
+                          format: binary
+                          writeOnly: true
+                          description: Content of file
+                        size:
+                          type: integer
+                          writeOnly: true
+                          description: Size of file
+                          minimum: 0
+                        name:
+                          type: string
+                          writeOnly: true
+                          description: Name of file
+                        document:
+                          type: string
+                          format: uri
+                          description: URL-referentie naar het brondocument in de
+                            Documenten API. Deze mag de 'versie' querystring parameter
+                            bevatten.
+                          maxLength: 1000
+                          pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
+                            s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
+                            .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
+                            .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                            -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
+                            .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
+                            .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                        source_version:
+                          type: integer
+                          readOnly: true
+                        advice_version:
+                          type: integer
+                          readOnly: true
+                      required:
+                      - content
+                      - size
+                      - name
+                      - document
+                    description: (New) versions of documents that were uploaded as
+                      part of the advice round.
+          description: ''
+    patch:
+      operationId: advice_partial_update
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this advies.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema: &id009
+              properties:
+                advice:
+                  type: string
+                  description: Het inhoudelijke advies
+                  maxLength: 1000
+                documents:
+                  type: array
+                  items:
+                    properties:
+                      content:
+                        type: string
+                        format: binary
+                        writeOnly: true
+                        description: Content of file
+                      size:
+                        type: integer
+                        writeOnly: true
+                        description: Size of file
+                        minimum: 0
+                      name:
+                        type: string
+                        writeOnly: true
+                        description: Name of file
+                      document:
+                        type: string
+                        format: uri
+                        description: URL-referentie naar het brondocument in de Documenten
+                          API. Deze mag de 'versie' querystring parameter bevatten.
+                        maxLength: 1000
+                        pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
+                          s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\\
+                          d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF\
+                          0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1-\uFFFF0-9])?(?:\\\
+                          .(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
+                          -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
+                          d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                      source_version:
+                        type: integer
+                        readOnly: true
+                      advice_version:
+                        type: integer
+                        readOnly: true
+                    required:
+                    - content
+                    - size
+                    - name
+                    - document
+                  description: (New) versions of documents that were uploaded as part
+                    of the advice round.
+          application/x-www-form-urlencoded:
+            schema: *id009
+          multipart/form-data:
+            schema: *id009
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  author:
+                    properties:
+                      username:
+                        type: string
+                        description: Required. 150 characters or fewer.
+                        maxLength: 150
+                      first_name:
+                        type: string
+                        maxLength: 255
+                      last_name:
+                        type: string
+                        maxLength: 255
+                    required:
+                    - username
+                    type: object
+                    readOnly: true
+                    description: Author of the review
+                  advice:
+                    type: string
+                    description: Het inhoudelijke advies
+                    maxLength: 1000
+                  documents:
+                    type: array
+                    items:
+                      properties:
+                        content:
+                          type: string
+                          format: binary
+                          writeOnly: true
+                          description: Content of file
+                        size:
+                          type: integer
+                          writeOnly: true
+                          description: Size of file
+                          minimum: 0
+                        name:
+                          type: string
+                          writeOnly: true
+                          description: Name of file
+                        document:
+                          type: string
+                          format: uri
+                          description: URL-referentie naar het brondocument in de
+                            Documenten API. Deze mag de 'versie' querystring parameter
+                            bevatten.
+                          maxLength: 1000
+                          pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
+                            s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
+                            .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
+                            .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
+                            -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
+                            .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
+                            .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
+                        source_version:
+                          type: integer
+                          readOnly: true
+                        advice_version:
+                          type: integer
+                          readOnly: true
+                      required:
+                      - content
+                      - size
+                      - name
+                      - document
+                    description: (New) versions of documents that were uploaded as
+                      part of the advice round.
+          description: ''
+    delete:
+      operationId: advice_destroy
+      description: ''
+      parameters:
+      - name: parent_lookup_request__uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this advies.
+        schema:
+          type: string
+      responses:
+        '204':
           description: ''
 servers:
 - url: https://kownsl.utrechtproeftuin.nl
