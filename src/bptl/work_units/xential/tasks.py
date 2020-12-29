@@ -36,6 +36,7 @@ def start_xential_template(task: BaseTask) -> dict:
     * ``buildId``: the id of the generated document (in case of starting a silent template)
     * ``xentialTemplateUrl``: the url of the page with the form to fill in (in case of starting
     an interactive template)
+
     """
     variables = task.get_variables()
     node_ref = check_variable(variables, "nodeRef")
