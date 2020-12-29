@@ -1,7 +1,5 @@
 import datetime
 
-from zds_client.schema import get_operation_url
-
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
@@ -39,24 +37,17 @@ def get_approval_status(task: BaseTask) -> dict:
          {
             "approved": true,
             "num_approved": 3,
-            "num_rejected": 0
+            "num_rejected": 0,
+            "approvers": ["mpet001", "will002", "jozz001"]
          }
+
     """
     client = get_client(task)
     variables = task.get_variables()
 
-    # TODO: switch from zaak-based retrieval to review-request based
     review_request_id = check_variable(variables, "kownslReviewRequestId")
 
-    operation_id = "reviewrequest_approvals"
-    url = get_operation_url(
-        client.schema,
-        operation_id,
-        base_url=client.base_url,
-        uuid=review_request_id,
-    )
-
-    approvals = client.request(url, operation_id)
+    approvals = client.list("approval", parent_lookup_request__uuid=review_request_id)
 
     num_approved, num_rejected = 0, 0
     for approval in approvals:
@@ -70,6 +61,11 @@ def get_approval_status(task: BaseTask) -> dict:
             "approved": num_approved > 0 and num_rejected == 0,
             "num_approved": num_approved,
             "num_rejected": num_rejected,
+            "approvers": [
+                approval["author"]["username"]
+                for approval in approvals
+                if approval["approved"]
+            ],
         },
     }
 
@@ -110,21 +106,12 @@ def get_review_response_status(task: BaseTask) -> dict:
 
     # Get review request type to set operation_id
     review_type = review_request["review_type"]
-    if review_type == "approval":
-        operation_id = "reviewrequest_approvals"
-    else:
-        operation_id = "reviewrequest_advices"
+    resource = "approval" if review_type == "approval" else "advice"
 
     client = get_client(task)
-    url = get_operation_url(
-        client.schema,
-        operation_id,
-        base_url=client.base_url,
-        uuid=review_request["id"],
-    )
 
     # Get approvals/advices belonging to review request
-    reviews = client.request(url, operation_id)
+    reviews = client.list(resource, parent_lookup_request__uuid=review_request["id"])
 
     # Build a list of users that have responded
     already_responded = []
@@ -343,17 +330,9 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
     """
     variables = task.get_variables()
     review_request_id = check_variable(variables, "kownslReviewRequestId")
-    operation_id = "reviewrequest_approvals"
     client = get_client(task)
-    url = get_operation_url(
-        client.schema,
-        operation_id,
-        base_url=client.base_url,
-        uuid=review_request_id,
-    )
-
     # Get approvals belonging to review request
-    approvals = client.request(url, operation_id)
+    approvals = client.list("approval", parent_lookup_request__uuid=review_request_id)
 
     # Get their toelichtingen
     toelichtingen = [approval["toelichting"] or "Geen" for approval in approvals]
