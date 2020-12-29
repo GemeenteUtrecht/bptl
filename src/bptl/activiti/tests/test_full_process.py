@@ -4,11 +4,11 @@ from django.urls import reverse
 import requests_mock
 from rest_framework import status
 from rest_framework.test import APITestCase
+from zgw_consumers.test import mock_service_oas_get
 
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.utils.constants import Statuses
-from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
 from ..models import ServiceTask
 from .utils import TokenAuthMixin

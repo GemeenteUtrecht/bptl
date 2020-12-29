@@ -450,6 +450,11 @@ CELERY_ONCE = {
 # project application settings
 MAX_TASKS = 10
 ZGW_CONSUMERS_CLIENT_CLASS = "bptl.work_units.zgw.client.ZGWClient"
+ZGW_CONSUMERS_TEST_SCHEMA_DIRS = [
+    os.path.join(DJANGO_PROJECT_DIR, "work_units", "zgw", "tests", "schemas"),
+]
+
+
 LONG_POLLING_TIMEOUT_MINUTES = 10
 
 # api settings

@@ -8,12 +8,12 @@ import jwt
 import requests_mock
 from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes, AuthTypes
+from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
-from bptl.work_units.zgw.tests.utils import mock_service_oas_get
 
 from ..tasks import CreateValidSignPackageTask, ValidSignReminderTask, ValidSignTask
 from .utils import VALIDSIGN_API_DOCS, mock_validsign_oas_get

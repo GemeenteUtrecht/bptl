@@ -1,15 +1,17 @@
 import copy
 import datetime
+import os
 import uuid
 
 from django.core.cache import caches
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 import requests_mock
 from django_camunda.utils import serialize_variable
 from zgw_consumers.cache import install_schema_fetcher_cache
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
+from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
@@ -25,12 +27,17 @@ from ..tasks import (
     get_review_response_status,
     set_review_request_metadata,
 )
-from .utils import mock_service_oas_get
 
 KOWNSL_API_ROOT = "https://kownsl.nl/"
 
+MOCK_FILES_DIR = os.path.join(
+    os.path.abspath(os.path.dirname(__file__)),
+    "schemas",
+)
+
 
 @requests_mock.Mocker()
+@override_settings(ZGW_CONSUMERS_TEST_SCHEMA_DIRS=[MOCK_FILES_DIR])
 class KownslAPITests(TestCase):
     @classmethod
     def setUpTestData(cls):
