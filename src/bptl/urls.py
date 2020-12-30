@@ -24,6 +24,7 @@ urlpatterns = [
         name="password_reset_done",
     ),
     path("admin/hijack/", include("hijack.urls")),
+    path("admin/xential/", include("bptl.work_units.xential.admin_urls")),
     path("admin/", admin.site.urls),
     path(
         "reset/<uidb64>/<token>/",
