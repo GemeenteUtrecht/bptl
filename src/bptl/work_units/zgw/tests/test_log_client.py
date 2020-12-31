@@ -4,12 +4,12 @@ from django.test import TestCase
 
 import requests_mock
 from zgw_consumers.constants import APITypes
+from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.tests.factories import ExternalTaskFactory
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks.base import ZGWWorkUnit
-from .utils import mock_service_oas_get
 
 ZRC_URL = "https://some.zrc.nl/api/v1/"
 ZAAK = f"{ZRC_URL}zaken/4f8b4811-5d7e-4e9b-8201-b35f5101f891"

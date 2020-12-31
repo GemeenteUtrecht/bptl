@@ -2,12 +2,12 @@ from django.test import TestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
+from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks import CreateZaakTask
-from .utils import mock_service_oas_get
 
 ZTC_URL = "https://some.ztc.nl/api/v1/"
 ZRC_URL = "https://some.zrc.nl/api/v1/"

@@ -3,12 +3,12 @@ import json
 from django.test import TestCase
 
 import requests_mock
+from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks import RelateDocumentToZaakTask
-from .utils import mock_service_oas_get
 
 ZRC_URL = "https://some.zrc.nl/api/v1/"
 DRC_URL = "https://some.drc.nl/api/v1/"
