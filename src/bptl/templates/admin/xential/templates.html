@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; {% trans 'Xential templates' %}
+</div>
+{% endblock %}
+
+{% block content_title %}<h1>Xential templates</h1>{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        {% for api_root, templates in template_groups.items %}
+            <h2>{{ api_root }}</h2>
+            <table style="width:100%">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Name' %}</th>
+                        <th>Uuid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for template in templates %}
+                    <tr>
+                        <td>{{ template.templateName }}</td>
+                        <td>{{ template.templateUuid }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
