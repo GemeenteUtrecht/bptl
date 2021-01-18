@@ -70,7 +70,7 @@ isort==5.0.5              # via -r requirements/dev.in
 itypes==1.1.0             # via -r requirements/ci.txt, coreapi
 jinja2==2.11.1            # via -r requirements/ci.txt, coreschema, sphinx
 kombu==4.6.7              # via -r requirements/ci.txt, celery
-lxml==4.4.2               # via -r requirements/ci.txt, pyquery
+lxml==4.6.2               # via -r requirements/ci.txt, pyquery
 markupsafe==1.1.1         # via -r requirements/ci.txt, jinja2
 mccabe==0.6.1             # via flake8
 mypy-extensions==0.4.3    # via black
