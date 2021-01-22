@@ -1,7 +1,13 @@
+import json
+import uuid
+
+from rest_framework.reverse import reverse
+
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
 from .client import get_client, require_xential_service
+from .models import XentialTicket
 
 
 @register
@@ -9,9 +15,9 @@ from .client import get_client, require_xential_service
 def start_xential_template(task: BaseTask) -> dict:
     """
     Run Xential template with requested variables.
-    The returned value is either buildId of created document (in case it is a silent template)
-    or the url to the page where the user can manually fill in the input fields (in case it is
-    an interactive template).
+    If the ``interactive`` task variable is:
+    * ``True``: it returns a URL in ``bptlDocumentUrl`` for building a document interactively
+    * ``False``: it returns an empty string in ``bptlDocumentUrl``
 
     In the task binding, the service with alias ``xential`` must be connected, so that
     this task knows which endpoints to contact.
@@ -19,9 +25,8 @@ def start_xential_template(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``bptlAppId``: the application ID in the BPTL credential store
-    * ``nodeRef``: a parameter to build POST url in Xential.
     * ``templateUuid``: the id of the template which should be started
-    * ``filename``: the name of the generated document
+    * ``interactive``: True or False, whether the process will be interactive or not
     * ``templateVariables``: a JSON-object containing meta-data about the result:
 
       .. code-block:: json
@@ -31,43 +36,95 @@ def start_xential_template(task: BaseTask) -> dict:
             "variable2": "String"
          }
 
-    **Sets the process variables**
+    **Sets the process variable**
 
-    * ``buildId``: the id of the generated document (in case of starting a silent template)
-    * ``xentialTemplateUrl``: the url of the page with the form to fill in (in case of starting
-      an interactive template)
+    * ``bptlDocumentUrl``: BPTL specific URL for interactive documents. If the document creation is not interactive, this will be empty.
 
     """
     variables = task.get_variables()
-    node_ref = check_variable(variables, "nodeRef")
+    interactive = check_variable(variables, "interactive")
     template_uuid = check_variable(variables, "templateUuid")
-    file_name = check_variable(variables, "filename")
-    template_variables = (
-        check_variable(variables, "templateVariables", empty_allowed=True) or {}
-    )
-
+    template_variables = check_variable(variables, "templateVariables")
     xential_client = get_client(task)
 
-    # get sessionID
-    list_url = "xential/templates"
-    list_response = xential_client.get(list_url)
-    session_id = list_response["data"]["params"]["sessionId"]
+    # Step 1: Retrieve XSessionID
+    xsession_id_url = "auth/whoami"
+    response_data = xential_client.post(xsession_id_url)
+    headers = {"Cookie": f"XSessionID={response_data['XSessionId']}"}
 
-    # start template
-    data = {
-        "templateUuid": template_uuid,
-        "sessionId": session_id,
-        "filename": file_name,
-        "variables": template_variables,
+    # Step 2: Create a ticket
+    create_ticket_url = "createTicket"
+
+    # Make a bptl ID for this ticket, so that later the task can be completed
+    bptl_ticket_uuid = str(uuid.uuid4())
+
+    # The option parameter needs *all* fields filled (even if empty), otherwise
+    # a 500 response is given.
+    options = {
+        "printOption": {},
+        "mailOption": {},
+        "documentPropertiesOption": {},
+        "valuesOption": {},
+        "attachmentsOption": {},
+        "ttlOption": {},
+        "selectionOption": {"templateUuid": template_uuid},
+        "webhooksOption": {
+            "hooks": [
+                {
+                    "event": "document.built",
+                    "retries": {"count": 0, "delayMs": 0},
+                    "request": {
+                        "url": reverse("Xential:xential-callbacks"), # TODO absolute URL
+                        "method": "POST",
+                        "headers": [],
+                        "contentType": "application/json",
+                        "requestBody": json.dumps(
+                            {"bptl_ticket_uuid": bptl_ticket_uuid}
+                        ),
+                        "clientCertificateId": "xentiallabs",
+                    },
+                }
+            ]
+        },
     }
+    # TODO Figure out how to pass the template variables
+    # Ticket data contains the template variables formatted as XML to fill the document
+    ticket_data = "<root></root>"
 
-    start_response = xential_client.post(
-        "xential/templates/start",
-        params={"nodeRef": node_ref},
-        json=data,
+    response_data = xential_client.post(
+        create_ticket_url,
+        headers=headers,
+        files=[
+            ("options", json.dumps(options)),
+            # ("ticketData", ticket_data),
+        ],
+    )
+    ticket_uuid = response_data["ticketId"]
+
+    XentialTicket.objects.create(
+        task=task,
+        bptl_ticket_uuid=bptl_ticket_uuid,
+        ticket_uuid=ticket_uuid,
     )
 
-    return {
-        "buildId": start_response.get("buildId"),
-        "xentialTemplateUrl": start_response.get("xentialTemplateUrl"),
-    }
+    if interactive == "False":
+        # Step 3: Start a document
+        start_document_url = "document/startDocument"
+        response_data = xential_client.post(
+            start_document_url, headers=headers, params={"ticketUuid": ticket_uuid}
+        )
+        document_uuid = response_data["documentUuid"]
+
+        # Step 4: Build document silently
+        # Once the document is created, Xential will notify the DocumentCreationCallbackView.
+        build_document_url = "document/buildDocument"
+        params = {"documentUuid": document_uuid}
+        xential_client.post(build_document_url, params=params, headers=headers)
+
+        return {"bptlDocumentUrl": ""}
+
+    interactive_document_path = reverse(
+        "Xential:interactive-document", args=[bptl_ticket_uuid]
+    )
+
+    return {"bptlDocumentUrl": interactive_document_path}  # TODO Add domain to URL
