@@ -74,7 +74,18 @@ class JSONClient:
     def log(self, resp, *args, **kwargs):
         response_data = resp.json() if resp.content else None
 
-        body = json.loads(resp.request.body) if resp.request.body else None
+        body = None
+        if (
+            resp.request.body
+            and resp.request.headers["Content-Type"] == "application/json"
+        ):
+            body = json.loads(resp.request.body)
+        elif (
+            resp.request.body
+            and "multipart/form-data" in resp.request.headers["Content-Type"]
+        ):
+            body = resp.request.body.decode("utf8")
+
         extra_data = {
             "service_base_url": self.api_root,
             "request": {
