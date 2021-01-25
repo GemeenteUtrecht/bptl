@@ -48,6 +48,7 @@ urlpatterns = [
         include(
             [
                 path("validsign/", include("bptl.work_units.valid_sign.urls")),
+                path("xential/", include("bptl.work_units.xential.urls")),
             ]
         ),
     ),
