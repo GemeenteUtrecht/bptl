@@ -1,5 +1,6 @@
 import json
 import uuid
+from xml.dom import minidom
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -77,30 +78,27 @@ def start_xential_template(task: BaseTask) -> dict:
                     "event": "document.built",
                     "retries": {"count": 0, "delayMs": 0},
                     "request": {
-                        "url": get_callback_url(),
+                        "url": get_absolute_url(reverse("Xential:xential-callbacks")),
                         "method": "POST",
                         "headers": [],
                         "contentType": "application/json",
-                        "requestBody": json.dumps(
-                            {"bptl_ticket_uuid": bptl_ticket_uuid}
-                        ),
+                        "requestBody": f'<data xmlns:sup="nl.inext.statusupdates"><document><sup:param name="documentData"/></document><bptlTicketUuid>{bptl_ticket_uuid}</bptlTicketUuid></data>',
                         "clientCertificateId": "xentiallabs",
                     },
                 }
             ]
         },
     }
-    # TODO Figure out how to pass the template variables
     # Ticket data contains the template variables formatted as XML to fill the document
-    ticket_data = "<root></root>"
+    ticket_data = make_xml_from_template_variables(template_variables)
 
     response_data = xential_client.post(
         create_ticket_url,
         headers=headers,
-        files=[
-            ("options", json.dumps(options)),
-            # ("ticketData", ticket_data),
-        ],
+        files={
+            "options": ("options", json.dumps(options), "application/json"),
+            "ticketData": ("ticketData", ticket_data, "text/xml"),
+        },
     )
     ticket_uuid = response_data["ticketId"]
 
@@ -120,6 +118,7 @@ def start_xential_template(task: BaseTask) -> dict:
 
         # Step 4: Build document silently
         # Once the document is created, Xential will notify the DocumentCreationCallbackView.
+        # If not all template variables are filled, building the document will not work.
         build_document_url = "document/buildDocument"
         params = {"documentUuid": document_uuid}
         xential_client.post(build_document_url, params=params, headers=headers)
@@ -130,11 +129,24 @@ def start_xential_template(task: BaseTask) -> dict:
         "Xential:interactive-document", args=[bptl_ticket_uuid]
     )
 
-    return {"bptlDocumentUrl": interactive_document_path}  # TODO Add domain to URL
+    return {"bptlDocumentUrl": get_absolute_url(interactive_document_path)}
 
 
-def get_callback_url() -> str:
-    path = reverse("Xential:xential-callbacks")
+def get_absolute_url(path: str) -> str:
     site = Site.objects.get_current()
     protocol = "https" if settings.IS_HTTPS else "http"
     return f"{protocol}://{site.domain}{path}"
+
+
+def make_xml_from_template_variables(template_variables: dict) -> str:
+    xml_doc = minidom.Document()
+    root_element = xml_doc.createElement("root")
+
+    for variable_name, variable_value in template_variables.items():
+        xml_tag = xml_doc.createElement(variable_name)
+        xml_text = xml_doc.createTextNode(variable_value)
+        xml_tag.appendChild(xml_text)
+        root_element.appendChild(xml_tag)
+
+    xml_doc.appendChild(root_element)
+    return xml_doc.toxml()
