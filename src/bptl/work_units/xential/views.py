@@ -40,10 +40,7 @@ class DocumentCreationCallbackView(views.APIView):
 
 
 class InteractiveDocumentView(views.APIView):
-    # TODO
-    # authentication_classes =
-    # permission_classes = (permissions.IsAuthenticated,)
-    # parser_classes = (CamelCaseJSONParser,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request: Request, uuid: UUID) -> HttpResponse:
         # With the BPTL specific UUID, we can retrieve the Xential ticket ID
