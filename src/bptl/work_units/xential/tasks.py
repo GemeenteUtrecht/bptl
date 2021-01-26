@@ -1,6 +1,9 @@
 import json
 import uuid
 
+from django.conf import settings
+from django.contrib.sites.models import Site
+
 from rest_framework.reverse import reverse
 
 from bptl.tasks.base import BaseTask, check_variable
@@ -74,7 +77,7 @@ def start_xential_template(task: BaseTask) -> dict:
                     "event": "document.built",
                     "retries": {"count": 0, "delayMs": 0},
                     "request": {
-                        "url": reverse("Xential:xential-callbacks"), # TODO absolute URL
+                        "url": get_callback_url(),
                         "method": "POST",
                         "headers": [],
                         "contentType": "application/json",
@@ -128,3 +131,10 @@ def start_xential_template(task: BaseTask) -> dict:
     )
 
     return {"bptlDocumentUrl": interactive_document_path}  # TODO Add domain to URL
+
+
+def get_callback_url() -> str:
+    path = reverse("Xential:xential-callbacks")
+    site = Site.objects.get_current()
+    protocol = "https" if settings.IS_HTTPS else "http"
+    return f"{protocol}://{site.domain}{path}"
