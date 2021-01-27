@@ -17,26 +17,33 @@ from ..services import get_alias_service
 
 logger = logging.getLogger(__name__)
 
-ALIAS = "xential"
+XENTIAL_ALIAS = "xential"
+DRC_ALIAS = "DRC"
 
 require_xential_service = register.require_service(
     APITypes.orc,
     description=_("The Xential API to use."),
-    alias=ALIAS,
+    alias=XENTIAL_ALIAS,
+)
+
+require_drc_service = register.require_service(
+    APITypes.drc,
+    description=_("The DRC API to use."),
+    alias=DRC_ALIAS,
 )
 
 
-def get_client(task: BaseTask) -> "JSONClient":
+def get_client(task: BaseTask, alias: str) -> "JSONClient":
     # get the service and credentials
-    service = get_alias_service(task, ALIAS)
+    service = get_alias_service(task, alias)
     return _get_client(task, service)
 
 
-def get_default_clients() -> List["JSONClient"]:
+def get_default_clients(alias: str) -> List["JSONClient"]:
     # get the service and default credentials
     # we can't use zgw_consumers client, since it uses OAS
     clients = [
         JSONClient(service, service.build_client().auth_header)
-        for service in Service.objects.filter(defaultservice__alias=ALIAS).distinct()
+        for service in Service.objects.filter(defaultservice__alias=alias).distinct()
     ]
     return clients

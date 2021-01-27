@@ -10,7 +10,7 @@ from rest_framework.reverse import reverse
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
-from .client import get_client, require_xential_service
+from .client import XENTIAL_ALIAS, get_client, require_xential_service
 from .models import XentialTicket
 
 
@@ -39,6 +39,19 @@ def start_xential_template(task: BaseTask) -> dict:
             "variable1": "String",
             "variable2": "String"
          }
+    * ``documentMetadata``: a JSON-object containing the fields required to create a document in the Documenten API.
+        The fields shown below are required.
+
+      .. code-block:: json
+
+         {
+            "bronorganisatie": "string",
+            "creatiedatum": "date",
+            "titel": "string",
+            "auteur": "string",
+            "taal": "string",
+            "informatieobjecttype": "url"
+         }
 
     **Sets the process variable**
 
@@ -49,7 +62,7 @@ def start_xential_template(task: BaseTask) -> dict:
     interactive = check_variable(variables, "interactive")
     template_uuid = check_variable(variables, "templateUuid")
     template_variables = check_variable(variables, "templateVariables")
-    xential_client = get_client(task)
+    xential_client = get_client(task, XENTIAL_ALIAS)
 
     # Step 1: Retrieve XSessionID
     xsession_id_url = "auth/whoami"

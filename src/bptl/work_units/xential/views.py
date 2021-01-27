@@ -1,16 +1,32 @@
+from urllib.parse import urlparse
 from uuid import UUID
 
 from django.http import HttpResponse, HttpResponseRedirect
 
+from defusedxml import minidom
 from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from rest_framework import permissions, status, views
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from bptl.work_units.xential.models import XentialTicket
-from bptl.work_units.xential.serializers import TicketUuidSerializer
+from bptl.work_units.xential.serializers import CallbackDataSerializer
 
-from .client import get_client
+from ...tasks.base import check_variable
+from .client import DRC_ALIAS, XENTIAL_ALIAS, get_client
+
+
+def parse_untrusted_xml(raw_xml: str) -> dict:
+    parsed_xml = minidom.parseString(raw_xml)  # minidom from defusedxml
+    extracted_data = {}
+
+    document_node = parsed_xml.getElementsByTagName("document")
+    extracted_data["document"] = document_node[0].firstChild.nodeValue
+
+    ticket_node = parsed_xml.getElementsByTagName("bptlTicketUuid")
+    extracted_data["bptl_ticket_id"] = ticket_node[0].firstChild.nodeValue
+
+    return extracted_data
 
 
 class DocumentCreationCallbackView(views.APIView):
@@ -20,7 +36,10 @@ class DocumentCreationCallbackView(views.APIView):
     # parser_classes = (CamelCaseJSONParser,)
 
     def post(self, request: Request) -> Response:
-        serializer = TicketUuidSerializer(data=request.data)
+        # The callback sends the base64 encoded document and the BPTL ticket ID as XML.
+        callback_data = parse_untrusted_xml(request.data)
+
+        serializer = CallbackDataSerializer(data=callback_data)
         serializer.is_valid(raise_exception=True)
 
         bptl_ticket_uuid = serializer.validated_data["bptl_ticket_uuid"]
@@ -29,10 +48,13 @@ class DocumentCreationCallbackView(views.APIView):
         xential_ticket = XentialTicket.objects.get(bptl_ticket_uuid=bptl_ticket_uuid)
         task = xential_ticket.task
 
-        # TODO
-        # Retrieve the document from Xential
-
         # Create the document in the Document API
+        variables = task.get_variables()
+        document_properties = check_variable(variables, "documentMetadata")
+        document_properties["inhoud"] = serializer.validated_data["document"]
+
+        drc_client = get_client(task, DRC_ALIAS)
+        drc_client.post("/enkelvoudiginformatieobjecten", json=document_properties)
 
         # Close task
 
