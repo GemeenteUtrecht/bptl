@@ -46,7 +46,7 @@ class InteractiveDocumentView(views.APIView):
         # With the BPTL specific UUID, we can retrieve the Xential ticket ID
         xential_ticket = XentialTicket.objects.get(bptl_ticket_uuid=uuid)
 
-        xential_client = get_client(xential_ticket.task)
+        xential_client = get_client(xential_ticket.task, XENTIAL_ALIAS)
 
         # Step 1: Retrieve XSessionID
         xsession_id_url = "auth/whoami"
@@ -60,7 +60,14 @@ class InteractiveDocumentView(views.APIView):
             headers=headers,
             params={"ticketUuid": xential_ticket.ticket_uuid},
         )
-        xential_url = response_data["resumeUrl"]
+
+        xential_base_url = get_xential_base_url(xential_client.api_root)
+        xential_url = xential_base_url + response_data["resumeUrl"]
 
         # Redirect the user to the Xential URL to interactively create a document
         return HttpResponseRedirect(redirect_to=xential_url)
+
+
+def get_xential_base_url(api_root: str) -> str:
+    parsed_url = urlparse(api_root)
+    return f"{parsed_url.scheme}://{parsed_url.netloc}"
