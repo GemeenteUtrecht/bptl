@@ -17,6 +17,6 @@ def on_document_created(task: BaseTask) -> None:
     instance_id = task.instance_id
     if not instance_id:
         external_task = camunda_client.get(f"history/external-task-log/{task.task_id}")
-        instance_id = external_task["processInstanceId"]
+        instance_id = external_task["process_instance_id"]
 
     send_message(message_id, [instance_id])
