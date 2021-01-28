@@ -2,10 +2,10 @@ from urllib.parse import urlparse
 from uuid import UUID
 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.views import View
 
 from defusedxml import minidom
-from djangorestframework_camel_case.parser import CamelCaseJSONParser
-from rest_framework import permissions, status, views
+from rest_framework import status, views
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -16,7 +16,7 @@ from ...tasks.base import check_variable
 from .client import DRC_ALIAS, XENTIAL_ALIAS, get_client
 
 
-def parse_untrusted_xml(raw_xml: str) -> dict:
+def parse_xml(raw_xml: str) -> dict:
     parsed_xml = minidom.parseString(raw_xml)  # minidom from defusedxml
     extracted_data = {}
 
@@ -30,14 +30,9 @@ def parse_untrusted_xml(raw_xml: str) -> dict:
 
 
 class DocumentCreationCallbackView(views.APIView):
-    # TODO
-    # authentication_classes =
-    # permission_classes = (permissions.IsAuthenticated,)
-    # parser_classes = (CamelCaseJSONParser,)
-
     def post(self, request: Request) -> Response:
         # The callback sends the base64 encoded document and the BPTL ticket ID as XML.
-        callback_data = parse_untrusted_xml(request.data)
+        callback_data = parse_xml(request.data)
 
         serializer = CallbackDataSerializer(data=callback_data)
         serializer.is_valid(raise_exception=True)
@@ -61,9 +56,7 @@ class DocumentCreationCallbackView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class InteractiveDocumentView(views.APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
+class InteractiveDocumentView(View):
     def get(self, request: Request, uuid: UUID) -> HttpResponse:
         # With the BPTL specific UUID, we can retrieve the Xential ticket ID
         xential_ticket = XentialTicket.objects.get(bptl_ticket_uuid=uuid)
