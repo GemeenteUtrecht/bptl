@@ -1,3 +1,5 @@
+from django.test import TestCase
+
 import requests_mock
 from django_camunda.utils import serialize_variable
 from rest_framework import status
@@ -18,7 +20,7 @@ DRC_ROOT = "https://openzaak.nl/documenten/api/v1/"
 
 
 @requests_mock.Mocker()
-class InteractiveDocumentUrlViewTest(APITestCase):
+class InteractiveDocumentUrlViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -53,51 +55,7 @@ class InteractiveDocumentUrlViewTest(APITestCase):
             alias="drc",
         )
 
-    def test_cant_access_interactive_document_url_if_unauthenticated(self, m):
-        external_task = ExternalTask.objects.create(
-            topic_name="xential-topic",
-            worker_id="test-worker-id",
-            task_id="test-task-id",
-            variables={
-                "bptlAppId": serialize_variable("some-app-id"),
-                "templateUuid": serialize_variable(
-                    "3e09b238-0617-47c1-8e6a-f6227b3d542e"
-                ),
-                "interactive": serialize_variable("False"),
-                "templateVariables": serialize_variable(
-                    {"textq1": "Answer1", "dateq1": "31-12-20"}
-                ),
-                "documentMetadata": serialize_variable(
-                    {
-                        "bronorganisatie": "517439943",
-                        "creatiedatum": "01-01-2021",
-                        "titel": "Test Document",
-                        "auteur": "Test Author",
-                        "taal": "eng",
-                        "informatieobjecttype": "http://openzaak.nl/catalogi/api/v1/informatieobjecttypen/06d3a135-bc20-4fce-9add-f69d8e585917",
-                    }
-                ),
-            },
-        )
-
-        XentialTicket.objects.create(
-            task=external_task,
-            bptl_ticket_uuid="f7f588eb-b7c9-4d23-babd-4a98a9326367",
-            ticket_uuid="99e6189a-e081-448b-a280-ca5bcde21d4e",
-        )
-
-        path = reverse(
-            "Xential:interactive-document",
-            args=["f7f588eb-b7c9-4d23-babd-4a98a9326367"],
-        )
-        bptl_interactive_url = get_absolute_url(path)
-
-        user = UserFactory.create()
-        # self.client.force_authenticate(user=user)
-        response = self.client.get(bptl_interactive_url)
-        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
-
-    def test_can_access_interactive_document_url_if_authenticated(self, m):
+    def test_interactive_document_redirect(self, m):
         bptl_ticket_uuid = "f7f588eb-b7c9-4d23-babd-4a98a9326367"
         ticket_uuid = "99e6189a-e081-448b-a280-ca5bcde21d4e"
 
@@ -154,8 +112,6 @@ class InteractiveDocumentUrlViewTest(APITestCase):
         path = reverse("Xential:interactive-document", args=[bptl_ticket_uuid])
         bptl_interactive_url = get_absolute_url(path)
 
-        user = UserFactory.create()
-        self.client.force_authenticate(user=user)
         response = self.client.get(bptl_interactive_url)
         self.assertEqual(status.HTTP_302_FOUND, response.status_code)
 
