@@ -14,6 +14,7 @@ from bptl.work_units.xential.serializers import CallbackDataSerializer
 
 from ...tasks.base import check_variable
 from .client import DRC_ALIAS, XENTIAL_ALIAS, get_client
+from .handlers import on_document_created
 
 
 def parse_xml(raw_xml: str) -> dict:
@@ -51,7 +52,8 @@ class DocumentCreationCallbackView(views.APIView):
         drc_client = get_client(task, DRC_ALIAS)
         drc_client.post("/enkelvoudiginformatieobjecten", json=document_properties)
 
-        # Close task
+        # Notify camunda that the document has been created
+        on_document_created(task)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 

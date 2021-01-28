@@ -53,9 +53,16 @@ def start_xential_template(task: BaseTask) -> dict:
             "informatieobjecttype": "url"
          }
 
+    **Optional process variable**
+
+    * ``messageId``: string. The message ID to send back into the process when the
+    document is sent to the Documenten API. You can use this to continue process execution.
+    If left empty, then no message will be sent.
+
     **Sets the process variable**
 
-    * ``bptlDocumentUrl``: BPTL specific URL for interactive documents. If the document creation is not interactive, this will be empty.
+    * ``bptlDocumentUrl``: BPTL specific URL for interactive documents.
+        If the document creation is not interactive, this will be empty.
 
     """
     variables = task.get_variables()
