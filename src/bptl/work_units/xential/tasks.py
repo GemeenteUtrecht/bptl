@@ -20,8 +20,8 @@ def start_xential_template(task: BaseTask) -> dict:
     """
     Run Xential template with requested variables.
     If the ``interactive`` task variable is:
-    * ``True``: it returns a URL in ``bptlDocumentUrl`` for building a document interactively
-    * ``False``: it returns an empty string in ``bptlDocumentUrl``
+    * ``"True"``: it returns a URL in ``bptlDocumentUrl`` for building a document interactively
+    * ``"False"``: it returns an empty string in ``bptlDocumentUrl``
 
     In the task binding, the service with alias ``xential`` must be connected, so that
     this task knows which endpoints to contact.
@@ -30,8 +30,9 @@ def start_xential_template(task: BaseTask) -> dict:
 
     * ``bptlAppId``: the application ID in the BPTL credential store
     * ``templateUuid``: the id of the template which should be started
-    * ``interactive``: True or False, whether the process will be interactive or not
-    * ``templateVariables``: a JSON-object containing meta-data about the result:
+    * ``interactive``: "True" or "False", whether the process will be interactive or not
+    * ``templateVariables``: a JSON-object containing the data to fill the template. In an interactive flow, this can be
+        an empty object ``{}``:
 
       .. code-block:: json
 
@@ -39,6 +40,7 @@ def start_xential_template(task: BaseTask) -> dict:
             "variable1": "String",
             "variable2": "String"
          }
+
     * ``documentMetadata``: a JSON-object containing the fields required to create a document in the Documenten API.
         The fields shown below are required.
 
@@ -79,10 +81,10 @@ def start_xential_template(task: BaseTask) -> dict:
     # Step 2: Create a ticket
     create_ticket_url = "createTicket"
 
-    # Make a bptl ID for this ticket, so that later the task can be completed
+    # Make a bptl UUID for this ticket, so that later the task can be retrieved
     bptl_ticket_uuid = str(uuid.uuid4())
 
-    # The option parameter needs *all* fields filled (even if empty), otherwise
+    # The `options` parameter needs *all* fields filled (even if empty), otherwise
     # a 500 response is given.
     options = {
         "printOption": {},
@@ -109,7 +111,7 @@ def start_xential_template(task: BaseTask) -> dict:
             ]
         },
     }
-    # Ticket data contains the template variables formatted as XML to fill the document
+    # `ticket_data` contains the template variables formatted as XML to fill the document
     ticket_data = make_xml_from_template_variables(template_variables)
 
     response_data = xential_client.post(
@@ -137,7 +139,6 @@ def start_xential_template(task: BaseTask) -> dict:
         document_uuid = response_data["documentUuid"]
 
         # Step 4: Build document silently
-        # Once the document is created, Xential will notify the DocumentCreationCallbackView.
         # If not all template variables are filled, building the document will not work.
         build_document_url = "document/buildDocument"
         params = {"documentUuid": document_uuid}

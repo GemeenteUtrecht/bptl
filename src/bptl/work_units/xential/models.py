@@ -9,11 +9,10 @@ class XentialTicket(models.Model):
 
     bptl_ticket_uuid = models.UUIDField(
         _("BPTL ticket UUID"),
-        max_length=200,
         help_text=_("BPTL specific Xential ticket UUID"),
     )
     ticket_uuid = models.UUIDField(
-        _("Xential ticket UUID"), max_length=200, help_text=_("Xential ticket UUID")
+        _("Xential ticket UUID"), help_text=_("Xential ticket UUID")
     )
     task = models.ForeignKey("tasks.BaseTask", on_delete=models.PROTECT)
 
