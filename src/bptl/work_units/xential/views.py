@@ -35,6 +35,10 @@ class DocumentCreationCallbackView(views.APIView):
         xential_ticket = XentialTicket.objects.get(bptl_ticket_uuid=bptl_ticket_uuid)
         task = xential_ticket.task
 
+        # Mark the Xential ticket as complete
+        xential_ticket.is_ticket_complete = True
+        xential_ticket.save()
+
         # Create the document in the Document API
         variables = task.get_variables()
         document_properties = check_variable(variables, "documentMetadata")

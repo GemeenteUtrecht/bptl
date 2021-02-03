@@ -493,3 +493,6 @@ MAX_TOTAL_DOCUMENT_SIZE = os.getenv("MAX_TOTAL_DOCUMENT_SIZE", 250000000)
 MAX_DOCUMENT_SIZE = os.getenv("MAX_DOCUMENT_SIZE", 2621440)
 # The size of the document chunks to load in memory
 CHUNK_SIZE = os.getenv("CHUNK_SIZE", 4096)
+
+# Xential ticket settings
+XENTIAL_URL_TOKEN_TIMEOUT_DAYS = os.getenv("XENTIAL_URL_TOKEN_TIMEOUT_DAYS", default=7)

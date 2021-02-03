@@ -129,6 +129,7 @@ def start_xential_template(task: BaseTask) -> dict:
         task=task,
         bptl_ticket_uuid=bptl_ticket_uuid,
         ticket_uuid=ticket_uuid,
+        is_ticket_complete=False,
     )
 
     if not interactive:
