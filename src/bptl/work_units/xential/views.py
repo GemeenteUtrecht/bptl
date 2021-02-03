@@ -2,6 +2,7 @@ import base64
 import datetime
 from uuid import UUID
 
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.views.generic import RedirectView
 
@@ -16,6 +17,7 @@ from ...tasks.base import check_variable
 from .authentication import XentialAuthentication
 from .client import DRC_ALIAS, XENTIAL_ALIAS, get_client
 from .handlers import on_document_created
+from .tokens import token_generator
 from .utils import SnakeXMLParser, get_xential_base_url
 
 
@@ -62,9 +64,14 @@ class DocumentCreationCallbackView(views.APIView):
 
 
 class InteractiveDocumentView(RedirectView):
-    def get_redirect_url(self, uuid: UUID, *args, **kwargs) -> str:
+    def get_redirect_url(self, uuid: UUID, token: str, *args, **kwargs) -> str:
         # With the BPTL specific UUID, we can retrieve the Xential ticket ID
         xential_ticket = get_object_or_404(XentialTicket, bptl_ticket_uuid=uuid)
+
+        # Check that the token is valid
+        valid = token_generator.check_token(xential_ticket, token)
+        if not valid:
+            raise PermissionDenied
 
         xential_client = get_client(xential_ticket.task, XENTIAL_ALIAS)
 

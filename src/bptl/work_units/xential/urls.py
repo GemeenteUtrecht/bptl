@@ -11,7 +11,7 @@ urlpatterns = [
         name="xential-callbacks",
     ),
     path(
-        "interactive_document/<uuid:uuid>",
+        "interactive_document/<uuid:uuid>/<str:token>",
         InteractiveDocumentView.as_view(),
         name="interactive-document",
     ),
