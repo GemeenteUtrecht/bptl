@@ -12,6 +12,7 @@ from bptl.tasks.tests.factories import DefaultServiceFactory
 
 from ..models import XentialTicket
 from ..tasks import start_xential_template
+from ..tokens import token_generator
 
 XENTIAL_API_ROOT = "https://xentiallabs.com/xential/modpages/next.oas/api/"
 DRC_ROOT = "https://openzaak.nl/documenten/api/v1/"
@@ -163,7 +164,8 @@ class XentialTaskTests(TestCase):
 
         # Check that the XentialTicket object was created
         xential_ticket = XentialTicket.objects.get()
-        bptl_ticket_url = f"https://example.com/contrib/api/xential/interactive_document/{xential_ticket.bptl_ticket_uuid}"
+        token = token_generator.make_token(xential_ticket)
+        bptl_ticket_url = f"https://example.com/contrib/api/xential/interactive_document/{xential_ticket.bptl_ticket_uuid}/{token}"
 
         self.assertEqual(
             "b0fdd542-0cc4-44a1-8dfb-808436123ce8", str(xential_ticket.ticket_uuid)

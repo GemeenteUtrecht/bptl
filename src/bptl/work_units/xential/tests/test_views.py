@@ -1,7 +1,8 @@
 import json
 import os
+from datetime import timedelta
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse_lazy
 
 import requests_mock
@@ -18,12 +19,14 @@ from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.work_units.xential.models import XentialConfiguration, XentialTicket
 from bptl.work_units.xential.tasks import get_absolute_url
+from bptl.work_units.xential.tokens import token_generator
 
 XENTIAL_API_ROOT = "https://xentiallabs.com/xential/modpages/next.oas/api/"
 DRC_ROOT = "https://openzaak.nl/documenten/api/v1/"
 
 
 @requests_mock.Mocker()
+@override_settings(XENTIAL_URL_TOKEN_TIMEOUT_DAYS=7)
 class InteractiveDocumentUrlViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -60,16 +63,13 @@ class InteractiveDocumentUrlViewTest(TestCase):
         )
 
     def test_get_non_existent_ticket(self, m):
-        path = reverse(
-            "Xential:interactive-document",
-            args=["f7f588eb-b7c9-4d23-babd-4a98a9326367"],
-        )
+        path = "/contrib/api/xential/interactive_document/f7f588eb-b7c9-4d23-babd-4a98a9326367/5o7-07fdc0f32e54abd30c4a"
         bptl_interactive_url = get_absolute_url(path)
 
         response = self.client.get(bptl_interactive_url)
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
-    def test_interactive_document_redirect(self, m):
+    def test_interactive_document_redirect_with_correct_token(self, m):
         bptl_ticket_uuid = "f7f588eb-b7c9-4d23-babd-4a98a9326367"
         ticket_uuid = "99e6189a-e081-448b-a280-ca5bcde21d4e"
 
@@ -115,13 +115,14 @@ class InteractiveDocumentUrlViewTest(TestCase):
             },
         )
 
-        XentialTicket.objects.create(
+        xential_ticket = XentialTicket.objects.create(
             task=external_task,
             bptl_ticket_uuid=bptl_ticket_uuid,
             ticket_uuid=ticket_uuid,
         )
+        token = token_generator.make_token(xential_ticket)
 
-        path = reverse("Xential:interactive-document", args=[bptl_ticket_uuid])
+        path = reverse("Xential:interactive-document", args=[bptl_ticket_uuid, token])
         bptl_interactive_url = get_absolute_url(path)
 
         response = self.client.get(bptl_interactive_url)
@@ -129,6 +130,112 @@ class InteractiveDocumentUrlViewTest(TestCase):
 
         expected_url = "https://xentiallabs.com/xential?resumeApplication=527f6ea1-e292-41ec-ac5b-8f8feddf153f&loginTicketUuid=4c68ae87-1e13-49db-8744-600a4c86a067"
         self.assertEqual(expected_url, response.url)
+
+    def test_interactive_document_redirect_with_expired_token(self, m):
+        bptl_ticket_uuid = "f7f588eb-b7c9-4d23-babd-4a98a9326367"
+        ticket_uuid = "99e6189a-e081-448b-a280-ca5bcde21d4e"
+
+        external_task = ExternalTask.objects.create(
+            topic_name="xential-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "bptlAppId": serialize_variable("some-app-id"),
+                "templateUuid": serialize_variable(
+                    "3e09b238-0617-47c1-8e6a-f6227b3d542e"
+                ),
+                "interactive": serialize_variable("True"),
+                "templateVariables": serialize_variable({}),
+                "documentMetadata": serialize_variable(
+                    {
+                        "bronorganisatie": "517439943",
+                        "creatiedatum": "01-01-2021",
+                        "titel": "Test Document",
+                        "auteur": "Test Author",
+                        "taal": "eng",
+                        "informatieobjecttype": "http://openzaak.nl/catalogi/api/v1/informatieobjecttypen/06d3a135-bc20-4fce-9add-f69d8e585917",
+                    }
+                ),
+            },
+        )
+
+        xential_ticket = XentialTicket.objects.create(
+            task=external_task,
+            bptl_ticket_uuid=bptl_ticket_uuid,
+            ticket_uuid=ticket_uuid,
+        )
+
+        token = token_generator.make_token(xential_ticket)
+
+        path = reverse("Xential:interactive-document", args=[bptl_ticket_uuid, token])
+        bptl_interactive_url = get_absolute_url(path)
+
+        with freeze_time(timedelta(days=8)):
+            response = self.client.get(bptl_interactive_url)
+            self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_cant_build_interactive_document_twice(self, m):
+        bptl_ticket_uuid = "f7f588eb-b7c9-4d23-babd-4a98a9326367"
+        ticket_uuid = "99e6189a-e081-448b-a280-ca5bcde21d4e"
+
+        external_task = ExternalTask.objects.create(
+            topic_name="xential-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "bptlAppId": serialize_variable("some-app-id"),
+                "templateUuid": serialize_variable(
+                    "3e09b238-0617-47c1-8e6a-f6227b3d542e"
+                ),
+                "interactive": serialize_variable("True"),
+                "templateVariables": serialize_variable({}),
+                "documentMetadata": serialize_variable(
+                    {
+                        "bronorganisatie": "517439943",
+                        "creatiedatum": "01-01-2021",
+                        "titel": "Test Document",
+                        "auteur": "Test Author",
+                        "taal": "eng",
+                        "informatieobjecttype": "http://openzaak.nl/catalogi/api/v1/informatieobjecttypen/06d3a135-bc20-4fce-9add-f69d8e585917",
+                    }
+                ),
+            },
+        )
+        m.post(
+            f"{XENTIAL_API_ROOT}auth/whoami",
+            json={
+                "user": {
+                    "uuid": "a4664ccb-259e-4107-b800-d8e5a764b9dd",
+                    "userName": "testuser",
+                },
+                "XSessionId": "f7f588eb-b7c9-4d23-babd-4a98a9326367",
+            },
+        )
+        m.post(
+            f"{XENTIAL_API_ROOT}document/startDocument?ticketUuid={ticket_uuid}",
+            json={
+                "documentUuid": "527f6ea1-e292-41ec-ac5b-8f8feddf153f",
+                "resumeUrl": "/xential?resumeApplication=527f6ea1-e292-41ec-ac5b-8f8feddf153f&loginTicketUuid=4c68ae87-1e13-49db-8744-600a4c86a067",
+            },
+        )
+
+        xential_ticket = XentialTicket.objects.create(
+            task=external_task,
+            bptl_ticket_uuid=bptl_ticket_uuid,
+            ticket_uuid=ticket_uuid,
+        )
+
+        token = token_generator.make_token(xential_ticket)
+
+        xential_ticket.is_ticket_complete = True
+        xential_ticket.save()
+
+        path = reverse("Xential:interactive-document", args=[bptl_ticket_uuid, token])
+        bptl_interactive_url = get_absolute_url(path)
+
+        with freeze_time(timedelta(days=8)):
+            response = self.client.get(bptl_interactive_url)
+            self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
 
 @requests_mock.Mocker()

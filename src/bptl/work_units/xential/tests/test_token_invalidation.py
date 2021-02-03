@@ -2,18 +2,15 @@ from datetime import timedelta
 
 from django.test import TestCase, override_settings
 
-from django_camunda.camunda_models import Task, factory
-from django_camunda.utils import serialize_variable, underscoreize
 from freezegun import freeze_time
 
-from bptl.camunda.models import ExternalTask
 from bptl.camunda.tests.factories import ExternalTaskFactory
 
 from ..models import XentialTicket
 from ..tokens import token_generator
 
 
-@override_settings(EXECUTE_TASK_TOKEN_TIMEOUT_DAYS=7)
+@override_settings(XENTIAL_URL_TOKEN_TIMEOUT_DAYS=7)
 class TokenInvalidationTests(TestCase):
     @classmethod
     def setUpTestData(cls):
