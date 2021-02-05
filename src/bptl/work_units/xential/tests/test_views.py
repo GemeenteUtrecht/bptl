@@ -16,7 +16,7 @@ from zgw_consumers.models import Service
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
-from bptl.work_units.xential.models import XentialTicket
+from bptl.work_units.xential.models import XentialConfiguration, XentialTicket
 from bptl.work_units.xential.tasks import get_absolute_url
 
 XENTIAL_API_ROOT = "https://xentiallabs.com/xential/modpages/next.oas/api/"
@@ -140,6 +140,9 @@ class XentialCallbackTest(APITestCase):
     def setUpTestData(cls):
         super().setUpTestData()
 
+        conf = XentialConfiguration.get_solo()
+        cls.auth_key = conf.auth_key
+
     def _get_sample_response(self, filename: str) -> str:
         file_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "responses"
@@ -149,6 +152,18 @@ class XentialCallbackTest(APITestCase):
         f.close()
 
         return response
+
+    def test_no_access_without_key(self, m):
+        callback_response = self.client.post(self.endpoint, data="A response!")
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, callback_response.status_code)
+
+    def test_no_access_with_wrong_key(self, m):
+        callback_response = self.client.post(
+            self.endpoint, data="A response!", HTTP_AUTHORIZATION=f"Basic WRONG-KEY"
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, callback_response.status_code)
 
     def test_callback_no_message_id(self, m):
         xential_response = self._get_sample_response("xential-response.xml")
@@ -222,7 +237,10 @@ class XentialCallbackTest(APITestCase):
         )
 
         callback_response = self.client.post(
-            self.endpoint, data=xential_response, content_type="application/xml"
+            self.endpoint,
+            content_type="application/xml",
+            data=xential_response,
+            HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
@@ -298,7 +316,10 @@ class XentialCallbackTest(APITestCase):
         )
 
         callback_response = self.client.post(
-            self.endpoint, data=xential_response, content_type="application/xml"
+            self.endpoint,
+            data=xential_response,
+            content_type="application/xml",
+            HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )
 
         document_data_posted = json.loads(m.request_history[0].text)
@@ -385,7 +406,10 @@ class XentialCallbackTest(APITestCase):
         )
 
         callback_response = self.client.post(
-            self.endpoint, data=xential_response, content_type="application/xml"
+            self.endpoint,
+            content_type="application/xml",
+            data=xential_response,
+            HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
@@ -465,7 +489,10 @@ class XentialCallbackTest(APITestCase):
         )
 
         callback_response = self.client.post(
-            self.endpoint, data=xential_response, content_type="application/xml"
+            self.endpoint,
+            content_type="application/xml",
+            data=xential_response,
+            HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
@@ -474,7 +501,10 @@ class XentialCallbackTest(APITestCase):
         xential_response = self._get_sample_response("xential-wrong-doc.xml")
 
         callback_response = self.client.post(
-            self.endpoint, data=xential_response, content_type="application/xml"
+            self.endpoint,
+            content_type="application/xml",
+            data=xential_response,
+            HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, callback_response.status_code)
