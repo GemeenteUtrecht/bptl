@@ -1,4 +1,5 @@
 import logging
+import warnings
 from concurrent import futures
 from typing import Dict
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
@@ -107,6 +108,11 @@ class RelatePand(ZGWWorkUnit):
         return urlunsplit((scheme, netloc, path, query, fragment))
 
     def perform(self) -> dict:
+        warnings.warn(
+            "The `RelatedPand` task is deprected in favour of `CreateZaakObject`. "
+            "It will be removed in 1.0.",
+            DeprecationWarning,
+        )
         # prep client
         zrc_client = self.get_client(APITypes.zrc)
 
