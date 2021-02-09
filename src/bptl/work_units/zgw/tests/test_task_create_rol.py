@@ -108,3 +108,12 @@ class CreateRolTaskTests(TestCase):
                 "betrokkeneIdentificatie": {},
             },
         )
+
+    def test_no_create_rol_empty_omschrijving(self, m):
+        self.fetched_task.variables["omschrijving"] = serialize_variable("")
+        task = CreateRolTask(self.fetched_task)
+
+        result = task.perform()
+
+        self.assertIsNone(result)
+        self.assertEqual(len(m.request_history), 0)
