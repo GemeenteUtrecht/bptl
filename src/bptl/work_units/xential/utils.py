@@ -1,4 +1,5 @@
 import binascii
+import logging
 from base64 import b64decode
 from urllib.parse import urlparse
 
@@ -7,6 +8,8 @@ from django.utils.translation import gettext_lazy as _
 from defusedxml import minidom
 from drf_extra_fields.fields import Base64FileField
 from rest_framework.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 def parse_xml(raw_xml: str) -> dict:
@@ -44,6 +47,7 @@ class Base64Document(Base64FileField):
             b64decode(base64_data, validate=True)
         except binascii.Error as e:
             if str(e) == "Incorrect padding":
+                logger.warning("Document received from Xential has incorrect padding.")
                 raise ValidationError(
                     _("The provided base64 data has incorrect padding"),
                     code="incorrect-base64-padding",
