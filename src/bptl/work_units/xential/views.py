@@ -5,12 +5,9 @@ from uuid import UUID
 from django.shortcuts import get_object_or_404
 from django.views.generic import RedirectView
 
-from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from rest_framework import status, views
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework_xml.parsers import XMLParser
-from rest_framework_xml.renderers import XMLRenderer
 
 from bptl.work_units.xential.models import XentialTicket
 from bptl.work_units.xential.serializers import CallbackDataSerializer
@@ -18,12 +15,12 @@ from bptl.work_units.xential.serializers import CallbackDataSerializer
 from ...tasks.base import check_variable
 from .client import DRC_ALIAS, XENTIAL_ALIAS, get_client
 from .handlers import on_document_created
-from .utils import get_xential_base_url, parse_xml
+from .utils import SnakeXMLParser, get_xential_base_url
 
 
 class DocumentCreationCallbackView(views.APIView):
     permission_classes = []
-    parser_classes = [XMLParser]
+    parser_classes = [SnakeXMLParser]
 
     def post(self, request: Request) -> Response:
         # The callback sends the base64 encoded document and the BPTL ticket ID as XML.
