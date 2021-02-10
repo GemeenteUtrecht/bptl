@@ -1,3 +1,4 @@
+import base64
 import datetime
 from uuid import UUID
 
@@ -40,7 +41,9 @@ class DocumentCreationCallbackView(views.APIView):
             "creatiedatum", datetime.date.today().strftime("%Y-%m-%d")
         )
         document_properties.setdefault("taal", "nld")
-        document_properties["inhoud"] = serializer.validated_data["document"]
+        document_properties["inhoud"] = base64.b64encode(
+            serializer.validated_data["document"].read()
+        ).decode("utf8")
 
         drc_client = get_client(task, DRC_ALIAS)
         drc_client.post("enkelvoudiginformatieobjecten", json=document_properties)
