@@ -15,7 +15,7 @@ cffi==1.13.2              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via drf-yasg
 coreschema==0.0.4         # via coreapi, drf-yasg
-cryptography==3.2.1       # via django-auth-adfs
+cryptography==3.4.4       # via django-auth-adfs
 defusedxml==0.6.0         # via django-camunda
 django-admin-index==1.2.3  # via -r requirements/base.in
 django-appconf==1.0.3     # via django-axes, django-timeline-logger
@@ -73,7 +73,7 @@ requests==2.22.0          # via coreapi, django-auth-adfs, django-camunda, djang
 ruamel.yaml.clib==0.2.0   # via ruamel.yaml
 ruamel.yaml==0.16.10      # via drf-yasg
 sentry-sdk==0.14.0        # via -r requirements/base.in
-six==1.13.0               # via cryptography, django-appconf, django-choices, django-compat, django-rosetta, drf-yasg, packaging, python-dateutil, requests-mock
+six==1.13.0               # via django-appconf, django-choices, django-compat, django-rosetta, drf-yasg, packaging, python-dateutil, requests-mock
 snowballstemmer==2.0.0    # via sphinx
 sphinx==2.4.3             # via -r requirements/base.in
 sphinxcontrib-applehelp==1.0.1  # via sphinx

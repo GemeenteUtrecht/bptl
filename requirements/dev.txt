@@ -21,7 +21,7 @@ click==7.1.2              # via black, pip-tools
 coreapi==2.3.3            # via -r requirements/ci.txt, drf-yasg
 coreschema==0.0.4         # via -r requirements/ci.txt, coreapi, drf-yasg
 coverage==4.5.4           # via -r requirements/ci.txt
-cryptography==3.2.1       # via -r requirements/ci.txt, django-auth-adfs
+cryptography==3.4.4       # via -r requirements/ci.txt, django-auth-adfs
 cssselect==1.1.0          # via -r requirements/ci.txt, pyquery
 ddt-api-calls==0.3.0      # via -r requirements/dev.in
 defusedxml==0.6.0         # via -r requirements/ci.txt, django-camunda
@@ -99,7 +99,7 @@ requests==2.22.0          # via -r requirements/ci.txt, coreapi, ddt-api-calls, 
 ruamel.yaml.clib==0.2.0   # via -r requirements/ci.txt, ruamel.yaml
 ruamel.yaml==0.16.10      # via -r requirements/ci.txt, drf-yasg
 sentry-sdk==0.14.0        # via -r requirements/ci.txt
-six==1.13.0               # via -r requirements/ci.txt, cryptography, django-appconf, django-choices, django-compat, django-extensions, django-rosetta, drf-yasg, freezegun, packaging, pip-tools, python-dateutil, requests-mock, webtest
+six==1.13.0               # via -r requirements/ci.txt, django-appconf, django-choices, django-compat, django-extensions, django-rosetta, drf-yasg, freezegun, packaging, pip-tools, python-dateutil, requests-mock, webtest
 snowballstemmer==2.0.0    # via -r requirements/ci.txt, sphinx
 soupsieve==1.9.5          # via -r requirements/ci.txt, beautifulsoup4
 sphinx-rtd-theme==0.4.3   # via -r requirements/dev.in
