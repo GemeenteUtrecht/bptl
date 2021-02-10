@@ -2,6 +2,7 @@ import datetime
 from uuid import UUID
 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.views import View
 
 from rest_framework import status, views
@@ -54,7 +55,7 @@ class DocumentCreationCallbackView(views.APIView):
 class InteractiveDocumentView(View):
     def get(self, request: Request, uuid: UUID) -> HttpResponse:
         # With the BPTL specific UUID, we can retrieve the Xential ticket ID
-        xential_ticket = XentialTicket.objects.get(bptl_ticket_uuid=uuid)
+        xential_ticket = get_object_or_404(XentialTicket, bptl_ticket_uuid=uuid)
 
         xential_client = get_client(xential_ticket.task, XENTIAL_ALIAS)
 
