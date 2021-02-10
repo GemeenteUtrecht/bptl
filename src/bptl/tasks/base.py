@@ -10,7 +10,11 @@ def check_variable(variables: dict, name: str, empty_allowed=False):
     if name not in variables:
         raise error
 
-    elif not empty_allowed and not variables[name]:
+    elif (
+        not empty_allowed
+        and not variables[name]
+        and not isinstance(variables[name], bool)
+    ):
         raise error
 
     return variables[name]

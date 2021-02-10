@@ -1,7 +1,17 @@
+import json
+import uuid
+from xml.dom import minidom
+
+from django.conf import settings
+from django.contrib.sites.models import Site
+
+from rest_framework.reverse import reverse
+
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
-from .client import get_client, require_xential_service
+from .client import XENTIAL_ALIAS, get_client, require_xential_service
+from .models import XentialTicket
 
 
 @register
@@ -9,9 +19,9 @@ from .client import get_client, require_xential_service
 def start_xential_template(task: BaseTask) -> dict:
     """
     Run Xential template with requested variables.
-    The returned value is either buildId of created document (in case it is a silent template)
-    or the url to the page where the user can manually fill in the input fields (in case it is
-    an interactive template).
+    If the ``interactive`` task variable is:
+    * ``True``: it returns a URL in ``bptlDocumentUrl`` for building a document interactively
+    * ``False``: it returns an empty string in ``bptlDocumentUrl``
 
     In the task binding, the service with alias ``xential`` must be connected, so that
     this task knows which endpoints to contact.
@@ -19,10 +29,10 @@ def start_xential_template(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``bptlAppId``: the application ID in the BPTL credential store
-    * ``nodeRef``: a parameter to build POST url in Xential.
     * ``templateUuid``: the id of the template which should be started
-    * ``filename``: the name of the generated document
-    * ``templateVariables``: a JSON-object containing meta-data about the result:
+    * ``interactive``: bool, whether the process will be interactive or not
+    * ``templateVariables``: a JSON-object containing the data to fill the template. In an interactive flow, this can be
+        an empty object ``{}``:
 
       .. code-block:: json
 
@@ -31,43 +41,126 @@ def start_xential_template(task: BaseTask) -> dict:
             "variable2": "String"
          }
 
-    **Sets the process variables**
+    * ``documentMetadata``: a JSON-object containing the fields required to create a document in the Documenten API.
+        The fields shown below are required. The property 'creatiedatum' defaults to the day in which the document is
+        sent to the Documenten API and the property 'taal' defaults to 'nld' (dutch).
 
-    * ``buildId``: the id of the generated document (in case of starting a silent template)
-    * ``xentialTemplateUrl``: the url of the page with the form to fill in (in case of starting
-      an interactive template)
+      .. code-block:: json
+
+         {
+            "bronorganisatie": "string",
+            "titel": "string",
+            "auteur": "string",
+            "informatieobjecttype": "url"
+         }
+
+    **Optional process variable**
+
+    * ``messageId``: string. The message ID to send back into the process when the
+    document is sent to the Documenten API. You can use this to continue process execution.
+    If left empty, then no message will be sent.
+
+    **Sets the process variable**
+
+    * ``bptlDocumentUrl``: BPTL specific URL for interactive documents.
+        If the document creation is not interactive, this will be empty.
 
     """
     variables = task.get_variables()
-    node_ref = check_variable(variables, "nodeRef")
+    interactive = check_variable(variables, "interactive")
     template_uuid = check_variable(variables, "templateUuid")
-    file_name = check_variable(variables, "filename")
-    template_variables = (
-        check_variable(variables, "templateVariables", empty_allowed=True) or {}
+    template_variables = check_variable(variables, "templateVariables")
+    xential_client = get_client(task, XENTIAL_ALIAS)
+
+    # Step 1: Create a ticket
+    create_ticket_url = "createTicket"
+
+    # Make a bptl UUID for this ticket, so that later the task can be retrieved
+    bptl_ticket_uuid = str(uuid.uuid4())
+
+    # The `options` parameter needs *all* fields filled (even if empty), otherwise
+    # a 500 response is given.
+    options = {
+        "printOption": {},
+        "mailOption": {},
+        "documentPropertiesOption": {},
+        "valuesOption": {},
+        "attachmentsOption": {},
+        "ttlOption": {},
+        "selectionOption": {"templateUuid": template_uuid},
+        "webhooksOption": {
+            "hooks": [
+                {
+                    "event": "document.built",
+                    "retries": {"count": 0, "delayMs": 0},
+                    "request": {
+                        "url": get_absolute_url(reverse("Xential:xential-callbacks")),
+                        "method": "POST",
+                        "headers": [],
+                        "contentType": "application/json",
+                        "requestBody": f'<data xmlns:sup="nl.inext.statusupdates"><document><sup:param name="documentData"/></document><bptlTicketUuid>{bptl_ticket_uuid}</bptlTicketUuid></data>',
+                        "clientCertificateId": "xentiallabs",
+                    },
+                }
+            ]
+        },
+    }
+    # `ticket_data` contains the template variables formatted as XML to fill the document
+    ticket_data = make_xml_from_template_variables(template_variables)
+
+    response_data = xential_client.post(
+        create_ticket_url,
+        files={
+            "options": ("options", json.dumps(options), "application/json"),
+            "ticketData": ("ticketData", ticket_data, "text/xml"),
+        },
+    )
+    ticket_uuid = response_data["ticketId"]
+
+    XentialTicket.objects.create(
+        task=task,
+        bptl_ticket_uuid=bptl_ticket_uuid,
+        ticket_uuid=ticket_uuid,
     )
 
-    xential_client = get_client(task)
+    if not interactive:
+        # Step 2: Start a document
+        start_document_url = "document/startDocument"
+        response_data = xential_client.post(
+            start_document_url, params={"ticketUuid": ticket_uuid}
+        )
+        document_uuid = response_data["documentUuid"]
 
-    # get sessionID
-    list_url = "xential/templates"
-    list_response = xential_client.get(list_url)
-    session_id = list_response["data"]["params"]["sessionId"]
+        # Step 3: Build document silently
+        # If not all template variables are filled, building the document will not work.
+        build_document_url = "document/buildDocument"
+        params = {"documentUuid": document_uuid}
+        xential_client.post(build_document_url, params=params)
 
-    # start template
-    data = {
-        "templateUuid": template_uuid,
-        "sessionId": session_id,
-        "filename": file_name,
-        "variables": template_variables,
-    }
+        return {"bptlDocumentUrl": ""}
 
-    start_response = xential_client.post(
-        "xential/templates/start",
-        params={"nodeRef": node_ref},
-        json=data,
+    interactive_document_path = reverse(
+        "Xential:interactive-document", args=[bptl_ticket_uuid]
     )
 
-    return {
-        "buildId": start_response.get("buildId"),
-        "xentialTemplateUrl": start_response.get("xentialTemplateUrl"),
-    }
+    return {"bptlDocumentUrl": get_absolute_url(interactive_document_path)}
+
+
+def get_absolute_url(path: str) -> str:
+    site = Site.objects.get_current()
+    protocol = "https" if settings.IS_HTTPS else "http"
+    return f"{protocol}://{site.domain}{path}"
+
+
+def make_xml_from_template_variables(template_variables: dict) -> str:
+    xml_doc = minidom.Document()
+    root_element = xml_doc.createElement("root")
+
+    for variable_name, variable_value in template_variables.items():
+        xml_tag = xml_doc.createElement(variable_name)
+        xml_text = xml_doc.createTextNode(variable_value)
+        xml_tag.appendChild(xml_text)
+        root_element.appendChild(xml_tag)
+
+    xml_doc.appendChild(root_element)
+    return xml_doc.toxml()
