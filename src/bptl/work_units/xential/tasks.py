@@ -20,8 +20,8 @@ def start_xential_template(task: BaseTask) -> dict:
     """
     Run Xential template with requested variables.
     If the ``interactive`` task variable is:
-    * ``"True"``: it returns a URL in ``bptlDocumentUrl`` for building a document interactively
-    * ``"False"``: it returns an empty string in ``bptlDocumentUrl``
+    * ``True``: it returns a URL in ``bptlDocumentUrl`` for building a document interactively
+    * ``False``: it returns an empty string in ``bptlDocumentUrl``
 
     In the task binding, the service with alias ``xential`` must be connected, so that
     this task knows which endpoints to contact.
@@ -30,7 +30,7 @@ def start_xential_template(task: BaseTask) -> dict:
 
     * ``bptlAppId``: the application ID in the BPTL credential store
     * ``templateUuid``: the id of the template which should be started
-    * ``interactive``: "True" or "False", whether the process will be interactive or not
+    * ``interactive``: bool, whether the process will be interactive or not
     * ``templateVariables``: a JSON-object containing the data to fill the template. In an interactive flow, this can be
         an empty object ``{}``:
 
@@ -130,7 +130,7 @@ def start_xential_template(task: BaseTask) -> dict:
         ticket_uuid=ticket_uuid,
     )
 
-    if interactive == "False":
+    if not interactive:
         # Step 3: Start a document
         start_document_url = "document/startDocument"
         response_data = xential_client.post(
