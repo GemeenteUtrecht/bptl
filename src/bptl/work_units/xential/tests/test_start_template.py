@@ -88,7 +88,7 @@ class XentialTaskTests(TestCase):
                 "templateUuid": serialize_variable(
                     "3e09b238-0617-47c1-8e6a-f6227b3d542e"
                 ),
-                "interactive": serialize_variable("False"),
+                "interactive": serialize_variable(False),
                 "templateVariables": serialize_variable(
                     {"textq1": "Answer1", "dateq1": "31-12-20"}
                 ),
@@ -141,7 +141,7 @@ class XentialTaskTests(TestCase):
                 "templateUuid": serialize_variable(
                     "3e09b238-0617-47c1-8e6a-f6227b3d542e"
                 ),
-                "interactive": serialize_variable("True"),
+                "interactive": serialize_variable(True),
                 "templateVariables": serialize_variable(
                     {"textq1": "Answer1", "dateq1": "31-12-20"}
                 ),
