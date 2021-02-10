@@ -26,6 +26,7 @@ django-redis
 django-rosetta
 django-sniplates
 django-timeline-logger
+drf-extra-fields
 
 # API libraries
 djangorestframework
