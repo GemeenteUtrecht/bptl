@@ -59,6 +59,16 @@ class InteractiveDocumentUrlViewTest(TestCase):
             alias="drc",
         )
 
+    def test_get_non_existent_ticket(self, m):
+        path = reverse(
+            "Xential:interactive-document",
+            args=["f7f588eb-b7c9-4d23-babd-4a98a9326367"],
+        )
+        bptl_interactive_url = get_absolute_url(path)
+
+        response = self.client.get(bptl_interactive_url)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
     def test_interactive_document_redirect(self, m):
         bptl_ticket_uuid = "f7f588eb-b7c9-4d23-babd-4a98a9326367"
         ticket_uuid = "99e6189a-e081-448b-a280-ca5bcde21d4e"
