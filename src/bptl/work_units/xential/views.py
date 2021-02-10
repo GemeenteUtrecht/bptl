@@ -5,9 +5,12 @@ from uuid import UUID
 from django.shortcuts import get_object_or_404
 from django.views.generic import RedirectView
 
+from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from rest_framework import status, views
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework_xml.parsers import XMLParser
+from rest_framework_xml.renderers import XMLRenderer
 
 from bptl.work_units.xential.models import XentialTicket
 from bptl.work_units.xential.serializers import CallbackDataSerializer
@@ -20,12 +23,11 @@ from .utils import get_xential_base_url, parse_xml
 
 class DocumentCreationCallbackView(views.APIView):
     permission_classes = []
+    parser_classes = [XMLParser]
 
     def post(self, request: Request) -> Response:
         # The callback sends the base64 encoded document and the BPTL ticket ID as XML.
-        callback_data = parse_xml(request.data)
-
-        serializer = CallbackDataSerializer(data=callback_data)
+        serializer = CallbackDataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         bptl_ticket_uuid = serializer.validated_data["bptl_ticket_uuid"]
