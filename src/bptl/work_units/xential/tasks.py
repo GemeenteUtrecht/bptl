@@ -42,16 +42,15 @@ def start_xential_template(task: BaseTask) -> dict:
          }
 
     * ``documentMetadata``: a JSON-object containing the fields required to create a document in the Documenten API.
-        The fields shown below are required.
+        The fields shown below are required. The property 'creatiedatum' defaults to the day in which the document is
+        sent to the Documenten API and the property 'taal' defaults to 'nld' (dutch).
 
       .. code-block:: json
 
          {
             "bronorganisatie": "string",
-            "creatiedatum": "date",
             "titel": "string",
             "auteur": "string",
-            "taal": "string",
             "informatieobjecttype": "url"
          }
 

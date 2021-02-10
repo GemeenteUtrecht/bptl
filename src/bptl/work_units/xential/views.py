@@ -1,3 +1,4 @@
+import datetime
 from uuid import UUID
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -35,6 +36,10 @@ class DocumentCreationCallbackView(views.APIView):
         # Create the document in the Document API
         variables = task.get_variables()
         document_properties = check_variable(variables, "documentMetadata")
+        document_properties.setdefault(
+            "creatiedatum", datetime.date.today().strftime("%Y-%m-%d")
+        )
+        document_properties.setdefault("taal", "nld")
         document_properties["inhoud"] = serializer.validated_data["document"]
 
         drc_client = get_client(task, DRC_ALIAS)
