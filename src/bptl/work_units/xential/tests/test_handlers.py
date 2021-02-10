@@ -23,7 +23,7 @@ class HandlerTests(TestCase):
 
     @requests_mock.Mocker()
     def test_document_created_no_message_id(self, m):
-        on_document_created(self.task)
+        on_document_created(self.task, "http://example.com/doc/doc-uuid")
 
         self.assertEqual(m.call_count, 0)
 
@@ -33,7 +33,7 @@ class HandlerTests(TestCase):
         self.task.save()
         m.post("https://camunda.example.com/engine-rest/message")
 
-        on_document_created(self.task)
+        on_document_created(self.task, "http://example.com/doc/doc-uuid")
 
         self.assertEqual(m.call_count, 1)
         self.assertEqual(m.last_request.method, "POST")
@@ -42,6 +42,11 @@ class HandlerTests(TestCase):
             {
                 "messageName": "Document created!",
                 "processInstanceId": "some-instance-id",
-                "processVariables": {},
+                "processVariables": {
+                    "url": {
+                        "type": "String",
+                        "value": "http://example.com/doc/doc-uuid",
+                    }
+                },
             },
         )

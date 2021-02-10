@@ -5,7 +5,7 @@ from bptl.camunda.models import ExternalTask
 from bptl.tasks.models import BaseTask
 
 
-def on_document_created(task: BaseTask) -> None:
+def on_document_created(task: BaseTask, document_url: str) -> None:
     camunda_client = get_client()
     task = task.get_real_instance()
     assert isinstance(task, ExternalTask), "Currently only Camunda is supported"
@@ -19,4 +19,4 @@ def on_document_created(task: BaseTask) -> None:
         external_task = camunda_client.get(f"history/external-task-log/{task.task_id}")
         instance_id = external_task["process_instance_id"]
 
-    send_message(message_id, [instance_id])
+    send_message(message_id, [instance_id], variables={"url": document_url})

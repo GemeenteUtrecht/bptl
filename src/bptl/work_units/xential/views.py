@@ -43,10 +43,12 @@ class DocumentCreationCallbackView(views.APIView):
         document_properties["inhoud"] = serializer.validated_data["document"]
 
         drc_client = get_client(task, DRC_ALIAS)
-        drc_client.post("enkelvoudiginformatieobjecten", json=document_properties)
+        document = drc_client.post(
+            "enkelvoudiginformatieobjecten", json=document_properties
+        )
 
         # Notify camunda that the document has been created
-        on_document_created(task)
+        on_document_created(task, document["url"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
