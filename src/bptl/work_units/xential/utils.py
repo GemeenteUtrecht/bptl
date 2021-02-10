@@ -9,6 +9,8 @@ from defusedxml import minidom
 from drf_extra_fields.fields import Base64FileField
 from rest_framework.exceptions import ValidationError
 
+from bptl.tasks.base import MissingVariable
+
 logger = logging.getLogger(__name__)
 
 
@@ -57,3 +59,24 @@ class Base64Document(Base64FileField):
             raise ValidationError(str(exc))
 
         return super().to_internal_value(base64_data)
+
+
+def check_document_api_required_fields(document_properties: dict) -> None:
+    required_fields = [
+        "bronorganisatie",
+        "titel",
+        "auteur",
+        "informatieobjecttype",
+    ]
+
+    missing_fields = []
+    for field_name in required_fields:
+        if field_name not in document_properties:
+            missing_fields.append(field_name)
+
+    if len(missing_fields) > 0:
+        error_message = _(
+            "The Documenten API expects the following properties to be provided: %(variables)s. "
+            "Please add them to the documentMetadata process variable."
+        ) % {"variables": ", ".join(missing_fields)}
+        raise MissingVariable(error_message)

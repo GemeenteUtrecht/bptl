@@ -6,6 +6,7 @@ from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 
 from bptl.camunda.models import ExternalTask
+from bptl.tasks.base import MissingVariable
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
 
@@ -168,3 +169,46 @@ class XentialTaskTests(TestCase):
             "b0fdd542-0cc4-44a1-8dfb-808436123ce8", str(xential_ticket.ticket_uuid)
         )
         self.assertEqual(bptl_ticket_url, result["bptlDocumentUrl"])
+
+    def test_start_template_with_missing_document_properties(self, m):
+        m.post(
+            f"{XENTIAL_API_ROOT}auth/whoami",
+            json={
+                "user": {
+                    "uuid": "a4664ccb-259e-4107-b800-d8e5a764b9dd",
+                    "userName": "testuser",
+                },
+                "XSessionId": "f7f588eb-b7c9-4d23-babd-4a98a9326367",
+            },
+        )
+
+        external_task = ExternalTask.objects.create(
+            topic_name="xential-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "bptlAppId": serialize_variable("some-app-id"),
+                "templateUuid": serialize_variable(
+                    "3e09b238-0617-47c1-8e6a-f6227b3d542e"
+                ),
+                "interactive": serialize_variable("True"),
+                "templateVariables": serialize_variable(
+                    {"textq1": "Answer1", "dateq1": "31-12-20"}
+                ),
+                "documentMetadata": serialize_variable(
+                    {
+                        "bronorganisatie": "517439943",
+                        "creatiedatum": "01-01-2021",
+                        "taal": "eng",
+                        "informatieobjecttype": "http://openzaak.nl/catalogi/api/v1/informatieobjecttypen/06d3a135-bc20-4fce-9add-f69d8e585917",
+                    }
+                ),
+            },
+        )
+
+        expected_error_message = (
+            "The Documenten API expects the following properties to be provided: titel, auteur. "
+            "Please add them to the documentMetadata process variable."
+        )
+        with self.assertRaisesMessage(MissingVariable, expected_error_message):
+            start_xential_template(external_task)

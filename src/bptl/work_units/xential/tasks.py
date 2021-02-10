@@ -12,6 +12,7 @@ from bptl.tasks.registry import register
 
 from .client import XENTIAL_ALIAS, get_client, require_xential_service
 from .models import XentialTicket
+from .utils import check_document_api_required_fields
 
 
 @register
@@ -71,6 +72,8 @@ def start_xential_template(task: BaseTask) -> dict:
     template_uuid = check_variable(variables, "templateUuid")
     template_variables = check_variable(variables, "templateVariables")
     xential_client = get_client(task, XENTIAL_ALIAS)
+
+    check_document_api_required_fields(check_variable(variables, "documentMetadata"))
 
     # Step 1: Create a ticket
     create_ticket_url = "createTicket"
