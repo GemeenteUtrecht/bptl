@@ -6,9 +6,10 @@ Integration
 
 BPTL can automate document creation using Xential templates.
 
-The `bptl.work_units.xential.tasks.start_xential_template` work-unit needs to know the UUID of the template to
+The :func:`bptl.work_units.xential.tasks.start_xential_template` work-unit needs to know the UUID of the template to
 use and whether to build the document interactively (the user fills the empty fields in the template) or
-'silently'. In the latter case, values to fill the template fields also need to be provided to the work-unit.
+'silently'. In the latter case, values to fill the template fields also *need* to be provided to the work-unit.
+For interactive documents, they *may* be provided.
 Once the document is built, Xential sends it to BPTL, who then stores it in the Documenten API.
 
 The workflow for both the interactive and silent document creation is explained in more details below.
