@@ -1,6 +1,7 @@
 import logging
+import warnings
 from concurrent import futures
-from typing import Dict
+from typing import Dict, Optional
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from zgw_consumers.constants import APITypes
@@ -107,6 +108,11 @@ class RelatePand(ZGWWorkUnit):
         return urlunsplit((scheme, netloc, path, query, fragment))
 
     def perform(self) -> dict:
+        warnings.warn(
+            "The `RelatedPand` task is deprected in favour of `CreateZaakObject`. "
+            "It will be removed in 1.0.",
+            DeprecationWarning,
+        )
         # prep client
         zrc_client = self.get_client(APITypes.zrc)
 
@@ -267,14 +273,18 @@ class RelateerZaak(ZGWWorkUnit):
     **Sets no process variables**
     """
 
-    def perform(self) -> dict:
+    def perform(self) -> Optional[dict]:
         # prep clients
         zrc_client = self.get_client(APITypes.zrc)
 
         # get vars
         variables = self.task.get_variables()
 
-        zaak_url = check_variable(variables, "hoofdZaakUrl")
+        zaak_url = variables.get("hoofdZaakUrl")
+        if not zaak_url:
+            logger.info("No 'hoofdZaakUrl' provided, skipping task execution.")
+            return
+
         bijdrage_zaak_url = check_variable(variables, "zaakUrl")
         bijdrage_aard = check_variable(variables, "bijdrageAard")
 

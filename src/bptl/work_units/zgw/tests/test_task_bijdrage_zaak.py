@@ -79,3 +79,23 @@ class RelateerZaakTests(TestCase):
                 ],
             },
         )
+
+    def test_relateer_zaak_no_hoofdzaak(self, m):
+        self.fetched_task.variables["hoofdZaakUrl"] = serialize_variable("")
+        self.fetched_task.save()
+        task = RelateerZaak(self.fetched_task)
+
+        result = task.perform()
+
+        self.assertIsNone(result)
+        self.assertEqual(len(m.request_history), 0)
+
+    def test_relateer_zaak_hoofdzaak_unset(self, m):
+        del self.fetched_task.variables["hoofdZaakUrl"]
+        self.fetched_task.save()
+        task = RelateerZaak(self.fetched_task)
+
+        result = task.perform()
+
+        self.assertIsNone(result)
+        self.assertEqual(len(m.request_history), 0)
