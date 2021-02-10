@@ -1,9 +1,8 @@
 import datetime
 from uuid import UUID
 
-from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.views import View
+from django.views.generic import RedirectView
 
 from rest_framework import status, views
 from rest_framework.request import Request
@@ -52,8 +51,8 @@ class DocumentCreationCallbackView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class InteractiveDocumentView(View):
-    def get(self, request: Request, uuid: UUID) -> HttpResponse:
+class InteractiveDocumentView(RedirectView):
+    def get_redirect_url(self, uuid: UUID, *args, **kwargs) -> str:
         # With the BPTL specific UUID, we can retrieve the Xential ticket ID
         xential_ticket = get_object_or_404(XentialTicket, bptl_ticket_uuid=uuid)
 
@@ -70,4 +69,4 @@ class InteractiveDocumentView(View):
         xential_url = xential_base_url + response_data["resumeUrl"]
 
         # Redirect the user to the Xential URL to interactively create a document
-        return HttpResponseRedirect(redirect_to=xential_url)
+        return xential_url
