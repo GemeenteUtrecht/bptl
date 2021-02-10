@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from zgw_consumers.constants import APITypes
 
@@ -36,10 +37,14 @@ class CreateRolTask(ZGWWorkUnit):
     * ``rolUrl``: the full URL of the created ROL
     """
 
-    def create_rol(self) -> dict:
+    def create_rol(self) -> Optional[dict]:
         variables = self.task.get_variables()
         betrokkene = check_variable(variables, "betrokkene")
-        omschrijving = check_variable(variables, "omschrijving")
+        omschrijving = check_variable(variables, "omschrijving", empty_allowed=True)
+
+        if not omschrijving:
+            logger.info("Received empty rol-omschrijving process variable, skipping.")
+            return
 
         zrc_client = self.get_client(APITypes.zrc)
         zaak_url = check_variable(variables, "zaakUrl")
@@ -75,6 +80,8 @@ class CreateRolTask(ZGWWorkUnit):
         )
         return rol
 
-    def perform(self):
+    def perform(self) -> Optional[dict]:
         rol = self.create_rol()
+        if rol is None:
+            return None
         return {"rolUrl": rol["url"]}
