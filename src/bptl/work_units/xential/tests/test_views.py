@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.test import TestCase
@@ -5,6 +6,7 @@ from django.urls import reverse_lazy
 
 import requests_mock
 from django_camunda.utils import serialize_variable
+from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
@@ -210,6 +212,84 @@ class XentialCallbackTest(APITestCase):
         )
 
         callback_response = self.client.post(self.endpoint, data=xential_response)
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
+
+    @freeze_time("2021-02-10")
+    def test_callback_default_document_data(self, m):
+        xential_response = self._get_sample_response("xential-response.xml")
+
+        bptl_ticket_uuid = "9c132492-6c7c-4c34-af9d-16322dff89cc"
+        ticket_uuid = "2d30f19b-8666-4f45-a8da-78ad7ed0ef4d"
+
+        # Setting up DRC service
+        mapping = TaskMapping.objects.create(
+            topic_name="xential-topic",
+        )
+
+        drc = Service.objects.create(
+            label="Documenten API",
+            api_type=APITypes.drc,
+            api_root=DRC_ROOT,
+            auth_type=AuthTypes.api_key,
+            oas="",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service=drc,
+            alias="DRC",
+        )
+
+        external_task = ExternalTask.objects.create(
+            topic_name="xential-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "bptlAppId": serialize_variable("some-app-id"),
+                "templateUuid": serialize_variable(
+                    "3e09b238-0617-47c1-8e6a-f6227b3d542e"
+                ),
+                "interactive": serialize_variable(False),
+                "templateVariables": serialize_variable(
+                    {"textq1": "Answer1", "dateq1": "31-12-20"}
+                ),
+                "documentMetadata": serialize_variable(
+                    {
+                        "bronorganisatie": "517439943",
+                        "titel": "Test Document",
+                        "auteur": "Test Author",
+                        "informatieobjecttype": "http://openzaak.nl/catalogi/api/v1/informatieobjecttypen/06d3a135-bc20-4fce-9add-f69d8e585917",
+                    }
+                ),
+            },
+        )
+
+        # Mock calls
+        m.post(
+            "https://openzaak.nl/documenten/api/v1/enkelvoudiginformatieobjecten",
+            json={
+                "identificatie": "DOCUMENT-0001",
+                "url": "https://openzaak.nl/documenten/api/v1/enkelvoudiginformatieobjecten/15f4c2e8-f900-4fd1-8f31-44163d369c93",
+                "bronorganisatie": "517439943",
+                "creatiedatum": "2021-02-10",
+                "titel": "Test Document",
+                "auteur": "Test Author",
+                "taal": "nld",
+                "informatieobjecttype": "http://openzaak.nl/catalogi/api/v1/informatieobjecttypen/06d3a135-bc20-4fce-9add-f69d8e585917",
+            },
+        )
+
+        XentialTicket.objects.create(
+            task=external_task,
+            bptl_ticket_uuid=bptl_ticket_uuid,
+            ticket_uuid=ticket_uuid,
+        )
+
+        callback_response = self.client.post(self.endpoint, data=xential_response)
+
+        document_data_posted = json.loads(m.request_history[0].text)
+        self.assertEqual("2021-02-10", document_data_posted["creatiedatum"])
+        self.assertEqual("nld", document_data_posted["taal"])
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
 
