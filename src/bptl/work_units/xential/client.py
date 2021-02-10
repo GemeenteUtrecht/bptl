@@ -2,7 +2,7 @@
 Implements a Xential client.
 """
 import logging
-from typing import List
+from typing import Dict, List
 
 from django.utils.translation import gettext_lazy as _
 
@@ -33,10 +33,31 @@ require_drc_service = register.require_service(
 )
 
 
+class XentialClient(JSONClient):
+    def __init__(self, service: Service, auth_header: Dict[str, str]):
+        super().__init__(service, auth_header)
+
+        self.cookie_header = self.set_cookie_header()
+
+    def set_cookie_header(self) -> str:
+        xsession_id_url = "auth/whoami"
+        response_data = self.request("post", xsession_id_url, use_cookie_header=False)
+        return f"XSessionID={response_data['XSessionId']}"
+
+    def request(self, method: str, path: str, use_cookie_header=True, **kwargs):
+        if use_cookie_header:
+            headers = kwargs.pop("headers", {})
+            headers.setdefault("Cookie", self.cookie_header)
+            kwargs["headers"] = headers
+
+        return super().request(method, path, **kwargs)
+
+
 def get_client(task: BaseTask, alias: str) -> "JSONClient":
+    client_classes = {XENTIAL_ALIAS: XentialClient}
     # get the service and credentials
     service = get_alias_service(task, alias)
-    return _get_client(task, service)
+    return _get_client(task, service, cls=client_classes.get(alias))
 
 
 def get_default_clients(alias: str) -> List["JSONClient"]:

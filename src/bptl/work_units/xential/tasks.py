@@ -72,12 +72,7 @@ def start_xential_template(task: BaseTask) -> dict:
     template_variables = check_variable(variables, "templateVariables")
     xential_client = get_client(task, XENTIAL_ALIAS)
 
-    # Step 1: Retrieve XSessionID
-    xsession_id_url = "auth/whoami"
-    response_data = xential_client.post(xsession_id_url)
-    headers = {"Cookie": f"XSessionID={response_data['XSessionId']}"}
-
-    # Step 2: Create a ticket
+    # Step 1: Create a ticket
     create_ticket_url = "createTicket"
 
     # Make a bptl UUID for this ticket, so that later the task can be retrieved
@@ -115,7 +110,6 @@ def start_xential_template(task: BaseTask) -> dict:
 
     response_data = xential_client.post(
         create_ticket_url,
-        headers=headers,
         files={
             "options": ("options", json.dumps(options), "application/json"),
             "ticketData": ("ticketData", ticket_data, "text/xml"),
@@ -130,18 +124,18 @@ def start_xential_template(task: BaseTask) -> dict:
     )
 
     if not interactive:
-        # Step 3: Start a document
+        # Step 2: Start a document
         start_document_url = "document/startDocument"
         response_data = xential_client.post(
-            start_document_url, headers=headers, params={"ticketUuid": ticket_uuid}
+            start_document_url, params={"ticketUuid": ticket_uuid}
         )
         document_uuid = response_data["documentUuid"]
 
-        # Step 4: Build document silently
+        # Step 3: Build document silently
         # If not all template variables are filled, building the document will not work.
         build_document_url = "document/buildDocument"
         params = {"documentUuid": document_uuid}
-        xential_client.post(build_document_url, params=params, headers=headers)
+        xential_client.post(build_document_url, params=params)
 
         return {"bptlDocumentUrl": ""}
 

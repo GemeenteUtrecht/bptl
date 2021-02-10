@@ -59,16 +59,10 @@ class InteractiveDocumentView(View):
 
         xential_client = get_client(xential_ticket.task, XENTIAL_ALIAS)
 
-        # Step 1: Retrieve XSessionID
-        xsession_id_url = "auth/whoami"
-        response_data = xential_client.post(xsession_id_url)
-        headers = {"Cookie": f"XSessionID={response_data['XSessionId']}"}
-
-        # Step 2: Start document with existing ticket ID
+        # Start document with existing ticket ID
         start_document_url = "document/startDocument"
         response_data = xential_client.post(
             start_document_url,
-            headers=headers,
             params={"ticketUuid": xential_ticket.ticket_uuid},
         )
 
