@@ -21,4 +21,4 @@ class XentialTicket(models.Model):
         verbose_name_plural = _("Xential Tickets")
 
     def __str__(self):
-        return self.bptl_ticket_uuid
+        return str(self.bptl_ticket_uuid)
