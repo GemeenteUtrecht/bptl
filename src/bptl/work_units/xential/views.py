@@ -15,17 +15,16 @@ from bptl.work_units.xential.serializers import CallbackDataSerializer
 from ...tasks.base import check_variable
 from .client import DRC_ALIAS, XENTIAL_ALIAS, get_client
 from .handlers import on_document_created
-from .utils import get_xential_base_url, parse_xml
+from .utils import SnakeXMLParser, get_xential_base_url
 
 
 class DocumentCreationCallbackView(views.APIView):
     permission_classes = []
+    parser_classes = [SnakeXMLParser]
 
     def post(self, request: Request) -> Response:
         # The callback sends the base64 encoded document and the BPTL ticket ID as XML.
-        callback_data = parse_xml(request.data)
-
-        serializer = CallbackDataSerializer(data=callback_data)
+        serializer = CallbackDataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         bptl_ticket_uuid = serializer.validated_data["bptl_ticket_uuid"]

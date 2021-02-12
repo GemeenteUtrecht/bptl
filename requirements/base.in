@@ -34,6 +34,7 @@ djangorestframework-camel-case
 # django-extra-fields
 # django-filter
 drf-yasg  # api documentation
+djangorestframework-xml
 
 # WSGI servers & monitoring - production oriented
 uwsgi

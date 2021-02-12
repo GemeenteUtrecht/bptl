@@ -5,26 +5,14 @@ from urllib.parse import urlparse
 
 from django.utils.translation import gettext_lazy as _
 
-from defusedxml import minidom
+from djangorestframework_camel_case.util import underscoreize
 from drf_extra_fields.fields import Base64FileField
 from rest_framework.exceptions import ValidationError
+from rest_framework_xml.parsers import XMLParser
 
 from bptl.tasks.base import MissingVariable
 
 logger = logging.getLogger(__name__)
-
-
-def parse_xml(raw_xml: str) -> dict:
-    parsed_xml = minidom.parseString(raw_xml)  # minidom from defusedxml
-    extracted_data = {}
-
-    document_node = parsed_xml.getElementsByTagName("document")
-    extracted_data["document"] = document_node[0].firstChild.nodeValue
-
-    ticket_node = parsed_xml.getElementsByTagName("bptlTicketUuid")
-    extracted_data["bptl_ticket_uuid"] = ticket_node[0].firstChild.nodeValue
-
-    return extracted_data
 
 
 def get_xential_base_url(api_root: str) -> str:
@@ -80,3 +68,9 @@ def check_document_api_required_fields(document_properties: dict) -> None:
             "Please add them to the documentMetadata process variable."
         ) % {"variables": ", ".join(missing_fields)}
         raise MissingVariable(error_message)
+
+
+class SnakeXMLParser(XMLParser):
+    def parse(self, stream, media_type=None, parser_context=None):
+        camel_data = super().parse(stream, media_type, parser_context)
+        return underscoreize(camel_data)

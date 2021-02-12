@@ -100,7 +100,7 @@ def start_xential_template(task: BaseTask) -> dict:
                         "url": get_absolute_url(reverse("Xential:xential-callbacks")),
                         "method": "POST",
                         "headers": [],
-                        "contentType": "application/json",
+                        "contentType": "application/xml",
                         "requestBody": f'<data xmlns:sup="nl.inext.statusupdates"><document><sup:param name="documentData"/></document><bptlTicketUuid>{bptl_ticket_uuid}</bptlTicketUuid></data>',
                         "clientCertificateId": "xentiallabs",
                     },

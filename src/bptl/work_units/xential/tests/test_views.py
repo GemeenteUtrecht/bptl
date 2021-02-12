@@ -221,7 +221,9 @@ class XentialCallbackTest(APITestCase):
             ticket_uuid=ticket_uuid,
         )
 
-        callback_response = self.client.post(self.endpoint, data=xential_response)
+        callback_response = self.client.post(
+            self.endpoint, data=xential_response, content_type="application/xml"
+        )
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
 
@@ -295,7 +297,9 @@ class XentialCallbackTest(APITestCase):
             ticket_uuid=ticket_uuid,
         )
 
-        callback_response = self.client.post(self.endpoint, data=xential_response)
+        callback_response = self.client.post(
+            self.endpoint, data=xential_response, content_type="application/xml"
+        )
 
         document_data_posted = json.loads(m.request_history[0].text)
         self.assertEqual("2021-02-10", document_data_posted["creatiedatum"])
@@ -380,7 +384,9 @@ class XentialCallbackTest(APITestCase):
             ticket_uuid=ticket_uuid,
         )
 
-        callback_response = self.client.post(self.endpoint, data=xential_response)
+        callback_response = self.client.post(
+            self.endpoint, data=xential_response, content_type="application/xml"
+        )
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
 
@@ -458,14 +464,18 @@ class XentialCallbackTest(APITestCase):
             ticket_uuid=ticket_uuid,
         )
 
-        callback_response = self.client.post(self.endpoint, data=xential_response)
+        callback_response = self.client.post(
+            self.endpoint, data=xential_response, content_type="application/xml"
+        )
 
         self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
 
     def test_callback_document_not_b64(self, m):
         xential_response = self._get_sample_response("xential-wrong-doc.xml")
 
-        callback_response = self.client.post(self.endpoint, data=xential_response)
+        callback_response = self.client.post(
+            self.endpoint, data=xential_response, content_type="application/xml"
+        )
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, callback_response.status_code)
         self.assertIn("document", callback_response.data)
