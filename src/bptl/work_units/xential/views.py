@@ -5,7 +5,7 @@ from uuid import UUID
 from django.shortcuts import get_object_or_404
 from django.views.generic import RedirectView
 
-from rest_framework import status, views
+from rest_framework import permissions, status, views
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -13,13 +13,15 @@ from bptl.work_units.xential.models import XentialTicket
 from bptl.work_units.xential.serializers import CallbackDataSerializer
 
 from ...tasks.base import check_variable
+from .authentication import XentialAuthentication
 from .client import DRC_ALIAS, XENTIAL_ALIAS, get_client
 from .handlers import on_document_created
 from .utils import SnakeXMLParser, get_xential_base_url
 
 
 class DocumentCreationCallbackView(views.APIView):
-    permission_classes = []
+    authentication_classes = (XentialAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
     parser_classes = [SnakeXMLParser]
 
     def post(self, request: Request) -> Response:

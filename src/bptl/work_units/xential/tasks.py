@@ -11,7 +11,7 @@ from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
 from .client import XENTIAL_ALIAS, get_client, require_xential_service
-from .models import XentialTicket
+from .models import XentialConfiguration, XentialTicket
 from .utils import check_document_api_required_fields
 
 
@@ -83,6 +83,7 @@ def start_xential_template(task: BaseTask) -> dict:
 
     # The `options` parameter needs *all* fields filled (even if empty), otherwise
     # a 500 response is given.
+    config = XentialConfiguration.get_solo()
     options = {
         "printOption": {},
         "mailOption": {},
@@ -99,10 +100,14 @@ def start_xential_template(task: BaseTask) -> dict:
                     "request": {
                         "url": get_absolute_url(reverse("Xential:xential-callbacks")),
                         "method": "POST",
-                        "headers": [],
                         "contentType": "application/xml",
+                        "headers": [
+                            {
+                                "name": "Authorization",
+                                "value": f"Basic {config.auth_key}",
+                            }
+                        ],
                         "requestBody": f'<data xmlns:sup="nl.inext.statusupdates"><document><sup:param name="documentData"/></document><bptlTicketUuid>{bptl_ticket_uuid}</bptlTicketUuid></data>',
-                        "clientCertificateId": "xentiallabs",
                     },
                 }
             ]
