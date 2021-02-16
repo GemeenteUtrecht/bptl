@@ -12,6 +12,7 @@ from bptl.tasks.registry import register
 
 from .client import XENTIAL_ALIAS, get_client, require_xential_service
 from .models import XentialConfiguration, XentialTicket
+from .tokens import token_generator
 from .utils import check_document_api_required_fields
 
 
@@ -125,10 +126,11 @@ def start_xential_template(task: BaseTask) -> dict:
     )
     ticket_uuid = response_data["ticketId"]
 
-    XentialTicket.objects.create(
+    ticket = XentialTicket.objects.create(
         task=task,
         bptl_ticket_uuid=bptl_ticket_uuid,
         ticket_uuid=ticket_uuid,
+        is_ticket_complete=False,
     )
 
     if not interactive:
@@ -147,8 +149,9 @@ def start_xential_template(task: BaseTask) -> dict:
 
         return {"bptlDocumentUrl": ""}
 
+    token = token_generator.make_token(ticket)
     interactive_document_path = reverse(
-        "Xential:interactive-document", args=[bptl_ticket_uuid]
+        "Xential:interactive-document", args=[bptl_ticket_uuid, token]
     )
 
     return {"bptlDocumentUrl": get_absolute_url(interactive_document_path)}

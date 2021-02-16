@@ -20,6 +20,11 @@ class XentialTicket(models.Model):
         _("Xential ticket UUID"), help_text=_("Xential ticket UUID")
     )
     task = models.ForeignKey("tasks.BaseTask", on_delete=models.PROTECT)
+    is_ticket_complete = models.BooleanField(
+        verbose_name=_("Ticket complete"),
+        help_text=_("Indicates whether the document was built in Xential."),
+        default=False,
+    )
 
     class Meta:
         verbose_name = _("Xential Ticket")
