@@ -147,6 +147,9 @@ def start_xential_template(task: BaseTask) -> dict:
         params = {"documentUuid": document_uuid}
         xential_client.post(build_document_url, params=params)
 
+        ticket.document_uuid = document_uuid
+        ticket.save()
+
         return {"bptlDocumentUrl": ""}
 
     token = token_generator.make_token(ticket)

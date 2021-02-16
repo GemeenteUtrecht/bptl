@@ -82,6 +82,11 @@ class InteractiveDocumentView(RedirectView):
             params={"ticketUuid": xential_ticket.ticket_uuid},
         )
 
+        # Save the document ID so that the status of the build can
+        # be checked with the Celery beat task.
+        xential_ticket.document_uuid = response_data["documentUuid"]
+        xential_ticket.save()
+
         xential_base_url = get_xential_base_url(xential_client.api_root)
         xential_url = xential_base_url + response_data["resumeUrl"]
 
