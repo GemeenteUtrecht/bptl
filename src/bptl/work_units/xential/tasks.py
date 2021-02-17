@@ -196,10 +196,12 @@ def task_check_failed_document_builds():
     )
 
     for ticket in open_tickets:
-        check_xential_document_status(ticket)
+        check_xential_document_status.delay(str(ticket.bptl_ticket_uuid))
 
 
-def check_xential_document_status(xential_ticket: XentialTicket) -> None:
+@app.task
+def check_xential_document_status(ticket_uuid: str) -> None:
+    xential_ticket = XentialTicket.objects.get(bptl_ticket_uuid=ticket_uuid)
     task = xential_ticket.task
     xential_client = get_client(task, XENTIAL_ALIAS)
 
