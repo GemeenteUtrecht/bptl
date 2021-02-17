@@ -44,3 +44,15 @@ The interactive creation of a document involves more steps:
 * When the user navigates to the BPTL URL, BPTL starts the procedure to create a document. Like in the silent case, Xential returns the document UUID as well as a URL that can be used for interactively building the document. This URL expires after 15 min. BPTL redirects the user to the Xential URL.
 * Once the user has finished filling in the template and builds the document, Xential sends the document to the BPTL webhook.
 * BPTL sends the document to the Documenten API. Depending on the configuration, it can send a message to camunda to resume execution.
+
+Failures
+--------
+
+A periodic task is configured to run every 12 hours to check for Xential errors.
+
+Xential has an endpoint that can be queried to check the status of a particular document build. For both interactive
+and silent document creation, if an error occurs during the document build Xential changes the status of the document
+from ``NONE`` to ``ERROR``.
+
+The periodic task in BPTL looks for all open tickets with an associated document UUID. It then requests the status of
+each document from Xential. If any document has an ``ERROR`` status, the BPTL task is marked as failed.
