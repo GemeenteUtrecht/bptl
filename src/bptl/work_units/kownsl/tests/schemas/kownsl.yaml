@@ -1,29 +1,41 @@
-openapi: 3.0.2
+openapi: 3.0.3
 info:
-  title: Kownsl - manage advices and approvals
-  version: 1.0.0
-  description: "\nKownsl facilitates requesting advices/approvals in case management\n\
-    (\"Zaakgericht werken\").\n\nThis API provides an interface for other applications\
-    \ to register advice/approval\nrequests for a given ZAAK.\n\nThe frontend will\
-    \ then register the advices/approvals from end-users, and this data\ncan be retrieved\
-    \ again by the original application for reporting/display.\n\nThis API will require\
-    \ authentication using a token obtained from an administrator.\n\nUse it in the\
-    \ `Authorization` header:\n\n    Authorization: Token <token value>\n\n"
+  title: Kownsl - advices and approvals
+  version: 0.1.0
+  description: |2
+
+    Manage case-oriented advices and approvals.
+
+    Kownsl allows you to store review requests on a case with (a subset of) its documents,
+    and present the review requests to assignees. The advice or approval from reviewers
+    is subsequently again stored in Kownsl.
+
+    This component publishes notifications on the `kownsl` channel.
+  contact:
+    url: https://github.com/GemeenteUtrecht/kownsl
+  license:
+    name: UNLICENSED
 paths:
   /api/v1/review-requests:
     get:
-      operationId: reviewrequest_list
-      description: 'CRUD operations on review requests.
+      operationId: review_requests_list
+      description: |-
+        CRUD operations on review requests.
 
-
-        Note that the list endpoint _requires_ a filter parameter.'
+        Note that the list endpoint _requires_ a filter parameter.
+      summary: List review requests
       parameters:
-      - name: for_zaak
-        required: false
-        in: query
-        description: for_zaak
+      - in: query
+        name: for_zaak
         schema:
           type: string
+          format: uri
+        description: URL reference to the zaak in the API.
+      tags:
+      - review-requests
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
       responses:
         '200':
           content:
@@ -31,1559 +43,911 @@ paths:
               schema:
                 type: array
                 items:
-                  properties:
-                    created:
-                      type: string
-                      format: date-time
-                      readOnly: true
-                    id:
-                      type: string
-                      format: uuid
-                      readOnly: true
-                    for_zaak:
-                      type: string
-                      format: uri
-                      description: URL reference to the zaak in the API.
-                      maxLength: 1000
-                      pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                        d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                        [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                        -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                        .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                        .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                    review_type:
-                      enum:
-                      - advice
-                      - approval
-                    documents:
-                      type: array
-                      items:
-                        type: string
-                        format: uri
-                    frontend_url:
-                      type: string
-                      readOnly: true
-                      description: The frontend URL for reviewers to submit their
-                        review.
-                    num_advices:
-                      type: integer
-                      readOnly: true
-                      description: The number of advices registered for this request.
-                    num_approvals:
-                      type: integer
-                      readOnly: true
-                      description: The number of approvals registered for this request.
-                        Note that does not mean they are all positive approvals -
-                        this includes the rejections.
-                    num_assigned_users:
-                      type: integer
-                      maximum: 32767
-                      minimum: 0
-                    toelichting:
-                      type: string
-                    user_deadlines:
-                      type: object
-                    requester:
-                      type: string
-                      description: Username of user who requested review request
-                      maxLength: 100
-                    metadata:
-                      type: object
-                      description: Metadata that may be relevant for the process.
-                    zaak_documents:
-                      type: string
-                      readOnly: true
-                      description: The documents with their download url and relevant
-                        metadata.
-                    reviews:
-                      type: string
-                      readOnly: true
-                      description: Previous advices or approvals.
-                  required:
-                  - for_zaak
-                  - review_type
+                  $ref: '#/components/schemas/ReviewRequest'
           description: ''
     post:
-      operationId: reviewrequest_create
-      description: 'CRUD operations on review requests.
+      operationId: review_requests_create
+      description: |-
+        CRUD operations on review requests.
 
-
-        Note that the list endpoint _requires_ a filter parameter.'
-      parameters: []
+        Note that the list endpoint _requires_ a filter parameter.
+      summary: Create a review request
+      tags:
+      - review-requests
       requestBody:
         content:
           application/json:
-            schema: &id001
-              properties:
-                for_zaak:
-                  type: string
-                  format: uri
-                  description: URL reference to the zaak in the API.
-                  maxLength: 1000
-                  pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                    d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                    [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                    -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
-                    -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
-                    d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                review_type:
-                  enum:
-                  - advice
-                  - approval
-                documents:
-                  type: array
-                  items:
-                    type: string
-                    format: uri
-                num_assigned_users:
-                  type: integer
-                  maximum: 32767
-                  minimum: 0
-                toelichting:
-                  type: string
-                user_deadlines:
-                  type: object
-                requester:
-                  type: string
-                  description: Username of user who requested review request
-                  maxLength: 100
-                metadata:
-                  type: object
-                  description: Metadata that may be relevant for the process.
-              required:
-              - for_zaak
-              - review_type
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
           application/x-www-form-urlencoded:
-            schema: *id001
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
           multipart/form-data:
-            schema: *id001
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+        required: true
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewRequest'
+          description: ''
+  /api/v1/review-requests/{request__uuid}/advices:
+    get:
+      operationId: review_requests_advices_list
+      description: |-
+        Manage advices for a given review request.
+
+        Advices can only be created if the end-user has not submitted an advice yet and they
+        are listed in the user deadlines.
+      summary: List advices
+      parameters:
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - advices
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  for_zaak:
-                    type: string
-                    format: uri
-                    description: URL reference to the zaak in the API.
-                    maxLength: 1000
-                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                  review_type:
-                    enum:
-                    - advice
-                    - approval
-                  documents:
-                    type: array
-                    items:
-                      type: string
-                      format: uri
-                  frontend_url:
-                    type: string
-                    readOnly: true
-                    description: The frontend URL for reviewers to submit their review.
-                  num_advices:
-                    type: integer
-                    readOnly: true
-                    description: The number of advices registered for this request.
-                  num_approvals:
-                    type: integer
-                    readOnly: true
-                    description: The number of approvals registered for this request.
-                      Note that does not mean they are all positive approvals - this
-                      includes the rejections.
-                  num_assigned_users:
-                    type: integer
-                    maximum: 32767
-                    minimum: 0
-                  toelichting:
-                    type: string
-                  user_deadlines:
-                    type: object
-                  requester:
-                    type: string
-                    description: Username of user who requested review request
-                    maxLength: 100
-                  metadata:
-                    type: object
-                    description: Metadata that may be relevant for the process.
-                  zaak_documents:
-                    type: string
-                    readOnly: true
-                    description: The documents with their download url and relevant
-                      metadata.
-                  reviews:
-                    type: string
-                    readOnly: true
-                    description: Previous advices or approvals.
-                required:
-                - for_zaak
-                - review_type
+                type: array
+                items:
+                  $ref: '#/components/schemas/Advice'
           description: ''
+    post:
+      operationId: review_requests_advices_create
+      description: |-
+        Manage advices for a given review request.
+
+        Advices can only be created if the end-user has not submitted an advice yet and they
+        are listed in the user deadlines.
+      summary: Register an advice
+      parameters:
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - advices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Advice'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Advice'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Advice'
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Advice'
+          description: ''
+  /api/v1/review-requests/{request__uuid}/advices/{id}:
+    get:
+      operationId: review_requests_advices_retrieve
+      description: |-
+        Manage advices for a given review request.
+
+        Advices can only be created if the end-user has not submitted an advice yet and they
+        are listed in the user deadlines.
+      summary: Retrieve advice details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this advies.
+        required: true
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - advices
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Advice'
+          description: ''
+    put:
+      operationId: review_requests_advices_update
+      description: |-
+        Manage advices for a given review request.
+
+        Advices can only be created if the end-user has not submitted an advice yet and they
+        are listed in the user deadlines.
+      summary: Replace an advice
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this advies.
+        required: true
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - advices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Advice'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Advice'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Advice'
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Advice'
+          description: ''
+    patch:
+      operationId: review_requests_advices_partial_update
+      description: |-
+        Manage advices for a given review request.
+
+        Advices can only be created if the end-user has not submitted an advice yet and they
+        are listed in the user deadlines.
+      summary: Update an advice
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this advies.
+        required: true
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - advices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdvice'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdvice'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdvice'
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Advice'
+          description: ''
+    delete:
+      operationId: review_requests_advices_destroy
+      description: |-
+        Manage advices for a given review request.
+
+        Advices can only be created if the end-user has not submitted an advice yet and they
+        are listed in the user deadlines.
+      summary: Destroy an advice
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this advies.
+        required: true
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - advices
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/review-requests/{request__uuid}/approvals:
+    get:
+      operationId: review_requests_approvals_list
+      description: |-
+        Manage approvals for a given review request.
+
+        Approvals can only be created if the end-user has not submitted an approval yet and
+        they are listed in the user deadlines.
+      summary: List approvals
+      parameters:
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - approvals
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Approval'
+          description: ''
+    post:
+      operationId: review_requests_approvals_create
+      description: |-
+        Manage approvals for a given review request.
+
+        Approvals can only be created if the end-user has not submitted an approval yet and
+        they are listed in the user deadlines.
+      summary: Register an approval
+      parameters:
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - approvals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Approval'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Approval'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Approval'
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+          description: ''
+  /api/v1/review-requests/{request__uuid}/approvals/{id}:
+    get:
+      operationId: review_requests_approvals_retrieve
+      description: |-
+        Manage approvals for a given review request.
+
+        Approvals can only be created if the end-user has not submitted an approval yet and
+        they are listed in the user deadlines.
+      summary: Retrieve approval details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this accordering.
+        required: true
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - approvals
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+          description: ''
+    put:
+      operationId: review_requests_approvals_update
+      description: |-
+        Manage approvals for a given review request.
+
+        Approvals can only be created if the end-user has not submitted an approval yet and
+        they are listed in the user deadlines.
+      summary: Replace an approval
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this accordering.
+        required: true
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - approvals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Approval'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Approval'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Approval'
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+          description: ''
+    patch:
+      operationId: review_requests_approvals_partial_update
+      description: |-
+        Manage approvals for a given review request.
+
+        Approvals can only be created if the end-user has not submitted an approval yet and
+        they are listed in the user deadlines.
+      summary: Update an approval
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this accordering.
+        required: true
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - approvals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedApproval'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedApproval'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedApproval'
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+          description: ''
+    delete:
+      operationId: review_requests_approvals_destroy
+      description: |-
+        Manage approvals for a given review request.
+
+        Approvals can only be created if the end-user has not submitted an approval yet and
+        they are listed in the user deadlines.
+      summary: Destroy an approval
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this accordering.
+        required: true
+      - in: path
+        name: request__uuid
+        schema:
+          type: string
+          format: uuid
+        description: ID of the parent review request.
+        required: true
+      tags:
+      - approvals
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/review-requests/{uuid}:
     get:
-      operationId: reviewrequest_retrieve
-      description: 'CRUD operations on review requests.
+      operationId: review_requests_retrieve
+      description: |-
+        CRUD operations on review requests.
 
-
-        Note that the list endpoint _requires_ a filter parameter.'
+        Note that the list endpoint _requires_ a filter parameter.
+      summary: Retrieve review request details
       parameters:
-      - name: uuid
-        in: path
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
         required: true
-        description: ''
-        schema:
-          type: string
-      - name: for_zaak
-        required: false
-        in: query
-        description: for_zaak
-        schema:
-          type: string
+      tags:
+      - review-requests
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  for_zaak:
-                    type: string
-                    format: uri
-                    description: URL reference to the zaak in the API.
-                    maxLength: 1000
-                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                  review_type:
-                    enum:
-                    - advice
-                    - approval
-                  documents:
-                    type: array
-                    items:
-                      type: string
-                      format: uri
-                  frontend_url:
-                    type: string
-                    readOnly: true
-                    description: The frontend URL for reviewers to submit their review.
-                  num_advices:
-                    type: integer
-                    readOnly: true
-                    description: The number of advices registered for this request.
-                  num_approvals:
-                    type: integer
-                    readOnly: true
-                    description: The number of approvals registered for this request.
-                      Note that does not mean they are all positive approvals - this
-                      includes the rejections.
-                  num_assigned_users:
-                    type: integer
-                    maximum: 32767
-                    minimum: 0
-                  toelichting:
-                    type: string
-                  user_deadlines:
-                    type: object
-                  requester:
-                    type: string
-                    description: Username of user who requested review request
-                    maxLength: 100
-                  metadata:
-                    type: object
-                    description: Metadata that may be relevant for the process.
-                  zaak_documents:
-                    type: string
-                    readOnly: true
-                    description: The documents with their download url and relevant
-                      metadata.
-                  reviews:
-                    type: string
-                    readOnly: true
-                    description: Previous advices or approvals.
-                required:
-                - for_zaak
-                - review_type
+                $ref: '#/components/schemas/ReviewRequest'
           description: ''
     put:
-      operationId: reviewrequest_update
-      description: 'CRUD operations on review requests.
+      operationId: review_requests_update
+      description: |-
+        CRUD operations on review requests.
 
-
-        Note that the list endpoint _requires_ a filter parameter.'
+        Note that the list endpoint _requires_ a filter parameter.
+      summary: Replace a review request
       parameters:
-      - name: uuid
-        in: path
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
         required: true
-        description: ''
-        schema:
-          type: string
-      - name: for_zaak
-        required: false
-        in: query
-        description: for_zaak
-        schema:
-          type: string
+      tags:
+      - review-requests
       requestBody:
         content:
           application/json:
-            schema: &id002
-              properties:
-                for_zaak:
-                  type: string
-                  format: uri
-                  description: URL reference to the zaak in the API.
-                  maxLength: 1000
-                  pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                    d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                    [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                    -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
-                    -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
-                    d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                review_type:
-                  enum:
-                  - advice
-                  - approval
-                documents:
-                  type: array
-                  items:
-                    type: string
-                    format: uri
-                num_assigned_users:
-                  type: integer
-                  maximum: 32767
-                  minimum: 0
-                toelichting:
-                  type: string
-                user_deadlines:
-                  type: object
-                requester:
-                  type: string
-                  description: Username of user who requested review request
-                  maxLength: 100
-                metadata:
-                  type: object
-                  description: Metadata that may be relevant for the process.
-              required:
-              - for_zaak
-              - review_type
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
           application/x-www-form-urlencoded:
-            schema: *id002
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
           multipart/form-data:
-            schema: *id002
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+        required: true
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  for_zaak:
-                    type: string
-                    format: uri
-                    description: URL reference to the zaak in the API.
-                    maxLength: 1000
-                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                  review_type:
-                    enum:
-                    - advice
-                    - approval
-                  documents:
-                    type: array
-                    items:
-                      type: string
-                      format: uri
-                  frontend_url:
-                    type: string
-                    readOnly: true
-                    description: The frontend URL for reviewers to submit their review.
-                  num_advices:
-                    type: integer
-                    readOnly: true
-                    description: The number of advices registered for this request.
-                  num_approvals:
-                    type: integer
-                    readOnly: true
-                    description: The number of approvals registered for this request.
-                      Note that does not mean they are all positive approvals - this
-                      includes the rejections.
-                  num_assigned_users:
-                    type: integer
-                    maximum: 32767
-                    minimum: 0
-                  toelichting:
-                    type: string
-                  user_deadlines:
-                    type: object
-                  requester:
-                    type: string
-                    description: Username of user who requested review request
-                    maxLength: 100
-                  metadata:
-                    type: object
-                    description: Metadata that may be relevant for the process.
-                  zaak_documents:
-                    type: string
-                    readOnly: true
-                    description: The documents with their download url and relevant
-                      metadata.
-                  reviews:
-                    type: string
-                    readOnly: true
-                    description: Previous advices or approvals.
-                required:
-                - for_zaak
-                - review_type
+                $ref: '#/components/schemas/ReviewRequest'
           description: ''
     patch:
-      operationId: reviewrequest_partial_update
-      description: 'CRUD operations on review requests.
+      operationId: review_requests_partial_update
+      description: |-
+        CRUD operations on review requests.
 
-
-        Note that the list endpoint _requires_ a filter parameter.'
+        Note that the list endpoint _requires_ a filter parameter.
+      summary: Update a review request
       parameters:
-      - name: uuid
-        in: path
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
         required: true
-        description: ''
-        schema:
-          type: string
-      - name: for_zaak
-        required: false
-        in: query
-        description: for_zaak
-        schema:
-          type: string
+      tags:
+      - review-requests
       requestBody:
         content:
           application/json:
-            schema: &id003
-              properties:
-                for_zaak:
-                  type: string
-                  format: uri
-                  description: URL reference to the zaak in the API.
-                  maxLength: 1000
-                  pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                    d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                    [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                    -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
-                    -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
-                    d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                review_type:
-                  enum:
-                  - advice
-                  - approval
-                documents:
-                  type: array
-                  items:
-                    type: string
-                    format: uri
-                num_assigned_users:
-                  type: integer
-                  maximum: 32767
-                  minimum: 0
-                toelichting:
-                  type: string
-                user_deadlines:
-                  type: object
-                requester:
-                  type: string
-                  description: Username of user who requested review request
-                  maxLength: 100
-                metadata:
-                  type: object
-                  description: Metadata that may be relevant for the process.
+            schema:
+              $ref: '#/components/schemas/PatchedReviewRequest'
           application/x-www-form-urlencoded:
-            schema: *id003
+            schema:
+              $ref: '#/components/schemas/PatchedReviewRequest'
           multipart/form-data:
-            schema: *id003
+            schema:
+              $ref: '#/components/schemas/PatchedReviewRequest'
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  id:
-                    type: string
-                    format: uuid
-                    readOnly: true
-                  for_zaak:
-                    type: string
-                    format: uri
-                    description: URL reference to the zaak in the API.
-                    maxLength: 1000
-                    pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\\
-                      d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\\
-                      [[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                      -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                      .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                      .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                  review_type:
-                    enum:
-                    - advice
-                    - approval
-                  documents:
-                    type: array
-                    items:
-                      type: string
-                      format: uri
-                  frontend_url:
-                    type: string
-                    readOnly: true
-                    description: The frontend URL for reviewers to submit their review.
-                  num_advices:
-                    type: integer
-                    readOnly: true
-                    description: The number of advices registered for this request.
-                  num_approvals:
-                    type: integer
-                    readOnly: true
-                    description: The number of approvals registered for this request.
-                      Note that does not mean they are all positive approvals - this
-                      includes the rejections.
-                  num_assigned_users:
-                    type: integer
-                    maximum: 32767
-                    minimum: 0
-                  toelichting:
-                    type: string
-                  user_deadlines:
-                    type: object
-                  requester:
-                    type: string
-                    description: Username of user who requested review request
-                    maxLength: 100
-                  metadata:
-                    type: object
-                    description: Metadata that may be relevant for the process.
-                  zaak_documents:
-                    type: string
-                    readOnly: true
-                    description: The documents with their download url and relevant
-                      metadata.
-                  reviews:
-                    type: string
-                    readOnly: true
-                    description: Previous advices or approvals.
-                required:
-                - for_zaak
-                - review_type
+                $ref: '#/components/schemas/ReviewRequest'
           description: ''
     delete:
-      operationId: reviewrequest_destroy
-      description: 'CRUD operations on review requests.
+      operationId: review_requests_destroy
+      description: |-
+        CRUD operations on review requests.
 
-
-        Note that the list endpoint _requires_ a filter parameter.'
+        Note that the list endpoint _requires_ a filter parameter.
+      summary: Destroy a review request
       parameters:
-      - name: uuid
-        in: path
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
         required: true
-        description: ''
-        schema:
-          type: string
-      - name: for_zaak
-        required: false
-        in: query
-        description: for_zaak
-        schema:
-          type: string
+      tags:
+      - review-requests
+      security:
+      - ZGWAuthentication: []
+      - tokenAuth: []
       responses:
         '204':
-          description: ''
-  /api/v1/review-requests/{parent_lookup_request__uuid}/approvals:
-    get:
-      operationId: approval_list
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          description: No response body
+components:
+  schemas:
+    Advice:
+      type: object
+      properties:
+        created:
           type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  properties:
-                    created:
-                      type: string
-                      format: date-time
-                      readOnly: true
-                    author:
-                      properties:
-                        username:
-                          type: string
-                          description: Required. 150 characters or fewer.
-                          maxLength: 150
-                        first_name:
-                          type: string
-                          maxLength: 255
-                        last_name:
-                          type: string
-                          maxLength: 255
-                      required:
-                      - username
-                      type: object
-                      readOnly: true
-                      description: Author of the review
-                    approved:
-                      type: boolean
-                      description: Vink dit aan om akkoord te gaan met het/de document(en).
-                    toelichting:
-                      type: string
-                      description: Voeg een toelichting toe aan de accordering.
-          description: ''
-    post:
-      operationId: approval_create
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          format: date-time
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+          description: Author of the review
+        advice:
           type: string
-      requestBody:
+          description: Het inhoudelijke advies
+          maxLength: 1000
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentAdvice'
+          description: (New) versions of documents that were uploaded as part of the
+            advice round.
+      required:
+      - author
+      - created
+    Approval:
+      type: object
+      properties:
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+          description: Author of the review
+        approved:
+          type: boolean
+          description: Vink dit aan om akkoord te gaan met het/de document(en).
+        toelichting:
+          type: string
+          description: Voeg een toelichting toe aan de accordering.
+      required:
+      - author
+      - created
+    DocumentAdvice:
+      type: object
+      properties:
         content:
-          application/json:
-            schema: &id004
-              properties:
-                approved:
-                  type: boolean
-                  description: Vink dit aan om akkoord te gaan met het/de document(en).
-                toelichting:
-                  type: string
-                  description: Voeg een toelichting toe aan de accordering.
-          application/x-www-form-urlencoded:
-            schema: *id004
-          multipart/form-data:
-            schema: *id004
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  author:
-                    properties:
-                      username:
-                        type: string
-                        description: Required. 150 characters or fewer.
-                        maxLength: 150
-                      first_name:
-                        type: string
-                        maxLength: 255
-                      last_name:
-                        type: string
-                        maxLength: 255
-                    required:
-                    - username
-                    type: object
-                    readOnly: true
-                    description: Author of the review
-                  approved:
-                    type: boolean
-                    description: Vink dit aan om akkoord te gaan met het/de document(en).
-                  toelichting:
-                    type: string
-                    description: Voeg een toelichting toe aan de accordering.
-          description: ''
-  /api/v1/review-requests/{parent_lookup_request__uuid}/approvals/{id}:
-    get:
-      operationId: approval_retrieve
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
           type: string
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this accordering.
-        schema:
+          format: binary
+          writeOnly: true
+          description: Content of file
+        size:
+          type: integer
+          writeOnly: true
+          description: Size of file
+          minimum: 0
+        name:
           type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  author:
-                    properties:
-                      username:
-                        type: string
-                        description: Required. 150 characters or fewer.
-                        maxLength: 150
-                      first_name:
-                        type: string
-                        maxLength: 255
-                      last_name:
-                        type: string
-                        maxLength: 255
-                    required:
-                    - username
-                    type: object
-                    readOnly: true
-                    description: Author of the review
-                  approved:
-                    type: boolean
-                    description: Vink dit aan om akkoord te gaan met het/de document(en).
-                  toelichting:
-                    type: string
-                    description: Voeg een toelichting toe aan de accordering.
-          description: ''
-    put:
-      operationId: approval_update
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          writeOnly: true
+          description: Name of file
+        document:
           type: string
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this accordering.
-        schema:
+          format: uri
+          description: URL-referentie naar het brondocument in de Documenten API.
+            Deze mag de 'versie' querystring parameter bevatten.
+          maxLength: 1000
+        editedDocument:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema: &id005
-              properties:
-                approved:
-                  type: boolean
-                  description: Vink dit aan om akkoord te gaan met het/de document(en).
-                toelichting:
-                  type: string
-                  description: Voeg een toelichting toe aan de accordering.
-          application/x-www-form-urlencoded:
-            schema: *id005
-          multipart/form-data:
-            schema: *id005
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  author:
-                    properties:
-                      username:
-                        type: string
-                        description: Required. 150 characters or fewer.
-                        maxLength: 150
-                      first_name:
-                        type: string
-                        maxLength: 255
-                      last_name:
-                        type: string
-                        maxLength: 255
-                    required:
-                    - username
-                    type: object
-                    readOnly: true
-                    description: Author of the review
-                  approved:
-                    type: boolean
-                    description: Vink dit aan om akkoord te gaan met het/de document(en).
-                  toelichting:
-                    type: string
-                    description: Voeg een toelichting toe aan de accordering.
-          description: ''
-    patch:
-      operationId: approval_partial_update
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          format: uri
+          writeOnly: true
+          description: URL reference to Documenten API document, including `?versie=`
+            parameter.
+        sourceVersion:
+          type: integer
+          readOnly: true
+        adviceVersion:
+          type: integer
+          readOnly: true
+      required:
+      - adviceVersion
+      - document
+      - sourceVersion
+    PatchedAdvice:
+      type: object
+      properties:
+        created:
           type: string
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this accordering.
-        schema:
+          format: date-time
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+          description: Author of the review
+        advice:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema: &id006
-              properties:
-                approved:
-                  type: boolean
-                  description: Vink dit aan om akkoord te gaan met het/de document(en).
-                toelichting:
-                  type: string
-                  description: Voeg een toelichting toe aan de accordering.
-          application/x-www-form-urlencoded:
-            schema: *id006
-          multipart/form-data:
-            schema: *id006
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  author:
-                    properties:
-                      username:
-                        type: string
-                        description: Required. 150 characters or fewer.
-                        maxLength: 150
-                      first_name:
-                        type: string
-                        maxLength: 255
-                      last_name:
-                        type: string
-                        maxLength: 255
-                    required:
-                    - username
-                    type: object
-                    readOnly: true
-                    description: Author of the review
-                  approved:
-                    type: boolean
-                    description: Vink dit aan om akkoord te gaan met het/de document(en).
-                  toelichting:
-                    type: string
-                    description: Voeg een toelichting toe aan de accordering.
-          description: ''
-    delete:
-      operationId: approval_destroy
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          description: Het inhoudelijke advies
+          maxLength: 1000
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentAdvice'
+          description: (New) versions of documents that were uploaded as part of the
+            advice round.
+    PatchedApproval:
+      type: object
+      properties:
+        created:
           type: string
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this accordering.
-        schema:
+          format: date-time
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+          description: Author of the review
+        approved:
+          type: boolean
+          description: Vink dit aan om akkoord te gaan met het/de document(en).
+        toelichting:
           type: string
-      responses:
-        '204':
-          description: ''
-  /api/v1/review-requests/{parent_lookup_request__uuid}/advices:
-    get:
-      operationId: advice_list
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          description: Voeg een toelichting toe aan de accordering.
+    PatchedReviewRequest:
+      type: object
+      properties:
+        created:
           type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  properties:
-                    created:
-                      type: string
-                      format: date-time
-                      readOnly: true
-                    author:
-                      properties:
-                        username:
-                          type: string
-                          description: Required. 150 characters or fewer.
-                          maxLength: 150
-                        first_name:
-                          type: string
-                          maxLength: 255
-                        last_name:
-                          type: string
-                          maxLength: 255
-                      required:
-                      - username
-                      type: object
-                      readOnly: true
-                      description: Author of the review
-                    advice:
-                      type: string
-                      description: Het inhoudelijke advies
-                      maxLength: 1000
-                    documents:
-                      type: array
-                      items:
-                        properties:
-                          content:
-                            type: string
-                            format: binary
-                            writeOnly: true
-                            description: Content of file
-                          size:
-                            type: integer
-                            writeOnly: true
-                            description: Size of file
-                            minimum: 0
-                          name:
-                            type: string
-                            writeOnly: true
-                            description: Name of file
-                          document:
-                            type: string
-                            format: uri
-                            description: URL-referentie naar het brondocument in de
-                              Documenten API. Deze mag de 'versie' querystring parameter
-                              bevatten.
-                            maxLength: 1000
-                            pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
-                              s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
-                              .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
-                              .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                              -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                              .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                              .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                          source_version:
-                            type: integer
-                            readOnly: true
-                          advice_version:
-                            type: integer
-                            readOnly: true
-                        required:
-                        - content
-                        - size
-                        - name
-                        - document
-                      description: (New) versions of documents that were uploaded
-                        as part of the advice round.
-          description: ''
-    post:
-      operationId: advice_create
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          format: date-time
+          readOnly: true
+        id:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema: &id007
-              properties:
-                advice:
-                  type: string
-                  description: Het inhoudelijke advies
-                  maxLength: 1000
-                documents:
-                  type: array
-                  items:
-                    properties:
-                      content:
-                        type: string
-                        format: binary
-                        writeOnly: true
-                        description: Content of file
-                      size:
-                        type: integer
-                        writeOnly: true
-                        description: Size of file
-                        minimum: 0
-                      name:
-                        type: string
-                        writeOnly: true
-                        description: Name of file
-                      document:
-                        type: string
-                        format: uri
-                        description: URL-referentie naar het brondocument in de Documenten
-                          API. Deze mag de 'versie' querystring parameter bevatten.
-                        maxLength: 1000
-                        pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
-                          s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\\
-                          d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF\
-                          0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1-\uFFFF0-9])?(?:\\\
-                          .(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
-                          -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
-                          d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                      source_version:
-                        type: integer
-                        readOnly: true
-                      advice_version:
-                        type: integer
-                        readOnly: true
-                    required:
-                    - content
-                    - size
-                    - name
-                    - document
-                  description: (New) versions of documents that were uploaded as part
-                    of the advice round.
-          application/x-www-form-urlencoded:
-            schema: *id007
-          multipart/form-data:
-            schema: *id007
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  author:
-                    properties:
-                      username:
-                        type: string
-                        description: Required. 150 characters or fewer.
-                        maxLength: 150
-                      first_name:
-                        type: string
-                        maxLength: 255
-                      last_name:
-                        type: string
-                        maxLength: 255
-                    required:
-                    - username
-                    type: object
-                    readOnly: true
-                    description: Author of the review
-                  advice:
-                    type: string
-                    description: Het inhoudelijke advies
-                    maxLength: 1000
-                  documents:
-                    type: array
-                    items:
-                      properties:
-                        content:
-                          type: string
-                          format: binary
-                          writeOnly: true
-                          description: Content of file
-                        size:
-                          type: integer
-                          writeOnly: true
-                          description: Size of file
-                          minimum: 0
-                        name:
-                          type: string
-                          writeOnly: true
-                          description: Name of file
-                        document:
-                          type: string
-                          format: uri
-                          description: URL-referentie naar het brondocument in de
-                            Documenten API. Deze mag de 'versie' querystring parameter
-                            bevatten.
-                          maxLength: 1000
-                          pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
-                            s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
-                            .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
-                            .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                            -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                            .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                            .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                        source_version:
-                          type: integer
-                          readOnly: true
-                        advice_version:
-                          type: integer
-                          readOnly: true
-                      required:
-                      - content
-                      - size
-                      - name
-                      - document
-                    description: (New) versions of documents that were uploaded as
-                      part of the advice round.
-          description: ''
-  /api/v1/review-requests/{parent_lookup_request__uuid}/advices/{id}:
-    get:
-      operationId: advice_retrieve
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          format: uuid
+          readOnly: true
+        forZaak:
           type: string
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this advies.
-        schema:
+          format: uri
+          description: URL reference to the zaak in the API.
+          maxLength: 1000
+        reviewType:
+          $ref: '#/components/schemas/ReviewTypeEnum'
+        documents:
+          type: array
+          items:
+            type: string
+            format: uri
+        frontendUrl:
           type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  author:
-                    properties:
-                      username:
-                        type: string
-                        description: Required. 150 characters or fewer.
-                        maxLength: 150
-                      first_name:
-                        type: string
-                        maxLength: 255
-                      last_name:
-                        type: string
-                        maxLength: 255
-                    required:
-                    - username
-                    type: object
-                    readOnly: true
-                    description: Author of the review
-                  advice:
-                    type: string
-                    description: Het inhoudelijke advies
-                    maxLength: 1000
-                  documents:
-                    type: array
-                    items:
-                      properties:
-                        content:
-                          type: string
-                          format: binary
-                          writeOnly: true
-                          description: Content of file
-                        size:
-                          type: integer
-                          writeOnly: true
-                          description: Size of file
-                          minimum: 0
-                        name:
-                          type: string
-                          writeOnly: true
-                          description: Name of file
-                        document:
-                          type: string
-                          format: uri
-                          description: URL-referentie naar het brondocument in de
-                            Documenten API. Deze mag de 'versie' querystring parameter
-                            bevatten.
-                          maxLength: 1000
-                          pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
-                            s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
-                            .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
-                            .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                            -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                            .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                            .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                        source_version:
-                          type: integer
-                          readOnly: true
-                        advice_version:
-                          type: integer
-                          readOnly: true
-                      required:
-                      - content
-                      - size
-                      - name
-                      - document
-                    description: (New) versions of documents that were uploaded as
-                      part of the advice round.
-          description: ''
-    put:
-      operationId: advice_update
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          readOnly: true
+          description: The frontend URL for reviewers to submit their review.
+        numAdvices:
+          type: integer
+          readOnly: true
+          description: The number of advices registered for this request.
+        numApprovals:
+          type: integer
+          readOnly: true
+          description: The number of approvals registered for this request. Note that
+            does not mean they are all positive approvals - this includes the rejections.
+        numAssignedUsers:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        toelichting:
           type: string
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this advies.
-        schema:
+        userDeadlines:
+          type: object
+          additionalProperties: {}
+        requester:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema: &id008
-              properties:
-                advice:
-                  type: string
-                  description: Het inhoudelijke advies
-                  maxLength: 1000
-                documents:
-                  type: array
-                  items:
-                    properties:
-                      content:
-                        type: string
-                        format: binary
-                        writeOnly: true
-                        description: Content of file
-                      size:
-                        type: integer
-                        writeOnly: true
-                        description: Size of file
-                        minimum: 0
-                      name:
-                        type: string
-                        writeOnly: true
-                        description: Name of file
-                      document:
-                        type: string
-                        format: uri
-                        description: URL-referentie naar het brondocument in de Documenten
-                          API. Deze mag de 'versie' querystring parameter bevatten.
-                        maxLength: 1000
-                        pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
-                          s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\\
-                          d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF\
-                          0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1-\uFFFF0-9])?(?:\\\
-                          .(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
-                          -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
-                          d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                      source_version:
-                        type: integer
-                        readOnly: true
-                      advice_version:
-                        type: integer
-                        readOnly: true
-                    required:
-                    - content
-                    - size
-                    - name
-                    - document
-                  description: (New) versions of documents that were uploaded as part
-                    of the advice round.
-          application/x-www-form-urlencoded:
-            schema: *id008
-          multipart/form-data:
-            schema: *id008
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  author:
-                    properties:
-                      username:
-                        type: string
-                        description: Required. 150 characters or fewer.
-                        maxLength: 150
-                      first_name:
-                        type: string
-                        maxLength: 255
-                      last_name:
-                        type: string
-                        maxLength: 255
-                    required:
-                    - username
-                    type: object
-                    readOnly: true
-                    description: Author of the review
-                  advice:
-                    type: string
-                    description: Het inhoudelijke advies
-                    maxLength: 1000
-                  documents:
-                    type: array
-                    items:
-                      properties:
-                        content:
-                          type: string
-                          format: binary
-                          writeOnly: true
-                          description: Content of file
-                        size:
-                          type: integer
-                          writeOnly: true
-                          description: Size of file
-                          minimum: 0
-                        name:
-                          type: string
-                          writeOnly: true
-                          description: Name of file
-                        document:
-                          type: string
-                          format: uri
-                          description: URL-referentie naar het brondocument in de
-                            Documenten API. Deze mag de 'versie' querystring parameter
-                            bevatten.
-                          maxLength: 1000
-                          pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
-                            s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
-                            .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
-                            .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                            -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                            .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                            .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                        source_version:
-                          type: integer
-                          readOnly: true
-                        advice_version:
-                          type: integer
-                          readOnly: true
-                      required:
-                      - content
-                      - size
-                      - name
-                      - document
-                    description: (New) versions of documents that were uploaded as
-                      part of the advice round.
-          description: ''
-    patch:
-      operationId: advice_partial_update
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          description: Username of user who requested review request
+          maxLength: 100
+        metadata:
+          type: object
+          additionalProperties: {}
+          description: Metadata that may be relevant for the process.
+        zaakDocuments:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+          description: The documents with their download url and relevant metadata.
+        reviews:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+          description: Previous advices or approvals.
+    ReviewRequest:
+      type: object
+      properties:
+        created:
           type: string
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this advies.
-        schema:
+          format: date-time
+          readOnly: true
+        id:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema: &id009
-              properties:
-                advice:
-                  type: string
-                  description: Het inhoudelijke advies
-                  maxLength: 1000
-                documents:
-                  type: array
-                  items:
-                    properties:
-                      content:
-                        type: string
-                        format: binary
-                        writeOnly: true
-                        description: Content of file
-                      size:
-                        type: integer
-                        writeOnly: true
-                        description: Size of file
-                        minimum: 0
-                      name:
-                        type: string
-                        writeOnly: true
-                        description: Name of file
-                      document:
-                        type: string
-                        format: uri
-                        description: URL-referentie naar het brondocument in de Documenten
-                          API. Deze mag de 'versie' querystring parameter bevatten.
-                        maxLength: 1000
-                        pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
-                          s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\\
-                          d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xA1-\uFFFF\
-                          0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1-\uFFFF0-9])?(?:\\\
-                          .(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1\
-                          -\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\\
-                          d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                      source_version:
-                        type: integer
-                        readOnly: true
-                      advice_version:
-                        type: integer
-                        readOnly: true
-                    required:
-                    - content
-                    - size
-                    - name
-                    - document
-                  description: (New) versions of documents that were uploaded as part
-                    of the advice round.
-          application/x-www-form-urlencoded:
-            schema: *id009
-          multipart/form-data:
-            schema: *id009
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                properties:
-                  created:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  author:
-                    properties:
-                      username:
-                        type: string
-                        description: Required. 150 characters or fewer.
-                        maxLength: 150
-                      first_name:
-                        type: string
-                        maxLength: 255
-                      last_name:
-                        type: string
-                        maxLength: 255
-                    required:
-                    - username
-                    type: object
-                    readOnly: true
-                    description: Author of the review
-                  advice:
-                    type: string
-                    description: Het inhoudelijke advies
-                    maxLength: 1000
-                  documents:
-                    type: array
-                    items:
-                      properties:
-                        content:
-                          type: string
-                          format: binary
-                          writeOnly: true
-                          description: Content of file
-                        size:
-                          type: integer
-                          writeOnly: true
-                          description: Size of file
-                          minimum: 0
-                        name:
-                          type: string
-                          writeOnly: true
-                          description: Name of file
-                        document:
-                          type: string
-                          format: uri
-                          description: URL-referentie naar het brondocument in de
-                            Documenten API. Deze mag de 'versie' querystring parameter
-                            bevatten.
-                          maxLength: 1000
-                          pattern: "^(?:[a-z0-9\\.\\-\\+]*)://(?:[^\\s:@/]+(?::[^\\\
-                            s:@/]*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\\
-                            .(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\\
-                            .]+\\]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1\
-                            -\uFFFF0-9])?(?:\\.(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\\
-                            .(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
-                            .?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z"
-                        source_version:
-                          type: integer
-                          readOnly: true
-                        advice_version:
-                          type: integer
-                          readOnly: true
-                      required:
-                      - content
-                      - size
-                      - name
-                      - document
-                    description: (New) versions of documents that were uploaded as
-                      part of the advice round.
-          description: ''
-    delete:
-      operationId: advice_destroy
-      description: ''
-      parameters:
-      - name: parent_lookup_request__uuid
-        in: path
-        required: true
-        description: ''
-        schema:
+          format: uuid
+          readOnly: true
+        forZaak:
           type: string
-      - name: id
-        in: path
-        required: true
-        description: A unique integer value identifying this advies.
-        schema:
+          format: uri
+          description: URL reference to the zaak in the API.
+          maxLength: 1000
+        reviewType:
+          $ref: '#/components/schemas/ReviewTypeEnum'
+        documents:
+          type: array
+          items:
+            type: string
+            format: uri
+        frontendUrl:
           type: string
-      responses:
-        '204':
-          description: ''
-servers:
-- url: https://kownsl.utrechtproeftuin.nl
+          readOnly: true
+          description: The frontend URL for reviewers to submit their review.
+        numAdvices:
+          type: integer
+          readOnly: true
+          description: The number of advices registered for this request.
+        numApprovals:
+          type: integer
+          readOnly: true
+          description: The number of approvals registered for this request. Note that
+            does not mean they are all positive approvals - this includes the rejections.
+        numAssignedUsers:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        toelichting:
+          type: string
+        userDeadlines:
+          type: object
+          additionalProperties: {}
+        requester:
+          type: string
+          description: Username of user who requested review request
+          maxLength: 100
+        metadata:
+          type: object
+          additionalProperties: {}
+          description: Metadata that may be relevant for the process.
+        zaakDocuments:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+          description: The documents with their download url and relevant metadata.
+        reviews:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+          description: Previous advices or approvals.
+      required:
+      - created
+      - forZaak
+      - frontendUrl
+      - id
+      - numAdvices
+      - numApprovals
+      - reviewType
+      - reviews
+      - zaakDocuments
+    ReviewTypeEnum:
+      enum:
+      - advice
+      - approval
+      type: string
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer.
+          maxLength: 150
+        firstName:
+          type: string
+          maxLength: 255
+        lastName:
+          type: string
+          maxLength: 255
+      required:
+      - username
+  securitySchemes:
+    ZGWAuthentication:
+      type: http
+      in: beader
+      bearerFormat: JWT
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

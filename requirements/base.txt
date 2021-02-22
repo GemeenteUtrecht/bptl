@@ -48,7 +48,7 @@ drf-yasg==1.17.1          # via -r requirements/base.in
 elastic-apm==5.3.2        # via -r requirements/base.in
 faker==5.1.0              # via zgw-consumers
 flower==0.9.3             # via -r requirements/base.in
-gemma-zds-client==0.13.4  # via -r requirements/base.in, zgw-consumers
+gemma-zds-client==0.14.1  # via -r requirements/base.in, zgw-consumers
 idna==2.8                 # via requests
 imagesize==1.2.0          # via sphinx
 inflection==0.3.1         # via django-camunda, drf-yasg

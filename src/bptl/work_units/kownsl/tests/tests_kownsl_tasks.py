@@ -116,8 +116,8 @@ class KownslAPITests(TestCase):
 
         response = {
             "id": "1",
-            "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-            "review_type": "advice",
+            "forZaak": "https://zaken.nl/api/v1/zaak/123",
+            "reviewType": "advice",
         }
         m.get(
             f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
@@ -131,8 +131,8 @@ class KownslAPITests(TestCase):
         mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         rr_response = {
             "id": "1",
-            "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-            "review_type": "advice",
+            "forZaak": "https://zaken.nl/api/v1/zaak/123",
+            "reviewType": "advice",
         }
         m.get(
             f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
@@ -168,9 +168,9 @@ class KownslAPITests(TestCase):
         mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         rr_response = {
             "id": "1",
-            "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-            "review_type": "advice",
-            "user_deadlines": {
+            "forZaak": "https://zaken.nl/api/v1/zaak/123",
+            "reviewType": "advice",
+            "userDeadlines": {
                 "Zeus": "2020-04-20",
                 "Poseidon": "2020-04-20",
                 "Hades": "2020-04-20",
@@ -199,8 +199,8 @@ class KownslAPITests(TestCase):
         mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         rr_response = {
             "id": "1",
-            "for_zaak": "https://zaken.nl/api/v1/zaak/123",
-            "review_type": "advice",
+            "forZaak": "https://zaken.nl/api/v1/zaak/123",
+            "reviewType": "advice",
             "requester": "Pietje",
         }
         m.get(

@@ -55,7 +55,7 @@ factory-boy==2.12.0       # via -r requirements/test-tools.in
 faker==5.1.0              # via -r requirements/base.txt, factory-boy, zgw-consumers
 flower==0.9.3             # via -r requirements/base.txt
 freezegun==0.3.12         # via -r requirements/test-tools.in
-gemma-zds-client==0.13.4  # via -r requirements/base.txt, zgw-consumers
+gemma-zds-client==0.14.1  # via -r requirements/base.txt, zgw-consumers
 idna==2.8                 # via -r requirements/base.txt, requests
 imagesize==1.2.0          # via -r requirements/base.txt, sphinx
 inflection==0.3.1         # via -r requirements/base.txt, django-camunda, drf-yasg

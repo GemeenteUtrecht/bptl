@@ -64,7 +64,7 @@ faker==5.1.0              # via -r requirements/ci.txt, factory-boy, zgw-consume
 flake8==3.7.9             # via -r requirements/dev.in
 flower==0.9.3             # via -r requirements/ci.txt
 freezegun==0.3.12         # via -r requirements/ci.txt
-gemma-zds-client==0.13.4  # via -r requirements/ci.txt, zgw-consumers
+gemma-zds-client==0.14.1  # via -r requirements/ci.txt, zgw-consumers
 idna==2.8                 # via -r requirements/ci.txt, requests
 imagesize==1.2.0          # via -r requirements/ci.txt, sphinx
 inflection==0.3.1         # via -r requirements/ci.txt, django-camunda, drf-yasg

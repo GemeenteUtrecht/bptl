@@ -47,7 +47,9 @@ def get_approval_status(task: BaseTask) -> dict:
 
     review_request_id = check_variable(variables, "kownslReviewRequestId")
 
-    approvals = client.list("approval", parent_lookup_request__uuid=review_request_id)
+    approvals = client.list(
+        "review_requests_approvals", request__uuid=review_request_id
+    )
 
     num_approved, num_rejected = 0, 0
     for approval in approvals:
@@ -105,13 +107,17 @@ def get_review_response_status(task: BaseTask) -> dict:
     review_request = get_review_request(task)
 
     # Get review request type to set operation_id
-    review_type = review_request["review_type"]
-    resource = "approval" if review_type == "approval" else "advice"
+    review_type = review_request["reviewType"]
+    resource = (
+        "review_requests_approvals"
+        if review_type == "approval"
+        else "review_requests_advices"
+    )
 
     client = get_client(task)
 
     # Get approvals/advices belonging to review request
-    reviews = client.list(resource, parent_lookup_request__uuid=review_request["id"])
+    reviews = client.list(resource, request__uuid=review_request["id"])
 
     # Build a list of users that have responded
     already_responded = []
@@ -163,7 +169,7 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
 
     # Get user deadlines
     review_request = get_review_request(task)
-    user_deadlines = review_request["user_deadlines"]
+    user_deadlines = review_request["userDeadlines"]
 
     # Get deadline belonging to that specific set of kownslUsers
     deadline_str = user_deadlines[kownsl_users[0]]
@@ -228,9 +234,7 @@ def get_email_details(task: BaseTask) -> dict:
     requester = review_request["requester"]
 
     # Set template
-    template = (
-        "accordering" if review_request["review_type"] == "approval" else "advies"
-    )
+    template = "accordering" if review_request["reviewType"] == "approval" else "advies"
 
     # Get variables
     variables = task.get_variables()
@@ -301,7 +305,7 @@ def set_review_request_metadata(task: BaseTask) -> dict:
 
     client = get_client(task)
     client.partial_update(
-        "reviewrequest",
+        "review_requests",
         data={"metadata": metadata},
         uuid=review_request_id,
     )
@@ -332,7 +336,9 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
     review_request_id = check_variable(variables, "kownslReviewRequestId")
     client = get_client(task)
     # Get approvals belonging to review request
-    approvals = client.list("approval", parent_lookup_request__uuid=review_request_id)
+    approvals = client.list(
+        "review_requests_approvals", request__uuid=review_request_id
+    )
 
     # Get their toelichtingen
     toelichtingen = [approval["toelichting"] or "Geen" for approval in approvals]

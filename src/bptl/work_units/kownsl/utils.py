@@ -1,6 +1,5 @@
 from django.utils.translation import gettext_lazy as _
 
-from zds_client.schema import get_operation_url
 from zgw_consumers.client import ZGWClient
 from zgw_consumers.constants import APITypes
 
@@ -38,6 +37,10 @@ def get_client(task: BaseTask) -> ZGWClient:
     service = default_services[0].service
     client = service.build_client()
     client._log.task = task
+    client.operation_suffix_mapping = {
+        **client.operation_suffix_mapping,
+        "retrieve": "_retrieve",
+    }
 
     # set the auth if we have the bptlAppId set
     if app_id:
@@ -59,12 +62,5 @@ def get_review_request(task: BaseTask) -> dict:
     # Build url
     client = get_client(task)
     review_request_id = check_variable(variables, "kownslReviewRequestId")
-    operation_id = "reviewrequest_retrieve"
-    url = get_operation_url(
-        client.schema,
-        operation_id,
-        base_url=client.base_url,
-        uuid=review_request_id,
-    )
-    review_request = client.request(url, operation_id)
+    review_request = client.retrieve("review_requests", uuid=review_request_id)
     return review_request
