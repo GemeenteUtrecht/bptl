@@ -12,8 +12,8 @@ from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.work_units.xential.models import XentialTicket
 from bptl.work_units.xential.tasks import (
+    check_failed_document_builds,
     check_xential_document_status,
-    task_check_failed_document_builds,
 )
 
 XENTIAL_API_ROOT = "https://xentiallabs.com/xential/modpages/next.oas/api/"
@@ -200,7 +200,7 @@ class PeriodicTaskTests(TestCase):
             is_ticket_complete=False,
         )
 
-        task_check_failed_document_builds()
+        check_failed_document_builds()
 
         check_xential_document_status.assert_not_called()
 
@@ -227,7 +227,7 @@ class PeriodicTaskTests(TestCase):
             is_ticket_complete=False,
         )
 
-        task_check_failed_document_builds()
+        check_failed_document_builds()
 
         check_xential_document_status.assert_called_once_with(
             "2d30f19b-8666-4f45-a8da-78ad7ed0ef4d"

@@ -435,7 +435,7 @@ CELERY_BEAT_SCHEDULE = {
         # is marked graceful, so it'll just return None and not be scheduled again.
         "schedule": schedule(run_every=10),
     },
-    "task-xential-docs-status-check": {
+    "xential-docs-status-check": {
         "task": "bptl.work_units.xential.tasks.task_check_failed_document_builds",
         "schedule": schedule(run_every=43200),  # 12 hours
     },

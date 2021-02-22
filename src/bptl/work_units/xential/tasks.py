@@ -187,12 +187,12 @@ def make_xml_from_template_variables(template_variables: dict) -> str:
 
 
 @app.task
-def task_check_failed_document_builds():
+def check_failed_document_builds():
     logger.debug("Checking for failed Xential document builds")
 
     # Getting all incomplete tickets with an associated document ID
     open_tickets = XentialTicket.objects.filter(
-        Q(is_ticket_complete=False) & ~Q(document_uuid="")
+        is_ticket_complete=False, document_uuid__isnull=False
     )
 
     for ticket in open_tickets:
