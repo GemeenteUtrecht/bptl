@@ -56,7 +56,7 @@ class UserDetailsTask(WorkUnit):
         usernames = check_variable(variables, "usernames")
         params = {"include": usernames}
         with get_client(self.task) as client:
-            return client.get("accounts/api/users", params=params)
+            return client.get("api/accounts/users", params=params)
 
     def validate_data(self, data: dict) -> dict:
         serializer = ZacUsersDetailsSerializer(data=data)

@@ -4,7 +4,6 @@ from django.core import mail
 from django.test import TestCase
 
 from django_camunda.utils import serialize_variable
-from rest_framework.exceptions import ValidationError
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import MissingVariable

@@ -10,7 +10,7 @@ from bptl.tasks.tests.factories import DefaultServiceFactory
 from ..tasks import UserDetailsTask
 
 ZAC_API_ROOT = "https://zac.example.com/"
-FILTER_USERS_URL = f"{ZAC_API_ROOT}accounts/api/users?include=thor&include=loki"
+FILTER_USERS_URL = f"{ZAC_API_ROOT}api/accounts/users?include=thor&include=loki"
 
 
 @requests_mock.Mocker()
