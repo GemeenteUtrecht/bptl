@@ -25,6 +25,12 @@ class XentialTicket(models.Model):
         help_text=_("Indicates whether the document was built in Xential."),
         default=False,
     )
+    document_uuid = models.UUIDField(
+        _("Document UUID"),
+        help_text=_("UUID of the document associated with the ticket"),
+        null=True,
+        default=None,
+    )
 
     class Meta:
         verbose_name = _("Xential Ticket")

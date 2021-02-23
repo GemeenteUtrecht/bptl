@@ -4,16 +4,22 @@ from xml.dom import minidom
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.db.models import Q
 
+from celery.utils.log import get_task_logger
 from rest_framework.reverse import reverse
 
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
+from ...camunda.utils import fail_task
+from ...celery import app
 from .client import XENTIAL_ALIAS, get_client, require_xential_service
 from .models import XentialConfiguration, XentialTicket
 from .tokens import token_generator
 from .utils import check_document_api_required_fields
+
+logger = get_task_logger(__name__)
 
 
 @register
@@ -147,6 +153,9 @@ def start_xential_template(task: BaseTask) -> dict:
         params = {"documentUuid": document_uuid}
         xential_client.post(build_document_url, params=params)
 
+        ticket.document_uuid = document_uuid
+        ticket.save()
+
         return {"bptlDocumentUrl": ""}
 
     token = token_generator.make_token(ticket)
@@ -175,3 +184,32 @@ def make_xml_from_template_variables(template_variables: dict) -> str:
 
     xml_doc.appendChild(root_element)
     return xml_doc.toxml()
+
+
+@app.task
+def check_failed_document_builds():
+    logger.debug("Checking for failed Xential document builds")
+
+    # Getting all incomplete tickets with an associated document ID
+    open_tickets = XentialTicket.objects.filter(
+        is_ticket_complete=False, document_uuid__isnull=False
+    )
+
+    for ticket in open_tickets:
+        check_xential_document_status.delay(str(ticket.bptl_ticket_uuid))
+
+
+@app.task
+def check_xential_document_status(ticket_uuid: str) -> None:
+    xential_ticket = XentialTicket.objects.get(bptl_ticket_uuid=ticket_uuid)
+    task = xential_ticket.task
+    xential_client = get_client(task, XENTIAL_ALIAS)
+
+    # Request the status of the document to Xential
+    document_data = xential_client.get(f"document/{xential_ticket.document_uuid}")
+
+    # If no error has occurred, then there is nothing to do
+    if document_data["buildStatus"] != "ERROR":
+        return
+
+    fail_task(task, reason="Xential failed to build the document.")
