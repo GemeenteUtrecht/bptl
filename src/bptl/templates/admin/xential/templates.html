@@ -13,20 +13,20 @@
 {% block content %}
 <div id="content-main">
     <div class="module">
-        {% for api_root, templates in template_groups.items %}
-            <h2>{{ api_root }}</h2>
+        {% for template_group in template_groups %}
+            <h2>Template Group {{ template_group.name }}</h2>
             <table style="width:100%">
                 <thead>
                     <tr>
-                        <th>{% trans 'Name' %}</th>
-                        <th>Uuid</th>
+                        <th>{% trans 'Template name' %}</th>
+                        <th>{% trans 'UUID' %}</th>
                     </tr>
                 </thead>
                 <tbody>
-                {% for template in templates %}
+                {% for template in template_group.templates %}
                     <tr>
-                        <td>{{ template.templateName }}</td>
-                        <td>{{ template.templateUuid }}</td>
+                        <td>{{ template.name }}</td>
+                        <td>{{ template.uuid }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
