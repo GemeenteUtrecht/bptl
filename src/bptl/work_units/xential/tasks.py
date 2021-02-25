@@ -77,7 +77,9 @@ def start_xential_template(task: BaseTask) -> dict:
     variables = task.get_variables()
     interactive = check_variable(variables, "interactive")
     template_uuid = check_variable(variables, "templateUuid")
-    template_variables = check_variable(variables, "templateVariables")
+    template_variables = check_variable(
+        variables, "templateVariables", empty_allowed=True
+    )
     xential_client = get_client(task, XENTIAL_ALIAS)
 
     check_document_api_required_fields(check_variable(variables, "documentMetadata"))

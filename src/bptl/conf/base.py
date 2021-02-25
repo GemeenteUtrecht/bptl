@@ -25,7 +25,7 @@ BASE_DIR = os.path.abspath(
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -224,7 +224,9 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False)
 EMAIL_TIMEOUT = 10
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "bptl@example.com")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="bptl@example.com")
+
+LOG_STDOUT = config("LOG_STDOUT", default=False)
 
 LOGGING_DIR = os.path.join(BASE_DIR, "log")
 
@@ -286,12 +288,12 @@ LOGGING = {
     },
     "loggers": {
         "bptl": {
-            "handlers": ["project"],
+            "handlers": ["project"] if not LOG_STDOUT else ["console"],
             "level": "INFO",
             "propagate": True,
         },
         "django.request": {
-            "handlers": ["django"],
+            "handlers": ["project"] if not LOG_STDOUT else ["console"],
             "level": "ERROR",
             "propagate": True,
         },

@@ -7,6 +7,9 @@ os.environ.setdefault("DB_NAME", os.getenv("DATABASE_NAME", "postgres"))
 os.environ.setdefault("DB_PASSWORD", os.getenv("DATABASE_PASSWORD", ""))
 os.environ.setdefault("DB_HOST", os.getenv("DATABASE_HOST", "db"))
 
+os.environ.setdefault("ENVIRONMENT", "docker")
+os.environ.setdefault("LOG_STDOUT", "yes")
+
 from .base import *  # noqa isort:skip
 
 # Helper function
