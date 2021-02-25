@@ -26,13 +26,10 @@ logger = logging.getLogger(__name__)
 
 class DocumentCreationCallbackView(views.APIView):
     authentication_classes = (XentialAuthentication,)
-    # temp auth disabled for demo purposes - Xential is not sending the header (yet)
-    # permission_classes = (permissions.IsAuthenticated,)
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
     parser_classes = [SnakeXMLParser]
 
     def post(self, request: Request) -> Response:
-        logger.info("Xential callback data: %r", request.body)
         # The callback sends the base64 encoded document and the BPTL ticket ID as XML.
         serializer = CallbackDataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

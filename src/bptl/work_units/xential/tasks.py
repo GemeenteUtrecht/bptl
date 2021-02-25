@@ -4,7 +4,6 @@ from xml.dom import minidom
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.db.models import Q
 
 from celery.utils.log import get_task_logger
 from rest_framework.reverse import reverse

@@ -1,6 +1,5 @@
 import json
 import os
-import unittest
 from datetime import timedelta
 
 from django.test import TestCase, override_settings
@@ -261,13 +260,11 @@ class XentialCallbackTest(APITestCase):
 
         return response
 
-    @unittest.expectedFailure
     def test_no_access_without_key(self, m):
         callback_response = self.client.post(self.endpoint, data="A response!")
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, callback_response.status_code)
 
-    @unittest.expectedFailure
     def test_no_access_with_wrong_key(self, m):
         callback_response = self.client.post(
             self.endpoint, data="A response!", HTTP_AUTHORIZATION=f"Basic WRONG-KEY"
@@ -348,7 +345,7 @@ class XentialCallbackTest(APITestCase):
 
         callback_response = self.client.post(
             self.endpoint,
-            content_type="application/xml",
+            content_type="text/xml",
             data=xential_response,
             HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )
@@ -428,8 +425,9 @@ class XentialCallbackTest(APITestCase):
         callback_response = self.client.post(
             self.endpoint,
             data=xential_response,
-            content_type="application/xml",
+            content_type="text/xml",
             HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
+            HTTP_CONTENT_TYPE="text/xml; charset=UTF-8",
         )
 
         document_data_posted = json.loads(m.request_history[0].text)
@@ -517,7 +515,7 @@ class XentialCallbackTest(APITestCase):
 
         callback_response = self.client.post(
             self.endpoint,
-            content_type="application/xml",
+            content_type="text/xml",
             data=xential_response,
             HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )
@@ -600,7 +598,7 @@ class XentialCallbackTest(APITestCase):
 
         callback_response = self.client.post(
             self.endpoint,
-            content_type="application/xml",
+            content_type="text/xml",
             data=xential_response,
             HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )
@@ -612,7 +610,7 @@ class XentialCallbackTest(APITestCase):
 
         callback_response = self.client.post(
             self.endpoint,
-            content_type="application/xml",
+            content_type="text/xml",
             data=xential_response,
             HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
         )

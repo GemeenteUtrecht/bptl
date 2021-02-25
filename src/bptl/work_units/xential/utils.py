@@ -71,6 +71,8 @@ def check_document_api_required_fields(document_properties: dict) -> None:
 
 
 class SnakeXMLParser(XMLParser):
+    media_type = "text/xml"
+
     def parse(self, stream, media_type=None, parser_context=None):
         camel_data = super().parse(stream, media_type, parser_context)
         return underscoreize(camel_data)
