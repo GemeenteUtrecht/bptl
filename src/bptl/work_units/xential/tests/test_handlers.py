@@ -28,6 +28,41 @@ class HandlerTests(TestCase):
         self.assertEqual(m.call_count, 0)
 
     @requests_mock.Mocker()
+    def test_task_without_instance_id(self, m):
+        task = ExternalTaskFactory.create()
+        XentialTicket.objects.create(
+            task=task,
+            bptl_ticket_uuid="2d30f19b-8666-4f45-a8da-78ad7ed0ef4d",
+            ticket_uuid="f15aceb4-b316-45bc-8353-7906ae125557",
+        )
+        task.variables = {"messageId": serialize_variable("Document created!")}
+        task.save()
+
+        m.post("https://camunda.example.com/engine-rest/message")
+        m.get(
+            f"https://camunda.example.com/engine-rest/history/external-task-log/{task.task_id}",
+            json={"process_instance_id": "some-instance-id"},
+        )
+
+        on_document_created(task, "http://example.com/doc/doc-uuid")
+
+        self.assertEqual(m.call_count, 2)
+        self.assertEqual(m.last_request.method, "POST")
+        self.assertEqual(
+            m.last_request.json(),
+            {
+                "messageName": "Document created!",
+                "processInstanceId": "some-instance-id",
+                "processVariables": {
+                    "url": {
+                        "type": "String",
+                        "value": "http://example.com/doc/doc-uuid",
+                    }
+                },
+            },
+        )
+
+    @requests_mock.Mocker()
     def test_document_created_sends_message(self, m):
         self.task.variables = {"messageId": serialize_variable("Document created!")}
         self.task.save()
