@@ -23,7 +23,9 @@ from .utils import SnakeXMLParser, get_xential_base_url
 
 class DocumentCreationCallbackView(views.APIView):
     authentication_classes = (XentialAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
+    # temp auth disabled for demo purposes - Xential is not sending the header (yet)
+    # permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
     parser_classes = [SnakeXMLParser]
 
     def post(self, request: Request) -> Response:
