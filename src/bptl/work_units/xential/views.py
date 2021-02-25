@@ -1,5 +1,6 @@
 import base64
 import datetime
+import logging
 from uuid import UUID
 
 from django.core.exceptions import PermissionDenied
@@ -20,6 +21,8 @@ from .handlers import on_document_created
 from .tokens import token_generator
 from .utils import SnakeXMLParser, get_xential_base_url
 
+logger = logging.getLogger(__name__)
+
 
 class DocumentCreationCallbackView(views.APIView):
     authentication_classes = (XentialAuthentication,)
@@ -29,6 +32,7 @@ class DocumentCreationCallbackView(views.APIView):
     parser_classes = [SnakeXMLParser]
 
     def post(self, request: Request) -> Response:
+        logger.info("Xential callback data: %r", request.body)
         # The callback sends the base64 encoded document and the BPTL ticket ID as XML.
         serializer = CallbackDataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
