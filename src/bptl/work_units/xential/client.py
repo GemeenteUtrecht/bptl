@@ -9,8 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
 
-from bptl.credentials.models import AppServiceCredentials
-from bptl.tasks.models import BaseTask, DefaultService
+from bptl.tasks.models import BaseTask
 from bptl.tasks.registry import register
 
 from ..clients import JSONClient, get_client as _get_client

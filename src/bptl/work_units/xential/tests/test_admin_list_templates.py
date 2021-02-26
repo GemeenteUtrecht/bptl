@@ -2,12 +2,9 @@ from django.urls import reverse_lazy
 
 import requests_mock
 from django_webtest import WebTest
-from zgw_consumers.constants import APITypes, AuthTypes
-from zgw_consumers.models import Service
+from zgw_consumers.constants import APITypes
 
 from bptl.accounts.tests.factories import SuperUserFactory
-from bptl.credentials.tests.factories import AppServiceCredentialsFactory
-from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import (
     DefaultServiceFactory,
     ServiceFactory,
