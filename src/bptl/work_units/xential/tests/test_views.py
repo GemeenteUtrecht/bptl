@@ -354,7 +354,10 @@ class XentialCallbackTest(APITestCase):
 
     @freeze_time("2021-02-10")
     def test_callback_default_document_data(self, m):
-        xential_response = self._get_sample_response("xential-response.xml")
+        xential_responses = [
+            self._get_sample_response("xential-response.xml"),
+            self._get_sample_response("xential-response-newlines.xml"),
+        ]
 
         bptl_ticket_uuid = "9c132492-6c7c-4c34-af9d-16322dff89cc"
         ticket_uuid = "2d30f19b-8666-4f45-a8da-78ad7ed0ef4d"
@@ -422,19 +425,24 @@ class XentialCallbackTest(APITestCase):
             ticket_uuid=ticket_uuid,
         )
 
-        callback_response = self.client.post(
-            self.endpoint,
-            data=xential_response,
-            content_type="text/xml",
-            HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
-            HTTP_CONTENT_TYPE="text/xml; charset=UTF-8",
-        )
+        for xential_response in xential_responses:
+            with self.subTest(response=xential_responses):
 
-        document_data_posted = json.loads(m.request_history[0].text)
-        self.assertEqual("2021-02-10", document_data_posted["creatiedatum"])
-        self.assertEqual("nld", document_data_posted["taal"])
+                callback_response = self.client.post(
+                    self.endpoint,
+                    data=xential_response,
+                    content_type="text/xml",
+                    HTTP_AUTHORIZATION=f"Basic {self.auth_key}",
+                    HTTP_CONTENT_TYPE="text/xml; charset=UTF-8",
+                )
 
-        self.assertEqual(status.HTTP_204_NO_CONTENT, callback_response.status_code)
+                document_data_posted = json.loads(m.request_history[0].text)
+                self.assertEqual("2021-02-10", document_data_posted["creatiedatum"])
+                self.assertEqual("nld", document_data_posted["taal"])
+
+                self.assertEqual(
+                    status.HTTP_204_NO_CONTENT, callback_response.status_code
+                )
 
     def test_callback_with_message_id_no_instance_id(self, m):
         xential_response = self._get_sample_response("xential-response.xml")

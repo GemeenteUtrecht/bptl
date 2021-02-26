@@ -32,6 +32,9 @@ class Base64Document(Base64FileField):
         return "bin"
 
     def to_internal_value(self, base64_data):
+        # for some reason, Xential includes newlines, which aren't valid in base64
+        if "\n" in base64_data:
+            base64_data = base64_data.replace("\n", "")
         try:
             # If validate is False, no check is done to see if the data contains non base-64 alphabet characters
             b64decode(base64_data, validate=True)
