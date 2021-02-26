@@ -2,7 +2,7 @@
 Implements a Xential client.
 """
 import logging
-from typing import Dict
+from typing import Dict, List
 
 from django.utils.translation import gettext_lazy as _
 
@@ -61,12 +61,11 @@ def get_client(task: BaseTask, alias: str) -> "JSONClient":
     return _get_client(task, service, cls=client_classes.get(alias))
 
 
-def get_xential_client() -> "XentialClient":
-    default_service = DefaultService.objects.get(alias=XENTIAL_ALIAS)
-    service_credentials = AppServiceCredentials.objects.get(
-        service=default_service.service
-    )
-    client = XentialClient(
-        default_service.service, service_credentials.get_auth_headers()
-    )
-    return client
+def get_xential_clients() -> List["XentialClient"]:
+    services = Service.objects.filter(defaultservice__alias=XENTIAL_ALIAS).distinct()
+    xential_clients = [
+        XentialClient(service, service.build_client().auth_header)
+        for service in services
+    ]
+
+    return xential_clients
