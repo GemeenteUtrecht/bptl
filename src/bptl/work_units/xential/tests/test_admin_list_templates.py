@@ -8,7 +8,12 @@ from zgw_consumers.models import Service
 from bptl.accounts.tests.factories import SuperUserFactory
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import TaskMapping
-from bptl.tasks.tests.factories import DefaultServiceFactory
+from bptl.tasks.tests.factories import (
+    DefaultServiceFactory,
+    ServiceFactory,
+    TaskMappingFactory,
+)
+from bptl.work_units.xential.client import XENTIAL_ALIAS
 
 XENTIAL_API_ROOT = "https://xential.nl/api/"
 
@@ -21,27 +26,10 @@ class XentialAdminTests(WebTest):
     def setUpTestData(cls):
         super().setUpTestData()
 
-        mapping = TaskMapping.objects.create(
-            topic_name="xential-topic",
+        xential_service = ServiceFactory.create(
+            api_root=XENTIAL_API_ROOT, api_type=APITypes.orc
         )
-        xential = Service.objects.create(
-            label="xential",
-            api_type=APITypes.orc,
-            api_root=XENTIAL_API_ROOT,
-            auth_type=AuthTypes.api_key,
-            oas="",
-        )
-        DefaultServiceFactory.create(
-            task_mapping=mapping,
-            service=xential,
-            alias="xential",
-        )
-        AppServiceCredentialsFactory.create(
-            app__app_id="some-app-id",
-            service=xential,
-            header_key="Authorization",
-            header_value="Basic aGVsbG86dGhpc2lzbm90YXNlY3JldA==",
-        )
+        DefaultServiceFactory.create(alias=XENTIAL_ALIAS, service=xential_service)
 
     def test_list_templates_context(self, m):
         user = SuperUserFactory.create()
@@ -264,8 +252,101 @@ class XentialAdminTests(WebTest):
 
         page = self.app.get(self.url, user=user)
 
-        self.assertEqual("Template Group Sjablonen", page.html.h2.text)
+        self.assertIn("Template Group Sjablonen", page.html.h2.text)
         self.assertIn("Template name", page.html.table.thead.tr.text)
         self.assertIn("UUID", page.html.table.thead.tr.text)
         self.assertIn("TestSjabloon", page.html.table.tbody.tr.text)
         self.assertIn("uuid-2", page.html.table.tbody.tr.text)
+
+    def test_multiple_services(self, m):
+        task_mapping = TaskMappingFactory.create(topic_name="some-different-topic")
+        another_xential_api_root = "http://another.xential.nl/api/"
+        xential_service = ServiceFactory.create(
+            api_root=another_xential_api_root, api_type=APITypes.orc
+        )
+        DefaultServiceFactory.create(
+            alias=XENTIAL_ALIAS, service=xential_service, task_mapping=task_mapping
+        )
+
+        user = SuperUserFactory.create()
+
+        # First Xential API
+        m.post(
+            f"{XENTIAL_API_ROOT}auth/whoami",
+            json={
+                "user": {
+                    "uuid": "a4664ccb-259e-4107-b800-d8e5a764b9dd",
+                    "userName": "testuser",
+                },
+                "XSessionId": "f7f588eb-b7c9-4d23-babd-4a98a9326367",
+            },
+        )
+        m.post(
+            f"{XENTIAL_API_ROOT}template_utils/getUsableTemplates",
+            json={
+                "objects": [
+                    {
+                        "uuid": "uuid-1",
+                        "objectTypeId": "templategroup",
+                        "fields": [{"name": "name", "value": "Sjablonen"}],
+                    }
+                ]
+            },
+        )
+        m.post(
+            f"{XENTIAL_API_ROOT}template_utils/getUsableTemplates?parentGroupUuid=uuid-1",
+            json={
+                "objects": [
+                    {
+                        "uuid": "uuid-2",
+                        "objectTypeId": "ooxmltexttemplate",
+                        "fields": [{"name": "name", "value": "TestSjabloon"}],
+                    }
+                ]
+            },
+        )
+
+        # Second Xential api
+        m.post(
+            f"{another_xential_api_root}auth/whoami",
+            json={
+                "user": {
+                    "uuid": "a4664ccb-259e-4107-b800-d8e5a764b9dd",
+                    "userName": "testuser",
+                },
+                "XSessionId": "f7f588eb-b7c9-4d23-babd-4a98a9326367",
+            },
+        )
+        m.post(
+            f"{another_xential_api_root}template_utils/getUsableTemplates",
+            json={
+                "objects": [
+                    {
+                        "uuid": "uuid-1",
+                        "objectTypeId": "templategroup",
+                        "fields": [{"name": "name", "value": "Sjablonen"}],
+                    }
+                ]
+            },
+        )
+        m.post(
+            f"{another_xential_api_root}template_utils/getUsableTemplates?parentGroupUuid=uuid-1",
+            json={
+                "objects": [
+                    {
+                        "uuid": "uuid-2",
+                        "objectTypeId": "ooxmltexttemplate",
+                        "fields": [{"name": "name", "value": "TestSjabloon"}],
+                    }
+                ]
+            },
+        )
+
+        page = self.app.get(self.url, user=user)
+
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("template_groups", page.context)
+
+        template_group_context = page.context["template_groups"]
+
+        self.assertEqual(2, len(template_group_context))
