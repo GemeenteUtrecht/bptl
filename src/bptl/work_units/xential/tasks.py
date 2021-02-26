@@ -13,7 +13,12 @@ from bptl.tasks.registry import register
 
 from ...camunda.utils import fail_task
 from ...celery import app
-from .client import XENTIAL_ALIAS, get_client, require_xential_service
+from .client import (
+    XENTIAL_ALIAS,
+    get_client,
+    require_drc_service,
+    require_xential_service,
+)
 from .models import XentialConfiguration, XentialTicket
 from .tokens import token_generator
 from .utils import check_document_api_required_fields
@@ -22,6 +27,7 @@ logger = get_task_logger(__name__)
 
 
 @register
+@require_drc_service
 @require_xential_service
 def start_xential_template(task: BaseTask) -> dict:
     """
