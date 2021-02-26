@@ -14,7 +14,12 @@
 <div id="content-main">
     <div class="module">
         {% for template_group in template_groups %}
-            <h2>Template Group {{ template_group.name }}</h2>
+            <h2
+                title="This template group comes from the api {{ template_group.api }}"
+                style="cursor: help"
+            >
+                Template Group {{ template_group.name }}
+            </h2>
             <table style="width:100%">
                 <thead>
                     <tr>
