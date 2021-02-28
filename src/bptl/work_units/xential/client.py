@@ -60,11 +60,11 @@ def get_client(task: BaseTask, alias: str) -> "JSONClient":
     return _get_client(task, service, cls=client_classes.get(alias))
 
 
-def get_default_clients(alias: str) -> List["JSONClient"]:
-    # get the service and default credentials
-    # we can't use zgw_consumers client, since it uses OAS
-    clients = [
-        JSONClient(service, service.build_client().auth_header)
-        for service in Service.objects.filter(defaultservice__alias=alias).distinct()
+def get_xential_clients() -> List["XentialClient"]:
+    services = Service.objects.filter(defaultservice__alias=XENTIAL_ALIAS).distinct()
+    xential_clients = [
+        XentialClient(service, service.build_client().auth_header)
+        for service in services
     ]
-    return clients
+
+    return xential_clients
