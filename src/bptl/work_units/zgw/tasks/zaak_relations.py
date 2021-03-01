@@ -328,6 +328,8 @@ class CreateZaakObject(ZGWWorkUnit):
       The app-specific credentials will be used for the API calls.
     * ``services``: DEPRECATED - support will be removed in 1.1
 
+    If `zaakUrl` is not given - returns empty dictionary.
+
     **Optional process variables**
 
     * ``objectTypeOverige``: description of the OBJECT type if objectType = 'overige'
@@ -342,8 +344,7 @@ class CreateZaakObject(ZGWWorkUnit):
     * ``zaakObjectUrl``: the full URL of the created ZAAKOBJECT
     """
 
-    def create_zaakobject(self) -> dict:
-        variables = self.task.get_variables()
+    def create_zaakobject(self, variables: dict) -> dict:
         zrc_client = self.get_client(APITypes.zrc)
         data = {
             "zaak": check_variable(variables, "zaakUrl"),
@@ -355,6 +356,11 @@ class CreateZaakObject(ZGWWorkUnit):
         zaakobject = zrc_client.create("zaakobject", data)
         return zaakobject
 
-    def perform(self):
-        zaakobject = self.create_zaakobject()
-        return {"zaakObjectUrl": zaakobject["url"]}
+    def perform(self) -> dict:
+        variables = self.task.get_variables()
+        if variables.get("zaakUrl", ""):
+            zaakobject = self.create_zaakobject(variables)
+            return {"zaakObjectUrl": zaakobject["url"]}
+        else:
+            logger.info("Case url is not given, aborting.")
+            return {}
