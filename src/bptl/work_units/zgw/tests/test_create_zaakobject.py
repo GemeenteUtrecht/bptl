@@ -3,6 +3,7 @@ import json
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
@@ -78,3 +79,18 @@ class CreateZaakObjectTests(TestCase):
                 "relatieomschrijving": "",
             },
         )
+
+    def test_create_zaakobject_no_zaak(self, m):
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+
+        fetched_task = self.fetched_task
+        fetched_task.variables = {
+            **fetched_task.variables,
+            **{"zaakUrl": serialize_variable("")},
+        }
+        fetched_task.save()
+
+        task = CreateZaakObject(fetched_task)
+        result = task.perform()
+        self.assertEqual(result, {})
+        self.assertTrue(all(req.method == "GET" for req in m.request_history))
