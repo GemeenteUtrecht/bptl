@@ -77,7 +77,7 @@ python-dateutil==2.8.1    # via -r requirements/base.txt, django-camunda, django
 python-decouple==3.3      # via -r requirements/base.txt
 python-dotenv==0.10.3     # via -r requirements/base.txt
 pytz==2019.3              # via -r requirements/base.txt, babel, celery, django, flower
-pyyaml==5.3               # via -r requirements/base.txt, gemma-zds-client
+pyyaml==5.4               # via -r requirements/base.txt, gemma-zds-client
 redis==3.3.11             # via -r requirements/base.txt, celery-once, django-redis
 requests-mock==1.8.0      # via -r requirements/base.txt, -r requirements/test-tools.in, zgw-consumers
 requests==2.22.0          # via -r requirements/base.txt, coreapi, django-auth-adfs, django-camunda, django-rosetta, gemma-zds-client, requests-mock, sphinx, zgw-consumers
