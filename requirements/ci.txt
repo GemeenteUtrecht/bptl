@@ -69,7 +69,7 @@ pillow==7.0.0             # via -r requirements/base.txt
 polib==1.1.0              # via -r requirements/base.txt, django-rosetta
 psycopg2==2.8.4           # via -r requirements/base.txt
 pycparser==2.19           # via -r requirements/base.txt, cffi
-pygments==2.5.2           # via -r requirements/base.txt, sphinx
+pygments==2.7.4           # via -r requirements/base.txt, sphinx
 pyjwt==1.7.1              # via -r requirements/base.txt, django-auth-adfs, gemma-zds-client
 pyparsing==2.4.6          # via -r requirements/base.txt, packaging
 pyquery==1.4.1            # via -r requirements/test-tools.in
