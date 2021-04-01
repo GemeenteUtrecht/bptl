@@ -105,6 +105,7 @@ def start_xential_template(task: BaseTask) -> dict:
         "valuesOption": {},
         "attachmentsOption": {},
         "ttlOption": {},
+        "storageOption": {"fixed": True, "target": "NONE"},
         "selectionOption": {"templateUuid": template_uuid},
         "webhooksOption": {
             "hooks": [
