@@ -157,7 +157,7 @@ def start_xential_template(task: BaseTask) -> dict:
         # Step 3: Build document silently
         # If not all template variables are filled, building the document will not work.
         build_document_url = "document/buildDocument"
-        params = {"documentUuid": document_uuid}
+        params = {"documentUuid": document_uuid, "close": "true"}
         xential_client.post(build_document_url, params=params)
 
         ticket.document_uuid = document_uuid
