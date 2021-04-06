@@ -62,14 +62,14 @@ inflection==0.3.1         # via -r requirements/base.txt, django-camunda, drf-ya
 itypes==1.1.0             # via -r requirements/base.txt, coreapi
 jinja2==2.11.3            # via -r requirements/base.txt, coreschema, sphinx
 kombu==4.6.7              # via -r requirements/base.txt, celery
-lxml==4.6.2               # via pyquery
+lxml==4.6.3               # via pyquery
 markupsafe==1.1.1         # via -r requirements/base.txt, jinja2
 packaging==20.1           # via -r requirements/base.txt, drf-yasg, sphinx
 pillow==7.0.0             # via -r requirements/base.txt
 polib==1.1.0              # via -r requirements/base.txt, django-rosetta
 psycopg2==2.8.4           # via -r requirements/base.txt
 pycparser==2.19           # via -r requirements/base.txt, cffi
-pygments==2.5.2           # via -r requirements/base.txt, sphinx
+pygments==2.8.1           # via -r requirements/base.txt, sphinx
 pyjwt==1.7.1              # via -r requirements/base.txt, django-auth-adfs, gemma-zds-client
 pyparsing==2.4.6          # via -r requirements/base.txt, packaging
 pyquery==1.4.1            # via -r requirements/test-tools.in
@@ -77,7 +77,7 @@ python-dateutil==2.8.1    # via -r requirements/base.txt, django-camunda, django
 python-decouple==3.3      # via -r requirements/base.txt
 python-dotenv==0.10.3     # via -r requirements/base.txt
 pytz==2019.3              # via -r requirements/base.txt, babel, celery, django, flower
-pyyaml==5.3               # via -r requirements/base.txt, gemma-zds-client
+pyyaml==5.4.1             # via -r requirements/base.txt, gemma-zds-client
 redis==3.3.11             # via -r requirements/base.txt, celery-once, django-redis
 requests-mock==1.8.0      # via -r requirements/base.txt, -r requirements/test-tools.in, zgw-consumers
 requests==2.22.0          # via -r requirements/base.txt, coreapi, django-auth-adfs, django-camunda, django-rosetta, gemma-zds-client, requests-mock, sphinx, zgw-consumers

@@ -61,14 +61,14 @@ pillow==7.0.0             # via -r requirements/base.in
 polib==1.1.0              # via django-rosetta
 psycopg2==2.8.4           # via -r requirements/base.in
 pycparser==2.19           # via cffi
-pygments==2.5.2           # via sphinx
+pygments==2.8.1           # via sphinx
 pyjwt==1.7.1              # via django-auth-adfs, gemma-zds-client
 pyparsing==2.4.6          # via packaging
 python-dateutil==2.8.1    # via django-camunda, django-relativedelta, faker
 python-decouple==3.3      # via -r requirements/base.in
 python-dotenv==0.10.3     # via -r requirements/base.in
 pytz==2019.3              # via -r requirements/base.in, babel, celery, django, flower
-pyyaml==5.3               # via gemma-zds-client
+pyyaml==5.4.1             # via gemma-zds-client
 redis==3.3.11             # via celery-once, django-redis
 requests-mock==1.8.0      # via zgw-consumers
 requests==2.22.0          # via coreapi, django-auth-adfs, django-camunda, django-rosetta, gemma-zds-client, requests-mock, sphinx, zgw-consumers
