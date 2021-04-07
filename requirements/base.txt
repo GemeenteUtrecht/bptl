@@ -166,8 +166,6 @@ packaging==20.1
     # via
     #   drf-yasg
     #   sphinx
-pillow==7.0.0
-    # via -r requirements/base.in
 polib==1.1.0
     # via django-rosetta
 psycopg2==2.8.4

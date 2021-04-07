@@ -267,8 +267,6 @@ pathspec==0.7.0
     # via black
 pep517==0.10.0
     # via pip-tools
-pillow==7.0.0
-    # via -r requirements/ci.txt
 pip-tools==6.0.1
     # via -r requirements/dev.in
 polib==1.1.0

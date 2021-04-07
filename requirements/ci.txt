@@ -229,8 +229,6 @@ packaging==20.1
     #   -r requirements/base.txt
     #   drf-yasg
     #   sphinx
-pillow==7.0.0
-    # via -r requirements/base.txt
 polib==1.1.0
     # via
     #   -r requirements/base.txt
