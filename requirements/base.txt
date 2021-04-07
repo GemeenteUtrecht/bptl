@@ -121,7 +121,7 @@ djangorestframework-camel-case==1.2.0
     # via -r requirements/base.in
 djangorestframework-xml==2.0.0
     # via -r requirements/base.in
-djangorestframework==3.12.4
+djangorestframework==3.11.2
     # via
     #   -r requirements/base.in
     #   drf-extra-fields
