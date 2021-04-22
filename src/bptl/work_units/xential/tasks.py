@@ -1,5 +1,6 @@
 import json
 import uuid
+from time import sleep
 from xml.dom import minidom
 
 from django.conf import settings
@@ -105,7 +106,7 @@ def start_xential_template(task: BaseTask) -> dict:
         "valuesOption": {},
         "attachmentsOption": {},
         "ttlOption": {},
-        "storageOption": {"fixed": True, "target": "NONE"},
+        "storageOption": {"fixed": True, "None": {}},
         "selectionOption": {"templateUuid": template_uuid},
         "webhooksOption": {
             "hooks": [
@@ -154,6 +155,10 @@ def start_xential_template(task: BaseTask) -> dict:
             start_document_url, params={"ticketUuid": ticket_uuid}
         )
         document_uuid = response_data["documentUuid"]
+
+        # It seems that if the buildDocument request is done too soon
+        # after startDocument, the document is not sent to the callback
+        sleep(5)
 
         # Step 3: Build document silently
         # If not all template variables are filled, building the document will not work.
