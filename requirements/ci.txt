@@ -286,7 +286,7 @@ requests-mock==1.8.0
     #   -r requirements/base.txt
     #   -r requirements/test-tools.in
     #   zgw-consumers
-requests==2.22.0
+requests==2.25.1
     # via
     #   -r requirements/base.txt
     #   coreapi
@@ -371,7 +371,7 @@ uritemplate==3.0.1
     #   -r requirements/base.txt
     #   coreapi
     #   drf-yasg
-urllib3==1.25.7
+urllib3==1.26.4
     # via
     #   -r requirements/base.txt
     #   elastic-apm

@@ -69,7 +69,7 @@ class ZGWClientLogTests(TestCase):
                     "headers": {
                         "Accept": "application/json",
                         "Connection": "keep-alive",
-                        "User-Agent": "python-requests/2.22.0",
+                        "User-Agent": "python-requests/2.25.1",
                         "Accept-Encoding": "gzip, deflate",
                         "Other-Header": "foobarbaz",
                     },

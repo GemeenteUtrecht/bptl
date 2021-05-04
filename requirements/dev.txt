@@ -332,7 +332,7 @@ requests-mock==1.8.0
     #   -r requirements/ci.txt
     #   ddt-api-calls
     #   zgw-consumers
-requests==2.22.0
+requests==2.25.1
     # via
     #   -r requirements/ci.txt
     #   coreapi
@@ -432,7 +432,7 @@ uritemplate==3.0.1
     #   -r requirements/ci.txt
     #   coreapi
     #   drf-yasg
-urllib3==1.25.7
+urllib3==1.26.4
     # via
     #   -r requirements/ci.txt
     #   elastic-apm

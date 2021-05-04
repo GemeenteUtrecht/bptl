@@ -204,7 +204,7 @@ redis==3.3.11
     #   django-redis
 requests-mock==1.8.0
     # via zgw-consumers
-requests==2.22.0
+requests==2.25.1
     # via
     #   coreapi
     #   django-auth-adfs
@@ -256,7 +256,7 @@ uritemplate==3.0.1
     # via
     #   coreapi
     #   drf-yasg
-urllib3==1.25.7
+urllib3==1.26.4
     # via
     #   elastic-apm
     #   requests
