@@ -60,7 +60,6 @@ class SendEmailTask(WorkUnit):
 
             {
               "kownslFrontendUrl": "https://kownsl.utrechtproeftuin.nl/kownsl/<uuid>/",
-              "reminder": True,
               "deadline`": "2020-04-20"
             }
     """
@@ -83,12 +82,6 @@ class SendEmailTask(WorkUnit):
         # Get email template
         template_path = VALID_TEMPLATE_CHOICES[send_email["template"]]
         email_template = get_template(template_path)
-
-        # If email is a reminder, add reminder to subject line
-        if send_email["context"].get("reminder", ""):
-            send_email["email"][
-                "subject"
-            ] = f"HERINNERING: {send_email['email']['subject']}"
 
         # Render and send
         email_message = email_template.render(email_context)
