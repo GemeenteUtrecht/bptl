@@ -1,5 +1,5 @@
 {% extends "email/mails/base.txt" %}
-{% load i18n %}{% block body %}{% if reminder %}HERINNERING: {% endif %}Uw {{ review_type }} is vereist. {% if deadline %}U heeft tot {{ deadline }} om te reageren.{% endif %}
+{% load i18n %}{% block body %}Uw {{ review_type }} is vereist. {% if deadline %}U heeft tot {{ deadline }} om te reageren.{% endif %}
 
 Ga alstublieft hierheen: {{ kownslFrontendUrl }}
 

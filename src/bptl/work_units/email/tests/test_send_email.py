@@ -33,7 +33,6 @@ class SendEmailTests(TestCase):
                 "template": serialize_variable("generiek"),
                 "context": serialize_variable(
                     {
-                        "reminder": "True",
                         "deadline": "2020-04-20",
                         "kownslFrontendUrl": "test.com",
                     }
@@ -53,7 +52,7 @@ class SendEmailTests(TestCase):
             email.body,
             """Beste Jan Janssen,\n\nDit is pas leuk.\n\nMet vriendelijke groeten,\n\nKees Koos""",
         )
-        self.assertEqual(email.subject, "HERINNERING: Vakantiepret")
+        self.assertEqual(email.subject, "Vakantiepret")
         self.assertEqual(email.to, ["jan.janssen@test.test"])
         self.assertEqual(email.reply_to, ["kees.koos@test.test"])
 
@@ -99,7 +98,7 @@ class SendEmailTests(TestCase):
             email.body,
             """Beste Jan Janssen,
 
-HERINNERING: Uw advies is vereist. U heeft tot 20 april 2020 om te reageren.
+Uw advies is vereist. U heeft tot 20 april 2020 om te reageren.
 
 Ga alstublieft hierheen: test.com
 
@@ -109,7 +108,7 @@ Met vriendelijke groeten,
 
 Kees Koos""",
         )
-        self.assertEqual(email.subject, "HERINNERING: Vakantiepret")
+        self.assertEqual(email.subject, "Vakantiepret")
         self.assertEqual(email.to, ["jan.janssen@test.test"])
 
     def test_send_email_invalid_review_template(self):

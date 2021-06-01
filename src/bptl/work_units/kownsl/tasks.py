@@ -220,7 +220,6 @@ def get_email_details(task: BaseTask) -> dict:
             {
                 "deadline": "2020-12-31",
                 "kownslFrontendUrl": "somekownslurl",
-                "reminder": True/False,
             }
 
     * ``template``: a string that determines which template will be used for the email.
@@ -245,10 +244,6 @@ def get_email_details(task: BaseTask) -> dict:
     # Get deadline
     deadline_str = check_variable(variables, "deadline")
 
-    # Get reminder
-    deadline = datetime.datetime.strptime(deadline_str, "%Y-%m-%d")
-    reminder = datetime.datetime.now() + datetime.timedelta(days=1) >= deadline
-
     # Set email process variable
     email = {
         "subject": f"Uw {template} wordt gevraagd",
@@ -259,7 +254,6 @@ def get_email_details(task: BaseTask) -> dict:
     context = {
         "deadline": deadline_str,
         "kownslFrontendUrl": kownsl_frontend_url,
-        "reminder": reminder,
     }
 
     return {

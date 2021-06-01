@@ -1,5 +1,4 @@
 import copy
-import datetime
 import os
 import uuid
 
@@ -230,15 +229,11 @@ class KownslAPITests(TestCase):
             },
         )
 
-        reminder = datetime.datetime.now() + datetime.timedelta(
-            days=1
-        ) >= datetime.datetime(2020, 4, 20, 0, 0, 0)
         self.assertEqual(
             email_details["context"],
             {
                 "deadline": "2020-04-01",
                 "kownslFrontendUrl": "a-url.test",
-                "reminder": reminder,
             },
         )
 
