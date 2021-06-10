@@ -135,7 +135,7 @@ django-timeline-logger==1.1.2
     # via -r requirements/base.txt
 django-webtest==1.9.7
     # via -r requirements/test-tools.in
-django==2.2.20
+django==2.2.24
     # via
     #   -r requirements/base.txt
     #   django-appconf
