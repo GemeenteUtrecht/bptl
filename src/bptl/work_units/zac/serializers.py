@@ -7,6 +7,7 @@ class ZacUserDetailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, allow_blank=False)
     firstName = serializers.CharField(required=True, allow_blank=True)
     lastName = serializers.CharField(required=True, allow_blank=True)
+    username = serializers.CharField(required=True, allow_blank=False)
     name = serializers.SerializerMethodField()
 
     def get_name(self, obj):
