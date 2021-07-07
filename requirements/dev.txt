@@ -155,7 +155,7 @@ django-timeline-logger==1.1.2
     # via -r requirements/ci.txt
 django-webtest==1.9.7
     # via -r requirements/ci.txt
-django==2.2.20
+django==2.2.24
     # via
     #   -r requirements/ci.txt
     #   ddt-api-calls
@@ -432,7 +432,7 @@ uritemplate==3.0.1
     #   -r requirements/ci.txt
     #   coreapi
     #   drf-yasg
-urllib3==1.26.4
+urllib3==1.26.6
     # via
     #   -r requirements/ci.txt
     #   elastic-apm
