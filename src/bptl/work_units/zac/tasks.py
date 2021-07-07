@@ -1,6 +1,6 @@
 from requests import Response
 
-from bptl.tasks.base import WorkUnit, check_variable
+from bptl.tasks.base import MissingVariable, WorkUnit, check_variable
 from bptl.tasks.registry import register
 
 from .client import get_client, require_zac_service
@@ -11,14 +11,8 @@ from .serializers import ZacUsersDetailsSerializer
 @require_zac_service
 class UserDetailsTask(WorkUnit):
     """
-    Requests email and name data from usernames from the zac.
-
-    In the camunda process models accorderen/adviseren we have a list of usernames from
-    the zac. In order to send signaling emails, we will need to fetch
-    the email addresses and names from the zac and feed it back to the camunda process.
-
-    In this first implementation a simple and direct get request is done
-    at the zac.accounts.api endpoint.
+    Requests email and name data from usernames from the zac
+    and feeds them back to the camunda process.
 
     **Required process variables**
 
@@ -28,7 +22,15 @@ class UserDetailsTask(WorkUnit):
                 [
                     "user1",
                     "user2",
-                    "user3",
+                    "user3"
+                ]
+    OR
+    * ``emailaddresses``: JSON with email addresses.
+        .. code-block:: json
+
+                [
+                    "user1@email",
+                    "user2@email"
                 ]
 
     **Optional process variables**
@@ -45,6 +47,7 @@ class UserDetailsTask(WorkUnit):
             [
                 {
                     "name": "FirstName LastName",
+                    "username": "username",
                     "email": "test@test.nl"
                 }
             ]
@@ -53,8 +56,18 @@ class UserDetailsTask(WorkUnit):
 
     def get_client_response(self) -> Response:
         variables = self.task.get_variables()
-        usernames = check_variable(variables, "usernames")
-        params = {"include": usernames}
+        try:
+            usernames = check_variable(variables, "usernames")
+            params = {"include_username": usernames}
+        except MissingVariable:
+            try:
+                emails = check_variable(variables, "emailaddresses")
+                params = {"include_email": emails}
+            except MissingVariable:
+                raise MissingVariable(
+                    "Missing one of the required variables usernames or emailaddresses."
+                )
+
         with get_client(self.task) as client:
             return client.get("api/accounts/users", params=params)
 
