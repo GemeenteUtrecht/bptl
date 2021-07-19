@@ -30,10 +30,6 @@ class DocumentCreationCallbackView(views.APIView):
     parser_classes = [SnakeXMLParser]
 
     def post(self, request: Request) -> Response:
-        logger.error("Response data: %s", request.data)
-        logger.error("Ticket UUID: %s", request.data.get("bptl_ticket_uuid"))
-        logger.error("Xential Document b64: %s", request.data.get("document"))
-
         # The callback sends the base64 encoded document and the BPTL ticket ID as XML.
         serializer = CallbackDataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
