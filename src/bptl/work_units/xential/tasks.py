@@ -9,6 +9,7 @@ from django.contrib.sites.models import Site
 from celery.utils.log import get_task_logger
 from rest_framework.reverse import reverse
 
+from bptl.conf.environ import config
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
 
@@ -25,6 +26,15 @@ from .tokens import token_generator
 from .utils import check_document_api_required_fields
 
 logger = get_task_logger(__name__)
+
+
+def get_callback_url() -> str:
+    callback_url = config("XENTIAL_CALLBACK_URL", default=None)
+    if callback_url:
+        return callback_url
+
+    path = reverse("Xential:xential-callbacks")
+    return get_absolute_url(path)
 
 
 @register
@@ -114,7 +124,7 @@ def start_xential_template(task: BaseTask) -> dict:
                     "event": "document.built",
                     "retries": {"count": 0, "delayMs": 0},
                     "request": {
-                        "url": get_absolute_url(reverse("Xential:xential-callbacks")),
+                        "url": get_callback_url(),
                         "method": "POST",
                         "contentType": "application/xml",
                         "headers": [
