@@ -43,7 +43,9 @@ def get_callback_url() -> str:
 def start_xential_template(task: BaseTask) -> dict:
     """
     Run Xential template with requested variables.
+
     If the ``interactive`` task variable is:
+
     * ``True``: it returns a URL in ``bptlDocumentUrl`` for building a document interactively
     * ``False``: it returns an empty string in ``bptlDocumentUrl``
 
@@ -56,7 +58,7 @@ def start_xential_template(task: BaseTask) -> dict:
     * ``templateUuid``: the id of the template which should be started
     * ``interactive``: bool, whether the process will be interactive or not
     * ``templateVariables``: a JSON-object containing the data to fill the template. In an interactive flow, this can be
-        an empty object ``{}``:
+      an empty object ``{}``:
 
       .. code-block:: json
 
@@ -66,8 +68,8 @@ def start_xential_template(task: BaseTask) -> dict:
          }
 
     * ``documentMetadata``: a JSON-object containing the fields required to create a document in the Documenten API.
-        The fields shown below are required. The property 'creatiedatum' defaults to the day in which the document is
-        sent to the Documenten API and the property 'taal' defaults to 'nld' (dutch).
+      The fields shown below are required. The property 'creatiedatum' defaults to the day in which the document is
+      sent to the Documenten API and the property 'taal' defaults to 'nld' (dutch).
 
       .. code-block:: json
 
@@ -81,13 +83,13 @@ def start_xential_template(task: BaseTask) -> dict:
     **Optional process variable**
 
     * ``messageId``: string. The message ID to send back into the process when the
-    document is sent to the Documenten API. You can use this to continue process execution.
-    If left empty, then no message will be sent.
+      document is sent to the Documenten API. You can use this to continue process execution.
+      If left empty, then no message will be sent.
 
     **Sets the process variable**
 
     * ``bptlDocumentUrl``: BPTL specific URL for interactive documents.
-        If the document creation is not interactive, this will be empty.
+      If the document creation is not interactive, this will be empty.
 
     """
     variables = task.get_variables()

@@ -17,6 +17,7 @@ class UserDetailsTask(WorkUnit):
     **Required process variables**
 
     * ``usernames``: JSON with usernames.
+
         .. code-block:: json
 
                 [
@@ -24,8 +25,11 @@ class UserDetailsTask(WorkUnit):
                     "user2",
                     "user3"
                 ]
+
     OR
+
     * ``emailaddresses``: JSON with email addresses.
+
         .. code-block:: json
 
                 [

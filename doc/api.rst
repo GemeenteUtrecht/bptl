@@ -30,6 +30,9 @@ API's voor Zaakgericht Werken
 .. automodule:: bptl.work_units.zgw.tasks.zaak_relations
     :members:
 
+.. automodule:: bptl.work_units.zgw.tasks.documents
+    :members:
+
 BRP
 ---
 
@@ -52,6 +55,30 @@ ValidSign
 ---------
 
 .. automodule:: bptl.work_units.valid_sign.tasks
+    :members:
+
+Email
+-----
+
+.. automodule:: bptl.work_units.email.tasks
+    :members:
+
+Kownsl
+------
+
+.. automodule:: bptl.work_units.kownsl.tasks
+    :members:
+
+Xential
+-------
+
+.. automodule:: bptl.work_units.xential.tasks
+    :members:
+
+ZAC
+---
+
+.. automodule:: bptl.work_units.zac.tasks
     :members:
 
 Camunda tasks
