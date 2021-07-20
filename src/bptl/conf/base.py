@@ -438,7 +438,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": schedule(run_every=10),
     },
     "xential-docs-status-check": {
-        "task": "bptl.work_units.xential.tasks.task_check_failed_document_builds",
+        "task": "bptl.work_units.xential.tasks.check_failed_document_builds",
         "schedule": schedule(run_every=43200),  # 12 hours
     },
 }
