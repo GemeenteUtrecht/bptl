@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from zgw_consumers.constants import APITypes
 
-from bptl.tasks.base import check_variable
+from bptl.tasks.base import MissingVariable, check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
@@ -288,6 +288,17 @@ class RelateerZaak(ZGWWorkUnit):
         bijdrage_zaak_url = check_variable(variables, "zaakUrl")
         bijdrage_aard = check_variable(variables, "bijdrageAard")
 
+        # To avoid having to edit BPMN models - default of bijdrage_aard_omgekeerde_richting
+        # is "onderwerp".
+        try:
+            bijdrage_aard_omgekeerde_richting = check_variable(
+                variables, "bijdrageAardOmgekeerdeRichting", empty_allowed=True
+            )
+            if bijdrage_aard_omgekeerde_richting != "":
+                raise ValueError(f"Unknown 'bijdrage_aard': '{bijdrage_aard}'")
+        except MissingVariable:
+            bijdrage_aard_omgekeerde_richting = "onderwerp"
+
         if bijdrage_aard not in ["vervolg", "onderwerp", "bijdrage"]:
             raise ValueError(f"Unknown 'bijdrage_aard': '{bijdrage_aard}'")
 
@@ -309,6 +320,25 @@ class RelateerZaak(ZGWWorkUnit):
             url=zaak_url,
             request_headers=headers,
         )
+
+        # Relating of bijdrage zaken to their hoofd zaak.
+        if bijdrage_aard != "onderwerp" and bijdrage_aard_omgekeerde_richting:
+            bijdrage_zaak = zrc_client.retrieve(
+                "zaak", url=bijdrage_zaak_url, request_headers=headers
+            )
+            relevante_andere_zaken_bijdrage_zaak = bijdrage_zaak["relevanteAndereZaken"]
+            relevante_andere_zaken_bijdrage_zaak.append(
+                {
+                    "url": zaak_url,
+                    "aardRelatie": bijdrage_aard_omgekeerde_richting,
+                }
+            )
+            zrc_client.partial_update(
+                "zaak",
+                {"relevanteAndereZaken": relevante_andere_zaken_bijdrage_zaak},
+                url=bijdrage_zaak_url,
+                request_headers=headers,
+            )
 
         return {}
 
