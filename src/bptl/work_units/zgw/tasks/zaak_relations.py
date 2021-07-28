@@ -295,7 +295,9 @@ class RelateerZaak(ZGWWorkUnit):
                 variables, "bijdrageAardOmgekeerdeRichting", empty_allowed=True
             )
             if bijdrage_aard_omgekeerde_richting != "":
-                raise ValueError(f"Unknown 'bijdrageAardOmgekeerdeRichting': '{bijdrage_aard_omgekeerde_richting}'")
+                raise ValueError(
+                    f"Unknown 'bijdrageAardOmgekeerdeRichting': '{bijdrage_aard_omgekeerde_richting}'"
+                )
         except MissingVariable:
             bijdrage_aard_omgekeerde_richting = "onderwerp"
 
