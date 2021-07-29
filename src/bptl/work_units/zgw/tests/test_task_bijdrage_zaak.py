@@ -174,3 +174,38 @@ class RelateerZaakTests(TestCase):
                 ],
             },
         )
+
+    def test_relateer_zaak_bijdrage_aard_omgekeerde_richting_invalid(self, m):
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+        m.get(
+            ZAAK,
+            json={
+                "url": ZAAK,
+                "relevanteAndereZaken": [],
+            },
+        )
+        m.patch(
+            ZAAK,
+            status_code=200,
+            json={
+                "url": ZAAK,
+                "relevanteAndereZaken": [
+                    {
+                        "url": BIJDRAGE_ZAAK,
+                        "aardRelatie": "bijdrage",
+                    },
+                ],
+            },
+        )
+
+        self.fetched_task.variables[
+            "bijdrageAardOmgekeerdeRichting"
+        ] = serialize_variable("niks")
+        self.fetched_task.save()
+        task = RelateerZaak(self.fetched_task)
+
+        with self.assertRaises(ValueError) as e:
+            task.perform()
+        self.assertEqual(
+            e.exception.__str__(), "Unknown 'bijdrageAardOmgekeerdeRichting': 'niks'"
+        )
