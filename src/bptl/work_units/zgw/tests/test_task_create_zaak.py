@@ -2,15 +2,18 @@ from django.test import TestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
-from zgw_consumers.test import mock_service_oas_get
+from freezegun import freeze_time
+from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
+from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks import CreateZaakTask
 
 ZTC_URL = "https://some.ztc.nl/api/v1/"
 ZRC_URL = "https://some.zrc.nl/api/v1/"
+CATALOGUS = f"{ZTC_URL}/catalogussen/7022a89e-0dd1-4074-9c3a-1a990e6c18ab"
 ZAAKTYPE = f"{ZTC_URL}zaaktypen/abcd"
 STATUSTYPE = f"{ZTC_URL}statustypen/7ff0bd9d-571f-47d0-8205-77ae41c3fc0b"
 ROLTYPE_URL = f"{ZTC_URL}roltypen"
@@ -124,7 +127,9 @@ class CreateZaakTaskTests(TestCase):
             service__api_type="ztc",
             alias="ZTC",
         )
-        cls.fetched_task = ExternalTask.objects.create(
+
+    def setUp(self):
+        self.fetched_task = ExternalTask.objects.create(
             topic_name="some-topic",
             worker_id="test-worker-id",
             task_id="test-task-id",
@@ -141,7 +146,7 @@ class CreateZaakTaskTests(TestCase):
             },
         )
 
-    def test_create_zaak(self, m):
+    def test_create_zaak_zaaktype_specified(self, m):
         mock_service_oas_get(m, ZTC_URL, "ztc")
         mock_service_oas_get(m, ZRC_URL, "zrc")
 
@@ -151,6 +156,228 @@ class CreateZaakTaskTests(TestCase):
 
         task = CreateZaakTask(self.fetched_task)
 
+        result = task.perform()
+        self.assertEqual(
+            result,
+            {
+                "zaakUrl": ZAAK,
+                "zaakIdentificatie": "ZAAK-2020-0000000013",
+            },
+        )
+
+        request_zaak = next(
+            filter(
+                lambda x: x.url == f"{ZRC_URL}zaken" and x.method == "POST",
+                m.request_history,
+            )
+        )
+        self.assertEqual(request_zaak.headers["X-NLX-Request-Process-Id"], "12345")
+        self.assertEqual(request_zaak.headers["Authorization"], "Bearer 12345")
+
+    def test_create_zaak_zaaktype_details_missing_raises_error(self, m):
+        self.fetched_task.variables["zaaktype"] = serialize_variable("")
+        self.fetched_task.save()
+        task = CreateZaakTask(self.fetched_task)
+
+        with self.assertRaises(MissingVariable) as e:
+            task.perform()
+        self.assertEqual(
+            e.exception.__str__(), "The variable catalogusDomein is missing or empty."
+        )
+
+        self.fetched_task.variables["catalogusDomein"] = serialize_variable("ABR")
+        self.fetched_task.save()
+        task = CreateZaakTask(self.fetched_task)
+
+        with self.assertRaises(MissingVariable) as e:
+            task.perform()
+        self.assertEqual(
+            e.exception.__str__(),
+            "The variable zaaktypeIdentificatie is missing or empty.",
+        )
+
+    def test_create_zaak_cant_find_catalogus(self, m):
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+        self.fetched_task.variables["zaaktype"] = serialize_variable("")
+        self.fetched_task.variables["catalogusDomein"] = serialize_variable("ABR")
+        self.fetched_task.variables["zaaktypeIdentificatie"] = serialize_variable(
+            "abcd"
+        )
+        self.fetched_task.save()
+        task = CreateZaakTask(self.fetched_task)
+
+        m.get(
+            f"{ZTC_URL}catalogussen?domein=ABR&rsin=002220647",
+            status_code=200,
+            json={"count": 0, "next": None, "previous": None, "results": []},
+        )
+        with self.assertRaises(ValueError) as e:
+            task.perform()
+        self.assertEqual(
+            e.exception.__str__(),
+            "No catalogus found with domein ABR and RSIN 002220647.",
+        )
+
+    def test_create_zaak_cant_find_zaaktypen(self, m):
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+        self.fetched_task.variables["zaaktype"] = serialize_variable("")
+        self.fetched_task.variables["catalogusDomein"] = serialize_variable("ABR")
+        self.fetched_task.variables["zaaktypeIdentificatie"] = serialize_variable(
+            "abcd"
+        )
+        self.fetched_task.save()
+        task = CreateZaakTask(self.fetched_task)
+
+        catalogus = generate_oas_component(
+            "ztc",
+            "schemas/Catalogus",
+            url=CATALOGUS,
+        )
+        m.get(
+            f"{ZTC_URL}catalogussen?domein=ABR&rsin=002220647",
+            status_code=200,
+            json={"count": 1, "next": None, "previous": None, "results": [catalogus]},
+        )
+        m.get(
+            f"{ZTC_URL}zaaktypen?catalogus=https%3A%2F%2Fsome.ztc.nl%2Fapi%2Fv1%2F%2Fcatalogussen%2F7022a89e-0dd1-4074-9c3a-1a990e6c18ab&identificatie=abcd",
+            status_code=200,
+            json={"count": 0, "next": None, "previous": None, "results": []},
+        )
+        with self.assertRaises(ValueError) as e:
+            task.perform()
+        self.assertEqual(
+            e.exception.__str__(),
+            "No zaaktype was found with catalogus https://some.ztc.nl/api/v1//catalogussen/7022a89e-0dd1-4074-9c3a-1a990e6c18ab and identificatie abcd.",
+        )
+
+    @freeze_time("2021-08-02")
+    def test_create_zaak_cant_find_unique_zaaktype(self, m):
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+        self.fetched_task.variables["zaaktype"] = serialize_variable("")
+        self.fetched_task.variables["catalogusDomein"] = serialize_variable("ABR")
+        self.fetched_task.variables["zaaktypeIdentificatie"] = serialize_variable(
+            "abcd"
+        )
+        self.fetched_task.save()
+        task = CreateZaakTask(self.fetched_task)
+
+        catalogus = generate_oas_component(
+            "ztc",
+            "schemas/Catalogus",
+            url=CATALOGUS,
+        )
+        m.get(
+            f"{ZTC_URL}catalogussen?domein=ABR&rsin=002220647",
+            status_code=200,
+            json={"count": 1, "next": None, "previous": None, "results": [catalogus]},
+        )
+        zaaktype = generate_oas_component("ztc", "schemas/ZaakType")
+        m.get(
+            f"{ZTC_URL}zaaktypen?catalogus=https%3A%2F%2Fsome.ztc.nl%2Fapi%2Fv1%2F%2Fcatalogussen%2F7022a89e-0dd1-4074-9c3a-1a990e6c18ab&identificatie=abcd",
+            status_code=200,
+            json={
+                "count": 2,
+                "next": None,
+                "previous": None,
+                "results": [zaaktype, zaaktype],
+            },
+        )
+        with self.assertRaises(ValueError) as e:
+            task.perform()
+        self.assertEqual(
+            e.exception.__str__(),
+            "No unique zaaktype was found with catalogus https://some.ztc.nl/api/v1//catalogussen/7022a89e-0dd1-4074-9c3a-1a990e6c18ab, identificatie abcd with begin_geldigheid <= 2021-08-02 <= einde_geldigheid.",
+        )
+
+    @freeze_time("2021-08-02")
+    def test_create_zaak_cant_find_valid_zaaktype(self, m):
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+        self.fetched_task.variables["zaaktype"] = serialize_variable("")
+        self.fetched_task.variables["catalogusDomein"] = serialize_variable("ABR")
+        self.fetched_task.variables["zaaktypeIdentificatie"] = serialize_variable(
+            "abcd"
+        )
+        self.fetched_task.save()
+        task = CreateZaakTask(self.fetched_task)
+
+        catalogus = generate_oas_component(
+            "ztc",
+            "schemas/Catalogus",
+            url=CATALOGUS,
+        )
+        m.get(
+            f"{ZTC_URL}catalogussen?domein=ABR&rsin=002220647",
+            status_code=200,
+            json={"count": 1, "next": None, "previous": None, "results": [catalogus]},
+        )
+        zaaktype_1 = generate_oas_component(
+            "ztc", "schemas/ZaakType", beginGeldigheid="2021-08-05"
+        )
+        zaaktype_2 = generate_oas_component(
+            "ztc", "schemas/ZaakType", beginGeldigheid="2021-08-03"
+        )
+        m.get(
+            f"{ZTC_URL}zaaktypen?catalogus=https%3A%2F%2Fsome.ztc.nl%2Fapi%2Fv1%2F%2Fcatalogussen%2F7022a89e-0dd1-4074-9c3a-1a990e6c18ab&identificatie=abcd",
+            status_code=200,
+            json={
+                "count": 2,
+                "next": None,
+                "previous": None,
+                "results": [zaaktype_1, zaaktype_2],
+            },
+        )
+        with self.assertRaises(ValueError) as e:
+            task.perform()
+        self.assertEqual(
+            e.exception.__str__(),
+            "No zaaktype was found with catalogus https://some.ztc.nl/api/v1//catalogussen/7022a89e-0dd1-4074-9c3a-1a990e6c18ab, identificatie abcd with begin_geldigheid <= 2021-08-02 <= einde_geldigheid.",
+        )
+
+    @freeze_time("2021-08-02")
+    def test_create_zaak_found_valid_zaaktype(self, m):
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+        self.fetched_task.variables["zaaktype"] = serialize_variable("")
+        self.fetched_task.variables["catalogusDomein"] = serialize_variable("ABR")
+        self.fetched_task.variables["zaaktypeIdentificatie"] = serialize_variable(
+            "abcd"
+        )
+        self.fetched_task.save()
+        task = CreateZaakTask(self.fetched_task)
+
+        catalogus = generate_oas_component(
+            "ztc",
+            "schemas/Catalogus",
+            url=CATALOGUS,
+        )
+        m.get(
+            f"{ZTC_URL}catalogussen?domein=ABR&rsin=002220647",
+            status_code=200,
+            json={"count": 1, "next": None, "previous": None, "results": [catalogus]},
+        )
+        zaaktype_1 = generate_oas_component(
+            "ztc",
+            "schemas/ZaakType",
+            beginGeldigheid="2021-08-01",
+            url=ZAAKTYPE,
+        )
+        zaaktype_2 = generate_oas_component(
+            "ztc", "schemas/ZaakType", beginGeldigheid="2021-08-03"
+        )
+        m.get(
+            f"{ZTC_URL}zaaktypen?catalogus=https%3A%2F%2Fsome.ztc.nl%2Fapi%2Fv1%2F%2Fcatalogussen%2F7022a89e-0dd1-4074-9c3a-1a990e6c18ab&identificatie=abcd",
+            status_code=200,
+            json={
+                "count": 2,
+                "next": None,
+                "previous": None,
+                "results": [zaaktype_1, zaaktype_2],
+            },
+        )
+
+        mock_statustypen_get(m)
+        m.post(f"{ZRC_URL}zaken", status_code=201, json=RESPONSES[ZAAK])
+        mock_status_post(m)
         result = task.perform()
         self.assertEqual(
             result,
