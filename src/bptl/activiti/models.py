@@ -7,7 +7,7 @@ from bptl.tasks.models import BaseTask
 
 
 class ActivitiConfig(SingletonModel):
-    """ configuration of Activiti service, including base url and credentials """
+    """configuration of Activiti service, including base url and credentials"""
 
     root_url = models.URLField(
         _("activiti root"),

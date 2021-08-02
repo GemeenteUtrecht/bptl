@@ -33,14 +33,14 @@ class Relations:
         self.people = [Person(bsn=subject, type="origin", distance=0)]
 
     def included(self, bsn: str) -> bool:
-        """ check if requested bsn is in the relations set. Return boolean"""
+        """check if requested bsn is in the relations set. Return boolean"""
         for p in self.people:
             if p.bsn == bsn:
                 return True
         return False
 
     def add_relations(self, ids: Iterable, relation_type: str, distance: int):
-        """ If the requested bsn is not in relations yet, add it to the relations"""
+        """If the requested bsn is not in relations yet, add it to the relations"""
         for bsn in ids:
             if not self.included(bsn):
                 self.people.append(Person(bsn, relation_type, distance))

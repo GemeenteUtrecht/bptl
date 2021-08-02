@@ -2,7 +2,7 @@
 celery
 celery-once
 gemma-zds-client
-psycopg2  # database driver
+psycopg2 < 2.9 # database driver
 pytz  # handle timezones
 python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
@@ -11,7 +11,7 @@ zgw-consumers
 
 # Framework libraries
 django < 3.0
-django-admin-index
+django-admin-index < 1.4.0
 django-auth-adfs-db
 django-axes
 django-camunda
