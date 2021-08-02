@@ -266,6 +266,8 @@ class RelateerZaak(ZGWWorkUnit):
 
     * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
     * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+    * ``bijdrageAardOmgekeerdeRichting``: the type of reverse relation. One of ``vervolg``, ``onderwerp``, ``bijdrage`` or empty (``""``).
+      Default is ``onderwerp`` if the process variable isn't given.
 
     **Optional process variables (Camunda exclusive)**
 
