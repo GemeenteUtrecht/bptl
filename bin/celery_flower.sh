@@ -1,2 +1,2 @@
 #!/bin/bash
-exec celery flower --app bptl --workdir src
+exec celery --workdir src --app bptl flower 
