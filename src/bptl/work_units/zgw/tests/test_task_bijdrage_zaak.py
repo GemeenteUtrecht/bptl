@@ -49,6 +49,13 @@ class RelateerZaakTests(TestCase):
                 "relevanteAndereZaken": [],
             },
         )
+        m.get(
+            BIJDRAGE_ZAAK,
+            json={
+                "url": BIJDRAGE_ZAAK,
+                "relevanteAndereZaken": [],
+            },
+        )
         m.patch(
             ZAAK,
             status_code=200,
@@ -62,6 +69,19 @@ class RelateerZaakTests(TestCase):
                 ],
             },
         )
+        m.patch(
+            BIJDRAGE_ZAAK,
+            status_code=200,
+            json={
+                "url": BIJDRAGE_ZAAK,
+                "relevanteAndereZaken": [
+                    {
+                        "url": ZAAK,
+                        "aardRelatie": "onderwerp",
+                    },
+                ],
+            },
+        )
 
         task = RelateerZaak(self.fetched_task)
 
@@ -69,7 +89,18 @@ class RelateerZaakTests(TestCase):
 
         self.assertEqual(result, {})
         self.assertEqual(
-            m.last_request.json(),
+            m.request_history[-1].json(),
+            {
+                "relevanteAndereZaken": [
+                    {
+                        "url": ZAAK,
+                        "aardRelatie": "onderwerp",
+                    },
+                ],
+            },
+        )
+        self.assertEqual(
+            m.request_history[-3].json(),
             {
                 "relevanteAndereZaken": [
                     {
@@ -99,3 +130,82 @@ class RelateerZaakTests(TestCase):
 
         self.assertIsNone(result)
         self.assertEqual(len(m.request_history), 0)
+
+    def test_relateer_zaak_empty_bijdrage_aard_omgekeerde_richting(self, m):
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+        m.get(
+            ZAAK,
+            json={
+                "url": ZAAK,
+                "relevanteAndereZaken": [],
+            },
+        )
+        m.patch(
+            ZAAK,
+            status_code=200,
+            json={
+                "url": ZAAK,
+                "relevanteAndereZaken": [
+                    {
+                        "url": BIJDRAGE_ZAAK,
+                        "aardRelatie": "bijdrage",
+                    },
+                ],
+            },
+        )
+
+        self.fetched_task.variables[
+            "bijdrageAardOmgekeerdeRichting"
+        ] = serialize_variable("")
+        self.fetched_task.save()
+        task = RelateerZaak(self.fetched_task)
+
+        result = task.perform()
+
+        self.assertEqual(result, {})
+        self.assertEqual(
+            m.last_request.json(),
+            {
+                "relevanteAndereZaken": [
+                    {
+                        "url": BIJDRAGE_ZAAK,
+                        "aardRelatie": "bijdrage",
+                    },
+                ],
+            },
+        )
+
+    def test_relateer_zaak_bijdrage_aard_omgekeerde_richting_invalid(self, m):
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+        m.get(
+            ZAAK,
+            json={
+                "url": ZAAK,
+                "relevanteAndereZaken": [],
+            },
+        )
+        m.patch(
+            ZAAK,
+            status_code=200,
+            json={
+                "url": ZAAK,
+                "relevanteAndereZaken": [
+                    {
+                        "url": BIJDRAGE_ZAAK,
+                        "aardRelatie": "bijdrage",
+                    },
+                ],
+            },
+        )
+
+        self.fetched_task.variables[
+            "bijdrageAardOmgekeerdeRichting"
+        ] = serialize_variable("niks")
+        self.fetched_task.save()
+        task = RelateerZaak(self.fetched_task)
+
+        with self.assertRaises(ValueError) as e:
+            task.perform()
+        self.assertEqual(
+            e.exception.__str__(), "Unknown 'bijdrageAardOmgekeerdeRichting': 'niks'"
+        )

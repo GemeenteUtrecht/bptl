@@ -4,9 +4,10 @@ from concurrent import futures
 from typing import Dict, Optional
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
+from zgw_consumers.api_models.constants import AardRelatieChoices
 from zgw_consumers.constants import APITypes
 
-from bptl.tasks.base import check_variable
+from bptl.tasks.base import MissingVariable, check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
@@ -265,6 +266,8 @@ class RelateerZaak(ZGWWorkUnit):
 
     * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
     * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+    * ``bijdrageAardOmgekeerdeRichting``: the type of reverse relation. One of ``vervolg``, ``onderwerp``, ``bijdrage`` or empty (``""``).
+      Default is ``onderwerp`` if the process variable isn't given.
 
     **Optional process variables (Camunda exclusive)**
 
@@ -288,7 +291,7 @@ class RelateerZaak(ZGWWorkUnit):
         bijdrage_zaak_url = check_variable(variables, "zaakUrl")
         bijdrage_aard = check_variable(variables, "bijdrageAard")
 
-        if bijdrage_aard not in ["vervolg", "onderwerp", "bijdrage"]:
+        if bijdrage_aard not in AardRelatieChoices.values:
             raise ValueError(f"Unknown 'bijdrage_aard': '{bijdrage_aard}'")
 
         headers = get_nlx_headers(variables)
@@ -309,6 +312,44 @@ class RelateerZaak(ZGWWorkUnit):
             url=zaak_url,
             request_headers=headers,
         )
+
+        try:
+            bijdrage_aard_omgekeerde_richting = check_variable(
+                variables, "bijdrageAardOmgekeerdeRichting", empty_allowed=True
+            )
+            if (
+                bijdrage_aard_omgekeerde_richting
+                and bijdrage_aard_omgekeerde_richting not in AardRelatieChoices.values
+            ):
+                raise ValueError(
+                    f"Unknown 'bijdrageAardOmgekeerdeRichting': '{bijdrage_aard_omgekeerde_richting}'"
+                )
+        except MissingVariable:
+            # To avoid having to edit BPMN models - default of bijdrage_aard_omgekeerde_richting
+            # is "onderwerp" if it isn't explicitly given in the variables.
+            bijdrage_aard_omgekeerde_richting = AardRelatieChoices.onderwerp
+
+        # Relating of secondary zaken to their main zaak.
+        if (
+            bijdrage_aard != AardRelatieChoices.onderwerp
+            and bijdrage_aard_omgekeerde_richting
+        ):
+            bijdrage_zaak = zrc_client.retrieve(
+                "zaak", url=bijdrage_zaak_url, request_headers=headers
+            )
+            relevante_andere_zaken_bijdrage_zaak = bijdrage_zaak["relevanteAndereZaken"]
+            relevante_andere_zaken_bijdrage_zaak.append(
+                {
+                    "url": zaak_url,
+                    "aardRelatie": bijdrage_aard_omgekeerde_richting,
+                }
+            )
+            zrc_client.partial_update(
+                "zaak",
+                {"relevanteAndereZaken": relevante_andere_zaken_bijdrage_zaak},
+                url=bijdrage_zaak_url,
+                request_headers=headers,
+            )
 
         return {}
 
