@@ -19,12 +19,14 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: full URL of the ZAAK to set the RESULTAAT for
+    * ``zaakUrl``: full URL of the ZAAK to set the RESULTAAT for.
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
-    * ``resultaattype``: full URL of the RESULTAATTYPE to set
-    -OR-
+    * ``services``: DEPRECATED - support will be removed in 1.1.
+    * ``resultaattype``: full URL of the RESULTAATTYPE to set.
+
+      **OR**
+
     * ``omschrijving``: description of RESULTAAT.
 
     **Optional process variables**
@@ -33,11 +35,11 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``resultaatUrl``: the full URL of the created RESULTAAT
+    * ``resultaatUrl``: the full URL of the created RESULTAAT.
     """
 
     def _get_resultaattype(self, zaak_url: str, variables: dict) -> str:
@@ -46,6 +48,11 @@ class CreateResultaatTask(ZGWWorkUnit):
         except MissingVariable:
             try:
                 omschrijving = check_variable(variables, "omschrijving")
+            except MissingVariable:
+                raise MissingVariable(
+                    "Missing both resultaattype and omschrijving. One is required."
+                )
+            else:
                 zrc_client = self.get_client(APITypes.zrc)
                 zaak = zrc_client.retrieve("zaak", url=zaak_url)
                 ztc_client = self.get_client(APITypes.ztc)
@@ -58,12 +65,11 @@ class CreateResultaatTask(ZGWWorkUnit):
                         "No resultaattypen were found for zaaktype %s."
                         % zaak["zaaktype"]
                     )
-                resultaattype = list(
-                    filter(
-                        lambda rt: rt["omschrijving"].lower() == omschrijving.lower(),
-                        resultaattypen["results"],
-                    )
-                )
+                resultaattype = [
+                    rt
+                    for rt in resultaattypen["results"]
+                    if rt["omschrijving"].lower() == omschrijving.lower()
+                ]
                 if len(resultaattype) != 1:
                     raise ValueError(
                         "No%s resultaattype was found with zaaktype %s and omschrijving %s."
@@ -74,10 +80,6 @@ class CreateResultaatTask(ZGWWorkUnit):
                         )
                     )
                 resultaattype = resultaattype[0]["url"]
-            except MissingVariable:
-                raise MissingVariable(
-                    "Missing both resultaattype and omschrijving. One is required."
-                )
         return resultaattype
 
     def create_resultaat(self):

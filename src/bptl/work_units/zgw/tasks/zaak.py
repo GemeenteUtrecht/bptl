@@ -121,9 +121,7 @@ class CreateZaakTask(ZGWWorkUnit):
                     else:
                         return zaaktype.begin_geldigheid <= date.today()
 
-                zaaktypen = list(
-                    filter(lambda zt: _filter_on_geldigheid(zt), zaaktypen)
-                )
+                zaaktypen = [zt for zt in zaaktypen if _filter_on_geldigheid(zt)]
                 if len(zaaktypen) != 1:
                     raise ValueError(
                         "No%s zaaktype was found with catalogus %s, identificatie %s with begin_geldigheid <= %s <= einde_geldigheid."
