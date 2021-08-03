@@ -4,9 +4,11 @@ from typing import Any, Dict, Optional
 
 from django.utils import timezone
 
+from zgw_consumers.api_models.base import factory
+from zgw_consumers.api_models.catalogi import ZaakType
 from zgw_consumers.constants import APITypes
 
-from bptl.tasks.base import check_variable
+from bptl.tasks.base import MissingVariable, check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
@@ -30,46 +32,121 @@ class CreateZaakTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaaktype``: the full URL of the ZAAKTYPE
-    * ``organisatieRSIN``: RSIN of the organisation
+    * ``organisatieRSIN``: RSIN of the organisation.
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+    * ``catalogusDomein``: abbrevation for the domain of the catalogus of the ZAAKTYPEn.
     * ``services``: DEPRECATED - support will be removed in 1.1
+    * ``zaaktypeIdentificatie``: ID of ZAAKTYPE.
+
 
     **Optional process variables**
 
-    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
-    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+    * ``NLXProcessId``: a process id for purpose registration ("doelbinding").
+    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding").
+    * ``initialStatusRemarks``: a text to use for the remarks field on the initial status.
+      Must be maximum 1000 characters.
+    * ``catalogusRSIN``: RSIN of catalogus where zaaktype can be found. Defaults to ``organisatieRSIN``.
+    * ``initiator``: a JSON object with data used to create a rol for a particular zaak. See
+        https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
     * ``zaakDetails``: a JSON object with extra properties for zaak creation. See
       https://zaken-api.vng.cloud/api/v1/schema/#operation/zaak_create for the available
       properties. Note that you can use these to override ``zaaktype``, ``bronorganisatie``,
       ``verantwoordelijkeOrganisatie``, ``registratiedatum`` and ``startdatum`` if you'd
       require so.
-    * ``initialStatusRemarks``: a text to use for the remarks field on the initial status.
-      Must be maximum 1000 characters.
-    * ``initiator``: a JSON object with data used to create a rol for a particular zaak. See
-        https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
+    * ``zaaktype``: the full URL of the ZAAKTYPE.
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl``: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``zaak``: the JSON response of the created ZAAK
-    * ``zaakUrl``: the full URL of the created ZAAK
-    * ``zaakIdentificatie``: the identificatie of the created ZAAK
+    * ``zaak``: the JSON response of the created ZAAK.
+    * ``zaakUrl``: the full URL of the created ZAAK.
+    * ``zaakIdentificatie``: the identificatie of the created ZAAK.
     """
+
+    def _get_zaaktype(self, variables: dict) -> str:
+        if not hasattr(self, "_zaaktype"):
+            if not (zaaktype_url := variables.get("zaaktype", "")):
+                catalogus_domein = check_variable(variables, "catalogusDomein")
+                catalogus_rsin = variables.get("catalogusRSIN") or check_variable(
+                    variables, "organisatieRSIN"
+                )
+                zaaktype_identificatie = check_variable(
+                    variables, "zaaktypeIdentificatie"
+                )
+
+                request_kwargs = {
+                    "params": {"domein": catalogus_domein, "rsin": catalogus_rsin}
+                }
+                client_ztc = self.get_client(APITypes.ztc)
+                catalogus = client_ztc.list("catalogus", request_kwargs=request_kwargs)
+                try:
+                    catalogus_url = catalogus["results"][0]["url"]
+                except (KeyError, IndexError):
+                    raise ValueError(
+                        "No catalogus found with domein %s and RSIN %s."
+                        % (catalogus_domein, catalogus_rsin)
+                    )
+
+                request_kwargs = {
+                    "params": {
+                        "catalogus": catalogus_url,
+                        "identificatie": zaaktype_identificatie,
+                    }
+                }
+                zaaktypen = client_ztc.list("zaaktype", request_kwargs=request_kwargs)
+                if zaaktypen["count"] == 0:
+                    raise ValueError(
+                        "No zaaktype was found with catalogus %s and identificatie %s."
+                        % (
+                            catalogus_url,
+                            zaaktype_identificatie,
+                        )
+                    )
+
+                zaaktypen = [
+                    factory(ZaakType, zaaktype) for zaaktype in zaaktypen["results"]
+                ]
+
+                def _filter_on_geldigheid(zaaktype: ZaakType) -> bool:
+                    if zaaktype.einde_geldigheid:
+                        return (
+                            zaaktype.begin_geldigheid
+                            <= date.today()
+                            <= zaaktype.einde_geldigheid
+                        )
+                    else:
+                        return zaaktype.begin_geldigheid <= date.today()
+
+                zaaktypen = [zt for zt in zaaktypen if _filter_on_geldigheid(zt)]
+                if len(zaaktypen) != 1:
+                    raise ValueError(
+                        "No%s zaaktype was found with catalogus %s, identificatie %s with begin_geldigheid <= %s <= einde_geldigheid."
+                        % (
+                            "" if len(zaaktypen) == 0 else " unique",
+                            catalogus_url,
+                            zaaktype_identificatie,
+                            date.today(),
+                        )
+                    )
+
+                zaaktype_url = zaaktypen[0].url
+
+            self._zaaktype = zaaktype_url
+        return self._zaaktype
 
     def create_zaak(self) -> dict:
         variables = self.task.get_variables()
-
         extra_props = variables.get("zaakDetails", {})
+        zaaktype_url = self._get_zaaktype(variables)
 
         client_zrc = self.get_client(APITypes.zrc)
         today = date.today().strftime("%Y-%m-%d")
         data = {
-            "zaaktype": variables["zaaktype"],
+            "zaaktype": zaaktype_url,
             "bronorganisatie": variables["organisatieRSIN"],
             "verantwoordelijkeOrganisatie": variables["organisatieRSIN"],
             "registratiedatum": today,
@@ -90,7 +167,7 @@ class CreateZaakTask(ZGWWorkUnit):
 
         ztc_client = self.get_client(APITypes.ztc)
         query_params = {
-            "zaaktype": variables["zaaktype"],
+            "zaaktype": self._get_zaaktype(variables),
             "omschrijvingGeneriek": initiator.get("omschrijvingGeneriek", "initiator"),
         }
         rol_typen = ztc_client.list("roltype", query_params)
@@ -123,7 +200,7 @@ class CreateZaakTask(ZGWWorkUnit):
         # get statustype for initial status
         ztc_client = self.get_client(APITypes.ztc)
         statustypen = ztc_client.list(
-            "statustype", {"zaaktype": variables["zaaktype"]}
+            "statustype", {"zaaktype": self._get_zaaktype(variables)}
         )["results"]
         statustype = next(filter(lambda x: x["volgnummer"] == 1, statustypen))
 
@@ -169,6 +246,7 @@ class CloseZaakTask(ZGWWorkUnit):
 
     **Optional process variables**
 
+    * ``omschrijving``: description of the RESULTAATTYPE. RESULTAATTYPE takes priority.
     * ``resultaattype``: full URL of the RESULTAATTYPE to set.
       If provided the RESULTAAT is created before the ZAAK is closed
 
@@ -183,14 +261,15 @@ class CloseZaakTask(ZGWWorkUnit):
     * ``archiefactiedatum``: date when the archived zaak should be destroyed or transferred to the archive
     """
 
-    def create_resultaat(self):
-        resultaattype = self.task.get_variables().get("resultaattype")
-
-        if not resultaattype:
+    def create_resultaat(self) -> None:
+        try:
+            create_resultaat_work_unit = CreateResultaatTask(self.task)
+            create_resultaat_work_unit.create_resultaat()
+        except MissingVariable:
+            variables = self.task.get_variables()
+            zaak_url = variables.get("zaakUrl", variables.get("zaak"))
+            logger.warning("Can't create resultaat for %s." % zaak_url)
             return
-
-        create_resultaat_work_unit = CreateResultaatTask(self.task)
-        create_resultaat_work_unit.create_resultaat()
 
     def close_zaak(self) -> dict:
         variables = self.task.get_variables()

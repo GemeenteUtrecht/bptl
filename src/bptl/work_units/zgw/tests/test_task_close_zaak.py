@@ -3,7 +3,8 @@ import json
 from django.test import TestCase
 
 import requests_mock
-from zgw_consumers.test import mock_service_oas_get
+from django_camunda.utils import serialize_variable
+from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
@@ -100,6 +101,7 @@ class CloseZaakTaskTests(TestCase):
                 "zaak": ZAAK,
                 "resultaattype": RESULTAATTYPE,
                 "toelichting": "some resultaat",
+                "omschrijving": "some-omschrijving",
             },
         )
 
@@ -110,7 +112,7 @@ class CloseZaakTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaak": {"type": "String", "value": ZAAK, "valueInfo": {}},
+                "zaak": serialize_variable(ZAAK),
                 "services": {
                     "type": "json",
                     "value": json.dumps(
@@ -151,12 +153,8 @@ class CloseZaakTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaak": {"type": "String", "value": ZAAK, "valueInfo": {}},
-                "resultaattype": {
-                    "type": "String",
-                    "value": RESULTAATTYPE,
-                    "valueInfo": {},
-                },
+                "zaak": serialize_variable(ZAAK),
+                "resultaattype": serialize_variable(RESULTAATTYPE),
                 "services": {
                     "type": "json",
                     "value": json.dumps(
@@ -169,6 +167,66 @@ class CloseZaakTaskTests(TestCase):
             },
         )
 
+        task = CloseZaakTask(fetched_task)
+
+        result = task.perform()
+
+        self.assertEqual(
+            result,
+            {
+                "einddatum": "2020-01-20",
+                "archiefnominatie": "blijvend_bewaren",
+                "archiefactiedatum": "2025-01-20",
+            },
+        )
+        history_resultaat = list(
+            filter(
+                lambda x: x.method == "POST" and x.url == f"{ZRC_URL}resultaten",
+                m.request_history,
+            )
+        )
+        self.assertEqual(len(history_resultaat), 1)
+        self.assertEqual(
+            history_resultaat[0].json(),
+            {"zaak": ZAAK, "resultaattype": RESULTAATTYPE, "toelichting": ""},
+        )
+
+    def test_close_zaak_with_resultaattype_omschrijving(self, m):
+        self._mock_zgw(m)
+
+        fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "zaak": serialize_variable(ZAAK),
+                "omschrijving": serialize_variable("some-omschrijving"),
+                "services": {
+                    "type": "json",
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
+                    ),
+                },
+            },
+        )
+        resultaattype = generate_oas_component(
+            "ztc",
+            "schemas/ResultaatType",
+            omschrijving="some-omschrijving",
+            url=RESULTAATTYPE,
+        )
+        m.get(
+            f"{ZTC_URL}resultaattypen?zaaktype={ZAAKTYPE}",
+            json={
+                "count": 1,
+                "next": None,
+                "previous": None,
+                "results": [resultaattype],
+            },
+        )
         task = CloseZaakTask(fetched_task)
 
         result = task.perform()
