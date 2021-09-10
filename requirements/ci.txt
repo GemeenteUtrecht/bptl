@@ -405,7 +405,7 @@ sphinxcontrib-serializinghtml==1.1.5
     # via
     #   -r requirements/base.txt
     #   sphinx
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via
     #   -r requirements/base.txt
     #   django
