@@ -54,7 +54,9 @@
             </div>
 
             <div class="task__topic">
-                {{ task.instance_id }}
+                {% if task.instance_id %}
+                    {{ task.instance_id }}
+                {% endif %}
             </div>
 
         </article>
