@@ -59,6 +59,10 @@
                 <code>{{ task.task_id }}</code>
             {% endnested %}
 
+            {% nested_widget 'kv:kv-row' name=_("Process Instance ID") %}
+                <code>{{ task.instance_id }}</code>
+            {% endnested %}
+
             {% nested_widget 'kv:kv-row' name=_("Lock expiry") %}
                 <time datetime="{{ task.lock_expires_at.isoformat }}">
                     {% blocktrans with expiry=task.lock_expires_at since=task.lock_expires_at|timesince trimmed %}

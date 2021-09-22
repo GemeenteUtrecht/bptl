@@ -1,9 +1,10 @@
 from django import forms
-from django.db.models import QuerySet
+from django.db.models import QuerySet, query
 
 import django_filters
 from django_filters import FilterSet
 
+from bptl.camunda.models import ExternalTask
 from bptl.tasks.constants import ENGINETYPE_MODEL_MAPPING, EngineTypes
 from bptl.tasks.models import BaseTask
 from bptl.utils.constants import Statuses
@@ -19,10 +20,23 @@ class TaskFilter(FilterSet):
         label="Type",
         widget=forms.CheckboxSelectMultiple,
     )
+    instance_id = django_filters.CharFilter(
+        method="filter_by_process_instance_id",
+        label="Process Instance (ID)",
+        widget=forms.TextInput,
+    )
 
     class Meta:
         model = BaseTask
-        fields = ("status", "topic_name", "engine_type")
+        fields = ("status", "topic_name", "engine_type", "instance_id")
+
+    def filter_by_process_instance_id(self, queryset, name, value: str) -> QuerySet:
+        if not value:
+            return queryset
+        qs = queryset.instance_of(ExternalTask).filter(
+            externaltask__instance_id__iexact=value
+        )
+        return qs
 
     def filter_by_type(self, queryset, name, value: list) -> QuerySet:
         if not value:
@@ -36,4 +50,4 @@ class TaskFilter(FilterSet):
         for engine_type in value[1:]:
             qs = qs | queryset.instance_of(ENGINETYPE_MODEL_MAPPING[engine_type])
 
-        return queryset
+        return qs
