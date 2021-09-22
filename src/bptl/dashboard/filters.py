@@ -33,7 +33,7 @@ class TaskFilter(FilterSet):
     def filter_by_process_instance_id(self, queryset, name, value: str) -> QuerySet:
         if not value:
             return queryset
-        qs = queryset.instance_of(ExternalTask).filter(
+        qs = queryset.filter(
             externaltask__instance_id__iexact=value
         )
         return qs
