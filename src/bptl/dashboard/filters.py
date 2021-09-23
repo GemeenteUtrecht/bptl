@@ -1,10 +1,9 @@
 from django import forms
-from django.db.models import QuerySet, query
+from django.db.models import QuerySet
 
 import django_filters
 from django_filters import FilterSet
 
-from bptl.camunda.models import ExternalTask
 from bptl.tasks.constants import ENGINETYPE_MODEL_MAPPING, EngineTypes
 from bptl.tasks.models import BaseTask
 from bptl.utils.constants import Statuses
