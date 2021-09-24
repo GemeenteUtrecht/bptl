@@ -80,7 +80,7 @@ def task_execute_and_complete(fetched_task_id):
         return
 
     instance_id = fetched_task.instance_id
-    logger.info("Task is part of process instance %d", instance_id)
+    logger.info("Task is part of process instance %s", instance_id)
 
     fetched_task.status = Statuses.in_progress
     fetched_task.save(update_fields=["status"])

@@ -20,7 +20,8 @@ class TaskFilter(FilterSet):
         widget=forms.CheckboxSelectMultiple,
     )
     instance_id = django_filters.CharFilter(
-        method="filter_by_process_instance_id",
+        field_name="externaltask__instance_id",
+        lookup_expr="icontains",
         label="Process Instance (ID)",
         widget=forms.TextInput,
     )
@@ -28,12 +29,6 @@ class TaskFilter(FilterSet):
     class Meta:
         model = BaseTask
         fields = ("status", "topic_name", "engine_type", "instance_id")
-
-    def filter_by_process_instance_id(self, queryset, name, value: str) -> QuerySet:
-        if not value:
-            return queryset
-        qs = queryset.filter(externaltask__instance_id__iexact=value)
-        return qs
 
     def filter_by_type(self, queryset, name, value: list) -> QuerySet:
         if not value:
