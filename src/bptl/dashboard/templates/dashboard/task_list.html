@@ -29,6 +29,10 @@
                 <strong>{% trans "Status" %}</strong>
             </div>
 
+            <div class="task__topic">
+                <strong>{% trans "Process Instance (ID)" %}</strong>
+            </div>
+
         </header>
 
         {% for task in tasks %}
@@ -47,6 +51,12 @@
 
             <div class="task__topic">
                 {{ task.get_status_display }}
+            </div>
+
+            <div class="task__topic">
+                {% if task.instance_id %}
+                    {{ task.instance_id }}
+                {% endif %}
             </div>
 
         </article>
