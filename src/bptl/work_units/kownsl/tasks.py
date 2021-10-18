@@ -85,7 +85,7 @@ def get_review_response_status(task: BaseTask) -> dict:
     **Required process variables**
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
+    * ``kownslUsers``: list of users or groups that have been configured in the review request configuration.
 
     **Optional process variables**
 
@@ -94,7 +94,7 @@ def get_review_response_status(task: BaseTask) -> dict:
 
     **Sets the process variables**
 
-    * ``remindThese``: a JSON-object containing a list of usernames who need reminding:
+    * ``remindThese``: a JSON-object containing a list of users or groups who need reminding:
 
       .. code-block:: json
 
@@ -122,7 +122,11 @@ def get_review_response_status(task: BaseTask) -> dict:
     # Build a list of users that have responded
     already_responded = []
     for review in reviews:
-        user = review["author"]
+        user = (
+            f"group:{review['group']}"
+            if review["group"]
+            else f"user:{review['author']['username']}"
+        )
         already_responded.append(user)
 
     # Check who should respond
