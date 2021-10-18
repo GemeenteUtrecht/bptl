@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes, AuthTypes
 
 from bptl.camunda.models import ExternalTask
@@ -10,10 +11,7 @@ from bptl.tasks.tests.factories import DefaultServiceFactory
 from ..tasks import UserDetailsTask
 
 ZAC_API_ROOT = "https://zac.example.com/"
-FILTER_USERS_URL_USERNAMES = (
-    f"{ZAC_API_ROOT}api/accounts/users?include_username=thor&include_username=loki"
-)
-FILTER_USERS_URL_EMAILS = f"{ZAC_API_ROOT}api/accounts/users?include_email=thor@email"
+ZAC_USERS_URL = f"{ZAC_API_ROOT}api/accounts/users"
 
 
 @requests_mock.Mocker()
@@ -29,7 +27,7 @@ class ZacTaskTests(TestCase):
             "variables": {
                 "usernames": {
                     "type": "Json",
-                    "value": '["thor", "loki"]',
+                    "value": '["user:thor", "user:loki"]',
                     "valueInfo": {},
                 },
             },
@@ -80,17 +78,55 @@ class ZacTaskTests(TestCase):
                 },
             ],
         }
-        m.get(FILTER_USERS_URL_USERNAMES, json=zac_mock_data)
+        m.get(ZAC_USERS_URL, json=zac_mock_data)
 
         task = UserDetailsTask(self.task_usernames)
         response = task.get_client_response()
-        self.assertEqual(response, zac_mock_data)
+        self.assertEqual(response, [zac_mock_data])
 
         cleaned_data = task.perform()
+        self.assertEqual(
+            m.last_request.url,
+            f"{ZAC_USERS_URL}?include_username=thor&include_username=loki",
+        )
         self.assertEqual(len(cleaned_data["userData"]), 2)
         for user in cleaned_data["userData"]:
             self.assertTrue("name" in user)
             self.assertTrue("email" in user)
+
+    def test_get_user_details_from_usernames_email_notifications(self, m):
+        zac_mock_data = {
+            "count": 1,
+            "results": [
+                {
+                    "id": "3",
+                    "username": "loki",
+                    "firstName": "Loki",
+                    "lastName": "Laufeyson",
+                    "email": "loki@laufeyson.no",
+                    "isLiar": "true",
+                },
+            ],
+        }
+        m.get(ZAC_USERS_URL, json=zac_mock_data)
+        task_notifications = {
+            "topic_name": "send-email",
+            "worker_id": "test-worker-id",
+            "task_id": "test-task-id",
+            "variables": {
+                "usernames": serialize_variable(["user:thor", "user:loki"]),
+                "emailNotificationList": serialize_variable(
+                    {"user:thor": False, "user:loki": True}
+                ),
+            },
+        }
+        task_notifications = ExternalTask.objects.create(
+            **task_notifications,
+        )
+        task = UserDetailsTask(task_notifications)
+        response = task.get_client_response()
+        self.assertEqual(response, [zac_mock_data])
+        self.assertEqual(m.last_request.url, f"{ZAC_USERS_URL}?include_username=loki")
 
     def test_get_user_details_from_emailaddresses(self, m):
         zac_mock_data = {
@@ -114,13 +150,17 @@ class ZacTaskTests(TestCase):
                 },
             ],
         }
-        m.get(FILTER_USERS_URL_EMAILS, json=zac_mock_data)
+        m.get(ZAC_USERS_URL, json=zac_mock_data)
 
         task = UserDetailsTask(self.task_emails)
         response = task.get_client_response()
-        self.assertEqual(response, zac_mock_data)
+        self.assertEqual(response, [zac_mock_data])
 
         cleaned_data = task.perform()
+        self.assertEqual(
+            m.last_request.url,
+            f"{ZAC_USERS_URL}?include_email=thor%40email&include_email=loki%40email",
+        )
         self.assertEqual(len(cleaned_data["userData"]), 2)
         for user in cleaned_data["userData"]:
             self.assertTrue("name" in user)
@@ -149,9 +189,13 @@ class ZacTaskTests(TestCase):
             ],
         }
 
-        m.get(FILTER_USERS_URL_USERNAMES, json=zac_mock_data)
+        m.get(ZAC_USERS_URL, json=zac_mock_data)
         task = UserDetailsTask(self.task_usernames)
         cleaned_data = task.perform()
+        self.assertEqual(
+            m.last_request.url,
+            f"{ZAC_USERS_URL}?include_username=thor&include_username=loki",
+        )
         self.assertEqual(len(cleaned_data["userData"]), 2)
         for user in cleaned_data["userData"]:
             self.assertEqual(user["name"], "Medewerker")
@@ -179,9 +223,13 @@ class ZacTaskTests(TestCase):
             ],
         }
 
-        m.get(FILTER_USERS_URL_USERNAMES, json=zac_mock_data)
+        m.get(ZAC_USERS_URL, json=zac_mock_data)
         task = UserDetailsTask(self.task_usernames)
         cleaned_data = task.perform()
+        self.assertEqual(
+            m.last_request.url,
+            f"{ZAC_USERS_URL}?include_username=thor&include_username=loki",
+        )
         self.assertEqual(len(cleaned_data["userData"]), 2)
         for user in cleaned_data["userData"]:
             if user["firstName"] == "loki":
@@ -212,7 +260,7 @@ class ZacTaskTests(TestCase):
             ],
         }
 
-        m.get(FILTER_USERS_URL_USERNAMES, json=zac_mock_data)
+        m.get(ZAC_USERS_URL, json=zac_mock_data)
         task = UserDetailsTask(self.task_usernames)
         with self.assertRaises(Exception) as e:
             task.perform()
@@ -248,7 +296,7 @@ class ZacTaskTests(TestCase):
             ],
         }
 
-        m.get(FILTER_USERS_URL_USERNAMES, json=zac_mock_data)
+        m.get(ZAC_USERS_URL, json=zac_mock_data)
         task = ExternalTask.objects.create(**{**self.task_dict, "variables": {}})
         task = UserDetailsTask(task)
         with self.assertRaises(Exception) as e:
@@ -258,4 +306,118 @@ class ZacTaskTests(TestCase):
         self.assertEqual(
             "Missing one of the required variables usernames or emailaddresses.",
             e.exception.args[0],
+        )
+
+    def test_get_user_details_from_groups_and_usernames_with_email_notifications(
+        self, m
+    ):
+        zac_mock_data_user = {
+            "count": 1,
+            "results": [
+                {
+                    "id": "3",
+                    "username": "loki",
+                    "firstName": "Loki",
+                    "lastName": "Laufeyson",
+                    "email": "loki@laufeyson.no",
+                    "isLiar": "true",
+                },
+            ],
+        }
+        m.get(f"{ZAC_USERS_URL}?include_username=loki", json=zac_mock_data_user)
+        zac_mock_data_group = {
+            "count": 1,
+            "results": [
+                {
+                    "id": "1",
+                    "username": "thor",
+                    "firstName": "",
+                    "lastName": "Odinson",
+                    "email": "thor@odinson.no",
+                    "isAwesome": "true",
+                },
+            ],
+        }
+        m.get(f"{ZAC_USERS_URL}?include_groups=norse-gods", json=zac_mock_data_group)
+        task = {
+            "topic_name": "send-email",
+            "worker_id": "test-worker-id",
+            "task_id": "test-task-id",
+            "variables": {
+                "usernames": serialize_variable(["group:norse-gods", "user:loki"]),
+                "emailNotificationList": serialize_variable(
+                    {"user:loki": True, "group:norse-gods": True}
+                ),
+            },
+        }
+        task = ExternalTask.objects.create(
+            **task,
+        )
+        task = UserDetailsTask(task)
+        response = task.get_client_response()
+        self.assertEqual(response, [zac_mock_data_user, zac_mock_data_group])
+        historical_urls = []
+        for request in m.request_history:
+            historical_urls.append(request.url)
+
+        self.assertTrue(f"{ZAC_USERS_URL}?include_groups=norse-gods" in historical_urls)
+        self.assertTrue(f"{ZAC_USERS_URL}?include_username=loki" in historical_urls)
+
+        results = task.perform()
+        self.assertEqual(
+            results,
+            {
+                "userData": [
+                    {
+                        "email": "loki@laufeyson.no",
+                        "firstName": "Loki",
+                        "lastName": "Laufeyson",
+                        "username": "loki",
+                        "name": "Loki Laufeyson",
+                    },
+                    {
+                        "email": "thor@odinson.no",
+                        "firstName": "",
+                        "lastName": "Odinson",
+                        "username": "thor",
+                        "name": "Odinson",
+                    },
+                ]
+            },
+        )
+
+    def test_get_user_details_from_groups_with_email_notifications(self, m):
+        zac_mock_data_group = {
+            "count": 1,
+            "results": [
+                {
+                    "id": "1",
+                    "username": "thor",
+                    "firstName": "",
+                    "lastName": "Odinson",
+                    "email": "thor@odinson.no",
+                    "isAwesome": "true",
+                },
+            ],
+        }
+        m.get(ZAC_USERS_URL, json=zac_mock_data_group)
+        task = {
+            "topic_name": "send-email",
+            "worker_id": "test-worker-id",
+            "task_id": "test-task-id",
+            "variables": {
+                "usernames": serialize_variable(["group:norse-gods", "user:loki"]),
+                "emailNotificationList": serialize_variable(
+                    {"user:thor": False, "group:norse-gods": True}
+                ),
+            },
+        }
+        task = ExternalTask.objects.create(
+            **task,
+        )
+        task = UserDetailsTask(task)
+        response = task.get_client_response()
+        self.assertEqual(response, [zac_mock_data_group])
+        self.assertEqual(
+            m.last_request.url, f"{ZAC_USERS_URL}?include_groups=norse-gods"
         )
