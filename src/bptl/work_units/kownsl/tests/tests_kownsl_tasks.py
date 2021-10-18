@@ -140,7 +140,7 @@ class KownslAPITests(TestCase):
 
         task_dict = copy.deepcopy(self.task_dict)
         task_dict["variables"]["kownslUsers"] = serialize_variable(
-            ["Zeus", "Poseidon", "Hades"]
+            ["user:zeus", "user:poseidon", "user:hades"]
         )
 
         task = ExternalTask.objects.create(
@@ -149,10 +149,12 @@ class KownslAPITests(TestCase):
 
         advice_response = [
             {
-                "author": "Zeus",
+                "author": {"username": "zeus"},
+                "group": "",
             },
             {
-                "author": "Poseidon",
+                "author": {"username": "poseidon"},
+                "group": "",
             },
         ]
 
@@ -170,11 +172,11 @@ class KownslAPITests(TestCase):
             "forZaak": "https://zaken.nl/api/v1/zaak/123",
             "reviewType": "advice",
             "userDeadlines": {
-                "Zeus": "2020-04-20",
-                "Poseidon": "2020-04-20",
-                "Hades": "2020-04-20",
-                "Hera": "2021-04-20",
-                "Demeter": "2021-04-20",
+                "user:zeus": "2020-04-20",
+                "user:poseidon": "2020-04-20",
+                "user:hades": "2020-04-20",
+                "user:hera": "2021-04-20",
+                "user:demeter": "2021-04-20",
             },
         }
         m.get(
@@ -184,7 +186,7 @@ class KownslAPITests(TestCase):
 
         task_dict = copy.deepcopy(self.task_dict)
         task_dict["variables"]["kownslUsers"] = serialize_variable(
-            ["Zeus", "Poseidon", "Hades"]
+            ["user:zeus", "user:poseidon", "user:hades"]
         )
 
         task = ExternalTask.objects.create(
