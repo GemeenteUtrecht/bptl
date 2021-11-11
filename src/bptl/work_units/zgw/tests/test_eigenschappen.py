@@ -142,3 +142,35 @@ class CreateDocumentRelationTaskTests(TestCase):
         task.perform()
 
         self.assertTrue(all(req.method == "GET" for req in m.request_history))
+
+    def test_eigenschap_waarde_is_empty(self, m):
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+
+        m.get(ZAAK, json={"zaaktype": ZAAKTYPE})
+        # https://catalogi-api.vng.cloud/api/v1/schema/#operation/eigenschap_list
+        fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "services": serialize_variable(
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 12345"},
+                    }
+                ),
+                "zaakUrl": serialize_variable(ZAAK),
+                "eigenschap": serialize_variable(
+                    {
+                        "naam": "referentie",
+                        "waarde": "",
+                    }
+                ),
+            },
+        )
+
+        task = CreateEigenschap(fetched_task)
+        task.perform()
+
+        self.assertTrue(all(req.method == "GET" for req in m.request_history))
