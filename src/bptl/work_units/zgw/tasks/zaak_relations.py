@@ -201,7 +201,12 @@ class CreateEigenschap(ZGWWorkUnit):
             return {}
 
         naam = check_variable(eigenschap, "naam")
-        waarde = check_variable(eigenschap, "waarde")
+        waarde = check_variable(eigenschap, "waarde", empty_allowed=True)
+        if not waarde:
+            logger.info(
+                "Skipping creation of eigenschap %s, empty value provided", naam
+            )
+            return {}
 
         # fetch zaaktype - either from process variable or derive from zaak
         zaaktype = variables.get("zaaktype")

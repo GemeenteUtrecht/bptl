@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from django.test import TestCase
 
 import requests_mock
@@ -142,3 +144,30 @@ class CreateDocumentRelationTaskTests(TestCase):
         task.perform()
 
         self.assertTrue(all(req.method == "GET" for req in m.request_history))
+
+    def test_eigenschap_value_missing_skip(self, m):
+        task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "services": serialize_variable(
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 12345"},
+                    }
+                ),
+                "zaakUrl": serialize_variable(ZAAK),
+                "eigenschap": serialize_variable(
+                    {
+                        "naam": "start",
+                        "waarde": "",
+                    }
+                ),
+            },
+        )
+
+        task = CreateEigenschap(task)
+        task.perform()
+
+        self.assertFalse(m.called)
