@@ -8,6 +8,7 @@ python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
 sphinx
 zgw-consumers
+setuptools < 59
 
 # Framework libraries
 django < 3.0

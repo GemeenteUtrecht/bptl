@@ -452,4 +452,9 @@ zgw-consumers==0.15.2
     # via -r requirements/base.txt
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools
+setuptools==58.5.3
+    # via
+    #   -r requirements/base.txt
+    #   celery
+    #   humanize
+    #   sphinx

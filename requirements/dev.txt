@@ -511,5 +511,12 @@ zgw-consumers==0.15.2
     # via -r requirements/ci.txt
 
 # The following packages are considered to be unsafe in a requirements file:
-# pip
-# setuptools
+pip==21.3.1
+    # via pip-tools
+setuptools==58.5.3
+    # via
+    #   -r requirements/ci.txt
+    #   celery
+    #   humanize
+    #   pip-tools
+    #   sphinx
