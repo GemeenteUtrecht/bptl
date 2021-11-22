@@ -248,6 +248,7 @@ class CloseZaakTask(ZGWWorkUnit):
 
     * ``omschrijving``: description of the RESULTAATTYPE. RESULTAATTYPE takes priority.
     * ``resultaattype``: full URL of the RESULTAATTYPE to set.
+    * ``statustoelichting``: description of the STATUS.
       If provided the RESULTAAT is created before the ZAAK is closed
 
     **Optional process variables (Camunda exclusive)**
@@ -290,6 +291,8 @@ class CloseZaakTask(ZGWWorkUnit):
             "statustype": statustype["url"],
             "datumStatusGezet": timezone.now().isoformat(),
         }
+        if toelichting := variables.get("statustoelichting"):
+            data["statustoelichting"] = toelichting
         zrc_client.create("status", data)
 
         # get zaak to receive calculated variables
