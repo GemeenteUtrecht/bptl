@@ -4,6 +4,7 @@ from django.test import TestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
+from freezegun import freeze_time
 from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
@@ -249,4 +250,67 @@ class CloseZaakTaskTests(TestCase):
         self.assertEqual(
             history_resultaat[0].json(),
             {"zaak": ZAAK, "resultaattype": RESULTAATTYPE, "toelichting": ""},
+        )
+
+    @freeze_time("2020-01-10")
+    def test_close_zaak_with_status_toelichting(self, m):
+        self._mock_zgw(m)
+
+        fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "zaak": serialize_variable(ZAAK),
+                "statustoelichting": serialize_variable("some-toelichting"),
+                "services": {
+                    "type": "json",
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
+                    ),
+                },
+            },
+        )
+        m.post(
+            f"{ZRC_URL}statussen",
+            status_code=201,
+            json={
+                "url": STATUS,
+                "uuid": "b7218c76-7478-41e9-a088-54d2f914a713",
+                "zaak": ZAAK,
+                "statustype": STATUSTYPE,
+                "datumStatusGezet": "2020-01-10T00:00:00+00:00",
+                "statustoelichting": "some-toelichting",
+            },
+        )
+        task = CloseZaakTask(fetched_task)
+
+        result = task.perform()
+
+        self.assertEqual(
+            result,
+            {
+                "einddatum": "2020-01-20",
+                "archiefnominatie": "blijvend_bewaren",
+                "archiefactiedatum": "2025-01-20",
+            },
+        )
+        history_status = list(
+            filter(
+                lambda x: x.method == "POST" and x.url == f"{ZRC_URL}statussen",
+                m.request_history,
+            )
+        )
+        self.assertEqual(len(history_status), 1)
+        self.assertEqual(
+            history_status[0].json(),
+            {
+                "zaak": ZAAK,
+                "statustype": STATUSTYPE,
+                "datumStatusGezet": "2020-01-10T00:00:00+00:00",
+                "statustoelichting": "some-toelichting",
+            },
         )
