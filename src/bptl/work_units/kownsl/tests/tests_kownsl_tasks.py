@@ -243,7 +243,7 @@ class KownslAPITests(TestCase):
         self.assertEqual(email_details["template"], "advies")
 
         self.assertTrue("senderUsername" in email_details)
-        self.assertEqual(email_details["senderUsername"], ["Pietje"])
+        self.assertEqual(email_details["senderUsername"], ["user:Pietje"])
 
     def test_setting_review_request_metadata(self, m):
         mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")

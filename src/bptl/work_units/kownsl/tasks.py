@@ -99,8 +99,8 @@ def get_review_response_status(task: BaseTask) -> dict:
       .. code-block:: json
 
             [
-                "user1",
-                "user2",
+                "user:user1",
+                "user:user2",
             ]
     """
     # Get the review request with id as given in variables
@@ -227,7 +227,7 @@ def get_email_details(task: BaseTask) -> dict:
             }
 
     * ``template``: a string that determines which template will be used for the email.
-    * ``senderUsername``: a list that holds a string of the review requester's username.
+    * ``senderUsername``: a list that holds a string of the review requester's username: ["user:username"]
       This is used to determine the email's sender's details.
     """
     # Get review request
@@ -264,7 +264,7 @@ def get_email_details(task: BaseTask) -> dict:
         "email": email,
         "context": context,
         "template": template,
-        "senderUsername": [requester],
+        "senderUsername": [f"user:{requester}"],
     }
 
 
