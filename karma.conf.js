@@ -25,7 +25,8 @@ preprocessors[paths.jsSpecEntry] = [
 var configuration = function (config) {
     config.set({
         frameworks: [
-            'mocha'
+            'mocha',
+            'webpack',
         ],
 
         files: [
