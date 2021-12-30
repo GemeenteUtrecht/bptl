@@ -1,3 +1,5 @@
+@use "sass:math";
+
 $breakpoint-mobile-s: 320px !default;
 $breakpoint-mobile-m: 375px !default;
 $breakpoint-mobile-l: 425px !default;
@@ -39,13 +41,15 @@ $grid-gutter-tablet: $grid-gutter-base !default;
 $grid-gutter-laptop: $grid-gutter-base !default;
 $grid-gutter-desktop: $grid-gutter-base !default;
 $grid-row-height: 40px !default;
-$grid-container-margin-base: $grid-gutter-base / 2 !default;
+$grid-container-margin-base: math.div($grid-gutter-base, 2) !default;
 $grid-container-padding-base: 0px !default;
 $grid-container-margin: $grid-container-margin-base !default;
 $grid-container-margin-small: $grid-container-margin-base !default;
 $grid-container-margin-big: $grid-container-margin-base !default;
 $grid-container-padding: $grid-container-padding-base !default;
-$grid-container-padding-small: $grid-container-padding-base !default$grid-container-padding-big: $grid-container-padding-base !default$grid-container-size: $breakpoint-desktop - 2 * $grid-container-margin !default;
+$grid-container-padding-small: $grid-container-padding-base !default;
+$grid-container-padding-big: $grid-container-padding-base !default;
+$grid-container-size: $breakpoint-desktop - 2 * $grid-container-margin !default;
 $grid-container-size-small: 800px !default;
 $grid-container-size-big: 1400px !default;
 $grid-margin-0: 5px !default;
