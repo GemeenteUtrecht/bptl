@@ -33,7 +33,6 @@
     "babel-loader": "latest",
     "chai": "latest",
     "cssnano": "latest",
-    "eyeglass": "^2.4.2",
     "gulp": "latest",
     "gulp-file": "latest",
     "gulp-hub": "latest",
@@ -57,7 +56,7 @@
     "karma-phantomjs-launcher": "latest",
     "karma-spec-reporter": "latest",
     "karma-webpack": "latest",
-    "mocha": "^8.1.1",
+    "mocha": "^9.1.3",
     "postcss-loader": "latest",
     "postcss-selector-lint": "latest",
     "sass-loader": "latest",
@@ -66,7 +65,7 @@
     "url-loader": "latest",
     "utrecht-design-system": "git+https://github.com/GemeenteUtrecht/utrecht-design-system.git#bf6de9209a48adb443aac40a56582c474fae3184",
     "webpack": "^4.42.0",
-    "webpack-dev-server": "^3.11.0",
+    "webpack-dev-server": "^4.7.2",
     "webpack-stream": "latest",
     "yargs": "^15.3.1"
   }
