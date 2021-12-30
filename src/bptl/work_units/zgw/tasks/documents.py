@@ -123,3 +123,52 @@ class UnlockDocument(GetDRCMixin, ZGWWorkUnit):
         )
 
         return {}
+
+
+@register
+class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
+    """
+    Set a document's ``indicatieGebruiksrecht`` to ``false``.
+
+    From the API documentation:
+
+        Indicatie of er beperkingen gelden aangaande het gebruik van het informatieobject
+        anders dan raadpleging. Dit veld mag ``null`` zijn om aan te geven dat de
+        indicatie nog niet bekend is. Als de indicatie gezet is, dan kan je de
+        gebruiksrechten die van toepassing zijn raadplegen via de GEBRUIKSRECHTen
+        resource.
+
+        -- Documenten API documentation
+
+    This task essentially switches the value from ``null`` to ``false``, implying re-use
+    other than "consulting" is not allowed.
+
+    **required process variables**
+
+    * ``informatieobject``: String, API URL of the document to lock.
+      The API must comply with the Documenten API 1.0.x
+      (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+
+    * ``services``: DEPRECATED - support will be removed in 1.1
+
+    **Sets no process variables**
+    """
+
+    def perform(self) -> dict:
+        variables = self.task.get_variables()
+
+        # Retrieve document
+        document_url = check_variable(variables, "informatieobject")
+        drc_client = self.get_drc_client(document_url)
+
+        # Set indication
+        drc_client.partial_update(
+            "enkelvoudiginformatieobject",
+            data={"indicatieGebruiksrecht": False},
+            url=document_url,
+        )
+
+        return {}
