@@ -32,7 +32,7 @@
     "autoprefixer": "^9.8.6",
     "babel-loader": "latest",
     "chai": "latest",
-    "cssnano": "latest",
+    "cssnano": "^5.0.14",
     "gulp": "latest",
     "gulp-file": "latest",
     "gulp-hub": "latest",
