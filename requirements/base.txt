@@ -55,7 +55,7 @@ defusedxml==0.7.1
     # via
     #   django-camunda
     #   djangorestframework-xml
-django==2.2.24
+django==2.2.25
     # via
     #   -r requirements/base.in
     #   django-appconf
@@ -183,7 +183,7 @@ jinja2==3.0.1
     #   sphinx
 kombu==5.1.0
     # via celery
-lxml==4.6.3
+lxml==4.7.1
     # via django-docutils
 markupsafe==2.0.1
     # via jinja2

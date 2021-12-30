@@ -89,7 +89,7 @@ defusedxml==0.7.1
     #   -r requirements/base.txt
     #   django-camunda
     #   djangorestframework-xml
-django==2.2.24
+django==2.2.25
     # via
     #   -r requirements/base.txt
     #   django-appconf
@@ -261,7 +261,7 @@ kombu==5.1.0
     # via
     #   -r requirements/base.txt
     #   celery
-lxml==4.6.3
+lxml==4.7.1
     # via
     #   -r requirements/base.txt
     #   django-docutils
