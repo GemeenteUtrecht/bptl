@@ -68,7 +68,7 @@
     "utrecht-design-system": "git+https://github.com/GemeenteUtrecht/utrecht-design-system.git#bf6de9209a48adb443aac40a56582c474fae3184",
     "webpack": "^5.65.0",
     "webpack-dev-server": "^4.7.2",
-    "webpack-stream": "latest",
+    "webpack-stream": "^7.0.0",
     "yargs": "^15.3.1"
   }
 }
