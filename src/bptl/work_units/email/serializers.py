@@ -13,6 +13,7 @@ VALID_TEMPLATE_CHOICES = {
 class EmailPersonSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
+    assignee = serializers.CharField(required=False)
 
 
 class ContextSerializer(serializers.Serializer):

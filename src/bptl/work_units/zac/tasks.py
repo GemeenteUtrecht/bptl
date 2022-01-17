@@ -1,10 +1,13 @@
 from typing import List
 
+from rest_framework import exceptions
+from zgw_consumers.concurrent import parallel
+
 from bptl.tasks.base import MissingVariable, WorkUnit, check_variable
 from bptl.tasks.registry import register
 
 from .client import get_client, require_zac_service
-from .serializers import ZacUsersDetailsSerializer
+from .serializers import ZacUserDetailSerializer
 
 
 @register
@@ -61,10 +64,11 @@ class UserDetailsTask(WorkUnit):
     def get_client_response(self) -> List[dict]:
         variables = self.task.get_variables()
         email_notification_list = variables.get("emailNotificationList", {})
+        usernames = []
+        groupnames = []
+        emails = []
         try:
             assignees = check_variable(variables, "usernames")
-            usernames = []
-            groupnames = []
             for assignee in assignees:
                 # To not change normal expected behavior:
                 # if no emailNotificationList is found in variables everybody gets an email
@@ -75,37 +79,69 @@ class UserDetailsTask(WorkUnit):
                     else:
                         usernames.append(name)
 
-            list_of_params = []
-            if usernames:
-                list_of_params.append({"include_username": usernames})
-            if groupnames:
-                list_of_params.append({"include_groups": groupnames})
-
         except MissingVariable:
             try:
                 emails = check_variable(variables, "emailaddresses")
-                list_of_params = [{"include_email": emails}]
             except MissingVariable:
                 raise MissingVariable(
                     "Missing one of the required variables usernames or emailaddresses."
                 )
 
-        results = []
+        users = []
         with get_client(self.task) as client:
-            for params in list_of_params:
-                results.append(client.get("api/accounts/users", params=params))
-        return results
+            if usernames:
+                username_assignees = client.get(
+                    "api/accounts/users", params={"include_username": usernames}
+                )
+                for user in username_assignees["results"]:
+                    user["assignee"] = f'user:{user["username"]}'
+                users += username_assignees["results"]
+
+            if groupnames:
+                groups = {}
+
+                def _get_group_users(group: str):
+                    nonlocal groups, client
+                    groups[group] = client.get(
+                        "api/accounts/users", params={"include_groups": [group]}
+                    )
+
+                with parallel() as executor:
+                    list(executor.map(_get_group_users, groupnames))
+                for group, groupusers in groups.items():
+                    for user in groupusers["results"]:
+                        user["assignee"] = f"group:{group}"
+
+                    users += groupusers["results"]
+
+            if emails:
+                users += client.get(
+                    "api/accounts/users", params={"include_email": emails}
+                )["results"]
+
+        return users
 
     def validate_data(self, data: dict) -> dict:
-        serializer = ZacUsersDetailsSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        return serializer.data
+        serializer = ZacUserDetailSerializer(data=data, many=True)
+        codes_to_catch = (
+            "code='required'",
+            "code='blank'",
+        )
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            return serializer.data
+        except Exception as e:
+            if isinstance(e, exceptions.ValidationError):
+                error_codes = str(e.detail)
+                if any(code in error_codes for code in codes_to_catch):
+                    raise MissingVariable(e.detail)
+            else:
+                raise e
 
     def perform(self) -> dict:
-        results = self.get_client_response()
-        validated_data = []
-        for users in results:
-            validated_data += self.validate_data(users)["results"]
+        users = self.get_client_response()
+        validated_data = self.validate_data(users)
         return {
             "userData": validated_data,
         }

@@ -25,7 +25,11 @@ class SendEmailTests(TestCase):
                     {"email": "kees.koos@test.test", "name": "Kees Koos"}
                 ),
                 "receiver": serialize_variable(
-                    {"email": "jan.janssen@test.test", "name": "Jan Janssen"}
+                    {
+                        "email": "jan.janssen@test.test",
+                        "name": "Jan Janssen",
+                        "assignee": "user:janjansen",
+                    }
                 ),
                 "email": serialize_variable(
                     {"subject": "Vakantiepret", "content": "Dit is pas leuk."}
@@ -100,7 +104,7 @@ class SendEmailTests(TestCase):
 
 Uw advies is vereist. U heeft tot 20 april 2020 om te reageren.
 
-Ga alstublieft hierheen: test.com
+Ga alstublieft hierheen: test.com?assignee=user%3Ajanjansen
 
 Dit is pas leuk.
 

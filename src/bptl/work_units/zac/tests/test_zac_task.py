@@ -82,7 +82,27 @@ class ZacTaskTests(TestCase):
 
         task = UserDetailsTask(self.task_usernames)
         response = task.get_client_response()
-        self.assertEqual(response, [zac_mock_data])
+        expected_response = [
+            {
+                "id": "1",
+                "username": "thor",
+                "firstName": "Thor",
+                "lastName": "Odinson",
+                "email": "thor@odinson.no",
+                "isAwesome": "true",
+                "assignee": "user:thor",
+            },
+            {
+                "id": "3",
+                "username": "loki",
+                "firstName": "Loki",
+                "lastName": "Laufeyson",
+                "email": "loki@laufeyson.no",
+                "isLiar": "true",
+                "assignee": "user:loki",
+            },
+        ]
+        self.assertEqual(response, expected_response)
 
         cleaned_data = task.perform()
         self.assertEqual(
@@ -125,7 +145,18 @@ class ZacTaskTests(TestCase):
         )
         task = UserDetailsTask(task_notifications)
         response = task.get_client_response()
-        self.assertEqual(response, [zac_mock_data])
+        expected_response = [
+            {
+                "id": "3",
+                "username": "loki",
+                "firstName": "Loki",
+                "lastName": "Laufeyson",
+                "email": "loki@laufeyson.no",
+                "isLiar": "true",
+                "assignee": "user:loki",
+            }
+        ]
+        self.assertEqual(response, expected_response)
         self.assertEqual(m.last_request.url, f"{ZAC_USERS_URL}?include_username=loki")
 
     def test_get_user_details_from_emailaddresses(self, m):
@@ -154,7 +185,25 @@ class ZacTaskTests(TestCase):
 
         task = UserDetailsTask(self.task_emails)
         response = task.get_client_response()
-        self.assertEqual(response, [zac_mock_data])
+        expected_response = [
+            {
+                "id": "1",
+                "username": "thor",
+                "firstName": "Thor",
+                "lastName": "Odinson",
+                "email": "thor@odinson.no",
+                "isAwesome": "true",
+            },
+            {
+                "id": "3",
+                "username": "loki",
+                "firstName": "Loki",
+                "lastName": "Laufeyson",
+                "email": "loki@laufeyson.no",
+                "isLiar": "true",
+            },
+        ]
+        self.assertEqual(response, expected_response)
 
         cleaned_data = task.perform()
         self.assertEqual(
@@ -266,11 +315,9 @@ class ZacTaskTests(TestCase):
             task.perform()
 
         self.assertEqual(type(e.exception), MissingVariable)
-        self.assertTrue("results" in e.exception.args[0])
-        self.assertTrue("email" in e.exception.args[0]["results"][-1])
+        self.assertTrue("email" in e.exception.args[0][-1])
         self.assertTrue(
-            "Dit veld mag niet leeg zijn."
-            in e.exception.args[0]["results"][-1]["email"][0]
+            "Dit veld mag niet leeg zijn." in e.exception.args[0][-1]["email"][0]
         )
 
     def test_get_user_details_missing_variables(self, m):
@@ -355,7 +402,27 @@ class ZacTaskTests(TestCase):
         )
         task = UserDetailsTask(task)
         response = task.get_client_response()
-        self.assertEqual(response, [zac_mock_data_user, zac_mock_data_group])
+        expected_response = [
+            {
+                "id": "3",
+                "username": "loki",
+                "firstName": "Loki",
+                "lastName": "Laufeyson",
+                "email": "loki@laufeyson.no",
+                "isLiar": "true",
+                "assignee": "user:loki",
+            },
+            {
+                "id": "1",
+                "username": "thor",
+                "firstName": "",
+                "lastName": "Odinson",
+                "email": "thor@odinson.no",
+                "isAwesome": "true",
+                "assignee": "group:norse-gods",
+            },
+        ]
+        self.assertEqual(response, expected_response)
         historical_urls = []
         for request in m.request_history:
             historical_urls.append(request.url)
@@ -364,27 +431,27 @@ class ZacTaskTests(TestCase):
         self.assertTrue(f"{ZAC_USERS_URL}?include_username=loki" in historical_urls)
 
         results = task.perform()
-        self.assertEqual(
-            results,
-            {
-                "userData": [
-                    {
-                        "email": "loki@laufeyson.no",
-                        "firstName": "Loki",
-                        "lastName": "Laufeyson",
-                        "username": "loki",
-                        "name": "Loki Laufeyson",
-                    },
-                    {
-                        "email": "thor@odinson.no",
-                        "firstName": "",
-                        "lastName": "Odinson",
-                        "username": "thor",
-                        "name": "Odinson",
-                    },
-                ]
-            },
-        )
+        expected_results = {
+            "userData": [
+                {
+                    "email": "loki@laufeyson.no",
+                    "firstName": "Loki",
+                    "lastName": "Laufeyson",
+                    "username": "loki",
+                    "name": "Loki Laufeyson",
+                    "assignee": "user:loki",
+                },
+                {
+                    "email": "thor@odinson.no",
+                    "firstName": "",
+                    "lastName": "Odinson",
+                    "username": "thor",
+                    "name": "Odinson",
+                    "assignee": "group:norse-gods",
+                },
+            ]
+        }
+        self.assertEqual(results, expected_results)
 
     def test_get_user_details_from_groups_with_email_notifications(self, m):
         zac_mock_data_group = {
@@ -417,7 +484,18 @@ class ZacTaskTests(TestCase):
         )
         task = UserDetailsTask(task)
         response = task.get_client_response()
-        self.assertEqual(response, [zac_mock_data_group])
+        expected_response = [
+            {
+                "id": "1",
+                "username": "thor",
+                "firstName": "",
+                "lastName": "Odinson",
+                "email": "thor@odinson.no",
+                "isAwesome": "true",
+                "assignee": "group:norse-gods",
+            }
+        ]
+        self.assertEqual(response, expected_response)
         self.assertEqual(
             m.last_request.url, f"{ZAC_USERS_URL}?include_groups=norse-gods"
         )
