@@ -143,5 +143,5 @@ class UserDetailsTask(WorkUnit):
         users = self.get_client_response()
         validated_data = self.validate_data(users)
         return {
-            "userData": validated_data,
+            "userData": [*validated_data],
         }
