@@ -1,6 +1,6 @@
-from rest_framework import exceptions, serializers
+from django.utils.translation import ugettext_lazy as _
 
-from bptl.tasks.base import MissingVariable
+from rest_framework import serializers
 
 
 class ZacUserDetailSerializer(serializers.Serializer):
@@ -9,6 +9,9 @@ class ZacUserDetailSerializer(serializers.Serializer):
     lastName = serializers.CharField(required=True, allow_blank=True)
     username = serializers.CharField(required=True, allow_blank=False)
     name = serializers.SerializerMethodField()
+    assignee = serializers.CharField(
+        required=False, help_text=_("The assignee of the user task as set by Camunda.")
+    )
 
     def get_name(self, obj):
         name = f"{obj['firstName']} {obj['lastName']}"
@@ -17,24 +20,3 @@ class ZacUserDetailSerializer(serializers.Serializer):
             return "Medewerker"
         else:
             return name
-
-
-class ZacUsersDetailsSerializer(serializers.Serializer):
-    results = ZacUserDetailSerializer(many=True)
-
-    def is_valid(self, raise_exception=False):
-        codes_to_catch = (
-            "code='required'",
-            "code='blank'",
-        )
-
-        try:
-            valid = super().is_valid(raise_exception=raise_exception)
-            return valid
-        except Exception as e:
-            if isinstance(e, exceptions.ValidationError):
-                error_codes = str(e.detail)
-                if any(code in error_codes for code in codes_to_catch):
-                    raise MissingVariable(e.detail)
-            else:
-                raise e
