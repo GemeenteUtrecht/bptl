@@ -38,7 +38,7 @@ class SendEmailTests(TestCase):
                 "context": serialize_variable(
                     {
                         "deadline": "2020-04-20",
-                        "kownslFrontendUrl": "test.com",
+                        "kownslFrontendUrl": "test.com?uuid=123456",
                     }
                 ),
             },
@@ -104,7 +104,7 @@ class SendEmailTests(TestCase):
 
 Uw advies is vereist. U heeft tot 20 april 2020 om te reageren.
 
-Ga alstublieft hierheen: test.com?assignee=user%3Ajanjansen
+Ga alstublieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
 
 Dit is pas leuk.
 
