@@ -1,8 +1,9 @@
 import logging
-from typing import Dict
+from typing import Dict, List
 from urllib.parse import urlparse
 from uuid import UUID
 
+from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
 
@@ -128,7 +129,9 @@ class UnlockDocument(GetDRCMixin, ZGWWorkUnit):
 @register
 class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
     """
-    Set a document's ``indicatieGebruiksrecht`` to ``false``.
+    Set the ``indicatieGebruiksrecht`` to ``false`` of all INFORMATIEOBJECTen related to the ZAAK.
+    The INFORMATIEOBJECTen in ZAAKINFORMATIEOBJECTen must point to INFORMATIEOBJECTen in an API that complies with the Documenten API 1.0.x
+      (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
 
     From the API documentation:
 
@@ -145,9 +148,7 @@ class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
 
     **required process variables**
 
-    * ``informatieobject``: String, API URL of the document to lock.
-      The API must comply with the Documenten API 1.0.x
-      (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
+    * ``zaakUrl``: full URL of the ZAAK
 
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
@@ -157,11 +158,14 @@ class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
     **Sets no process variables**
     """
 
-    def perform(self) -> dict:
-        variables = self.task.get_variables()
+    def get_zaak_informatieobjecten(self, zaak_url: str) -> List[str]:
+        zrc_client = self.get_client(APITypes.zrc)
+        zaak_informatieobjecten = zrc_client.list(
+            "zaakinformatieobject", query_params={"zaak": zaak_url}
+        )
+        return zaak_informatieobjecten
 
-        # Retrieve document
-        document_url = check_variable(variables, "informatieobject")
+    def update_document(self, document_url: str):
         drc_client = self.get_drc_client(document_url)
 
         # Set indication
@@ -170,5 +174,15 @@ class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
             data={"indicatieGebruiksrecht": False},
             url=document_url,
         )
+
+    def perform(self) -> dict:
+        variables = self.task.get_variables()
+
+        # Retrieve document
+        zaak_url = check_variable(variables, "zaakUrl")
+        zaak_informatieobjecten = self.get_zaak_informatieobjecten(zaak_url)
+        zios = [zio["informatieobject"] for zio in zaak_informatieobjecten]
+        with parallel() as executor:
+            list(executor.map(self.update_document, zios))
 
         return {}
