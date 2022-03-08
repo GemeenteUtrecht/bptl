@@ -1,14 +1,14 @@
 # Core python libraries
-celery
 celery-once
 gemma-zds-client
 psycopg2 < 2.9 # database driver
 pytz  # handle timezones
 python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
-sphinx
 zgw-consumers
-setuptools < 59
+setuptools
+celery
+sphinx
 
 # Framework libraries
 django < 3.0

@@ -8,7 +8,7 @@ alabaster==0.7.12
     # via
     #   -r requirements/base.txt
     #   sphinx
-amqp==5.0.6
+amqp==5.1.0
     # via
     #   -r requirements/base.txt
     #   kombu
@@ -26,7 +26,7 @@ bitly-api-py3==0.3
     # via
     #   -r requirements/base.txt
     #   django-docutils
-celery==5.1.2
+celery==5.2.3
     # via
     #   -r requirements/base.txt
     #   celery-once
@@ -48,7 +48,7 @@ charset-normalizer==2.0.4
     # via
     #   -r requirements/base.txt
     #   requests
-click==7.1.2
+click==8.0.4
     # via
     #   -r requirements/base.txt
     #   celery
@@ -89,7 +89,7 @@ defusedxml==0.7.1
     #   -r requirements/base.txt
     #   django-camunda
     #   djangorestframework-xml
-django==2.2.25
+django==2.2.27
     # via
     #   -r requirements/base.txt
     #   django-appconf
@@ -243,6 +243,10 @@ imagesize==1.2.0
     # via
     #   -r requirements/base.txt
     #   sphinx
+importlib-metadata==4.11.2
+    # via
+    #   -r requirements/base.txt
+    #   sphinx
 inflection==0.5.1
     # via
     #   -r requirements/base.txt
@@ -257,7 +261,7 @@ jinja2==3.0.1
     #   -r requirements/base.txt
     #   coreschema
     #   sphinx
-kombu==5.1.0
+kombu==5.2.4
     # via
     #   -r requirements/base.txt
     #   celery
@@ -320,7 +324,7 @@ python-decouple==3.4
     # via -r requirements/base.txt
 python-dotenv==0.19.0
     # via -r requirements/base.txt
-pytz==2021.1
+pytz==2021.3
     # via
     #   -r requirements/base.txt
     #   babel
@@ -379,7 +383,7 @@ snowballstemmer==2.1.0
     #   sphinx
 soupsieve==2.2.1
     # via beautifulsoup4
-sphinx==4.1.2
+sphinx==4.4.0
     # via -r requirements/base.txt
 sphinxcontrib-applehelp==1.0.2
     # via
@@ -450,11 +454,14 @@ webtest==2.0.35
     # via django-webtest
 zgw-consumers==0.15.2
     # via -r requirements/base.txt
+zipp==3.7.0
+    # via
+    #   -r requirements/base.txt
+    #   importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==58.5.3
+setuptools==59.6.0
     # via
     #   -r requirements/base.txt
     #   celery
     #   humanize
-    #   sphinx
