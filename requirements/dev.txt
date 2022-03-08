@@ -8,7 +8,7 @@ alabaster==0.7.12
     # via
     #   -r requirements/ci.txt
     #   sphinx
-amqp==5.0.6
+amqp==5.1.0
     # via
     #   -r requirements/ci.txt
     #   kombu
@@ -36,7 +36,7 @@ bump2version==1.0.1
     # via bumpversion
 bumpversion==0.6.0
     # via -r requirements/dev.in
-celery==5.1.2
+celery==5.2.3
     # via
     #   -r requirements/ci.txt
     #   celery-once
@@ -58,7 +58,7 @@ charset-normalizer==2.0.4
     # via
     #   -r requirements/ci.txt
     #   requests
-click==7.1.2
+click==8.0.4
     # via
     #   -r requirements/ci.txt
     #   black
@@ -105,7 +105,7 @@ defusedxml==0.7.1
     #   -r requirements/ci.txt
     #   django-camunda
     #   djangorestframework-xml
-django==2.2.25
+django==2.2.27
     # via
     #   -r requirements/ci.txt
     #   ddt-api-calls
@@ -266,6 +266,10 @@ imagesize==1.2.0
     # via
     #   -r requirements/ci.txt
     #   sphinx
+importlib-metadata==4.11.2
+    # via
+    #   -r requirements/ci.txt
+    #   sphinx
 inflection==0.5.1
     # via
     #   -r requirements/ci.txt
@@ -282,7 +286,7 @@ jinja2==3.0.1
     #   -r requirements/ci.txt
     #   coreschema
     #   sphinx
-kombu==5.1.0
+kombu==5.2.4
     # via
     #   -r requirements/ci.txt
     #   celery
@@ -359,7 +363,7 @@ python-decouple==3.4
     # via -r requirements/ci.txt
 python-dotenv==0.19.0
     # via -r requirements/ci.txt
-pytz==2021.1
+pytz==2021.3
     # via
     #   -r requirements/ci.txt
     #   babel
@@ -423,7 +427,7 @@ soupsieve==2.2.1
     # via
     #   -r requirements/ci.txt
     #   beautifulsoup4
-sphinx==4.1.2
+sphinx==4.4.0
     # via
     #   -r requirements/ci.txt
     #   sphinx-rtd-theme
@@ -509,14 +513,17 @@ wheel==0.36.2
     # via pip-tools
 zgw-consumers==0.15.2
     # via -r requirements/ci.txt
+zipp==3.7.0
+    # via
+    #   -r requirements/ci.txt
+    #   importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==21.3.1
     # via pip-tools
-setuptools==58.5.3
+setuptools==59.6.0
     # via
     #   -r requirements/ci.txt
     #   celery
     #   humanize
     #   pip-tools
-    #   sphinx
