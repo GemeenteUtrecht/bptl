@@ -9,9 +9,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  IMAGE_NAME: scrumteamzgw/bptl
-
 jobs:
   tests:
     name: Run the Django test suite
@@ -62,38 +59,53 @@ jobs:
 
   docker:
     needs: tests
-
-    name: Build (and push) Docker image
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      -
+        name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Set tag
+      - 
+        name: Construct tag
         id: vars
         run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Construct outputs for tag
+          echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
+          echo ::set-output name=epoch::$(date +%s)
 
-          # Strip "v" prefix from tag name (if present at all)
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-          echo ::set-output name=tag::${VERSION}
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build the Docker image
-        env:
-          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-        run: docker build . --tag $IMAGE_NAME:$RELEASE_VERSION
+      -
+        name: Login to Harbor Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ${{ secrets.HARBOR_URL_ONT }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_TOKEN }}
 
-      - name: Log into registry
-        if: github.event_name == 'push'  # exclude PRs
-        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-
-      - name: Push the Docker image
-        if: github.event_name == 'push'  # exclude PRs
-        env:
-          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-        run: docker push $IMAGE_NAME:$RELEASE_VERSION
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            scrumteamzgw/bptl:latest
+            ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.epoch }}
+            ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:latest
