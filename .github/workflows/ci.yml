@@ -97,15 +97,24 @@ jobs:
           password: ${{ secrets.HARBOR_TOKEN }}
 
       -
-        name: Build and push
+        name: Image Build
         uses: docker/build-push-action@v2
         with:
           context: .
           platforms: linux/amd64
-          push: true
+          push: false
+          load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
             scrumteamzgw/bptl:latest
             ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.epoch }}
             ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:latest
+
+      -
+        name: Image Push
+        if: github.event_name == 'push'  # exclude PRs
+        run: |
+          docker push scrumteamzgw/bptl:latest
+          docker push ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.epoch }}
+          docker push ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:latest
