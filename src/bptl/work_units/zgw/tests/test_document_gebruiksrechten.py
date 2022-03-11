@@ -20,6 +20,7 @@ ZAAK = f"{ZRC_URL}zaken/4f8b4811-5d7e-4e9b-8201-b35f5101f891"
 PATCH_DOCUMENT_RESPONSE = {
     "url": DOCUMENT_URL,
     "indicatieGebruiksrecht": False,
+    "lock": "some-lock",
     # rest left out for brevity
 }
 
@@ -65,11 +66,22 @@ class GebruiksrechtDocumentsTests(TransactionTestCase):
         mock_service_oas_get(m, DRC_URL, "drc")
 
         # Mock call to retrieve and lock the document from the API
+        m.post(f"{DOCUMENT_URL}/lock", json={"lock": "some-lock"})
         m.patch(DOCUMENT_URL, json=PATCH_DOCUMENT_RESPONSE)
+        m.post(f"{DOCUMENT_URL}/unlock", json={})
         task = SetIndicatieGebruiksrecht(self.fetched_task)
         result = task.perform()
 
         self.assertEqual(result, {})
-        self.assertEqual(m.last_request.method, "PATCH")
-        self.assertEqual(m.last_request.url, DOCUMENT_URL)
-        self.assertEqual(m.last_request.json(), {"indicatieGebruiksrecht": False})
+        self.assertEqual(m.request_history[-3].method, "POST")
+        self.assertEqual(m.request_history[-3].url, f"{DOCUMENT_URL}/lock")
+        self.assertEqual(m.request_history[-3].json(), {})
+        self.assertEqual(m.request_history[-2].method, "PATCH")
+        self.assertEqual(m.request_history[-2].url, DOCUMENT_URL)
+        self.assertEqual(
+            m.request_history[-2].json(),
+            {"indicatieGebruiksrecht": False, "lock": "some-lock"},
+        )
+        self.assertEqual(m.request_history[-1].method, "POST")
+        self.assertEqual(m.request_history[-1].url, f"{DOCUMENT_URL}/unlock")
+        self.assertEqual(m.request_history[-1].json(), {"lock": "some-lock"})

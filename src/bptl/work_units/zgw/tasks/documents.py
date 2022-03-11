@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
 
@@ -165,24 +165,50 @@ class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
         )
         return zaak_informatieobjecten
 
-    def update_document(self, document_url: str):
+    def lock_document(self, document_url: str) -> dict:
         drc_client = self.get_drc_client(document_url)
+        response = drc_client.operation(
+            operation_id="enkelvoudiginformatieobject_lock",
+            uuid=get_document_uuid(document_url),
+            data={},
+        )
+        return {
+            "url": document_url,
+            "data": {"indicatieGebruiksrecht": False, "lock": response["lock"]},
+        }
+
+    def update_document(self, data: dict):
+        drc_client = self.get_drc_client(data["url"])
 
         # Set indication
-        drc_client.partial_update(
-            "enkelvoudiginformatieobject",
-            data={"indicatieGebruiksrecht": False},
-            url=document_url,
+        drc_client.partial_update("enkelvoudiginformatieobject", **data)
+
+    def unlock_document(self, data: dict):
+        drc_client = self.get_drc_client(data["url"])
+        drc_client.operation(
+            operation_id="enkelvoudiginformatieobject_unlock",
+            uuid=get_document_uuid(data["url"]),
+            data={"lock": data["data"]["lock"]},
         )
 
     def perform(self) -> dict:
         variables = self.task.get_variables()
 
-        # Retrieve document
+        # Retrieve io url
         zaak_url = check_variable(variables, "zaakUrl")
         zaak_informatieobjecten = self.get_zaak_informatieobjecten(zaak_url)
         zios = [zio["informatieobject"] for zio in zaak_informatieobjecten]
+
+        # lock io and set data
         with parallel() as executor:
-            list(executor.map(self.update_document, zios))
+            responses = list(executor.map(self.lock_document, zios))
+
+        # update io
+        with parallel() as executor:
+            list(executor.map(self.update_document, responses))
+
+        # unlock io
+        with parallel() as executor:
+            list(executor.map(self.unlock_document, responses))
 
         return {}
