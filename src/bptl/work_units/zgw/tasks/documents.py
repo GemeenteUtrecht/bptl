@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from urllib.parse import urlparse
 from uuid import UUID
 
