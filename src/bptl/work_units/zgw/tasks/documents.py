@@ -3,6 +3,7 @@ from typing import Dict, List
 from urllib.parse import urlparse
 from uuid import UUID
 
+from zds_client.schema import get_operation_url
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
@@ -184,11 +185,22 @@ class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
         drc_client.partial_update("enkelvoudiginformatieobject", **data)
 
     def unlock_document(self, data: dict):
+        # zds_client doesnt allow setting expected_status on zds_client.client.Client.operation.
+        # The drc returns a 204 on an unlock operation, the zds_client expects a 200.
+        # For now use the logic from zds_client.client.Client.operation but add expected_status.
         drc_client = self.get_drc_client(data["url"])
-        drc_client.operation(
-            operation_id="enkelvoudiginformatieobject_unlock",
+        url = get_operation_url(
+            drc_client.schema,
+            operation="enkelvoudiginformatieobject_unlock",
+            base_url=drc_client.base_url,
             uuid=get_document_uuid(data["url"]),
-            data={"lock": data["data"]["lock"]},
+        )
+        drc_client.request(
+            url,
+            operation="enkelvoudiginformatieobject_unlock",
+            method="POST",
+            json={"lock": data["data"]["lock"]},
+            expected_status=204,
         )
 
     def perform(self) -> dict:
