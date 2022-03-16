@@ -202,7 +202,9 @@ class KownslAPITests(TestCase):
             "id": "1",
             "forZaak": "https://zaken.nl/api/v1/zaak/123",
             "reviewType": "advice",
-            "requester": "Pietje",
+            "requester": {
+                "username": "Pietje",
+            },
         }
         m.get(
             f"{KOWNSL_API_ROOT}api/v1/review-requests/1",

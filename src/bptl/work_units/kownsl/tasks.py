@@ -234,7 +234,7 @@ def get_email_details(task: BaseTask) -> dict:
     review_request = get_review_request(task)
 
     # Get review request requester
-    requester = review_request["requester"]
+    requester = review_request["requester"]["username"]
 
     # Set template
     template = "accordering" if review_request["reviewType"] == "approval" else "advies"
