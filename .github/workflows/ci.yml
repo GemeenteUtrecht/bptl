@@ -6,6 +6,7 @@ on:
     branches:
       - master
     tags:
+      - '*'
   pull_request:
   workflow_dispatch:
 
@@ -69,9 +70,16 @@ jobs:
         name: Construct tag
         id: vars
         run: |
-          # Construct outputs for tag
-          echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
-          echo ::set-output name=epoch::$(date +%s)
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          
+          # Strip "v" prefix from tag name (if present at all)
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use `latest` tag for the master branch
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo ::set-output name=tag::${VERSION}
 
       -
         name: Set up QEMU
@@ -107,14 +115,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            scrumteamzgw/bptl:latest
-            ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.epoch }}
-            ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:latest
+            scrumteamzgw/bptl:${{ steps.vars.outputs.tag }}
+            ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.tag }}
 
       -
         name: Image Push
         if: github.event_name == 'push'  # exclude PRs
         run: |
-          docker push scrumteamzgw/bptl:latest
-          docker push ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.sha_short }}-${{ steps.vars.outputs.epoch }}
-          docker push ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:latest
+          docker push scrumteamzgw/bptl:${{ steps.vars.outputs.tag }}
+          docker push ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.tag }}
