@@ -68,7 +68,7 @@ class GebruiksrechtDocumentsTests(TransactionTestCase):
         # Mock call to retrieve and lock the document from the API
         m.post(f"{DOCUMENT_URL}/lock", json={"lock": "some-lock"})
         m.patch(DOCUMENT_URL, json=PATCH_DOCUMENT_RESPONSE)
-        m.post(f"{DOCUMENT_URL}/unlock", json={})
+        m.post(f"{DOCUMENT_URL}/unlock", json={}, status_code=204)
         task = SetIndicatieGebruiksrecht(self.fetched_task)
         result = task.perform()
 
