@@ -2,7 +2,7 @@
 Business Process Task Library (BPTL)
 ====================================
 
-:Version: 0.1.2
+:Version: 0.1.4
 :Source: https://github.com/GemeenteUtrecht/bptl
 :Keywords: bpmn, camunda, external tasks, process engine, VNG, Common Ground
 :PythonVersion: 3.8
