@@ -2,6 +2,16 @@
 Change history
 ==============
 
+0.1.4
+=====
+
+Bump image in dockerfile from 3.8.9-buster to 3.8-buster.
+
+0.1.3
+=====
+
+---
+
 0.1.2
 =====
 
