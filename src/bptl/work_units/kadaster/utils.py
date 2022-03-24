@@ -26,6 +26,7 @@ require_brt_service = register.require_service(
 def get_brt_service(task: BaseTask) -> Service:
     """
     Extract the BRT Service object to use for the client.
+
     """
     try:
         return get_alias_service(task, ALIAS, service__api_type=APITypes.orc)
