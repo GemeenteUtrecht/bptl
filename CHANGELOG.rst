@@ -2,6 +2,11 @@
 Change history
 ==============
 
+0.1.5
+=====
+
+Bump django requirement from 2.X to 3.X.
+
 0.1.4
 =====
 
