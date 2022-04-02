@@ -22,6 +22,7 @@ from ..tasks import (
     get_client,
     get_email_details,
     get_review_request,
+    get_review_request_lock_status,
     get_review_request_reminder_date,
     get_review_response_status,
     set_review_request_metadata,
@@ -301,4 +302,26 @@ class KownslAPITests(TestCase):
         self.assertEqual(
             result,
             {"toelichtingen": "Beste voorstel ooit.\n\nEcht niet mee eens.\n\nGeen"},
+        )
+
+    def test_get_lock_status_review_request(self, m):
+        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
+        response = {
+            "id": "1",
+            "forZaak": "https://zaken.nl/api/v1/zaak/123",
+            "reviewType": "advice",
+            "locked": False,
+        }
+        m.get(
+            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
+            json=response,
+        )
+        task_dict = {**self.task_dict}
+        task = ExternalTask.objects.create(**task_dict)
+
+        result = get_review_request_lock_status(task)
+        self.assertEqual(len(m.request_history), 2)  # one for client schema
+        self.assertEqual(
+            result,
+            {"locked": False},
         )
