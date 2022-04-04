@@ -342,3 +342,28 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
     toelichtingen = [approval["toelichting"] or "Geen" for approval in approvals]
 
     return {"toelichtingen": "\n\n".join(toelichtingen)}
+
+
+@register
+@require_kownsl_service
+def get_review_request_lock_status(task: BaseTask) -> dict:
+    """
+    Lock the review request to prevent further reviewing
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
+
+    **Optional process variables**
+
+    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
+
+    **Sets the process variables**
+
+    * ``locked``: a boolean containing the lock status of the review request.
+    """
+
+    review_request = get_review_request(task)
+
+    return {"locked": review_request["locked"]}
