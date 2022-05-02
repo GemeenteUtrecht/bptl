@@ -28,43 +28,17 @@ class GetZGWClientTests(TestCase):
             api_type=APITypes.zrc, api_root=ZRC_URL, label="zrc_service"
         )
 
-    def test_get_client_with_alias(self):
-        # The pre-1.0 behaviour. This is deprecated.
-        DefaultServiceFactory.create(
-            task_mapping=self.mapping, service=self.service, alias="ZRC"
-        )
-        self.task.variables = {
-            "services": {
-                "type": "json",
-                "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
-            }
-        }
+    def test_no_default_services(self):
+        self.task.variables = {"bptlAppId": serialize_variable("some-app-id")}
         self.task.save()
 
-        with self.assertWarns(DeprecationWarning):
-            client = self.work_unit.get_client(APITypes.zrc)
+        with self.assertRaises(NoService) as exc:
+            self.work_unit.get_client(APITypes.zrc)
 
-        self.assertEqual(client.base_url, ZRC_URL)
-        self.assertTrue(client.auth_value, "Bearer 12345")
-
-    def test_no_default_services(self):
-        variant_variables = {
-            "old": {"services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}})},
-            "new": {"bptlAppId": serialize_variable("some-app-id")},
-        }
-
-        for variant, variables in variant_variables.items():
-            with self.subTest(variant=variant):
-                self.task.variables = variables
-                self.task.save()
-
-                with self.assertRaises(NoService) as exc:
-                    self.work_unit.get_client(APITypes.zrc)
-
-                self.assertEqual(
-                    str(exc.exception),
-                    "No zrc service is configured for topic 'some-topic'",
-                )
+        self.assertEqual(
+            str(exc.exception),
+            "No zrc service is configured for topic 'some-topic'",
+        )
 
     def test_no_alias_in_process_vars(self):
         self.task.variables = {}
@@ -108,18 +82,3 @@ class GetZGWClientTests(TestCase):
         err_message = "Multiple 'zrc' services configured for topic 'some-topic'"
         with self.assertRaisesMessage(MultipleServices, err_message):
             self.work_unit.get_client(APITypes.zrc)
-
-    def test_no_jwt_in_process_vars(self):
-        # Deprecated
-        DefaultServiceFactory.create(
-            task_mapping=self.mapping, service=self.service, alias="ZRC"
-        )
-        self.task.variables = {
-            "services": serialize_variable({"ZRC": {"some_claims": "some value"}})
-        }
-        self.task.save()
-
-        err_message = "Expected 'jwt' key for service with alias 'ZRC'"
-        with self.assertWarns(DeprecationWarning):
-            with self.assertRaisesMessage(NoAuth, err_message):
-                self.work_unit.get_client(APITypes.zrc)

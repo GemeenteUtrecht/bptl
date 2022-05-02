@@ -1,12 +1,12 @@
-import json
-
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes
 from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.tests.factories import ExternalTaskFactory
+from bptl.credentials.api import get_credentials
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks.base import ZGWWorkUnit
@@ -22,19 +22,17 @@ class ZGWClientLogTests(TestCase):
         super().setUpClass()
 
         cls.mapping = TaskMappingFactory.create(topic_name="some-topic")
-        DefaultServiceFactory.create(
+        zrc_svc = DefaultServiceFactory.create(
             task_mapping=cls.mapping,
             service__api_type=APITypes.zrc,
             service__api_root=ZRC_URL,
             alias="ZRC",
         )
+        cls.zrc = zrc_svc.service
         cls.task = ExternalTaskFactory.create(
             topic_name="some-topic",
             variables={
-                "services": {
-                    "type": "json",
-                    "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
-                }
+                "bptlAppId": serialize_variable("some-id"),
             },
         )
         cls.work_unit = ZGWWorkUnit(cls.task)
@@ -51,6 +49,8 @@ class ZGWClientLogTests(TestCase):
 
         log = self.task.logs.get()
 
+        app_id = self.task.get_variables().get("bptlAppId")
+        auth_header = get_credentials(app_id, self.zrc)[self.zrc]
         self.assertEqual(
             log.extra_data,
             {
@@ -65,7 +65,7 @@ class ZGWClientLogTests(TestCase):
                         "Accept-Crs": "EPSG:4326",
                         "Content-Crs": "EPSG:4326",
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer 12345",
+                        "Authorization": auth_header["Authorization"],
                     },
                 },
                 "response": {
@@ -89,6 +89,8 @@ class ZGWClientLogTests(TestCase):
 
         log = self.task.logs.get()
 
+        app_id = self.task.get_variables().get("bptlAppId")
+        auth_header = get_credentials(app_id, self.zrc)[self.zrc]
         self.assertEqual(
             log.extra_data,
             {
@@ -103,7 +105,7 @@ class ZGWClientLogTests(TestCase):
                         "Accept-Crs": "EPSG:4326",
                         "Content-Crs": "EPSG:4326",
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer 12345",
+                        "Authorization": auth_header["Authorization"],
                     },
                 },
                 "response": {

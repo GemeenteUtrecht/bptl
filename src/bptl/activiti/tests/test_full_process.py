@@ -61,10 +61,7 @@ class WorkUnitTestCase(TokenAuthMixin, APITestCase):
             "vars": {
                 "zaaktype": ZAAKTYPE,
                 "organisatieRSIN": "002220647",
-                "services": {
-                    "ZRC": {"jwt": "Bearer 12345"},
-                    "ZTC": {"jwt": "Bearer 789"},
-                },
+                "bptlAppId": "some-id",
             },
         }
         url = reverse("work-unit", args=(settings.REST_FRAMEWORK["DEFAULT_VERSION"],))

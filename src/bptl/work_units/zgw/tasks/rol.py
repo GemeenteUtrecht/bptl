@@ -26,7 +26,6 @@ class CreateRolTask(ZGWWorkUnit):
         https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 
