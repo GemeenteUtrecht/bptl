@@ -36,7 +36,6 @@ class CreateZaakTask(ZGWWorkUnit):
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
     * ``catalogusDomein``: abbrevation for the domain of the catalogus of the ZAAKTYPEn.
-    * ``services``: DEPRECATED - support will be removed in 1.1
     * ``zaaktypeIdentificatie``: ID of ZAAKTYPE.
 
 
@@ -242,7 +241,6 @@ class CloseZaakTask(ZGWWorkUnit):
     * ``zaakUrl``: full URL of the ZAAK
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -329,7 +327,6 @@ class LookupZaak(ZGWWorkUnit):
         of identificatie and bronorganisatie uniquely identifies a zaak.
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 

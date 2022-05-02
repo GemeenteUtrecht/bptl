@@ -69,20 +69,10 @@ class CreateValidSignPackageTask(ValidSignTask):
     * ``packageName``: string. Name of the ValidSign package that contains the documents to sign and the signers.
         This name appears in the notification-email that is sent to the signers.
 
-
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<drc alias1>": {"jwt": "Bearer <JWT value>"},
-              "<drc alias2>": {"jwt": "Bearer <JWT value>"}
-          }
-
-    **Optional process variables**
-
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
+
+    **Optional process variables**
 
     * ``messageId``: string. The message ID to send back into the process when the
         package is signed by everyone. You can use this to continue process execution.
