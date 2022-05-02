@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
 from django_camunda.client import get_client
+
+from ..decorators import superuser_required
 
 
 @dataclass
@@ -38,7 +40,8 @@ def get_process_instances():
     ]
 
 
-class ProcessInstanceListView(UserPassesTestMixin, TemplateView):
+@method_decorator(superuser_required, name="dispatch")
+class ProcessInstanceListView(TemplateView):
     template_name = "camunda/process_instance_list.html"
 
     def test_func(self):

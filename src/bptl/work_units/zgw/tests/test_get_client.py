@@ -1,5 +1,3 @@
-import json
-
 from django.db import IntegrityError
 from django.test import TestCase
 
@@ -10,7 +8,7 @@ from zgw_consumers.models import Service
 from bptl.camunda.tests.factories import ExternalTaskFactory
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
-from ..client import MultipleServices, NoAuth, NoService
+from ..client import MultipleServices, NoService
 from ..tasks.base import ZGWWorkUnit
 
 ZRC_URL = "https://some.zrc.nl/api/v1/"
