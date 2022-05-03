@@ -1,11 +1,13 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, ListView
 
+from ..decorators import superuser_required
 from .forms import DefaultServiceFormset, TaskMappingForm
 from .models import TaskMapping
 
 
+@method_decorator(superuser_required, name="dispatch")
 class TaskMappingsView(ListView):
     """
     Display a list of active configured tasks.
@@ -15,7 +17,8 @@ class TaskMappingsView(ListView):
     context_object_name = "task_mappings"
 
 
-class AddTaskMappingView(LoginRequiredMixin, CreateView):
+@method_decorator(superuser_required, name="dispatch")
+class AddTaskMappingView(CreateView):
     model = TaskMapping
     form_class = TaskMappingForm
     success_url = reverse_lazy("tasks:taskmapping-list")

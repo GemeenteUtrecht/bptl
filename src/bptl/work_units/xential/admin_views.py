@@ -1,15 +1,15 @@
 from typing import List
 
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
-from bptl.utils.admin import StaffRequiredMixin
-
+from ...decorators import superuser_required
 from .client import XentialClient, get_xential_clients
 
 
-class TemplatesListView(StaffRequiredMixin, TemplateView):
+@method_decorator(superuser_required, name="dispatch")
+class TemplatesListView(TemplateView):
     template_name = "admin/xential/templates.html"
-    login_url = "admin:login"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

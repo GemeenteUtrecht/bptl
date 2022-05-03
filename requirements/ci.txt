@@ -231,6 +231,8 @@ flower==1.0.0
     # via -r requirements/base.txt
 freezegun==1.1.0
     # via -r requirements/test-tools.in
+furl==2.1.3
+    # via -r requirements/base.txt
 gemma-zds-client==1.0.1
     # via
     #   -r requirements/base.txt
@@ -278,6 +280,10 @@ markupsafe==2.0.1
     # via
     #   -r requirements/base.txt
     #   jinja2
+orderedmultidict==1.0.1
+    # via
+    #   -r requirements/base.txt
+    #   furl
 packaging==21.0
     # via
     #   -r requirements/base.txt
@@ -378,6 +384,8 @@ six==1.16.0
     #   django-compat
     #   django-extensions
     #   django-rosetta
+    #   furl
+    #   orderedmultidict
     #   python-dateutil
     #   requests-mock
     #   webtest

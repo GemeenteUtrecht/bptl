@@ -5,12 +5,15 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
-from django.views.generic.base import TemplateView
+
+from .views import IndexView
 
 handler500 = "bptl.utils.views.server_error"
+
 admin.site.site_header = "bptl admin"
 admin.site.site_title = "bptl admin"
 admin.site.index_title = "Welcome to the bptl admin"
+admin.site.has_permission = lambda request: request.user.is_superuser
 
 urlpatterns = [
     path(
@@ -38,7 +41,7 @@ urlpatterns = [
     ),
     path("adfs/", include("django_auth_adfs.urls")),
     # Simply show the master template.
-    path("", TemplateView.as_view(template_name="index.html"), name="index"),
+    path("", IndexView.as_view(), name="index"),
     path("tasks/", include("bptl.dashboard.urls")),
     path("taskmappings/", include("bptl.tasks.urls")),
     path("api/", include("bptl.activiti.api.urls")),

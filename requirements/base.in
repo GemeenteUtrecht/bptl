@@ -1,5 +1,6 @@
 # Core python libraries
 celery-once
+furl # manipulate urls like magic
 gemma-zds-client
 psycopg2 < 2.9 # database driver
 pytz  # handle timezones
