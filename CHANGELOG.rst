@@ -2,6 +2,11 @@
 Change history
 ==============
 
+0.4.1
+=====
+
+Revert deprecate services (not logged in CHANGELOG).
+
 0.4.0
 =====
 
