@@ -2,6 +2,16 @@
 Change history
 ==============
 
+0.4.1
+=====
+
+Revert deprecate services (not logged in CHANGELOG).
+
+0.4.0
+=====
+
+Lock the BPTL for every user except admin/superusers.
+
 0.1.5
 =====
 
