@@ -2,6 +2,11 @@
 Change history
 ==============
 
+0.4.0
+=====
+
+Lock the BPTL for every user except admin/superusers.
+
 0.1.5
 =====
 
