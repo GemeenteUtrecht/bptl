@@ -32,7 +32,7 @@ class LookupZaakTests(TestCase):
             variables={
                 "identificatie": serialize_variable("ZAAK-001122"),
                 "bronorganisatie": serialize_variable("123456782"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}}),
             },
         )
 

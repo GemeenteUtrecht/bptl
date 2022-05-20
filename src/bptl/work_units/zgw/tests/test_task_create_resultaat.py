@@ -48,7 +48,15 @@ class CreateResultaatTaskTests(TestCase):
             variables={
                 "zaak": serialize_variable(ZAAK),
                 "resultaattype": serialize_variable(RESULTAATTYPE),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": {
+                    "type": "json",
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
+                    ),
+                },
             },
         )
 

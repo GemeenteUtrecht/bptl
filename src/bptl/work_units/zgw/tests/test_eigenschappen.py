@@ -57,7 +57,12 @@ class CreateDocumentRelationTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 12345"},
+                    }
+                ),
                 "zaakUrl": serialize_variable(ZAAK),
                 "eigenschap": serialize_variable(
                     {
@@ -148,7 +153,12 @@ class CreateDocumentRelationTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 12345"},
+                    }
+                ),
                 "zaakUrl": serialize_variable(ZAAK),
                 "eigenschap": serialize_variable(
                     {

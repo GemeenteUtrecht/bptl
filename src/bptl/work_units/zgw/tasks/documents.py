@@ -32,9 +32,9 @@ class GetDRCMixin:
     """
     Temp workaround to get credentials for the relevant DRC.
 
-    DEPRECATED - The services var should contain a DRC alias key with credentials,
-    but that's currently a massive spaghetti. So, we'll allow for the time being
-    that DRCs are all configured in BPTL, and we grab the right one from the document URL.
+    The services var should contain a DRC alias key with credentials, but that's
+    currently a massive spaghetti. So, we'll allow for the time being that DRCs are
+    all configured in BPTL, and we grab the right one from the document URL.
     """
 
     def get_drc_client(self, document_url: str) -> Service:
@@ -61,6 +61,8 @@ class LockDocument(GetDRCMixin, ZGWWorkUnit):
 
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Sets the process variables**
 
@@ -101,6 +103,8 @@ class UnlockDocument(GetDRCMixin, ZGWWorkUnit):
 
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Sets no process variables**
     """
@@ -149,6 +153,8 @@ class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
 
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Sets no process variables**
     """

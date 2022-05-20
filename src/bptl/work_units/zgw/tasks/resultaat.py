@@ -22,6 +22,7 @@ class CreateResultaatTask(ZGWWorkUnit):
     * ``zaakUrl``: full URL of the ZAAK to set the RESULTAAT for.
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1.
     * ``resultaattype``: full URL of the RESULTAATTYPE to set.
 
       **OR**

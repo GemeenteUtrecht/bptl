@@ -11,7 +11,6 @@ from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
-from bptl.credentials.api import get_credentials
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
@@ -146,7 +145,7 @@ class ValidSignTests(TestCase):
                 "documents": serialize_variable([DOCUMENT_1, DOCUMENT_2]),
                 "signers": serialize_variable([SIGNER_1, SIGNER_2]),
                 "packageName": serialize_variable("Test package name"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable({"drc": {"jwt": "Bearer 12345"}}),
             },
         )
 
@@ -190,11 +189,8 @@ class ValidSignTests(TestCase):
         self.assertEqual(documents[0][1].read(), CONTENT_1)
         self.assertEqual(documents[1][0], RESPONSE_2["titel"])
         self.assertEqual(documents[1][1].read(), CONTENT_2)
-        app_id = self.fetched_task.get_variables().get("bptlAppId")
-        auth_header = get_credentials(app_id, self.drc)[self.drc]
-        self.assertEqual(
-            m.request_history[-1].headers["Authorization"], auth_header["Authorization"]
-        )
+
+        self.assertEqual(m.request_history[-1].headers["Authorization"], "Bearer 12345")
 
     def test_get_documents_from_api_credentials_store(self, m):
         mock_service_oas_get(m, DRC_URL, "drc")
@@ -424,7 +420,12 @@ class ValidSignMultipleDocsAPITests(TestCase):
                 "documents": serialize_variable([DOCUMENT_1, DOCUMENT_3]),
                 "signers": serialize_variable([SIGNER_1, SIGNER_2]),
                 "packageName": serialize_variable("Test package name"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {
+                        "drc1": {"jwt": "Bearer 12345"},
+                        "drc2": {"jwt": "Bearer 789"},
+                    }
+                ),
             },
         )
 

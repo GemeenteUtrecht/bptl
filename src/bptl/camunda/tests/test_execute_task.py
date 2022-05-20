@@ -72,7 +72,9 @@ class ExecuteCommandTests(TestCase):
             variables={
                 "zaaktype": serialize_variable(ZAAKTYPE),
                 "organisatieRSIN": serialize_variable("123456788"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
+                ),
             },
         )
         # mock camunda
@@ -144,7 +146,12 @@ class ExecuteCommandTests(TestCase):
             variables={
                 "zaaktype": serialize_variable(ZAAKTYPE),
                 "organisatieRSIN": serialize_variable("123456788"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    }
+                ),
             },
         )
         # mock openzaak services

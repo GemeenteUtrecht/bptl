@@ -50,7 +50,9 @@ class CreateRolTaskTests(TestCase):
                         "roltoelichting": "A test roltoelichting",
                     }
                 ),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
+                ),
             },
         )
 

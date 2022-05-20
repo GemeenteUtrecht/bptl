@@ -8,7 +8,7 @@ from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
 
 from bptl.credentials.api import get_credentials
-from bptl.tasks.models import BaseTask
+from bptl.tasks.models import BaseTask, DefaultService
 from bptl.tasks.registry import register
 
 from ..clients import APP_ID_PROCESS_VAR_NAME
@@ -43,6 +43,7 @@ def get_client(task: BaseTask) -> ZGWClient:
 class DRCClientPool:
     def __init__(self, task_variables: dict):
         self.app_id = task_variables.get(APP_ID_PROCESS_VAR_NAME)
+        self._services = task_variables.get("services")
 
         self._clients = []  # mapping of API root to service, works as a cache
 
@@ -56,6 +57,17 @@ class DRCClientPool:
                 _relevant_drcs.append(drc)
                 continue
 
+        # support for old services-style credentials, remove in 1.1
+        if self._services:
+            default_services = DefaultService.objects.filter(
+                task_mapping__topic_name=task.topic_name,
+                service__in=_relevant_drcs,
+            ).select_related("service")
+            default_service_aliases = {
+                default_service.service: default_service.alias
+                for default_service in default_services
+            }
+
         # build the clients
         service_credentials = get_credentials(self.app_id, *_relevant_drcs)
         for drc in sorted(
@@ -64,7 +76,18 @@ class DRCClientPool:
             client = drc.build_client()
 
             auth_headers = service_credentials.get(drc)
-            client.set_auth_value(auth_headers)
+            if self.app_id and auth_headers:
+                client.set_auth_value(auth_headers)
+            elif self._services:
+                warnings.warn(
+                    "Support for credentials in services variable will be removed in 1.1",
+                    DeprecationWarning,
+                )
+                alias = default_service_aliases[drc]
+                jwt = self._services.get(alias, {}).get("jwt")
+                if jwt:
+                    client.set_auth_value(jwt)
+
             client._log.task = task
             self._clients.append(client)
 

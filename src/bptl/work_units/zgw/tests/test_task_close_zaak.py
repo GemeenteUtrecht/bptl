@@ -114,7 +114,15 @@ class CloseZaakTaskTests(TestCase):
             task_id="test-task-id",
             variables={
                 "zaak": serialize_variable(ZAAK),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": {
+                    "type": "json",
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
+                    ),
+                },
             },
         )
 
@@ -148,7 +156,15 @@ class CloseZaakTaskTests(TestCase):
             variables={
                 "zaak": serialize_variable(ZAAK),
                 "resultaattype": serialize_variable(RESULTAATTYPE),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": {
+                    "type": "json",
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
+                    ),
+                },
             },
         )
 
@@ -186,7 +202,15 @@ class CloseZaakTaskTests(TestCase):
             variables={
                 "zaak": serialize_variable(ZAAK),
                 "omschrijving": serialize_variable("some-omschrijving"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": {
+                    "type": "json",
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
+                    ),
+                },
             },
         )
         resultaattype = generate_oas_component(
@@ -239,7 +263,15 @@ class CloseZaakTaskTests(TestCase):
             variables={
                 "zaak": serialize_variable(ZAAK),
                 "statustoelichting": serialize_variable("some-toelichting"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": {
+                    "type": "json",
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                            "ZTC": {"jwt": "Bearer 789"},
+                        }
+                    ),
+                },
             },
         )
         m.post(

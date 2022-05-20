@@ -6,7 +6,6 @@ from freezegun import freeze_time
 from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
-from bptl.credentials.api import get_credentials
 from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
@@ -116,20 +115,18 @@ class CreateZaakTaskTests(TestCase):
         super().setUpTestData()
 
         mapping = TaskMappingFactory.create(topic_name="some-topic")
-        zrc_svc = DefaultServiceFactory.create(
+        DefaultServiceFactory.create(
             task_mapping=mapping,
             service__api_root=ZRC_URL,
             service__api_type="zrc",
             alias="ZRC",
         )
-        cls.zrc = zrc_svc.service
-        ztc_svc = DefaultServiceFactory.create(
+        DefaultServiceFactory.create(
             task_mapping=mapping,
             service__api_root=ZTC_URL,
             service__api_type="ztc",
             alias="ZTC",
         )
-        cls.ztc = ztc_svc.service
 
     def setUp(self):
         self.fetched_task = ExternalTask.objects.create(
@@ -140,7 +137,12 @@ class CreateZaakTaskTests(TestCase):
                 "zaaktype": serialize_variable(ZAAKTYPE),
                 "organisatieRSIN": serialize_variable("002220647"),
                 "NLXProcessId": serialize_variable("12345"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    }
+                ),
             },
         )
 
@@ -170,11 +172,7 @@ class CreateZaakTaskTests(TestCase):
             )
         )
         self.assertEqual(request_zaak.headers["X-NLX-Request-Process-Id"], "12345")
-        app_id = self.fetched_task.get_variables().get("bptlAppId")
-        auth_header = get_credentials(app_id, self.zrc)[self.zrc]
-        self.assertEqual(
-            request_zaak.headers["Authorization"], auth_header["Authorization"]
-        )
+        self.assertEqual(request_zaak.headers["Authorization"], "Bearer 12345")
 
     def test_create_zaak_zaaktype_details_missing_raises_error(self, m):
         self.fetched_task.variables["zaaktype"] = serialize_variable("")
@@ -396,11 +394,7 @@ class CreateZaakTaskTests(TestCase):
             )
         )
         self.assertEqual(request_zaak.headers["X-NLX-Request-Process-Id"], "12345")
-        app_id = self.fetched_task.get_variables().get("bptlAppId")
-        auth_header = get_credentials(app_id, self.zrc)[self.zrc]
-        self.assertEqual(
-            request_zaak.headers["Authorization"], auth_header["Authorization"]
-        )
+        self.assertEqual(request_zaak.headers["Authorization"], "Bearer 12345")
 
     def test_extra_variables(self, m):
         self.fetched_task.variables["zaakDetails"] = serialize_variable(
@@ -450,7 +444,12 @@ class CreateZaakTaskTests(TestCase):
                 "zaaktype": serialize_variable(ZAAKTYPE),
                 "organisatieRSIN": serialize_variable("002220647"),
                 "NLXProcessId": serialize_variable("12345"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    }
+                ),
                 "initiator": serialize_variable(
                     {
                         "betrokkeneType": "natuurlijk_persoon",

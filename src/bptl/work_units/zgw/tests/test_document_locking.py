@@ -5,7 +5,6 @@ from django_camunda.utils import serialize_variable
 from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
-from bptl.credentials.api import get_credentials
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks.documents import LockDocument, UnlockDocument
@@ -29,13 +28,12 @@ class LockDocumentsTests(TestCase):
         super().setUpTestData()
 
         mapping = TaskMappingFactory.create(topic_name="some-topic")
-        drc_svc = DefaultServiceFactory.create(
+        DefaultServiceFactory.create(
             task_mapping=mapping,
             service__api_root=DRC_URL,
             service__api_type="drc",
             alias="drc",
         )
-        cls.drc = drc_svc.service
 
         cls.fetched_task = ExternalTask.objects.create(
             topic_name="some-topic",
@@ -43,7 +41,11 @@ class LockDocumentsTests(TestCase):
             task_id="test-task-id",
             variables={
                 "informatieobject": serialize_variable(DOCUMENT_URL),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {
+                        "drc": {"jwt": "Bearer 12345"},
+                    }
+                ),
             },
         )
 
@@ -60,11 +62,7 @@ class LockDocumentsTests(TestCase):
 
         self.assertEqual(m.last_request.method, "POST")
         self.assertEqual(m.last_request.url, LOCK_DOCUMENT_URL)
-        app_id = self.fetched_task.get_variables().get("bptlAppId")
-        auth_header = get_credentials(app_id, self.drc)[self.drc]
-        self.assertEqual(
-            m.last_request.headers["Authorization"], auth_header["Authorization"]
-        )
+        self.assertEqual(m.last_request.headers["Authorization"], "Bearer 12345")
 
 
 @requests_mock.Mocker()
@@ -74,13 +72,12 @@ class UnlockDocumentsTests(TestCase):
         super().setUpTestData()
 
         mapping = TaskMappingFactory.create(topic_name="some-topic")
-        drc_svc = DefaultServiceFactory.create(
+        DefaultServiceFactory.create(
             task_mapping=mapping,
             service__api_root=DRC_URL,
             service__api_type="drc",
             alias="drc",
         )
-        cls.drc = drc_svc.service
 
         cls.fetched_task = ExternalTask.objects.create(
             topic_name="some-topic",
@@ -89,7 +86,11 @@ class UnlockDocumentsTests(TestCase):
             variables={
                 "informatieobject": serialize_variable(DOCUMENT_URL),
                 "lockId": serialize_variable("bacbaeaf-600d-4b79-9414-3e1a668addd3"),
-                "bptlAppId": serialize_variable("some-id"),
+                "services": serialize_variable(
+                    {
+                        "drc": {"jwt": "Bearer 12345"},
+                    }
+                ),
             },
         )
 
@@ -104,8 +105,4 @@ class UnlockDocumentsTests(TestCase):
         self.assertEqual(result, {})
         self.assertEqual(m.last_request.method, "POST")
         self.assertEqual(m.last_request.url, UNLOCK_DOCUMENT_URL)
-        app_id = self.fetched_task.get_variables().get("bptlAppId")
-        auth_header = get_credentials(app_id, self.drc)[self.drc]
-        self.assertEqual(
-            m.last_request.headers["Authorization"], auth_header["Authorization"]
-        )
+        self.assertEqual(m.last_request.headers["Authorization"], "Bearer 12345")

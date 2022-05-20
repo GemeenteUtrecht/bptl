@@ -30,6 +30,7 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
        will be created.
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 
@@ -78,6 +79,7 @@ class RelatePand(ZGWWorkUnit):
     * ``panden``: list of URL references to PANDen in BAG API.
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -168,6 +170,7 @@ class CreateEigenschap(ZGWWorkUnit):
 
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -259,6 +262,7 @@ class RelateerZaak(ZGWWorkUnit):
       ``bijdrage``.
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
@@ -365,6 +369,7 @@ class CreateZaakObject(ZGWWorkUnit):
     * ``objectType``: type of the OBJECT
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
+    * ``services``: DEPRECATED - support will be removed in 1.1
 
     If `zaakUrl` is not given - returns empty dictionary.
 

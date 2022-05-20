@@ -34,10 +34,17 @@ class CreateZaakObjectTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "zaakUrl": serialize_variable(ZAAK),
-                "objectUrl": serialize_variable(OBJECT),
-                "objectType": serialize_variable("adres"),
-                "bptlAppId": serialize_variable("some-id"),
+                "zaakUrl": {"type": "String", "value": ZAAK, "valueInfo": {}},
+                "objectUrl": {"type": "String", "value": OBJECT, "valueInfo": {}},
+                "objectType": {"type": "String", "value": "adres", "valueInfo": {}},
+                "services": {
+                    "type": "json",
+                    "value": json.dumps(
+                        {
+                            "ZRC": {"jwt": "Bearer 12345"},
+                        }
+                    ),
+                },
             },
         )
 
