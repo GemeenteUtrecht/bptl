@@ -7,6 +7,7 @@ VALID_TEMPLATE_CHOICES = {
     "accordering": "email/mails/review.txt",
     "advies": "email/mails/review.txt",
     "nen2580": "email/mails/nen2580.txt",
+    "verzoek_afgehandeld": "email/mails/verzoek_afgehandeld.txt",
 }
 
 
@@ -19,6 +20,7 @@ class EmailPersonSerializer(serializers.Serializer):
 class ContextSerializer(serializers.Serializer):
     kownslFrontendUrl = serializers.CharField(required=False)
     deadline = serializers.DateField(required=False)
+    reviewType = serializers.CharField(required=False)
 
 
 class EmailSerializer(serializers.Serializer):

@@ -144,10 +144,15 @@ def get_review_response_status(task: BaseTask) -> dict:
 
 @register
 @require_kownsl_service
-def get_review_request_reminder_date(task: BaseTask) -> dict:
+def get_review_request_start_process_information(task: BaseTask) -> dict:
     """
-    Get the reminder for the set of reviewers who are requested.
-    The returned value is the deadline minus one day.
+    Get the process information for the review request.
+    The process information consists of the:
+        * deadline of the review request,
+        * reminder date of the review request,
+        * lock status of the review request,
+        * the username of the requester,
+        * and finally, the review type.
 
     In the task binding, the service with alias ``kownsl`` must be connected, so that
     this task knows which endpoints to contact.
@@ -156,9 +161,6 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
 
     * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
     * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
-
-    **Optional process variables**
-
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
 
@@ -166,6 +168,9 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
 
     * ``reminderDate``: a string containing the reminder date: "2020-02-29".
     * ``deadline``: a string containing the deadline date: "2020-03-01".
+    * ``locked``: a boolean containing the lock status of the review request.
+    * ``requester``: a string containing the username of the review requester.
+    * ``reviewType``: a string containing the review type (i.e., "advice" or "approval").
     """
     # Get kownslUsers
     variables = task.get_variables()
@@ -185,87 +190,12 @@ def get_review_request_reminder_date(task: BaseTask) -> dict:
     return {
         "deadline": deadline_str,
         "reminderDate": reminder_str,
+        "locked": review_request["locked"],
+        "requester": review_request["requester"]["username"],
+        "reviewType": "advies" if review_request["reviewType"] == 'advice' else "accordering",
     }
 
 
-@register
-@require_kownsl_service
-def get_email_details(task: BaseTask) -> dict:
-    """
-    Get email details required to build the email that is sent from the
-    accordeer/adviseer sub processes in Camunda.
-
-    **Required process variables**
-
-    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``deadline``: deadline of the review request.
-    * ``kownslFrontendUrl``: URL that takes you to the review request.
-
-    **Optional process variables**
-
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
-      The app-specific credentials will be used for the API calls, if provided.
-
-    **Sets the process variables**
-
-    * ``email``: a JSON that holds the email content and subject.
-
-      .. code-block:: json
-
-            {
-                "subject": "Email subject",
-                "content": "Email content",
-            }
-
-    * ``context``: a JSON that holds data relevant to the email:
-
-      .. code-block:: json
-
-            {
-                "deadline": "2020-12-31",
-                "kownslFrontendUrl": "somekownslurl",
-            }
-
-    * ``template``: a string that determines which template will be used for the email.
-    * ``senderUsername``: a list that holds a string of the review requester's username: ["user:username"]
-      This is used to determine the email's sender's details.
-    """
-    # Get review request
-    review_request = get_review_request(task)
-
-    # Get review request requester
-    requester = review_request["requester"]["username"]
-
-    # Set template
-    template = "accordering" if review_request["reviewType"] == "approval" else "advies"
-
-    # Get variables
-    variables = task.get_variables()
-
-    # Get kownslFrontendUrl
-    kownsl_frontend_url = check_variable(variables, "kownslFrontendUrl")
-
-    # Get deadline
-    deadline_str = check_variable(variables, "deadline")
-
-    # Set email process variable
-    email = {
-        "subject": f"Uw {template} wordt gevraagd",
-        "content": "",
-    }
-
-    # Set context process variable
-    context = {
-        "deadline": deadline_str,
-        "kownslFrontendUrl": kownsl_frontend_url,
-    }
-
-    return {
-        "email": email,
-        "context": context,
-        "template": template,
-        "senderUsername": [f"user:{requester}"],
-    }
 
 
 @register
@@ -342,28 +272,3 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
     toelichtingen = [approval["toelichting"] or "Geen" for approval in approvals]
 
     return {"toelichtingen": "\n\n".join(toelichtingen)}
-
-
-@register
-@require_kownsl_service
-def get_review_request_lock_status(task: BaseTask) -> dict:
-    """
-    Lock the review request to prevent further reviewing
-
-    **Required process variables**
-
-    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-
-    **Optional process variables**
-
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
-      The app-specific credentials will be used for the API calls, if provided.
-
-    **Sets the process variables**
-
-    * ``locked``: a boolean containing the lock status of the review request.
-    """
-
-    review_request = get_review_request(task)
-
-    return {"locked": review_request["locked"]}

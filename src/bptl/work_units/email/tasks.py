@@ -21,8 +21,8 @@ class SendEmailTask(WorkUnit):
         .. code-block:: json
 
             {
-              "email": "kees@example.com",
-              "name": "Kees Koos"
+              "email": "voornaam.achternaam@example.com",
+              "name": "Voornaam Achternaam"
             }
 
     * ``receiver``: JSON with required fields email and name of receiver.
@@ -30,8 +30,8 @@ class SendEmailTask(WorkUnit):
         .. code-block:: json
 
             {
-              "email": "jan@example.com",
-              "name": "Jan Janssen"
+              "email": "voornaam.achternaam@example.com",
+              "name": "Voornaam Achternaam"
             }
 
     * ``email``: JSON with required fields email subject and email content:
@@ -51,17 +51,20 @@ class SendEmailTask(WorkUnit):
               "generiek",
               "accordering",
               "advies",
-              "nen2580"
+              "nen2580",
+              "verzoek_afgehandeld"
             ]
 
-    * ``context``: JSON with optional fields:
+    * ``context`` (template: accordering/advies): JSON with fields depending on the template:
 
         .. code-block:: json
 
             {
-              "kownslFrontendUrl": "https://kownsl.utrechtproeftuin.nl/kownsl/<uuid>/",
+              "reviewType": "accordering/advies",
+              "kownslFrontendUrl": "https://kownsl.cg-intern.*.utrecht.nl/kownsl/<uuid>/",
               "deadline`": "2020-04-20"
             }
+
     """
 
     def perform(self):
@@ -75,7 +78,6 @@ class SendEmailTask(WorkUnit):
             "sender": send_email["sender"],
             "receiver": send_email["receiver"],
             "email": send_email["email"],
-            "review_type": send_email["template"],
             **send_email["context"],
         }
 
