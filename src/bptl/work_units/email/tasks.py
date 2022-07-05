@@ -71,27 +71,26 @@ class SendEmailTask(WorkUnit):
         variables = self.task.get_variables()
         send_email = SendEmailSerializer(data=variables)
         send_email.is_valid(raise_exception=True)
-        send_email = send_email.validated_data
 
         # Set email context
         email_context = {
-            "sender": send_email["sender"],
-            "receiver": send_email["receiver"],
-            "email": send_email["email"],
-            **send_email["context"],
+            "sender": send_email.data["sender"],
+            "receiver": send_email.data["receiver"],
+            "email": send_email.data["email"],
+            **send_email.data["context"],
         }
 
         # Get email template
-        template_path = VALID_TEMPLATE_CHOICES[send_email["template"]]
+        template_path = VALID_TEMPLATE_CHOICES[send_email.data["template"]]
         email_template = get_template(template_path)
 
         # Render and send
         email_message = email_template.render(email_context)
         email = EmailMessage(
-            subject=send_email["email"]["subject"],
+            subject=send_email.data["email"]["subject"],
             body=email_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            reply_to=[send_email["sender"]["email"]],
-            to=[send_email["receiver"]["email"]],
+            reply_to=[send_email.data["sender"]["email"]],
+            to=[send_email.data["receiver"]["email"]],
         )
         email.send(fail_silently=False)

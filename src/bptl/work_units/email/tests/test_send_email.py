@@ -98,12 +98,11 @@ class SendEmailTests(TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
-
         self.assertEqual(
             email.body,
             """Beste Jan Janssen,
 
-Uw advies is vereist. U heeft tot 20 april 2020 om te reageren.
+Uw advies is vereist. U heeft tot 2020-04-20 om te reageren.
 
 Ga alstublieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
 
