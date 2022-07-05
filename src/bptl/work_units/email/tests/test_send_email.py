@@ -39,6 +39,7 @@ class SendEmailTests(TestCase):
                     {
                         "deadline": "2020-04-20",
                         "kownslFrontendUrl": "test.com?uuid=123456",
+                        "reviewType": "advies",
                     }
                 ),
             },

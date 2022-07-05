@@ -20,10 +20,8 @@ from bptl.tasks.tests.factories import DefaultServiceFactory
 from ..tasks import (
     get_approval_toelichtingen,
     get_client,
-    get_email_details,
     get_review_request,
-    get_review_request_lock_status,
-    get_review_request_reminder_date,
+    get_review_request_start_process_information,
     get_review_response_status,
     set_review_request_metadata,
 )
@@ -179,30 +177,7 @@ class KownslAPITests(TestCase):
                 "user:hera": "2021-04-20",
                 "user:demeter": "2021-04-20",
             },
-        }
-        m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
-            json=rr_response,
-        )
-
-        task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"]["kownslUsers"] = serialize_variable(
-            ["user:zeus", "user:poseidon", "user:hades"]
-        )
-
-        task = ExternalTask.objects.create(
-            **task_dict,
-        )
-
-        reminderDate = get_review_request_reminder_date(task)
-        self.assertEqual(reminderDate["reminderDate"], "2020-04-19")
-
-    def test_get_email_details(self, m):
-        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
-        rr_response = {
-            "id": "1",
-            "forZaak": "https://zaken.nl/api/v1/zaak/123",
-            "reviewType": "advice",
+            "locked": False,
             "requester": {
                 "username": "Pietje",
             },
@@ -213,40 +188,22 @@ class KownslAPITests(TestCase):
         )
 
         task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"].update(
-            {
-                "kownslFrontendUrl": serialize_variable("a-url.test"),
-                "deadline": serialize_variable("2020-04-01"),
-            }
+        task_dict["variables"]["kownslUsers"] = serialize_variable(
+            ["user:zeus", "user:poseidon", "user:hades"]
         )
-
         task = ExternalTask.objects.create(
             **task_dict,
         )
-
-        email_details = get_email_details(task)
-        self.assertTrue("email" in email_details)
+        results = get_review_request_start_process_information(task)
+        self.assertEqual(len(m.request_history), 2)  # one for client schema
+        self.assertEqual(results["deadline"], "2020-04-20")
+        self.assertEqual(results["reminderDate"], "2020-04-19")
         self.assertEqual(
-            email_details["email"],
-            {
-                "subject": "Uw advies wordt gevraagd",
-                "content": "",
-            },
+            results["locked"],
+            False,
         )
-
-        self.assertEqual(
-            email_details["context"],
-            {
-                "deadline": "2020-04-01",
-                "kownslFrontendUrl": "a-url.test",
-            },
-        )
-
-        self.assertTrue("template" in email_details)
-        self.assertEqual(email_details["template"], "advies")
-
-        self.assertTrue("senderUsername" in email_details)
-        self.assertEqual(email_details["senderUsername"], ["user:Pietje"])
+        self.assertEqual(results["requester"], "Pietje")
+        self.assertEqual(results["reviewType"], "advies")
 
     def test_setting_review_request_metadata(self, m):
         mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
@@ -302,26 +259,4 @@ class KownslAPITests(TestCase):
         self.assertEqual(
             result,
             {"toelichtingen": "Beste voorstel ooit.\n\nEcht niet mee eens.\n\nGeen"},
-        )
-
-    def test_get_lock_status_review_request(self, m):
-        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
-        response = {
-            "id": "1",
-            "forZaak": "https://zaken.nl/api/v1/zaak/123",
-            "reviewType": "advice",
-            "locked": False,
-        }
-        m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
-            json=response,
-        )
-        task_dict = {**self.task_dict}
-        task = ExternalTask.objects.create(**task_dict)
-
-        result = get_review_request_lock_status(task)
-        self.assertEqual(len(m.request_history), 2)  # one for client schema
-        self.assertEqual(
-            result,
-            {"locked": False},
         )
