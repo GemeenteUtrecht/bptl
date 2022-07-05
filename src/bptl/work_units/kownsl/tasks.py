@@ -191,7 +191,7 @@ def get_review_request_start_process_information(task: BaseTask) -> dict:
         "deadline": deadline_str,
         "reminderDate": reminder_str,
         "locked": review_request["locked"],
-        "requester": review_request["requester"]["username"],
+        "requester": f"user:{review_request['requester']['username']}",
         "reviewType": "advies"
         if review_request["reviewType"] == "advice"
         else "accordering",
