@@ -20,7 +20,6 @@ from bptl.tasks.tests.factories import DefaultServiceFactory
 from ..tasks import (
     get_approval_toelichtingen,
     get_client,
-    get_email_details,
     get_review_request,
     get_review_request_start_process_information,
     get_review_response_status,
@@ -204,59 +203,7 @@ class KownslAPITests(TestCase):
             False,
         )
         self.assertEqual(results["requester"], "Pietje")
-        self.assertEqual(results["reviewType"], "advice")
-
-    def test_get_email_details(self, m):
-        mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
-        rr_response = {
-            "id": "1",
-            "forZaak": "https://zaken.nl/api/v1/zaak/123",
-            "reviewType": "advice",
-            "requester": {
-                "username": "Pietje",
-            },
-        }
-        m.get(
-            f"{KOWNSL_API_ROOT}api/v1/review-requests/1",
-            json=rr_response,
-        )
-
-        task_dict = copy.deepcopy(self.task_dict)
-        task_dict["variables"].update(
-            {
-                "kownslFrontendUrl": serialize_variable("a-url.test"),
-                "deadline": serialize_variable("2020-04-01"),
-            }
-        )
-
-        task = ExternalTask.objects.create(
-            **task_dict,
-        )
-
-        email_details = get_email_details(task)
-        self.assertTrue("email" in email_details)
-        self.assertEqual(
-            email_details["email"],
-            {
-                "subject": "Uw advies wordt gevraagd",
-                "content": "",
-            },
-        )
-
-        self.assertEqual(
-            email_details["context"],
-            {
-                "deadline": "2020-04-01",
-                "kownslFrontendUrl": "a-url.test",
-                "review_type": "advies"
-            },
-        )
-
-        self.assertTrue("template" in email_details)
-        self.assertEqual(email_details["template"], "advies")
-
-        self.assertTrue("senderUsername" in email_details)
-        self.assertEqual(email_details["senderUsername"], ["user:Pietje"])
+        self.assertEqual(results["reviewType"], "advies")
 
     def test_setting_review_request_metadata(self, m):
         mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
