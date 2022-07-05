@@ -69,7 +69,6 @@ class SendEmailTask(WorkUnit):
 
     def perform(self):
         variables = self.task.get_variables()
-        print(variables)
         send_email = SendEmailSerializer(data=variables)
         send_email.is_valid(raise_exception=True)
         send_email = send_email.validated_data

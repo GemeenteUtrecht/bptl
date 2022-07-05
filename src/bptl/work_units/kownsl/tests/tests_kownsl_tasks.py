@@ -164,7 +164,7 @@ class KownslAPITests(TestCase):
         remindThese = get_review_response_status(task)
         self.assertTrue(remindThese["remindThese"][0], "Hades")
 
-    def test_get_review_request_reminder_date(self, m):
+    def test_get_review_request_process_information(self, m):
         mock_service_oas_get(m, KOWNSL_API_ROOT, "kownsl")
         rr_response = {
             "id": "1",
@@ -202,7 +202,7 @@ class KownslAPITests(TestCase):
             results["locked"],
             False,
         )
-        self.assertEqual(results["requester"], "Pietje")
+        self.assertEqual(results["requester"], "user:Pietje")
         self.assertEqual(results["reviewType"], "advies")
 
     def test_setting_review_request_metadata(self, m):
