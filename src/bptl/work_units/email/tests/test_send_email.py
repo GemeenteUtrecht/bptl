@@ -117,6 +117,35 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
         self.assertEqual(email.subject, "Vakantiepret")
         self.assertEqual(email.to, ["jan.janssen@test.test"])
 
+    def test_send_email_review_template_empty_content(self):
+        task_dict = {**self.task_dict}
+        task_dict["variables"]["email"] = serialize_variable(
+            {"subject": "mooi onderwerp", "content": ""}
+        )
+        task_dict["variables"]["template"] = serialize_variable("advies")
+        task = ExternalTask.objects.create(**task_dict)
+        send_mail = SendEmailTask(task)
+        send_mail.perform()
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(
+            email.body,
+            """Beste Jan Janssen,
+
+Uw advies is vereist. U heeft tot 2020-04-20 om te reageren.
+
+Ga alstublieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
+
+Met vriendelijke groeten,
+
+Kees Koos
+
+Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het is niet mogelijk via dit bericht te reageren.""",
+        )
+        self.assertEqual(email.subject, "mooi onderwerp")
+        self.assertEqual(email.to, ["jan.janssen@test.test"])
+
     def test_send_email_invalid_review_template(self):
         task_dict = copy.deepcopy(self.task_dict)
         task_dict["variables"]["template"] = serialize_variable("lelijk")
