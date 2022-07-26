@@ -55,7 +55,7 @@ class SendEmailTests(TestCase):
 
         self.assertEqual(
             email.body,
-            """Beste Jan Janssen,\n\nDit is pas leuk.\n\nMet vriendelijke groeten,\n\nKees Koos""",
+            """Beste Jan Janssen,\n\nDit is pas leuk.\n\nMet vriendelijke groeten,\n\nKees Koos\n\nDit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het is niet mogelijk via dit bericht te reageren.""",
         )
         self.assertEqual(email.subject, "Vakantiepret")
         self.assertEqual(email.to, ["jan.janssen@test.test"])
@@ -110,7 +110,9 @@ Dit is pas leuk.
 
 Met vriendelijke groeten,
 
-Kees Koos""",
+Kees Koos
+
+Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het is niet mogelijk via dit bericht te reageren.""",
         )
         self.assertEqual(email.subject, "Vakantiepret")
         self.assertEqual(email.to, ["jan.janssen@test.test"])
@@ -158,6 +160,42 @@ De gewijzigde documenten kunt u opnieuw indienen.
 
 Met vriendelijke groeten,
 
-Kees Koos""",
+Kees Koos
+
+Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het is niet mogelijk via dit bericht te reageren.""",
         )
         self.assertEqual(email.subject, "Toelichting op niet akkoord")
+
+    def test_send_email_verzoek_afgehandeld_template(self):
+        task_dict = copy.deepcopy(self.task_dict)
+        task_dict["variables"]["email"] = serialize_variable(
+            {
+                "subject": "Betreft antwoord op accorderingsvraag voor some-zaak-omschrijving",
+                "content": "some content",
+            }
+        )
+        task_dict["variables"]["template"] = serialize_variable("verzoek_afgehandeld")
+        task_dict["variables"]["context"] = serialize_variable({})
+        task = ExternalTask.objects.create(**task_dict)
+        send_mail = SendEmailTask(task)
+        send_mail.perform()
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+
+        self.assertEqual(
+            email.body,
+            """Beste Jan Janssen,
+
+some content
+
+Met vriendelijke groeten,
+
+Kees Koos
+
+Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het is niet mogelijk via dit bericht te reageren.""",
+        )
+        self.assertEqual(
+            email.subject,
+            "Betreft antwoord op accorderingsvraag voor some-zaak-omschrijving",
+        )

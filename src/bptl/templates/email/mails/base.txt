@@ -6,3 +6,5 @@
 Met vriendelijke groeten,
 
 {{ sender.name }}
+
+Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het is niet mogelijk via dit bericht te reageren.
