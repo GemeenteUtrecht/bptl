@@ -19,7 +19,7 @@ ZAAK_URL = f"{ZRC_ROOT}zaken/some-zaak"
 ZAC_DETAIL_URL = f"{ZAC_ROOT}api/cases/123456789/ZAAK-01/url"
 
 
-class ZacTaskTests(TestCase):
+class ZacUIURLTaskTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
