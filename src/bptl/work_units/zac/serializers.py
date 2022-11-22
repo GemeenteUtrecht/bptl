@@ -20,3 +20,11 @@ class ZacUserDetailSerializer(serializers.Serializer):
             return "Medewerker"
         else:
             return name
+
+
+class ZaakDetailURLSerializer(serializers.Serializer):
+    zaakDetailUrl = serializers.URLField(
+        required=True,
+        allow_blank=False,
+        help_text=_("URL of the ZAAK detail page in the zaakafhandelcomponent."),
+    )

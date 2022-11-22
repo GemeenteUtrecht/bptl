@@ -2,12 +2,14 @@ from typing import List
 
 from rest_framework import exceptions
 from zgw_consumers.concurrent import parallel
+from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import MissingVariable, WorkUnit, check_variable
 from bptl.tasks.registry import register
 
+from ..zgw.tasks.base import ZGWWorkUnit, require_zrc
 from .client import get_client, require_zac_service
-from .serializers import ZacUserDetailSerializer
+from .serializers import ZaakDetailURLSerializer, ZacUserDetailSerializer
 
 
 @register
@@ -145,3 +147,56 @@ class UserDetailsTask(WorkUnit):
         return {
             "userData": [*validated_data],
         }
+
+
+@register
+@require_zac_service
+@require_zrc
+class ZaakDetailURLTask(ZGWWorkUnit):
+    """
+    Requests the URL to the zaak detail page of a ZAAK in open zaak.
+
+    **Required process variables**
+    * ``zaakUrl``: a string containing the URL of a ZAAK in Open Zaak.
+
+    **Sets the process variables**
+
+    * ``zaakDetailUrl``: a string containing the URL reference to the ZAC ZAAK detail page.
+
+    """
+
+    def get_client_response(self) -> List[dict]:
+        variables = self.task.get_variables()
+        zaak_url = check_variable(variables, "zaakUrl")
+        zrc_client = self.get_client(APITypes.zrc)
+        zaak = zrc_client.retrieve("zaak", url=zaak_url)
+
+        with get_client(self.task) as client:
+            zaak_detail_url = client.get(
+                f"api/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/url"
+            )
+        return zaak_detail_url
+
+    def validate_data(self, data: dict) -> dict:
+        serializer = ZaakDetailURLSerializer(data=data)
+        codes_to_catch = (
+            "code='required'",
+            "code='blank'",
+        )
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            return serializer.data
+        except Exception as e:
+            print(e)
+            if isinstance(e, exceptions.ValidationError):
+                error_codes = str(e.detail)
+                if any(code in error_codes for code in codes_to_catch):
+                    raise MissingVariable(e.detail)
+            else:
+                raise e
+
+    def perform(self) -> dict:
+        zaak_detail_url = self.get_client_response()
+        validated_data = self.validate_data(zaak_detail_url)
+        return validated_data
