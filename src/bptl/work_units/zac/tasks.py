@@ -7,7 +7,7 @@ from zgw_consumers.constants import APITypes
 from bptl.tasks.base import MissingVariable, WorkUnit, check_variable
 from bptl.tasks.registry import register
 
-from ..zgw.tasks.base import ZGWWorkUnit
+from ..zgw.tasks.base import ZGWWorkUnit, require_zrc
 from .client import get_client, require_zac_service
 from .serializers import ZaakDetailURLSerializer, ZacUserDetailSerializer
 
@@ -151,6 +151,7 @@ class UserDetailsTask(WorkUnit):
 
 @register
 @require_zac_service
+@require_zrc
 class ZaakDetailURLTask(ZGWWorkUnit):
     """
     Requests the URL to the zaak detail page of a ZAAK in open zaak.
