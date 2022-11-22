@@ -97,14 +97,6 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       -
-        name: Login to Harbor Container Registry
-        uses: docker/login-action@v1 
-        with:
-          registry: ${{ secrets.HARBOR_URL_ONT }}
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_TOKEN }}
-
-      -
         name: Image Build
         uses: docker/build-push-action@v2
         with:
@@ -116,11 +108,9 @@ jobs:
           cache-to: type=gha,mode=max
           tags: |
             scrumteamzgw/bptl:${{ steps.vars.outputs.tag }}
-            ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.tag }}
 
       -
         name: Image Push
         if: github.event_name == 'push'  # exclude PRs
         run: |
           docker push scrumteamzgw/bptl:${{ steps.vars.outputs.tag }}
-          docker push ${{ secrets.HARBOR_URL_ONT }}/${{ secrets.HARBOR_PROJECT }}/bptl:${{ steps.vars.outputs.tag }}
