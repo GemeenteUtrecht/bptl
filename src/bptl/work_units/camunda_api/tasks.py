@@ -17,23 +17,23 @@ class CamundaRequired(Exception):
 @register
 class CallActivity(WorkUnit):
     """
-    Start subprocess in Camunda
+    Start subprocess in Camunda.
 
     **Required process variables**
 
-    * ``subprocessDefinition``: process definition key for the target subprocess to
-       start.
+    * ``subprocessDefinition`` [str]: process definition key for the target subprocess to
+      start.
 
     **Optional process variables**
 
-    * ``subprocessDefinitionVersion``: a specific version of the deployed subprocess.
-       defaults to ``latest`` if not set, which means the process will be kicked off by
-       definition key.
+    * ``subprocessDefinitionVersion`` [str]: a specific version of the deployed subprocess.
+      defaults to ``latest`` if not set, which means the process will be kicked off by
+      definition key.
 
-    * ``variablesMapping``: JSON object to map variables from the parent process
-       to be sent into the new subprocess. If renaming is not needed, use the same
-       name as a key and a value. If ``variablesMapping`` is empty, the all parent
-       variables are sent to subprocess unchanged.
+    * ``variablesMapping`` [json]: JSON object to map variables from the parent process
+      to be sent into the new subprocess. If renaming is not needed, use the same
+      name as a key and a value. If ``variablesMapping`` is empty, the all parent
+      variables are sent to subprocess unchanged.
 
         .. code-block:: json
 
@@ -43,7 +43,7 @@ class CallActivity(WorkUnit):
 
     **Sets the process variables**
 
-    * ``processInstanceId``: instance id of the created subprocess
+    * ``processInstanceId`` [str]: instance id of the created subprocess
     """
 
     @staticmethod

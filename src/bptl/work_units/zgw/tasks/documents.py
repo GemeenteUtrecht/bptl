@@ -55,18 +55,16 @@ class LockDocument(GetDRCMixin, ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``informatieobject``: String, API URL of the document to lock.
+    * ``informatieobject`` [str]: URL-reference of the document to lock.
       The API must comply with the Documenten API 1.0.x
       (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Sets the process variables**
 
-    * ``lockId``: String, Lock ID for the locked document. Required to unlock or mutate
+    * ``lockId`` [str]: Lock ID for the locked document. Required to unlock or mutate
       the document.
     """
 
@@ -94,17 +92,15 @@ class UnlockDocument(GetDRCMixin, ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``informatieobject``: String, API URL of the document to lock.
+    * ``informatieobject`` [str]: URL-reference of the document to lock.
       The API must comply with the Documenten API 1.0.x
       (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
 
-    * ``lockId``: String, Lock ID for the locked DRC document, obtained from locking the
+    * ``lockId`` [str]: Lock ID for the locked DRC document, obtained from locking the
       document.
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Sets no process variables**
     """
@@ -130,31 +126,31 @@ class UnlockDocument(GetDRCMixin, ZGWWorkUnit):
 @register
 class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
     """
-    Set the ``indicatieGebruiksrecht`` to ``false`` of all INFORMATIEOBJECTen related to the ZAAK.
+    Set the ``indicatieGebruiksrecht`` to ``False`` of all INFORMATIEOBJECTen related to the ZAAK.
     The INFORMATIEOBJECTen in ZAAKINFORMATIEOBJECTen must point to INFORMATIEOBJECTen in an API that complies with the Documenten API 1.0.x
       (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
 
     From the API documentation:
 
-        Indicatie of er beperkingen gelden aangaande het gebruik van het informatieobject
-        anders dan raadpleging. Dit veld mag ``null`` zijn om aan te geven dat de
-        indicatie nog niet bekend is. Als de indicatie gezet is, dan kan je de
-        gebruiksrechten die van toepassing zijn raadplegen via de GEBRUIKSRECHTen
-        resource.
+      .. code-block:: json
 
-        -- Documenten API documentation
+            Indicatie of er beperkingen gelden aangaande het gebruik van het informatieobject
+            anders dan raadpleging. Dit veld mag ``Null`` zijn om aan te geven dat de
+            indicatie nog niet bekend is. Als de indicatie gezet is, dan kan je de
+            gebruiksrechten die van toepassing zijn raadplegen via de GEBRUIKSRECHTen
+            resource.
 
-    This task essentially switches the value from ``null`` to ``false``, implying re-use
+            -- Documenten API documentation
+
+    This task essentially switches the value from ``Null`` to ``False``, implying re-use
     other than "consulting" is not allowed.
 
     **required process variables**
 
-    * ``zaakUrl``: full URL of the ZAAK
+    * ``zaakUrl`` [str]: URL-reference to the ZAAK.
 
     * ``bptlAppId``: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Sets no process variables**
     """

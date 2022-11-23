@@ -18,9 +18,9 @@ def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
 
     Checked resources:
 
-    - Wegdeel
-    - Terrein (in development)
-    - Inrichtingselement (in development)
+    - Wegdeel.
+    - Terrein (in development).
+    - Inrichtingselement (in development).
 
     **Required process variables**
 
@@ -37,7 +37,7 @@ def retrieve_openbare_ruimten(task: BaseTask) -> Dict[str, Any]:
       feature-specific keys/values.
 
     .. note:: The kadaster geo query APIs have long response times (up to 40s) - this
-       work unit takes a considerable time to execute.
+      work unit takes a considerable time to execute.
     """
     variables = task.get_variables()
     geo = check_variable(variables, "geometry")

@@ -21,26 +21,25 @@ class CreateStatusTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: full URL of the ZAAK to create a new status for
-    * ``statusVolgnummer``: volgnummer of the status type as it occurs in the catalogus OR
-    * ``statustype``: full URL of the STATUSTYPE to set
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``zaakUrl`` [str]: URL-reference to the ZAAK to create a new status for
+    * ``statusVolgnummer`` [int]: volgnummer of the status type as it occurs in the catalogus OR
+    * ``statustype`` [str]: URL-reference to the STATUSTYPE to set
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     Note that either ``statusVolgnummer`` or ``statustype`` are sufficient.
 
     **Optional process variables**
 
-    * ``toelichting``: description of the STATUS
+    * ``toelichting`` [str]: description of the STATUS.
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``statusUrl``: the full URL of the created STATUS
+    * ``statusUrl`` [str]: URL-reference to the created STATUS.
     """
 
     def create_status(self) -> dict:

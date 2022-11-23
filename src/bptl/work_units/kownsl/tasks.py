@@ -21,16 +21,16 @@ def get_approval_status(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
 
     **Optional process variables**
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the process variables**
 
-    * ``approvalResult``: a JSON-object containing meta-data about the result:
+    * ``approvalResult`` [json]: a JSON-object containing meta-data about the result:
 
       .. code-block:: json
 
@@ -84,17 +84,17 @@ def get_review_response_status(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``kownslUsers``: list of users or groups that have been configured in the review request configuration.
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+    * ``kownslUsers`` [list[str]]: list of users or groups that have been configured in the review request configuration.
 
     **Optional process variables**
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the process variables**
 
-    * ``remindThese``: a JSON-object containing a list of users or groups who need reminding:
+    * ``remindThese`` [list[str]]: a JSON-object containing a list of users or groups who need reminding:
 
       .. code-block:: json
 
@@ -148,29 +148,30 @@ def get_review_request_start_process_information(task: BaseTask) -> dict:
     """
     Get the process information for the review request.
     The process information consists of the:
-        * deadline of the review request,
-        * reminder date of the review request,
-        * lock status of the review request,
-        * the username of the requester,
-        * and finally, the review type.
+
+    - deadline of the review request,
+    - reminder date of the review request,
+    - lock status of the review request,
+    - the username of the requester,
+    - and finally, the review type.
 
     In the task binding, the service with alias ``kownsl`` must be connected, so that
     this task knows which endpoints to contact.
 
     **Required process variables**
 
-    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``kownslUsers``: list of usernames that have been configured in the review request configuration.
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+    * ``kownslUsers`` [list[str]]: list of usernames that have been configured in the review request configuration.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the process variables**
 
-    * ``reminderDate``: a string containing the reminder date: "2020-02-29".
-    * ``deadline``: a string containing the deadline date: "2020-03-01".
-    * ``locked``: a boolean containing the lock status of the review request.
-    * ``requester``: a string containing the username of the review requester.
-    * ``reviewType``: a string containing the review type (i.e., "advice" or "approval").
+    * ``reminderDate`` [str]: the email reminder date: "2020-02-29".
+    * ``deadline`` [str]: the review deadline date: "2020-03-01".
+    * ``locked`` [bool]: the lock status of the review request.
+    * ``requester`` [str]: the username of the review requester.
+    * ``reviewType`` [str]: the review type (i.e., "advice" or "approval").
     """
     # Get kownslUsers
     variables = task.get_variables()
@@ -209,8 +210,8 @@ def set_review_request_metadata(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
-    * ``metadata``: a JSON structure holding key-values of the metadata. This will be
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+    * ``metadata`` [json]: a JSON structure holding key-values of the metadata. This will be
       set directly on the matching review request. Example:
 
       .. code-block:: json
@@ -221,7 +222,7 @@ def set_review_request_metadata(task: BaseTask) -> dict:
 
     **Optional process variables**
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
 
     **Sets no process variables**
@@ -249,16 +250,16 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``kownslReviewRequestId``: the identifier of the Kownsl review request.
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
 
     **Optional process variables**
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
 
     **Sets the process variables**
 
-    * ``toelichtingen``: a string containing the "toelichtingen" of all reviewers.
+    * ``toelichtingen`` [str]: the "toelichtingen" of all reviewers.
     """
     variables = task.get_variables()
     review_request_id = check_variable(variables, "kownslReviewRequestId")
