@@ -1,2 +1,4 @@
 {% extends "email/mails/base.txt" %}
-{% load i18n %}{% block body %}{{ email.content }}{% endblock %}
+{% load i18n %}{% block body %}{{ email.content }}
+
+Via de volgende link kun je naar de zaak: {{ zaakDetailUrl }}.{% endblock %}
