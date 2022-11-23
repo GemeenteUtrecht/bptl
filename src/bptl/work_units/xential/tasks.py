@@ -54,10 +54,10 @@ def start_xential_template(task: BaseTask) -> dict:
 
     **Required process variables**
 
-    * ``bptlAppId``: the application ID in the BPTL credential store
-    * ``templateUuid``: the id of the template which should be started
-    * ``interactive``: bool, whether the process will be interactive or not
-    * ``templateVariables``: a JSON-object containing the data to fill the template. In an interactive flow, this can be
+    * ``bptlAppId`` [str]: the application ID in the BPTL credential store
+    * ``templateUuid`` [str]: the id of the template which should be started
+    * ``interactive`` [bool]: indicates if the process will be interactive or not
+    * ``templateVariables`` [json]: the data to fill the template. In an interactive flow, this can be
       an empty object ``{}``:
 
       .. code-block:: json
@@ -67,7 +67,7 @@ def start_xential_template(task: BaseTask) -> dict:
             "variable2": "String"
          }
 
-    * ``documentMetadata``: a JSON-object containing the fields required to create a document in the Documenten API.
+    * ``documentMetadata`` [json]: the fields required to create a document in the Documenten API.
       The fields shown below are required. The property 'creatiedatum' defaults to the day in which the document is
       sent to the Documenten API and the property 'taal' defaults to 'nld' (dutch).
 
@@ -82,13 +82,13 @@ def start_xential_template(task: BaseTask) -> dict:
 
     **Optional process variable**
 
-    * ``messageId``: string. The message ID to send back into the process when the
+    * ``messageId`` [str]: The message ID to send back into the process when the
       document is sent to the Documenten API. You can use this to continue process execution.
       If left empty, then no message will be sent.
 
     **Sets the process variable**
 
-    * ``bptlDocumentUrl``: BPTL specific URL for interactive documents.
+    * ``bptlDocumentUrl`` [str]: BPTL specific URL for interactive documents.
       If the document creation is not interactive, this will be empty.
 
     """

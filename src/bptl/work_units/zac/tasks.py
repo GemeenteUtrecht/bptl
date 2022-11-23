@@ -20,7 +20,8 @@ class UserDetailsTask(WorkUnit):
     and feeds them back to the camunda process.
 
     **Required process variables**
-    * ``usernames``: JSON with usernames.
+
+    * ``usernames`` [list[str]]: usernames.
 
         .. code-block:: json
 
@@ -32,7 +33,7 @@ class UserDetailsTask(WorkUnit):
 
     OR
 
-    * ``emailaddresses``: JSON with email addresses.
+    * ``emailaddresses`` [list[str]]: user email addresses.
 
         .. code-block:: json
 
@@ -43,13 +44,13 @@ class UserDetailsTask(WorkUnit):
 
     **Optional process variables**
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
     * ``emailNotificationList``: JSON with email notification flags per "user".
 
     **Sets the process variables**
 
-    * ``userData``: a JSON-object containing a list of user names and emails:
+    * ``userData`` [list[json]]: a list of user names and emails:
 
       .. code-block:: json
 
@@ -157,11 +158,11 @@ class ZaakDetailURLTask(ZGWWorkUnit):
     Requests the URL to the zaak detail page of a ZAAK in open zaak.
 
     **Required process variables**
-    * ``zaakUrl``: a string containing the URL of a ZAAK in Open Zaak.
+    * ``zaakUrl`` [str]: URL-reference of a ZAAK in Open Zaak.
 
     **Sets the process variables**
 
-    * ``zaakDetailUrl``: a string containing the URL reference to the ZAC ZAAK detail page.
+    * ``zaakDetailUrl`` [str]: URL-reference to the ZAC ZAAK detail page.
 
     """
 

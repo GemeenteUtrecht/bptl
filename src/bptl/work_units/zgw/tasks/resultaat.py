@@ -19,27 +19,26 @@ class CreateResultaatTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: full URL of the ZAAK to set the RESULTAAT for.
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``zaakUrl`` [str]: URL-reference to the ZAAK to set the RESULTAAT for.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1.
-    * ``resultaattype``: full URL of the RESULTAATTYPE to set.
+    * ``resultaattype`` [str]: URL-reference to the RESULTAATTYPE to set.
 
-      **OR**
+    **OR**
 
-    * ``omschrijving``: description of RESULTAAT.
+    * ``omschrijving`` [str]: description of RESULTAAT.
 
     **Optional process variables**
 
-    * ``toelichting``
+    * ``toelichting`` [str]: comment of RESULTAAT.
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion.
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``resultaatUrl``: the full URL of the created RESULTAAT.
+    * ``resultaatUrl`` [str]: URL-reference to the created RESULTAAT.
     """
 
     def _get_resultaattype(self, zaak_url: str, variables: dict) -> str:

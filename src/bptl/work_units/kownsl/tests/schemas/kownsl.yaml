@@ -30,7 +30,7 @@ paths:
         schema:
           type: string
           format: uri
-        description: URL reference to the zaak in the API.
+        description: URL-reference to the zaak in the API.
       tags:
       - review-requests
       security:
@@ -725,7 +725,7 @@ components:
           type: string
           format: uri
           writeOnly: true
-          description: URL reference to Documenten API document, including `?versie=`
+          description: URL-reference to Documenten API document, including `?versie=`
             parameter.
         sourceVersion:
           type: integer
@@ -791,7 +791,7 @@ components:
         forZaak:
           type: string
           format: uri
-          description: URL reference to the zaak in the API.
+          description: URL-reference to the zaak in the API.
           maxLength: 1000
         reviewType:
           $ref: '#/components/schemas/ReviewTypeEnum'
@@ -858,7 +858,7 @@ components:
         forZaak:
           type: string
           format: uri
-          description: URL reference to the zaak in the API.
+          description: URL-reference to the zaak in the API.
           maxLength: 1000
         reviewType:
           $ref: '#/components/schemas/ReviewTypeEnum'

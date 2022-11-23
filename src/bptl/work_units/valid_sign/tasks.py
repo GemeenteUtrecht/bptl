@@ -46,12 +46,12 @@ class CreateValidSignPackageTask(ValidSignTask):
 
     **Required process variables**
 
-    * ``documents``: List of strings. List of API URLs where the documents to be signed can be retrieved.
-        The API must comply with the Documenten API 1.0.x (
-        https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
+    * ``documents`` [list[str]]: List of API URLs where the documents to be signed can be retrieved.
+      The API must comply with the Documenten API 1.0.x (
+      https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
 
-    * ``signers``: JSON list with signers information. For ValidSign, the first name, the last name and the
-        email address of each signer are required. Example ``signers``:
+    * ``signers`` [list[json]]: JSON list with signers information. For ValidSign, the first name, the last name and the
+      email address of each signer are required. Example ``signers``:
 
             .. code-block:: json
 
@@ -66,31 +66,21 @@ class CreateValidSignPackageTask(ValidSignTask):
                     "lastName": "AnotherLastName"
                 }]
 
-    * ``packageName``: string. Name of the ValidSign package that contains the documents to sign and the signers.
-        This name appears in the notification-email that is sent to the signers.
+    * ``packageName`` [str]: Name of the ValidSign package that contains the documents to sign and the signers.
+      This name appears in the notification-email that is sent to the signers.
 
-
-    * ``services``: JSON Object of connection details for ZGW services:
-
-        .. code-block:: json
-
-          {
-              "<drc alias1>": {"jwt": "Bearer <JWT value>"},
-              "<drc alias2>": {"jwt": "Bearer <JWT value>"}
-          }
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls, if provided.
 
     **Optional process variables**
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
-      The app-specific credentials will be used for the API calls, if provided.
-
-    * ``messageId``: string. The message ID to send back into the process when the
-        package is signed by everyone. You can use this to continue process execution.
-        If left empty, then no message will be sent.
+    * ``messageId`` [str]: string. The message ID to send back into the process when the
+      package is signed by everyone. You can use this to continue process execution.
+      If left empty, then no message will be sent.
 
     **Sets the process variables**
 
-    * ``packageId``: string. ID of the ValidSign package created by the task.
+    * ``packageId`` [str]: string. ID of the ValidSign package created by the task.
     """
 
     def format_signers(self, signers: List[dict]) -> List[dict]:
@@ -299,12 +289,12 @@ class ValidSignReminderTask(ValidSignTask):
 
     **Required process variables**
 
-    * ``packageId``: string with the ValidSign Id of a package
-    * ``email``: the email address of the signer who needs a reminder
+    * ``packageId`` [str]: the ValidSign Id of a package
+    * ``email`` [str]: the email address of the signer who needs a reminder
 
     **Optional process variables**
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls, if provided.
 
     **Sets no process variables**

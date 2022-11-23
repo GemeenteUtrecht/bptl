@@ -25,20 +25,19 @@ class RelateDocumentToZaakTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: full URL of the ZAAK
-    * ``informatieobject``: full URL of the INFORMATIEOBJECT. If empty, no relation
-       will be created.
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``zaakUrl`` [str]: URL-reference to the ZAAK.
+    * ``informatieobject`` [str]: URL-reference to the INFORMATIEOBJECT. If empty, no relation
+      will be created.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``zaakinformatieobject``: full URL of ZAAKINFORMATIEOBJECT
+    * ``zaakinformatieobject`` [str]: URL-reference to ZAAKINFORMATIEOBJECT.
     """
 
     def relate_document(self) -> dict:
@@ -75,20 +74,19 @@ class RelatePand(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. The PANDen are related to this.
-    * ``panden``: list of URL references to PANDen in BAG API.
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``zaakUrl`` [str]: URL-reference to a ZAAK in a Zaken API. The PANDen are related to this.
+    * ``panden`` [list[str]]: URL-references to PANDen in BAG API.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
-    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
-    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+    * ``NLXProcessId`` [str]: a process id for purpose registration ("doelbinding").
+    * ``NLXSubjectIdentifier`` [str]: a subject identifier for purpose registration ("doelbinding").
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion
 
     **Sets no process variables**
     """
@@ -157,29 +155,28 @@ class CreateEigenschap(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: URL reference to a ZAAK in a Zaken API. The eigenschap is created
+    * ``zaakUrl`` [str]: URL-reference to a ZAAK in a Zaken API. The eigenschap is created
       for this zaak.
-    * ``eigenschap``: a JSON Object containing the name and value:
+    * ``eigenschap`` [json]: a JSON Object containing the name and value:
 
       .. code-block:: json
 
-        {
-            "naam": "eigenschapnaam as in zaaktypecatalogus",
-            "waarde": "<value to set>"
-        }
+            {
+                "naam": "eigenschapnaam as in zaaktypecatalogus",
+                "waarde": "<value to set>"
+            }
 
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
-    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
-    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
+    * ``NLXProcessId`` [str]: a process id for purpose registration ("doelbinding")
+    * ``NLXSubjectIdentifier`` [str]: a subject identifier for purpose registration ("doelbinding")
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion
 
     **Sets no process variables**
     """
@@ -254,26 +251,25 @@ class RelateerZaak(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``hoofdZaakUrl``: URL reference to a ZAAK in a Zaken API. This zaak receives the
+    * ``hoofdZaakUrl`` [str]: URL-reference to a ZAAK in a Zaken API. This zaak receives the
       relations.
-    * ``zaakUrl``: URL reference to another ZAAK in a Zaken API, to be related
+    * ``zaakUrl`` [str]: URL-reference to another ZAAK in a Zaken API, to be related
       to ``zaakUrl``.
-    * ``bijdrageAard``: the type of relation. One of ``vervolg``, ``onderwerp`` or
+    * ``bijdrageAard`` [str]: the type of relation. One of ``vervolg``, ``onderwerp`` or
       ``bijdrage``.
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
-    * ``NLXProcessId``: a process id for purpose registration ("doelbinding")
-    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding")
-    * ``bijdrageAardOmgekeerdeRichting``: the type of reverse relation. One of ``vervolg``, ``onderwerp``, ``bijdrage`` or empty (``""``).
+    * ``NLXProcessId`` [str]: a process id for purpose registration ("doelbinding").
+    * ``NLXSubjectIdentifier`` [str]: a subject identifier for purpose registration ("doelbinding").
+    * ``bijdrageAardOmgekeerdeRichting`` [str]: the type of reverse relation. One of ``vervolg``, ``onderwerp``, ``bijdrage`` or empty (``""``).
       Default is ``onderwerp`` if the process variable isn't given.
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets no process variables**
     """
@@ -364,27 +360,26 @@ class CreateZaakObject(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: full URL of the ZAAK to create a new ZaakObject for
-    * ``objectUrl``: full URL of the OBJECT to set
-    * ``objectType``: type of the OBJECT
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``zaakUrl`` [str]: URL-reference to the ZAAK to create a new ZaakObject for.
+    * ``objectUrl`` [str]: URL-reference to the OBJECT to set.
+    * ``objectType`` [str]: URL-reference to the type of the OBJECT.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
-    If `zaakUrl` is not given - returns empty dictionary.
+    If ``zaakUrl`` is not given - returns empty dictionary.
 
     **Optional process variables**
 
-    * ``objectTypeOverige``: description of the OBJECT type if objectType = 'overige'
-    * ``relatieomschrijving``: description of relationship between ZAAK and OBJECT
+    * ``objectTypeOverige`` [str]: description of the OBJECT type if objectType == 'overige'.
+    * ``relatieomschrijving`` [str]: description of relationship between ZAAK and OBJECT.
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``zaakObjectUrl``: the full URL of the created ZAAKOBJECT
+    * ``zaakObjectUrl`` [str]: URL-reference to the created ZAAKOBJECT.
     """
 
     def create_zaakobject(self, variables: dict) -> dict:

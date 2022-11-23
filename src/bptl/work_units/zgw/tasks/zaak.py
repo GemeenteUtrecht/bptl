@@ -32,39 +32,37 @@ class CreateZaakTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``organisatieRSIN``: RSIN of the organisation.
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``organisatieRSIN`` [str]: RSIN of the organisation.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``catalogusDomein``: abbrevation for the domain of the catalogus of the ZAAKTYPEn.
-    * ``services``: DEPRECATED - support will be removed in 1.1
+    * ``catalogusDomein`` [str]: abbrevation for the domain of the catalogus of the ZAAKTYPEn.
     * ``zaaktypeIdentificatie``: ID of ZAAKTYPE.
-
 
     **Optional process variables**
 
-    * ``NLXProcessId``: a process id for purpose registration ("doelbinding").
-    * ``NLXSubjectIdentifier``: a subject identifier for purpose registration ("doelbinding").
-    * ``initialStatusRemarks``: a text to use for the remarks field on the initial status.
+    * ``NLXProcessId`` [str]: a process id for purpose registration ("doelbinding").
+    * ``NLXSubjectIdentifier`` [str]: a subject identifier for purpose registration ("doelbinding").
+    * ``initialStatusRemarks`` [str]: a text to use for the remarks field on the initial status.
       Must be maximum 1000 characters.
-    * ``catalogusRSIN``: RSIN of catalogus where zaaktype can be found. Defaults to ``organisatieRSIN``.
-    * ``initiator``: a JSON object with data used to create a rol for a particular zaak. See
-        https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
-    * ``zaakDetails``: a JSON object with extra properties for zaak creation. See
+    * ``catalogusRSIN`` [str]: RSIN of catalogus where zaaktype can be found. Defaults to ``organisatieRSIN``.
+    * ``initiator`` [str]: a JSON object with data used to create a rol for a particular zaak. See
+      https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
+    * ``zaakDetails`` [json]: a JSON object with extra properties for zaak creation. See
       https://zaken-api.vng.cloud/api/v1/schema/#operation/zaak_create for the available
       properties. Note that you can use these to override ``zaaktype``, ``bronorganisatie``,
       ``verantwoordelijkeOrganisatie``, ``registratiedatum`` and ``startdatum`` if you'd
       require so.
-    * ``zaaktype``: the full URL of the ZAAKTYPE.
+    * ``zaaktype`` [str]: URL-reference to the ZAAKTYPE.
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion.
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``zaak``: the JSON response of the created ZAAK.
-    * ``zaakUrl``: the full URL of the created ZAAK.
-    * ``zaakIdentificatie``: the identificatie of the created ZAAK.
+    * ``zaak`` [json]: the JSON response of the created ZAAK.
+    * ``zaakUrl`` [str]: URL-reference to the created ZAAK.
+    * ``zaakIdentificatie`` [str]: the identificatie of the created ZAAK.
     """
 
     def _get_zaaktype(self, variables: dict) -> str:
@@ -239,27 +237,26 @@ class CloseZaakTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: full URL of the ZAAK
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``zaakUrl`` [str]: URL-reference to the ZAAK.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables**
 
-    * ``omschrijving``: description of the RESULTAATTYPE. RESULTAATTYPE takes priority.
-    * ``resultaattype``: full URL of the RESULTAATTYPE to set.
-    * ``statustoelichting``: description of the STATUS.
-      If provided the RESULTAAT is created before the ZAAK is closed
+    * ``omschrijving`` [str]: description of the RESULTAATTYPE. RESULTAATTYPE takes priority.
+    * ``resultaattype`` [str]: URL-reference to the RESULTAATTYPE to set.
+    * ``statustoelichting`` [str]: description of the STATUS.
+      If provided the RESULTAAT is created before the ZAAK is closed.
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``einddatum``: date of closing the zaak
-    * ``archiefnominatie``: shows if the zaak should be destroyed or stored permanently
-    * ``archiefactiedatum``: date when the archived zaak should be destroyed or transferred to the archive
+    * ``einddatum`` [str]: date of closing the zaak.
+    * ``archiefnominatie`` [str]: shows if the zaak should be destroyed or stored permanently.
+    * ``archiefactiedatum`` [str]: date when the archived zaak should be destroyed or transferred to the archive.
     """
 
     def create_resultaat(self) -> None:
@@ -324,21 +321,20 @@ class LookupZaak(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``identificatie``: identification of the zaak, commonly known as "zaaknummer"
-    * ``bronorganisatie``: RSIN of the source organization for the zaak. The combination
-        of identificatie and bronorganisatie uniquely identifies a zaak.
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``identificatie`` [str]: identification of the zaak, commonly known as "zaaknummer".
+    * ``bronorganisatie`` [str]: RSIN of the source organization for the zaak. The combination
+      of identificatie and bronorganisatie uniquely identifies a zaak.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``zaakUrl``: the URL reference of the retrieved zaak, if retrieved at all. If the
-        zaak was not found, the value will be ``null``
+    * ``zaakUrl`` [str]: URL-reference of the retrieved zaak, if retrieved at all. If the
+      zaak was not found, the value will be ``Null``.
     """
 
     def perform(self) -> Dict[str, Optional[str]]:

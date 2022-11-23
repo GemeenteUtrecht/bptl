@@ -20,21 +20,20 @@ class CreateRolTask(ZGWWorkUnit):
 
     **Required process variables**
 
-    * ``zaakUrl``: full URL of the ZAAK to create a new rol for
-    * ``omschrijving``: roltype.omschrijving for the ROL
-    * ``betrokkene``: JSON object with data used to create a rol for a particular zaak. See
-        https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
-    * ``bptlAppId``: the application ID of the app that caused this task to be executed.
+    * ``zaakUrl`` [str]: URL-reference to the ZAAK to create a new rol for.
+    * ``omschrijving`` [str]: roltype.omschrijving for the ROL.
+    * ``betrokkene`` [json]: JSON object with data used to create a rol for a particular zaak. See
+      https://zaken-api.vng.cloud/api/v1/schema/#operation/rol_create for the properties available.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
-    * ``services``: DEPRECATED - support will be removed in 1.1
 
     **Optional process variables (Camunda exclusive)**
 
-    * ``callbackUrl``: send an empty POST request to this URL to signal completion
+    * ``callbackUrl`` [str]: send an empty POST request to this URL to signal completion.
 
     **Sets the process variables**
 
-    * ``rolUrl``: the full URL of the created ROL
+    * ``rolUrl`` [str]: URL-reference to the created ROL.
     """
 
     def create_rol(self) -> Optional[dict]:
