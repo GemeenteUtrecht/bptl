@@ -102,9 +102,9 @@ class SendEmailTests(TestCase):
             email.body,
             """Beste Jan Janssen,
 
-Uw advies is vereist. U heeft tot 2020-04-20 om te reageren.
+Je advies is vereist. Je hebt tot 2020-04-20 om te reageren.
 
-Ga alstublieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
+Ga alstjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
 
 Dit is pas leuk.
 
@@ -133,9 +133,9 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
             email.body,
             """Beste Jan Janssen,
 
-Uw advies is vereist. U heeft tot 2020-04-20 om te reageren.
+Je advies is vereist. Je hebt tot 2020-04-20 om te reageren.
 
-Ga alstublieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
+Ga alstjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
 
 Met vriendelijke groeten,
 
@@ -181,11 +181,11 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
             email.body,
             """Beste Jan Janssen,
 
-Wij hebben de door u aangeleverde documenten bekeken en vragen u onderstaande wijzigingen hier te doen:
+Wij hebben de door jou aangeleverde documenten bekeken en vragen je de onderstaande wijzigingen hier te doen:
 
 Ik kan hier echt niet mee akkoord gaan.
 
-De gewijzigde documenten kunt u opnieuw indienen.
+De gewijzigde documenten kun je opnieuw indienen.
 
 Met vriendelijke groeten,
 
@@ -217,6 +217,8 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
             """Beste Jan Janssen,
 
 some content
+
+Via de volgende link kun je naar de zaak: .
 
 Met vriendelijke groeten,
 
