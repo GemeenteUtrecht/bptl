@@ -259,7 +259,7 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
 
     **Sets the process variables**
 
-    * ``toelichtingen`` [str]: a string containing the "toelichtingen" of all reviewers.
+    * ``toelichtingen`` [str]: the "toelichtingen" of all reviewers.
     """
     variables = task.get_variables()
     review_request_id = check_variable(variables, "kownslReviewRequestId")

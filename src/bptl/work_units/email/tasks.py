@@ -16,7 +16,7 @@ class SendEmailTask(WorkUnit):
 
     **Required process variables**
 
-    * ``sender``: JSON with required fields email and name of sender.
+    * ``sender`` [json]: required fields email and name of sender.
 
         .. code-block:: json
 
@@ -25,7 +25,7 @@ class SendEmailTask(WorkUnit):
               "name": "Voornaam Achternaam"
             }
 
-    * ``receiver``: JSON with required fields email and name of receiver.
+    * ``receiver`` [json]: required fields email and name of receiver.
 
         .. code-block:: json
 
@@ -34,7 +34,7 @@ class SendEmailTask(WorkUnit):
               "name": "Voornaam Achternaam"
             }
 
-    * ``email``: JSON with required fields email subject and email content:
+    * ``email`` [json]: required fields email subject and email content:
 
         .. code-block:: json
 
@@ -43,7 +43,7 @@ class SendEmailTask(WorkUnit):
               "content": "This is an example body."
             }
 
-    * ``template``: string with template name. Valid choices are:
+    * ``template`` [str]: template name. Valid choices are:
 
         .. code-block:: json
 
@@ -55,7 +55,7 @@ class SendEmailTask(WorkUnit):
               "verzoek_afgehandeld"
             ]
 
-    * ``context`` (template: accordering/advies): JSON with fields depending on the template:
+    * ``context`` [json]: JSON with fields depending on the template:
 
         .. code-block:: json
 

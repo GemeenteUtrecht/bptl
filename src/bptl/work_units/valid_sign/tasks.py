@@ -74,13 +74,13 @@ class CreateValidSignPackageTask(ValidSignTask):
 
     **Optional process variables**
 
-    * ``messageId`` [str]: string. The message ID to send back into the process when the
+    * ``messageId`` [str]: The message ID to send back into the process when the
       package is signed by everyone. You can use this to continue process execution.
       If left empty, then no message will be sent.
 
     **Sets the process variables**
 
-    * ``packageId`` [str]: string. ID of the ValidSign package created by the task.
+    * ``packageId`` [str]: The ValidSign package ID created by the task.
     """
 
     def format_signers(self, signers: List[dict]) -> List[dict]:
