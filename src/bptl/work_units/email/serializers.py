@@ -21,6 +21,7 @@ class ContextSerializer(serializers.Serializer):
     kownslFrontendUrl = serializers.CharField(required=False)
     deadline = serializers.DateField(required=False)
     reviewType = serializers.CharField(required=False)
+    zaakDetailUrl = serializers.CharField(required=False)
 
 
 class EmailSerializer(serializers.Serializer):
