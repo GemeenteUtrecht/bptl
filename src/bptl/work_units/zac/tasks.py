@@ -174,7 +174,7 @@ class ZaakDetailURLTask(ZGWWorkUnit):
 
         with get_client(self.task) as client:
             zaak_detail_url = client.get(
-                f"api/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/url"
+                f"api/core/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/url"
             )
         return zaak_detail_url
 

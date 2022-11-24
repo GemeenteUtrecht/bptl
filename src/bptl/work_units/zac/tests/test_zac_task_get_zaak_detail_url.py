@@ -16,7 +16,7 @@ from ..tasks import ZaakDetailURLTask
 ZAC_ROOT = "https://zac.example.com/"
 ZRC_ROOT = "https://some.zrc.nl/api/v1/"
 ZAAK_URL = f"{ZRC_ROOT}zaken/some-zaak"
-ZAC_DETAIL_URL = f"{ZAC_ROOT}api/cases/123456789/ZAAK-01/url"
+ZAC_DETAIL_URL = f"{ZAC_ROOT}api/core/cases/123456789/ZAAK-01/url"
 
 
 class ZacUIURLTaskTests(TestCase):
