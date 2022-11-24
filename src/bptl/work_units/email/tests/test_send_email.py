@@ -204,21 +204,22 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
             }
         )
         task_dict["variables"]["template"] = serialize_variable("verzoek_afgehandeld")
-        task_dict["variables"]["context"] = serialize_variable({})
+        task_dict["variables"]["context"] = serialize_variable(
+            {"zaakDetailUrl": "http://some-detail-url.com/"}
+        )
         task = ExternalTask.objects.create(**task_dict)
         send_mail = SendEmailTask(task)
         send_mail.perform()
 
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
-
         self.assertEqual(
             email.body,
             """Beste Jan Janssen,
 
 some content
 
-Via de volgende link kun je naar de zaak: .
+Via de volgende link kun je naar de zaak: http://some-detail-url.com/.
 
 Met vriendelijke groeten,
 
