@@ -9,7 +9,11 @@ from bptl.tasks.registry import register
 
 from ..zgw.tasks.base import ZGWWorkUnit, require_zrc
 from .client import get_client, require_zac_service
-from .serializers import ZaakDetailURLSerializer, ZacUserDetailSerializer
+from .serializers import (
+    CreatedProcessInstanceSerializer,
+    ZaakDetailURLSerializer,
+    ZacUserDetailSerializer,
+)
 
 
 @register
@@ -189,7 +193,6 @@ class ZaakDetailURLTask(ZGWWorkUnit):
             serializer.is_valid(raise_exception=True)
             return serializer.data
         except Exception as e:
-            print(e)
             if isinstance(e, exceptions.ValidationError):
                 error_codes = str(e.detail)
                 if any(code in error_codes for code in codes_to_catch):
@@ -201,3 +204,57 @@ class ZaakDetailURLTask(ZGWWorkUnit):
         zaak_detail_url = self.get_client_response()
         validated_data = self.validate_data(zaak_detail_url)
         return validated_data
+
+
+@register
+@require_zac_service
+@require_zrc
+class StartCamundaProcessTask(ZGWWorkUnit):
+    """
+    Starts the related camunda business process for a ZAAK if
+    its ZAAKTYPE is associated to a configured StartCamundaProcessForm
+    in the OBJECTS API.
+
+    **Required process variables**
+    * ``zaakUrl`` [str]: URL-reference of a ZAAK in Open Zaak.
+
+    **Sets the process variables**
+
+    * Does not set any process variables.
+
+    """
+
+    def get_client_response(self) -> dict:
+        variables = self.task.get_variables()
+        zaak_url = check_variable(variables, "zaakUrl")
+        zrc_client = self.get_client(APITypes.zrc)
+        zaak = zrc_client.retrieve("zaak", url=zaak_url)
+
+        with get_client(self.task) as client:
+            process_instance = client.post(
+                f"api/core/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/start-process"
+            )
+        return process_instance
+
+    def validate_data(self, data: dict) -> dict:
+        serializer = CreatedProcessInstanceSerializer(data=data)
+        codes_to_catch = (
+            "code='required'",
+            "code='blank'",
+        )
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            return serializer.data
+        except Exception as e:
+            if isinstance(e, exceptions.ValidationError):
+                error_codes = str(e.detail)
+                if any(code in error_codes for code in codes_to_catch):
+                    raise MissingVariable(e.detail)
+            else:
+                raise e
+
+    def perform(self) -> None:
+        process_instance = self.get_client_response()
+        self.validate_data(process_instance)
+        return {}

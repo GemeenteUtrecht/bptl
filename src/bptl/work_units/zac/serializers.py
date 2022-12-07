@@ -28,3 +28,13 @@ class ZaakDetailURLSerializer(serializers.Serializer):
         allow_blank=False,
         help_text=_("URL of the ZAAK detail page in the zaakafhandelcomponent."),
     )
+
+
+class CreatedProcessInstanceSerializer(serializers.Serializer):
+    instanceId = serializers.UUIDField(
+        help_text=_("The UUID of the process instance."),
+        required=True,
+    )
+    instanceUrl = serializers.URLField(
+        help_text=_("The URL of the process instance."), required=True
+    )
