@@ -358,11 +358,21 @@ class CreateZaakTaskTests(TestCase):
         zaaktype_1 = generate_oas_component(
             "ztc",
             "schemas/ZaakType",
-            beginGeldigheid="2021-08-01",
-            url=ZAAKTYPE,
+            beginGeldigheid="2021-07-01",
+            eindeGeldigheid="2021-08-01",
         )
         zaaktype_2 = generate_oas_component(
-            "ztc", "schemas/ZaakType", beginGeldigheid="2021-08-03"
+            "ztc",
+            "schemas/ZaakType",
+            beginGeldigheid="2021-08-02",
+            eindeGeldigheid="2021-08-02",
+        )
+        zaaktype_3 = generate_oas_component(
+            "ztc",
+            "schemas/ZaakType",
+            beginGeldigheid="2021-08-02",
+            eindeGeldigheid=None,
+            url=ZAAKTYPE,
         )
         m.get(
             f"{ZTC_URL}zaaktypen?catalogus=https%3A%2F%2Fsome.ztc.nl%2Fapi%2Fv1%2F%2Fcatalogussen%2F7022a89e-0dd1-4074-9c3a-1a990e6c18ab&identificatie=abcd",
@@ -371,7 +381,7 @@ class CreateZaakTaskTests(TestCase):
                 "count": 2,
                 "next": None,
                 "previous": None,
-                "results": [zaaktype_1, zaaktype_2],
+                "results": [zaaktype_1, zaaktype_2, zaaktype_3],
             },
         )
 
