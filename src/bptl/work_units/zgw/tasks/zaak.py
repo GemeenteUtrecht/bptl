@@ -120,6 +120,26 @@ class CreateZaakTask(ZGWWorkUnit):
                         return zaaktype.begin_geldigheid <= date.today()
 
                 zaaktypen = [zt for zt in zaaktypen if _filter_on_geldigheid(zt)]
+                # Use the ZT with none as einde geldigheid or einde geldigheid that's further into the future
+                # in the edge case that einde geldigheid old zaaktype is today and a new zaaktype is geldig from today.
+                if len(zaaktypen) > 1:
+                    zaaktypen_without_einde_geldigheid = [
+                        zt for zt in zaaktypen if not zt.einde_geldigheid
+                    ]
+
+                    # If this does not exist -> get one with einde_geldigheid most distant into the future
+                    if len(zaaktypen_without_einde_geldigheid) == 0:
+                        max_einde_geldigheid = max(
+                            [zt.einde_geldigheid for zt in zaaktypen]
+                        )
+                        zaaktypen = [
+                            zt
+                            for zt in zaaktypen
+                            if zt.einde_geldigheid == max_einde_geldigheid
+                        ]
+                    else:
+                        zaaktypen = zaaktypen_without_einde_geldigheid
+
                 if len(zaaktypen) != 1:
                     raise ValueError(
                         "No%s zaaktype was found with catalogus %s, identificatie %s with begin_geldigheid <= %s <= einde_geldigheid."
