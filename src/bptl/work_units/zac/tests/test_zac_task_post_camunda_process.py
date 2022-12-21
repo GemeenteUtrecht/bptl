@@ -1,7 +1,10 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
+from requests.exceptions import HTTPError
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 from zgw_consumers.test import mock_service_oas_get
@@ -110,6 +113,25 @@ class ZacStartCamundaProcessTaskTests(TestCase):
         self.assertEqual(
             e.exception.args[0]["instanceUrl"][0].__str__(), "Dit veld is vereist."
         )
+
+    @requests_mock.Mocker()
+    @patch("bptl.work_units.zac.tasks.logger", return_value=None)
+    def test_post_camunda_start_process_form_from_zaak_url_missing_form(
+        self, m, mock_logger
+    ):
+        mock_service_oas_get(m, ZRC_ROOT, "zrc")
+        m.post(
+            ZAC_START_PROCESS_URL, json={"Detail": "Niet gevonden."}, status_code=404
+        )
+        m.get(
+            ZAAK_URL, json={"bronorganisatie": "123456789", "identificatie": "ZAAK-01"}
+        )
+
+        task = StartCamundaProcessTask(self.task_url)
+        with self.assertRaises(HTTPError) as exc:
+            response = task.get_client_response()
+
+        self.assertEqual(exc.exception.response.status_code, 404)
 
     def test_missing_zaak_url_variable(self):
         task_dict = {**self.task_dict}
