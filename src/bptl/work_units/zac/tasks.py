@@ -1,5 +1,7 @@
+import logging
 from typing import List
 
+from requests.exceptions import HTTPError
 from rest_framework import exceptions
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
@@ -14,6 +16,8 @@ from .serializers import (
     ZaakDetailURLSerializer,
     ZacUserDetailSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @register
@@ -255,6 +259,13 @@ class StartCamundaProcessTask(ZGWWorkUnit):
                 raise e
 
     def perform(self) -> None:
-        process_instance = self.get_client_response()
+        try:
+            process_instance = self.get_client_response()
+        except HTTPError as exc:
+            if exc.response.status_code == 404:
+                logger.warning("No start camunda process form found in the ZAC.")
+                return {}
+            else:
+                raise exc
         self.validate_data(process_instance)
         return {}
