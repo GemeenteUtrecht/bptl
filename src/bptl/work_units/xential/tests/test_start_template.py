@@ -67,7 +67,7 @@ class XentialTaskTests(TestCase):
         )
         m.post(
             f"{XENTIAL_API_ROOT}createTicket",
-            json={"ticketId": "b0fdd542-0cc4-44a1-8dfb-808436123ce8"},
+            json={"ticketUuid": "b0fdd542-0cc4-44a1-8dfb-808436123ce8"},
         )
         m.post(
             f"{XENTIAL_API_ROOT}document/startDocument?ticketUuid=b0fdd542-0cc4-44a1-8dfb-808436123ce8",
@@ -131,7 +131,7 @@ class XentialTaskTests(TestCase):
         )
         m.post(
             f"{XENTIAL_API_ROOT}createTicket",
-            json={"ticketId": "b0fdd542-0cc4-44a1-8dfb-808436123ce8"},
+            json={"ticketUuid": "b0fdd542-0cc4-44a1-8dfb-808436123ce8"},
         )
 
         external_task = ExternalTask.objects.create(
