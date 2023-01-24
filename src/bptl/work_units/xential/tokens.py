@@ -13,6 +13,7 @@ class XentialTicketTokenGenerator:
     to build documents interactively.
     Implementation adapted from
     :class:`from django.contrib.auth.tokens.PasswordResetTokenGenerator`
+
     """
 
     key_salt = "bptl.work_units.xential.tokens.XentialTicketTokenGenerator"

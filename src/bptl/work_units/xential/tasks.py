@@ -151,7 +151,7 @@ def start_xential_template(task: BaseTask) -> dict:
             "ticketData": ("ticketData", ticket_data, "text/xml"),
         },
     )
-    ticket_uuid = response_data["ticketId"]
+    ticket_uuid = response_data["ticketUuid"]
 
     ticket = XentialTicket.objects.create(
         task=task,
