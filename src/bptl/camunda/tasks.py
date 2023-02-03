@@ -8,11 +8,12 @@ from timeline_logger.models import TimelineLog
 from bptl.camunda.api import complete
 from bptl.camunda.models import ExternalTask
 from bptl.camunda.utils import fetch_and_lock
-from bptl.tasks.api import execute
+from bptl.tasks.api import TaskExpired, execute
+from bptl.tasks.registry import register
 from bptl.utils.constants import Statuses
 
 from ..celery import app
-from .utils import fail_task
+from .utils import extend_task, fail_task
 
 logger = get_task_logger(__name__)
 
@@ -85,9 +86,15 @@ def task_execute_and_complete(fetched_task_id):
     fetched_task.status = Statuses.in_progress
     fetched_task.save(update_fields=["status"])
 
-    # execute
+    def _execute(fetched_task: ExternalTask):
+        try:
+            execute(fetched_task, registry=register)
+        except TaskExpired:
+            extended_task = extend_task(fetched_task)
+            return _execute(extended_task)
+
     try:
-        execute(fetched_task)
+        _execute(fetched_task)
     except Exception as exc:
         logger.warning(
             "Task %r has failed during execution with error: %r",
