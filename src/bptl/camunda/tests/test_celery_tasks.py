@@ -250,3 +250,77 @@ class RouteTaskTests(TestCase):
         # Task should not be expired
         self.assertFalse(task.expired)
         m_complete.assert_called_once()
+
+    @patch("bptl.camunda.tasks.fail_task")
+    @requests_mock.Mocker()
+    @freeze_time(timezone.make_aware(timezone.datetime(2020, 1, 2)))
+    def test_task_execute_and_complete_fail_execute_retry_could_not_be_extended(
+        self, m_fail, m
+    ):
+        config = CamundaConfig.get_solo()
+        config.root_url = "https://some.camunda.com"
+        config.rest_api_path = "engine-rest/"
+        config.save()
+
+        mapping = TaskMapping.objects.create(
+            topic_name="zaak-initialize",
+            callback="bptl.work_units.zgw.tasks.zaak.CreateZaakTask",
+        )
+
+        task = ExternalTaskFactory.create(
+            task_id="some-task-id",
+            topic_name="zaak-initialize",
+            lock_expires_at=timezone.make_aware(timezone.datetime(2020, 1, 1)),
+        )
+
+        # Mock camunda call and to fail
+        m.post(
+            f"https://some.camunda.com/engine-rest/external-task/some-task-id/extendLock",
+            status_code=400,
+        )
+
+        task.refresh_from_db()
+        self.assertTrue(task.expired)
+
+        task_execute_and_complete(task.id)
+        m_fail.assert_called_once()
+
+    @patch("bptl.camunda.tasks.fail_task")
+    @requests_mock.Mocker()
+    @freeze_time(timezone.make_aware(timezone.datetime(2020, 1, 2)))
+    def test_task_execute_and_complete_fail_execute_retry_false_extend(self, m_fail, m):
+        config = CamundaConfig.get_solo()
+        config.root_url = "https://some.camunda.com"
+        config.rest_api_path = "engine-rest/"
+        config.save()
+
+        mapping = TaskMapping.objects.create(
+            topic_name="zaak-initialize",
+            callback="bptl.work_units.zgw.tasks.zaak.CreateZaakTask",
+        )
+
+        task = ExternalTaskFactory.create(
+            task_id="some-task-id",
+            topic_name="zaak-initialize",
+            lock_expires_at=timezone.make_aware(timezone.datetime(2020, 1, 1)),
+        )
+
+        # Mock camunda call and to fail
+        m.post(
+            f"https://some.camunda.com/engine-rest/external-task/some-task-id/extendLock",
+            status_code=204,
+        )
+        m.get(
+            f"https://some.camunda.com/engine-rest/external-task/some-task-id",
+            status_code=200,
+            json={
+                "lock_expiration_time": timezone.make_aware(
+                    timezone.datetime(2020, 1, 1)
+                ).isoformat()
+            },
+        )
+        task.refresh_from_db()
+        self.assertTrue(task.expired)
+
+        task_execute_and_complete(task.id)
+        m_fail.assert_called_once()

@@ -91,6 +91,8 @@ def task_execute_and_complete(fetched_task_id):
             execute(fetched_task, registry=register)
         except TaskExpired:
             extended_task = extend_task(fetched_task)
+            if extended_task.expired:
+                raise TaskExpired("Task lock expired and could not be extended.")
             return _execute(extended_task)
 
     try:
