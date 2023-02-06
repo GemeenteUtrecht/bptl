@@ -157,6 +157,20 @@ def fail_task(task: ExternalTask, reason: str = "") -> None:
     camunda.post(f"external-task/{task.task_id}/failure", json=body)
 
 
+def extend_task(task: ExternalTask) -> ExternalTask:
+    body = {
+        "newDuration": LOCK_DURATION * 1000,  # milliseconds
+        "workerId": task.worker_id,
+    }
+
+    camunda = get_client()
+    camunda.post(f"external-task/{task.task_id}/extendLock", json=body)
+    external_task = camunda.get(f"external-task/{task.task_id}")
+    task.lock_expires_at = parser.parse(external_task["lock_expiration_time"])
+    task.save()
+    return task
+
+
 def log_camunda_error(task: ExternalTask, exc: requests.HTTPError) -> None:
     # log Camunda errors if we get any at all
     response = getattr(exc, "response", None)
