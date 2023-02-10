@@ -12,6 +12,15 @@ class CoreConfig(SingletonModel):
         help_text=_("A flag that allows non-ADFS login (True) or not (False)."),
         default=False,
     )
+    primary_objecttypes_api = models.ForeignKey(
+        verbose_name=_("Primary OBJECTTYPES API"),
+        to="zgw_consumers.Service",
+        null=True,
+        on_delete=models.SET_NULL,
+        limit_choices_to={"api_type": APITypes.orc},
+        related_name="+",
+        help_text=_("Default OBJECTTYPES API service to use"),
+    )
 
     class Meta:
         verbose_name = _("global configuration")

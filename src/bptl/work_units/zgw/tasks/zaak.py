@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from zgw_consumers.api_models.base import factory
 from zgw_consumers.api_models.catalogi import ZaakType
+from zgw_consumers.api_models.constants import RolOmschrijving
 from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import MissingVariable, check_variable
@@ -186,7 +187,9 @@ class CreateZaakTask(ZGWWorkUnit):
         ztc_client = self.get_client(APITypes.ztc)
         query_params = {
             "zaaktype": self._get_zaaktype(variables),
-            "omschrijvingGeneriek": initiator.get("omschrijvingGeneriek", "initiator"),
+            "omschrijvingGeneriek": initiator.get(
+                "omschrijvingGeneriek", RolOmschrijving.initiator
+            ),
         }
         rol_typen = ztc_client.list("roltype", query_params)
         if not rol_typen:

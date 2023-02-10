@@ -33,6 +33,12 @@ API's voor Zaakgericht Werken
 .. automodule:: bptl.work_units.zgw.tasks.documents
     :members:
 
+.. automodule:: bptl.work_units.zgw.tasks.zaakprocess
+    :members:
+
+.. automodule:: bptl.work_units.zgw.zac.tasks
+    :members:
+
 BRP
 ---
 
@@ -73,12 +79,6 @@ Xential
 -------
 
 .. automodule:: bptl.work_units.xential.tasks
-    :members:
-
-ZAC
----
-
-.. automodule:: bptl.work_units.zac.tasks
     :members:
 
 Camunda tasks

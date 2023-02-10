@@ -10,3 +10,4 @@ from .zaak_relations import (  # noqa
     RelateerZaak,
     RelatePand,
 )
+from .zaakprocess import StartCamundaProcessTask  # noqa

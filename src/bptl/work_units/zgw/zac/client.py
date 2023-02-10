@@ -9,9 +9,8 @@ from zgw_consumers.constants import APITypes
 
 from bptl.tasks.models import BaseTask
 from bptl.tasks.registry import register
-
-from ..clients import JSONClient, get_client as _get_client
-from ..services import get_alias_service
+from bptl.work_units.clients import JSONClient, get_client as _get_client
+from bptl.work_units.services import get_alias_service
 
 logger = logging.getLogger(__name__)
 

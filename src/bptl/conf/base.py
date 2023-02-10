@@ -99,7 +99,6 @@ INSTALLED_APPS = [
     "bptl.work_units.zgw",
     "bptl.work_units.valid_sign",
     "bptl.work_units.email",
-    "bptl.work_units.zac",
     "bptl.work_units.xential",
 ]
 
