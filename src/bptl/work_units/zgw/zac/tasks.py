@@ -1,7 +1,6 @@
 import logging
 from typing import List
 
-from requests.exceptions import HTTPError
 from rest_framework import exceptions
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
@@ -11,11 +10,7 @@ from bptl.tasks.registry import register
 
 from ..zgw.tasks.base import ZGWWorkUnit, require_zrc
 from .client import get_client, require_zac_service
-from .serializers import (
-    CreatedProcessInstanceSerializer,
-    ZaakDetailURLSerializer,
-    ZacUserDetailSerializer,
-)
+from .serializers import ZaakDetailURLSerializer, ZacUserDetailSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -208,64 +203,3 @@ class ZaakDetailURLTask(ZGWWorkUnit):
         zaak_detail_url = self.get_client_response()
         validated_data = self.validate_data(zaak_detail_url)
         return validated_data
-
-
-@register
-@require_zac_service
-@require_zrc
-class StartCamundaProcessTask(ZGWWorkUnit):
-    """
-    Starts the related camunda business process for a ZAAK if
-    its ZAAKTYPE is associated to a configured StartCamundaProcessForm
-    in the OBJECTS API.
-
-    **Required process variables**
-    * ``zaakUrl`` [str]: URL-reference of a ZAAK in Open Zaak.
-
-    **Sets the process variables**
-
-    * Does not set any process variables.
-
-    """
-
-    def get_client_response(self) -> dict:
-        variables = self.task.get_variables()
-        zaak_url = check_variable(variables, "zaakUrl")
-        zrc_client = self.get_client(APITypes.zrc)
-        zaak = zrc_client.retrieve("zaak", url=zaak_url)
-
-        with get_client(self.task) as client:
-            process_instance = client.post(
-                f"api/core/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/start-process"
-            )
-        return process_instance
-
-    def validate_data(self, data: dict) -> dict:
-        serializer = CreatedProcessInstanceSerializer(data=data)
-        codes_to_catch = (
-            "code='required'",
-            "code='blank'",
-        )
-
-        try:
-            serializer.is_valid(raise_exception=True)
-            return serializer.data
-        except Exception as e:
-            if isinstance(e, exceptions.ValidationError):
-                error_codes = str(e.detail)
-                if any(code in error_codes for code in codes_to_catch):
-                    raise MissingVariable(e.detail)
-            else:
-                raise e
-
-    def perform(self) -> None:
-        try:
-            process_instance = self.get_client_response()
-        except HTTPError as exc:
-            if exc.response.status_code == 404:
-                logger.warning("No start camunda process form found in the ZAC.")
-                return {}
-            else:
-                raise exc
-        self.validate_data(process_instance)
-        return {}

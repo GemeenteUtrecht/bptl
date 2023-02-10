@@ -64,7 +64,6 @@ class RouteTaskTests(TestCase):
         task_execute_and_complete(task.id)
 
         task.refresh_from_db()
-        print(task.execution_error)
         self.assertEqual(task.status, "failed")
         self.assertTrue(task.execution_error.strip().endswith("execution is failed"))
 

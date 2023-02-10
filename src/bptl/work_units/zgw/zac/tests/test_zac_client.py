@@ -7,7 +7,7 @@ from zgw_consumers.models import Service
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.models import BaseTask
 from bptl.tasks.tests.factories import DefaultServiceFactory
-from bptl.work_units.zac.client import get_client
+from bptl.work_units.zgw.zac.client import get_client
 
 ZAC_API_ROOT = "https://zac.example.com/"
 

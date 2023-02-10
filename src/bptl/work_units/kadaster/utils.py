@@ -7,7 +7,7 @@ from zgw_consumers.models import Service
 
 from bptl.tasks.base import BaseTask, check_variable
 from bptl.tasks.registry import register
-from bptl.work_units.zgw.tasks.base import NoService
+from bptl.work_units.zgw.client import NoService
 
 from ..clients import get_client as _get_client
 from ..services import get_alias_service

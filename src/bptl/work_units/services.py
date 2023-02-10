@@ -1,7 +1,7 @@
 from zgw_consumers.models import Service
 
 from bptl.tasks.models import BaseTask, DefaultService
-from bptl.work_units.zgw.tasks.base import NoService
+from bptl.work_units.zgw.client import NoService
 
 
 def get_alias_service(task: BaseTask, alias: str, **extra_filters) -> Service:

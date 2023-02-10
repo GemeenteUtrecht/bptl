@@ -176,7 +176,7 @@ class CreateZaakTask(ZGWWorkUnit):
         zaak = client_zrc.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
-    def create_rol(self, zaak: dict) -> Optional[dict]:
+    def _create_rol(self, zaak: dict, rol: dict) -> Optional[dict]:
         variables = self.task.get_variables()
         initiator = variables.get("initiator", {})
 
@@ -186,7 +186,7 @@ class CreateZaakTask(ZGWWorkUnit):
         ztc_client = self.get_client(APITypes.ztc)
         query_params = {
             "zaaktype": self._get_zaaktype(variables),
-            "omschrijvingGeneriek": initiator.get("omschrijvingGeneriek", "initiator"),
+            "omschrijvingGeneriek": initiator.get("omschrijvingGeneriek", roltype),
         }
         rol_typen = ztc_client.list("roltype", query_params)
         if not rol_typen:
