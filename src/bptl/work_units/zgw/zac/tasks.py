@@ -7,8 +7,8 @@ from zgw_consumers.constants import APITypes
 
 from bptl.tasks.base import MissingVariable, WorkUnit, check_variable
 from bptl.tasks.registry import register
+from bptl.work_units.zgw.tasks.base import ZGWWorkUnit, require_zrc
 
-from ..zgw.tasks.base import ZGWWorkUnit, require_zrc
 from .client import get_client, require_zac_service
 from .serializers import ZaakDetailURLSerializer, ZacUserDetailSerializer
 
