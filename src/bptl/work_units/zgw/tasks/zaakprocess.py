@@ -96,7 +96,6 @@ class StartCamundaProcessTask(ZGWWorkUnit):
                 "identificatie"
             ]
 
-        print(variables)
         results = start_process(
             process_key=form["camundaProcessDefinitionKey"],
             variables=variables,
