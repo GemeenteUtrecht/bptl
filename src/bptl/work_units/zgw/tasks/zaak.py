@@ -179,15 +179,15 @@ class CreateZaakTask(ZGWWorkUnit):
 
     def create_rol(self, zaak: dict) -> Optional[dict]:
         variables = self.task.get_variables()
-        initiator = variables.get("Hoofdbehandelaar", {})
+        hoofdbehandelaar = variables.get("Hoofdbehandelaar", {})
 
-        if not initiator:
+        if not hoofdbehandelaar:
             return None
 
         ztc_client = self.get_client(APITypes.ztc)
         query_params = {
             "zaaktype": self._get_zaaktype(variables),
-            "omschrijvingGeneriek": initiator.get(
+            "omschrijvingGeneriek": hoofdbehandelaar.get(
                 "omschrijvingGeneriek", RolOmschrijving.initiator
             ),
         }
@@ -202,12 +202,16 @@ class CreateZaakTask(ZGWWorkUnit):
         zrc_client = self.get_client(APITypes.zrc)
         request_body = {
             "zaak": zaak["url"],
-            "betrokkene": initiator.get("betrokkene", ""),
-            "betrokkeneType": initiator.get("betrokkeneType", "natuurlijk_persoon"),
+            "betrokkene": hoofdbehandelaar.get("betrokkene", ""),
+            "betrokkeneType": hoofdbehandelaar.get(
+                "betrokkeneType", "natuurlijk_persoon"
+            ),
             "roltype": rol_typen["results"][0]["url"],
-            "roltoelichting": initiator.get("roltoelichting", ""),
-            "indicatieMachtiging": initiator.get("indicatieMachtiging", ""),
-            "betrokkeneIdentificatie": initiator.get("betrokkeneIdentificatie", {}),
+            "roltoelichting": hoofdbehandelaar.get("roltoelichting", ""),
+            "indicatieMachtiging": hoofdbehandelaar.get("indicatieMachtiging", ""),
+            "betrokkeneIdentificatie": hoofdbehandelaar.get(
+                "betrokkeneIdentificatie", {}
+            ),
         }
         rol = zrc_client.create(
             "rol",

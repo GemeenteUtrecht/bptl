@@ -98,7 +98,7 @@ class StartCamundaProcessTask(ZGWWorkUnit):
             if rol["omschrijvingGeneriek"] == RolOmschrijving.initiator
         ]
         if initiator:  # there can be only ONE
-            variables["Hoofdbehandelaar"] = serialize_variable(
+            variables["initiator"] = serialize_variable(
                 initiator[0]["betrokkeneIdentificatie"]["identificatie"]
             )
 
