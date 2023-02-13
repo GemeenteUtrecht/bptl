@@ -8,6 +8,7 @@ from zgw_consumers.constants import APITypes
 from bptl.tasks.base import MissingVariable, check_variable
 from bptl.tasks.registry import register
 from bptl.work_units.zgw.tasks.base import ZGWWorkUnit, require_zrc, require_ztc
+from bptl.work_units.zgw.utils import get_paginated_results
 
 from ..objects.client import require_objects_service
 from ..objects.services import fetch_start_camunda_process_form
@@ -85,7 +86,9 @@ class StartCamundaProcessTask(ZGWWorkUnit):
             },
         }
 
-        rollen = zrc_client.list("rol", {"zaak": zaak["url"]})
+        rollen = get_paginated_results(
+            zrc_client, "rol", query_params={"zaak": zaak["url"]}
+        )
         initiator = [
             rol
             for rol in rollen
