@@ -155,12 +155,14 @@ class StartCamundaProcessTests(TestCase):
         mock_start_process.assert_called_once_with(
             process_key=START_CAMUNDA_PROCESS_FORM["camundaProcessDefinitionKey"],
             variables={
-                "zaakUrl": self.zaak["url"],
-                "zaakIdentificatie": self.zaak["identificatie"],
-                "zaakDetails": {
-                    "omschrijving": self.zaak["omschrijving"],
-                    "zaaktypeOmschrijving": self.zaaktype["omschrijving"],
-                },
-                "initiator": "user:some-user",
+                "zaakUrl": serialize_variable(self.zaak["url"]),
+                "zaakIdentificatie": serialize_variable(self.zaak["identificatie"]),
+                "zaakDetails": serialize_variable(
+                    {
+                        "omschrijving": self.zaak["omschrijving"],
+                        "zaaktypeOmschrijving": self.zaaktype["omschrijving"],
+                    }
+                ),
+                "initiator": serialize_variable("user:some-user"),
             },
         )
