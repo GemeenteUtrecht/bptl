@@ -163,6 +163,6 @@ class StartCamundaProcessTests(TestCase):
                         "zaaktypeOmschrijving": self.zaaktype["omschrijving"],
                     }
                 ),
-                "initiator": serialize_variable("user:some-user"),
+                "Hoofdbehandelaar": serialize_variable("user:some-user"),
             },
         )

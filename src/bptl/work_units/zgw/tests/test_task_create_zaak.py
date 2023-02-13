@@ -460,7 +460,7 @@ class CreateZaakTaskTests(TestCase):
                         "ZTC": {"jwt": "Bearer 789"},
                     }
                 ),
-                "initiator": serialize_variable(
+                "Hoofdbehandelaar": serialize_variable(
                     {
                         "betrokkeneType": "natuurlijk_persoon",
                         "roltoelichting": "A test roltoelichting",
