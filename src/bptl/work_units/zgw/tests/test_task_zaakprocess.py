@@ -14,6 +14,7 @@ from bptl.camunda.models import ExternalTask
 from bptl.core.models import CoreConfig
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.work_units.zgw.objects.models import MetaObjectTypesConfig
 from bptl.work_units.zgw.objects.tests.utils import (
     START_CAMUNDA_PROCESS_FORM,
     START_CAMUNDA_PROCESS_FORM_OBJ,
@@ -36,7 +37,6 @@ CAMUNDA_ROOT = "https://some.camunda.com/"
 CAMUNDA_API_ROOT = f"{CAMUNDA_ROOT}engine-rest/"
 
 
-@patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
 @requests_mock.Mocker()
 class StartCamundaProcessTests(TestCase):
     @classmethod
@@ -123,7 +123,13 @@ class StartCamundaProcessTests(TestCase):
         config.primary_objecttypes_api = objecttypes_service
         config.save()
 
-    def test_start_camunda_start_process_success(self, mock_meta, m):
+        metaconfig = MetaObjectTypesConfig.get_solo()
+        metaconfig.start_camunda_process_form_objecttype = (
+            f"{OBJECTTYPES_ROOT}objecttypes/some-uuid"
+        )
+        metaconfig.save()
+
+    def test_start_camunda_start_process_success(self, m):
         mock_service_oas_get(m, ZRC_ROOT, "zrc")
         mock_service_oas_get(m, ZTC_ROOT, "ztc")
         mock_service_oas_get(m, OBJECTS_ROOT, "objects")

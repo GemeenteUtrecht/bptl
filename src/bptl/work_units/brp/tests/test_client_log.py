@@ -57,7 +57,6 @@ class ZGWClientLogTests(TestCase):
         self.assertEqual(self.fetched_task.logs.count(), 1)
 
         log = self.fetched_task.logs.get()
-
         self.assertEqual(
             log.extra_data,
             {
@@ -70,8 +69,8 @@ class ZGWClientLogTests(TestCase):
                         "Accept": "application/json",
                         "Connection": "keep-alive",
                         "User-Agent": "python-requests/2.26.0",
-                        "Accept-Encoding": "gzip, deflate",
                         "Other-Header": "foobarbaz",
+                        "Accept-Encoding": "gzip, deflate",
                     },
                 },
                 "response": {

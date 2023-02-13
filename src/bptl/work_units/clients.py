@@ -4,17 +4,25 @@ Provide base client implementations, based on requests.
 Note that for the time being only get/post are implemented.
 """
 import json
-from typing import Dict
+import logging
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import parse_qs, urljoin, urlparse
 
 import requests
+from requests.structures import CaseInsensitiveDict
 from timeline_logger.models import TimelineLog
+from zds_client.oas import schema_fetcher
+from zds_client.schema import get_headers
 from zgw_consumers.models import Service
 
 from bptl.credentials.api import get_credentials
 from bptl.tasks.base import BaseTask
 
+logger = logging.getLogger(__name__)
+
 APP_ID_PROCESS_VAR_NAME = "bptlAppId"
+
+Object = Dict[str, Any]
 
 
 def get_client(task: BaseTask, service: Service, cls=None) -> "JSONClient":
@@ -37,7 +45,24 @@ def get_client(task: BaseTask, service: Service, cls=None) -> "JSONClient":
 
 
 class JSONClient:
+    """
+    Adapted to include operation method from zds_client.Client.
+
+    """
+
     task = None
+    _schema = None
+
+    @property
+    def schema(self):
+        if self._schema is None:
+            self.fetch_schema()
+        return self._schema
+
+    def fetch_schema(self) -> None:
+        url = urljoin(self.api_root, "schema/openapi.yaml")
+        logger.info("Fetching schema at '%s'", url)
+        self._schema = schema_fetcher.fetch(url, {"v": "3"})
 
     def __init__(self, service: Service, auth_header: Dict[str, str]):
         self.api_root = service.api_root
@@ -50,13 +75,30 @@ class JSONClient:
     def __exit__(self, *args):
         self.session.__exit__(*args)
 
-    def request(self, method: str, path: str, **kwargs):
+    def request(
+        self,
+        method: str,
+        path: str,
+        operation: str = "",
+        request_kwargs: Optional[Dict] = None,
+        **kwargs,
+    ):
         assert not path.startswith("/"), "Only relative paths are supported."
         url = urljoin(self.api_root, path)
-        # add the API headers
-        headers = kwargs.pop("headers", {})
+
+        if request_kwargs:
+            kwargs.update(request_kwargs)
+
+        headers = CaseInsensitiveDict(kwargs.pop("headers", {}))
         headers.setdefault("Accept", "application/json")
-        headers.update(self.auth)
+
+        if operation:
+            schema_headers = get_headers(self.schema, operation)
+            for header, value in schema_headers.items():
+                headers.setdefault(header, value)
+        if self.auth:
+            headers.update(self.auth)
+
         kwargs["headers"] = headers
         kwargs["hooks"] = {"response": self.log}
 
@@ -102,3 +144,20 @@ class JSONClient:
             },
         }
         TimelineLog.objects.create(content_object=self.task, extra_data=extra_data)
+
+    def operation(
+        self,
+        operation_id: str,
+        path,
+        data: dict,
+        method="POST",
+        request_kwargs: Optional[dict] = None,
+    ) -> Union[List[Object], Object]:
+        assert path, "Relative path to API root needs to be supplied."
+        return self.request(
+            method,
+            path,
+            operation=operation_id,
+            json=data,
+            request_kwargs=request_kwargs,
+        )

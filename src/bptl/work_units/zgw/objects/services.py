@@ -22,7 +22,7 @@ def fetch_objecttypes() -> List[dict]:
 
 def search_objects(task, filters: Dict) -> List[dict]:
     client = get_objects_client(task)
-    return client.post("objects/search", data=filters)
+    return client.operation("object_search", path="objects/search", data=filters)
 
 
 def _search_meta_objects(
