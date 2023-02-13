@@ -137,7 +137,10 @@ class StartCamundaProcessTests(TestCase):
         m.get(ZAAK_URL, json=self.zaak)
         m.get(ZAAKTYPE_URL, json=self.zaaktype)
         m.get(CATALOGUS_URL, json=self.catalogus)
-        m.get(f"{ZRC_ROOT}rollen?zaak={self.zaak['url']}", json=[self.rol])
+        m.get(
+            f"{ZRC_ROOT}rollen?zaak={self.zaak['url']}",
+            json={"count": 1, "next": None, "previous": None, "results": [self.rol]},
+        )
         m.post(
             f"{OBJECTS_ROOT}objects/search",
             json=[START_CAMUNDA_PROCESS_FORM_OBJ],
