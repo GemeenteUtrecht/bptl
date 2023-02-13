@@ -92,10 +92,10 @@ class StartCamundaProcessTask(ZGWWorkUnit):
         initiator = [
             rol
             for rol in rollen
-            if rol["omschrijvingGeneriek"] == RolOmschrijving.initiator
+            if rol["omschrijving_generiek"] == RolOmschrijving.initiator
         ]
         if initiator:  # there can be only ONE
-            variables["initiator"] = initiator[0].betrokkene_identificatie[
+            variables["initiator"] = initiator[0]["betrokkene_identificatie"][
                 "identificatie"
             ]
 
