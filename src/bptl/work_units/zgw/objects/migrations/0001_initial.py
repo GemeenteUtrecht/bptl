@@ -7,18 +7,32 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='MetaObjectTypesConfig',
+            name="MetaObjectTypesConfig",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_camunda_process_form_objecttype', models.URLField(default='', help_text='A URL-reference to the StartCamundaForms OBJECTTYPE. This is used to set the right variables for the camunda process related to the ZAAKTYPE.', verbose_name='URL-reference to StartCamundaForms in OBJECTTYPES API.')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "start_camunda_process_form_objecttype",
+                    models.URLField(
+                        default="",
+                        help_text="A URL-reference to the StartCamundaForms OBJECTTYPE. This is used to set the right variables for the camunda process related to the ZAAKTYPE.",
+                        verbose_name="URL-reference to StartCamundaForms in OBJECTTYPES API.",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'meta objecttype configuration',
+                "verbose_name": "meta objecttype configuration",
             },
         ),
     ]
