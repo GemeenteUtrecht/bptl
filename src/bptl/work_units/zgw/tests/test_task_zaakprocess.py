@@ -104,8 +104,8 @@ class StartCamundaProcessTests(TestCase):
             "zrc",
             "schemas/Rol",
             zaak=cls.zaak["url"],
-            omschrijving_generiek=RolOmschrijving.initiator,
-            betrokkene_identificatie={"identificatie": "user:some-user"},
+            omschrijvingGeneriek=RolOmschrijving.initiator,
+            betrokkeneIdentificatie={"identificatie": "user:some-user"},
         )
 
         camunda_config = CamundaConfig.get_solo()
