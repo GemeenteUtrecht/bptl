@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 from django_camunda.tasks import start_process
+from django_camunda.utils import serialize_variable
 from rest_framework import exceptions, serializers
 from zgw_consumers.api_models.constants import RolOmschrijving
 from zgw_consumers.constants import APITypes
@@ -78,12 +79,14 @@ class StartCamundaProcessTask(ZGWWorkUnit):
         )
 
         variables = {
-            "zaakUrl": zaak["url"],
-            "zaakIdentificatie": zaak["identificatie"],
-            "zaakDetails": {
-                "omschrijving": zaak["omschrijving"],
-                "zaaktypeOmschrijving": zaaktype["omschrijving"],
-            },
+            "zaakUrl": serialize_variable(zaak["url"]),
+            "zaakIdentificatie": serialize_variable(zaak["identificatie"]),
+            "zaakDetails": serialize_variable(
+                {
+                    "omschrijving": zaak["omschrijving"],
+                    "zaaktypeOmschrijving": zaaktype["omschrijving"],
+                }
+            ),
         }
 
         rollen = get_paginated_results(
@@ -95,9 +98,9 @@ class StartCamundaProcessTask(ZGWWorkUnit):
             if rol["omschrijvingGeneriek"] == RolOmschrijving.initiator
         ]
         if initiator:  # there can be only ONE
-            variables["initiator"] = initiator[0]["betrokkeneIdentificatie"][
-                "identificatie"
-            ]
+            variables["initiator"] = serialize_variable(
+                initiator[0]["betrokkeneIdentificatie"]["identificatie"]
+            )
 
         results = start_process(
             process_key=form["camundaProcessDefinitionKey"],
