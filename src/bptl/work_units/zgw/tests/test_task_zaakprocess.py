@@ -161,5 +161,6 @@ class StartCamundaProcessTests(TestCase):
                     "omschrijving": self.zaak["omschrijving"],
                     "zaaktypeOmschrijving": self.zaaktype["omschrijving"],
                 },
+                "initiator": "user:some-user",
             },
         )
