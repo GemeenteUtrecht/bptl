@@ -179,7 +179,7 @@ class CreateZaakTask(ZGWWorkUnit):
 
     def create_rol(self, zaak: dict) -> Optional[dict]:
         variables = self.task.get_variables()
-        initiator = variables.get("initiator", {})
+        initiator = variables.get("Hoofdbehandelaar", {})
 
         if not initiator:
             return None
