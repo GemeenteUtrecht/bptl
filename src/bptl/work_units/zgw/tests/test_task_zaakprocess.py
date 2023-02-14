@@ -166,3 +166,25 @@ class StartCamundaProcessTests(TestCase):
                 "initiator": serialize_variable("user:some-user"),
             },
         )
+
+    @patch("bptl.work_units.zgw.tasks.zaakprocess.logger")
+    def test_start_camunda_start_process_no_form_logger(self, m, mock_logger):
+        mock_service_oas_get(m, ZRC_ROOT, "zrc")
+        mock_service_oas_get(m, ZTC_ROOT, "ztc")
+        mock_service_oas_get(m, OBJECTS_ROOT, "objects")
+
+        m.get(ZAAK_URL, json=self.zaak)
+        m.get(ZAAKTYPE_URL, json=self.zaaktype)
+        m.get(CATALOGUS_URL, json=self.catalogus)
+        m.post(
+            f"{OBJECTS_ROOT}objects/search",
+            json=[],
+        )
+        task = StartCamundaProcessTask(self.task_url)
+        response = task.perform()
+        self.assertEqual(response, {})
+        mock_logger.warning.assert_called_once_with(
+            "Did not find a start camunda process form for zaaktype {zt}.".format(
+                zt=self.zaaktype["identificatie"]
+            )
+        )
