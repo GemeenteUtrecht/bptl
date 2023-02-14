@@ -1,5 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
 
+from celery.utils.log import get_task_logger
 from django_camunda.tasks import start_process
 from django_camunda.utils import serialize_variable
 from rest_framework import exceptions, serializers
@@ -13,6 +14,8 @@ from bptl.work_units.zgw.utils import get_paginated_results
 
 from ..objects.client import require_objects_service
 from ..objects.services import fetch_start_camunda_process_form
+
+logger = get_task_logger(__name__)
 
 
 class CreatedProcessInstanceSerializer(serializers.Serializer):
@@ -73,10 +76,17 @@ class StartCamundaProcessTask(ZGWWorkUnit):
         zaaktype = ztc_client.retrieve("zaaktype", url=zaak["zaaktype"])
         catalogus = ztc_client.retrieve("catalogus", url=zaaktype["catalogus"])
 
-        # If no form is found - raise error here
+        # If no form is found - return here
         form = fetch_start_camunda_process_form(
             self.task, zaaktype=zaaktype, catalogus=catalogus
         )
+        if not form:
+            logger.warning(
+                "Did not find a start camunda process form for zaaktype {zt}.".format(
+                    zt=zaaktype["identificatie"]
+                )
+            )
+            return {}
 
         variables = {
             "zaakUrl": serialize_variable(zaak["url"]),
