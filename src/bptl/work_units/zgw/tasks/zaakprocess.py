@@ -88,7 +88,7 @@ class StartCamundaProcessTask(ZGWWorkUnit):
             )
             return {}
 
-        variables = {
+        set_variables = {
             "zaakUrl": serialize_variable(zaak["url"]),
             "zaakIdentificatie": serialize_variable(zaak["identificatie"]),
             "zaakDetails": serialize_variable(
@@ -99,22 +99,26 @@ class StartCamundaProcessTask(ZGWWorkUnit):
             ),
         }
 
-        rollen = get_paginated_results(
-            zrc_client, "rol", query_params={"zaak": zaak["url"]}
-        )
-        initiator = [
-            rol
-            for rol in rollen
-            if rol["omschrijvingGeneriek"] == RolOmschrijving.initiator
-        ]
-        if initiator:  # there can be only ONE
-            variables["initiator"] = serialize_variable(
-                initiator[0]["betrokkeneIdentificatie"]["identificatie"]
+        initiator = variables.get("initiator", None)
+
+        if not initiator:
+            rollen = get_paginated_results(
+                zrc_client, "rol", query_params={"zaak": zaak["url"]}
             )
+            _rol = [
+                rol
+                for rol in rollen
+                if rol["omschrijvingGeneriek"] == RolOmschrijving.initiator
+            ]
+            if _rol:  # THERE CAN BE ONLY ONE
+                initiator = _rol[0]["betrokkeneIdentificatie"]["identificatie"]
+
+        if initiator:
+            set_variables["initiator"] = serialize_variable(initiator)
 
         results = start_process(
             process_key=form["camundaProcessDefinitionKey"],
-            variables=variables,
+            variables=set_variables,
         )
         self.validate_data(results)
         return {}

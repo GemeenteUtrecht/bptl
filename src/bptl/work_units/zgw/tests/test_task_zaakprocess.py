@@ -1,3 +1,4 @@
+from copy import deepcopy
 from unittest.mock import patch
 
 from django.test import TestCase
@@ -52,7 +53,7 @@ class StartCamundaProcessTests(TestCase):
                 "bptlAppId": serialize_variable("some-app-id"),
             },
         }
-        cls.task_url = ExternalTask.objects.create(
+        cls.task = ExternalTask.objects.create(
             **cls.task_dict,
         )
 
@@ -149,7 +150,7 @@ class StartCamundaProcessTests(TestCase):
             "bptl.work_units.zgw.tasks.zaakprocess.start_process",
             return_value={"instance_id": "some-uuid", "instance_url": "some-url"},
         ) as mock_start_process:
-            task = StartCamundaProcessTask(self.task_url)
+            task = StartCamundaProcessTask(self.task)
             response = task.perform()
 
         mock_start_process.assert_called_once_with(
@@ -180,7 +181,7 @@ class StartCamundaProcessTests(TestCase):
             f"{OBJECTS_ROOT}objects/search",
             json=[],
         )
-        task = StartCamundaProcessTask(self.task_url)
+        task = StartCamundaProcessTask(self.task)
         response = task.perform()
         self.assertEqual(response, {})
         mock_logger.warning.assert_called_once_with(
@@ -188,3 +189,48 @@ class StartCamundaProcessTests(TestCase):
                 zt=self.zaaktype["identificatie"]
             )
         )
+
+    def test_start_camunda_start_process_success_initiator_from_camunda(self, m):
+        mock_service_oas_get(m, ZRC_ROOT, "zrc")
+        mock_service_oas_get(m, ZTC_ROOT, "ztc")
+        mock_service_oas_get(m, OBJECTS_ROOT, "objects")
+
+        m.get(ZAAK_URL, json=self.zaak)
+        m.get(ZAAKTYPE_URL, json=self.zaaktype)
+        m.get(CATALOGUS_URL, json=self.catalogus)
+
+        m.post(
+            f"{OBJECTS_ROOT}objects/search",
+            json=[START_CAMUNDA_PROCESS_FORM_OBJ],
+        )
+        rol_url = f"{ZRC_ROOT}rollen?zaak={self.zaak['url']}"
+        task_dict = deepcopy(self.task_dict)
+        task_dict["variables"] = {
+            **task_dict["variables"],
+            "initiator": serialize_variable("user:some-other-user"),
+        }
+
+        task = ExternalTask.objects.create(**task_dict)
+        with patch(
+            "bptl.work_units.zgw.tasks.zaakprocess.start_process",
+            return_value={"instance_id": "some-uuid", "instance_url": "some-url"},
+        ) as mock_start_process:
+            task = StartCamundaProcessTask(task)
+            response = task.perform()
+
+        mock_start_process.assert_called_once_with(
+            process_key=START_CAMUNDA_PROCESS_FORM["camundaProcessDefinitionKey"],
+            variables={
+                "zaakUrl": serialize_variable(self.zaak["url"]),
+                "zaakIdentificatie": serialize_variable(self.zaak["identificatie"]),
+                "zaakDetails": serialize_variable(
+                    {
+                        "omschrijving": self.zaak["omschrijving"],
+                        "zaaktypeOmschrijving": self.zaaktype["omschrijving"],
+                    }
+                ),
+                "initiator": serialize_variable("user:some-other-user"),
+            },
+        )
+
+        self.assertNotIn(rol_url, [req.url for req in m.request_history])
