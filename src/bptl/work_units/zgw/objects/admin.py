@@ -11,10 +11,7 @@ from bptl.work_units.zgw.objects.models import MetaObjectTypesConfig
 def get_objecttypes_choices() -> List[Tuple[str, str]]:
     from bptl.work_units.zgw.objects.services import fetch_objecttypes
 
-    try:
-        ots = fetch_objecttypes()
-    except Exception:
-        return []
+    ots = fetch_objecttypes()
     return [(ot["url"], ot["name"]) for ot in ots]
 
 
