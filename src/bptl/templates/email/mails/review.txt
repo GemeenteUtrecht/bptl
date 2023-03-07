@@ -1,6 +1,6 @@
 {% extends "email/mails/base.txt" %}
 {% load i18n %}{% block body %}Je {{ reviewType }} is vereist. {% if deadline %}Je hebt tot {{ deadline }} om te reageren.{% endif %}
 
-Ga alstjeblieft hierheen: {{ kownslFrontendUrl }}{% if receiver.assignee %}&assignee={{ receiver.assignee|urlencode }}{% endif %}{% if email.content %}
+Ga alsjeblieft hierheen: {{ kownslFrontendUrl }}{% if receiver.assignee %}&assignee={{ receiver.assignee|urlencode }}{% endif %}{% if email.content %}
 
 {{ email.content }}{% endif %}{% endblock %}

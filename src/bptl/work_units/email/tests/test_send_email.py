@@ -104,7 +104,7 @@ class SendEmailTests(TestCase):
 
 Je advies is vereist. Je hebt tot 2020-04-20 om te reageren.
 
-Ga alstjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
+Ga alsjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
 
 Dit is pas leuk.
 
@@ -135,7 +135,7 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
 
 Je advies is vereist. Je hebt tot 2020-04-20 om te reageren.
 
-Ga alstjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
+Ga alsjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
 
 Met vriendelijke groeten,
 
