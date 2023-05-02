@@ -30,16 +30,7 @@ def get_approval_status(task: BaseTask) -> dict:
 
     **Sets the process variables**
 
-    * ``approvalResult`` [json]: a JSON-object containing meta-data about the result:
-
-      .. code-block:: json
-
-         {
-            "approved": true,
-            "num_approved": 3,
-            "num_rejected": 0,
-            "approvers": ["mpet001", "will002", "jozz001"]
-         }
+    * ``approvalResult`` [bool]: a boolean indication approval status.
 
     """
     client = get_client(task)
@@ -58,18 +49,7 @@ def get_approval_status(task: BaseTask) -> dict:
         else:
             num_rejected += 1
 
-    return {
-        "approvalResult": {
-            "approved": num_approved > 0 and num_rejected == 0,
-            "num_approved": num_approved,
-            "num_rejected": num_rejected,
-            "approvers": [
-                approval["author"]["username"]
-                for approval in approvals
-                if approval["approved"]
-            ],
-        },
-    }
+    return {"approvalResult": num_approved > 0 and num_rejected == 0}
 
 
 @register

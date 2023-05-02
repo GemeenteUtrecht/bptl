@@ -128,19 +128,19 @@ class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
     """
     Set the ``indicatieGebruiksrecht`` to ``False`` of all INFORMATIEOBJECTen related to the ZAAK.
     The INFORMATIEOBJECTen in ZAAKINFORMATIEOBJECTen must point to INFORMATIEOBJECTen in an API that complies with the Documenten API 1.0.x
-      (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
+    (https://vng-realisatie.github.io/gemma-zaken/standaard/documenten/index).
 
     From the API documentation:
 
-      .. code-block:: json
+      .. code-block:: text
 
-            Indicatie of er beperkingen gelden aangaande het gebruik van het informatieobject
-            anders dan raadpleging. Dit veld mag ``Null`` zijn om aan te geven dat de
-            indicatie nog niet bekend is. Als de indicatie gezet is, dan kan je de
-            gebruiksrechten die van toepassing zijn raadplegen via de GEBRUIKSRECHTen
-            resource.
+        Indicatie of er beperkingen gelden aangaande het gebruik van het informatieobject
+        anders dan raadpleging. Dit veld mag ``Null`` zijn om aan te geven dat de
+        indicatie nog niet bekend is. Als de indicatie gezet is, dan kan je de
+        gebruiksrechten die van toepassing zijn raadplegen via de GEBRUIKSRECHTen
+        resource.
 
-            -- Documenten API documentation
+        -- Documenten API documentation
 
     This task essentially switches the value from ``Null`` to ``False``, implying re-use
     other than "consulting" is not allowed.

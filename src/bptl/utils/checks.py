@@ -23,6 +23,7 @@ def check_modelform_exclude(app_configs, **kwargs):
     This check piggy-backs on all form modules to be imported during Django
     startup. It won't cover forms that are defined on the fly such as in
     formset factories.
+
     """
     errors = []
 
@@ -52,6 +53,7 @@ def check_missing_init_files(app_configs, **kwargs):
 
     If they don't, the code will still run, but tests aren't picked up by the
     test runner, for example.
+
     """
     errors = []
 
