@@ -6,6 +6,8 @@ from zgw_consumers.constants import APITypes
 from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
+from ..zac.client import require_zac_service
+from ..zac.utils import get_betrokkene_identificatie
 from .base import ZGWWorkUnit, require_zrc, require_ztc
 
 logger = logging.getLogger(__name__)
@@ -14,6 +16,7 @@ logger = logging.getLogger(__name__)
 @register
 @require_zrc
 @require_ztc
+@require_zac_service
 class CreateRolTask(ZGWWorkUnit):
     """
     Create a new ROL for the ZAAK in the process.
@@ -71,7 +74,9 @@ class CreateRolTask(ZGWWorkUnit):
             "roltype": rol_typen[0]["url"],
             "roltoelichting": betrokkene["roltoelichting"],
             "indicatieMachtiging": betrokkene.get("indicatieMachtiging", ""),
-            "betrokkeneIdentificatie": betrokkene.get("betrokkeneIdentificatie", {}),
+            "betrokkeneIdentificatie": get_betrokkene_identificatie(
+                betrokkene, self.task
+            ),
         }
         rol = zrc_client.create(
             "rol",

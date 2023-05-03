@@ -13,6 +13,8 @@ from bptl.tasks.base import MissingVariable, check_variable
 from bptl.tasks.registry import register
 
 from ..nlx import get_nlx_headers
+from ..zac.client import require_zac_service
+from ..zac.utils import get_betrokkene_identificatie
 from .base import ZGWWorkUnit, require_zrc, require_ztc
 from .resultaat import CreateResultaatTask
 
@@ -22,6 +24,7 @@ logger = logging.getLogger(__name__)
 @register
 @require_zrc
 @require_ztc
+@require_zac_service
 class CreateZaakTask(ZGWWorkUnit):
     """
     Create a ZAAK in the configured Zaken API and set the initial status.
@@ -209,8 +212,8 @@ class CreateZaakTask(ZGWWorkUnit):
             "roltype": rol_typen["results"][0]["url"],
             "roltoelichting": hoofdbehandelaar.get("roltoelichting", ""),
             "indicatieMachtiging": hoofdbehandelaar.get("indicatieMachtiging", ""),
-            "betrokkeneIdentificatie": hoofdbehandelaar.get(
-                "betrokkeneIdentificatie", {}
+            "betrokkeneIdentificatie": get_betrokkene_identificatie(
+                hoofdbehandelaar, self.task
             ),
         }
         rol = zrc_client.create(

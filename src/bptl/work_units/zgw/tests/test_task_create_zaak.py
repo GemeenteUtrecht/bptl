@@ -3,14 +3,18 @@ from django.test import TestCase
 import requests_mock
 from django_camunda.utils import serialize_variable
 from freezegun import freeze_time
+from zgw_consumers.api_models.constants import RolTypes
+from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 
+from bptl.camunda.constants import AssigneeTypeChoices
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 
 from ..tasks import CreateZaakTask
 
+ZAC_URL = "https://zac.example.com/"
 ZTC_URL = "https://some.ztc.nl/api/v1/"
 ZRC_URL = "https://some.zrc.nl/api/v1/"
 CATALOGUS = f"{ZTC_URL}/catalogussen/7022a89e-0dd1-4074-9c3a-1a990e6c18ab"
@@ -126,6 +130,13 @@ class CreateZaakTaskTests(TestCase):
             service__api_root=ZTC_URL,
             service__api_type="ztc",
             alias="ZTC",
+        )
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=ZAC_URL,
+            service__api_type=APITypes.orc,
+            service__auth_type=AuthTypes.no_auth,
+            alias="zac",
         )
 
     def setUp(self):
@@ -435,7 +446,24 @@ class CreateZaakTaskTests(TestCase):
 
         self.assertEqual(request_zaak.json()["omschrijving"], "foo")
 
-    def test_create_zaak_with_rol(self, m):
+    def test_create_zaak_with_medewerker_rol(self, m):
+        mock_service_oas_get(m, ZAC_URL, "zac")
+        user = f"{AssigneeTypeChoices.user}:some-user"
+        zac_betrokkene_identificatie_url = (
+            f"{ZAC_URL}api/core/rollen/medewerker/betrokkeneIdentificatie"
+        )
+        m.post(
+            zac_betrokkene_identificatie_url,
+            json={
+                "betrokkeneIdentificatie": {
+                    "voorletters": "S.",
+                    "achternaam": "User",
+                    "identificatie": user,
+                    "voorvoegselAchternaam": "",
+                }
+            },
+        )
+
         mock_service_oas_get(m, ZTC_URL, "ztc")
         mock_service_oas_get(m, ZRC_URL, "zrc")
 
@@ -444,7 +472,24 @@ class CreateZaakTaskTests(TestCase):
         mock_status_post(m)
 
         mock_roltype_get(m)
-        mock_rol_post(m)
+        m.post(
+            f"{ZRC_URL}rollen",
+            status_code=201,
+            json={
+                "zaak": ZAAK,
+                "betrokkene": "http://some.api.nl/betrokkenen/12345",
+                "betrokkeneType": RolTypes.medewerker,
+                "roltype": ROLTYPE,
+                "roltoelichting": "A test roltoelichting",
+                "indicatieMachtiging": "",
+                "betrokkeneIdentificatie": {
+                    "voorletters": "S.",
+                    "achternaam": "User",
+                    "identificatie": user,
+                    "voorvoegselAchternaam": "",
+                },
+            },
+        )
 
         task_with_initiator = ExternalTask.objects.create(
             topic_name="some-topic",
@@ -462,8 +507,11 @@ class CreateZaakTaskTests(TestCase):
                 ),
                 "Hoofdbehandelaar": serialize_variable(
                     {
-                        "betrokkeneType": "natuurlijk_persoon",
+                        "betrokkeneType": RolTypes.medewerker,
                         "roltoelichting": "A test roltoelichting",
+                        "betrokkeneIdentificatie": {
+                            "identificatie": f"{AssigneeTypeChoices.user}:some-user"
+                        },
                     }
                 ),
             },
@@ -481,4 +529,20 @@ class CreateZaakTaskTests(TestCase):
         )
         # check that the /api/v1/rollen endpoint was called correctly
         self.assertEqual(m.last_request.url, "https://some.zrc.nl/api/v1/rollen")
-        self.assertIsInstance(m.last_request.json(), dict)
+        self.assertEqual(
+            m.last_request.json(),
+            {
+                "zaak": ZAAK,
+                "betrokkene": "",
+                "betrokkeneType": RolTypes.medewerker,
+                "roltype": ROLTYPE,
+                "roltoelichting": "A test roltoelichting",
+                "indicatieMachtiging": "",
+                "betrokkeneIdentificatie": {
+                    "voorletters": "S.",
+                    "achternaam": "User",
+                    "identificatie": "user:some-user",
+                    "voorvoegselAchternaam": "",
+                },
+            },
+        )
