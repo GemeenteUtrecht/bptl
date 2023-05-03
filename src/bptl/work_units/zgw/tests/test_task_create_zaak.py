@@ -450,15 +450,17 @@ class CreateZaakTaskTests(TestCase):
         mock_service_oas_get(m, ZAC_URL, "zac")
         user = f"{AssigneeTypeChoices.user}:some-user"
         zac_betrokkene_identificatie_url = (
-            f"{ZAC_URL}api/core/rollen/medewerker/{user}/betrokkeneIdentificatie"
+            f"{ZAC_URL}api/core/rollen/medewerker/betrokkeneIdentificatie"
         )
-        m.get(
+        m.post(
             zac_betrokkene_identificatie_url,
             json={
-                "voorletters": "S.",
-                "achternaam": "User",
-                "identificatie": "user:some-user",
-                "voorvoegselAchternaam": "",
+                "betrokkeneIdentificatie": {
+                    "voorletters": "S.",
+                    "achternaam": "User",
+                    "identificatie": user,
+                    "voorvoegselAchternaam": "",
+                }
             },
         )
 
@@ -483,7 +485,7 @@ class CreateZaakTaskTests(TestCase):
                 "betrokkeneIdentificatie": {
                     "voorletters": "S.",
                     "achternaam": "User",
-                    "identificatie": "user:some-user",
+                    "identificatie": user,
                     "voorvoegselAchternaam": "",
                 },
             },

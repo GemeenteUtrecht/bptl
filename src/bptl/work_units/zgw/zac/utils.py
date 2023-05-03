@@ -25,7 +25,8 @@ def get_betrokkene_identificatie(rol: Dict, task: BaseTask) -> Dict:
             pass
         else:
             with get_client(task) as client:
-                betrokkene_identificatie = client.get(
-                    f"api/core/rollen/medewerker/{betrokkene_identificatie['identificatie']}/betrokkeneIdentificatie"
-                )
+                betrokkene_identificatie = client.post(
+                    f"api/core/rollen/medewerker/betrokkeneIdentificatie",
+                    json={"betrokkeneIdentificatie": betrokkene_identificatie},
+                ).get("betrokkeneIdentificatie", {})
     return betrokkene_identificatie
