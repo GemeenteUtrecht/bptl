@@ -102,7 +102,7 @@ class SendEmailTests(TestCase):
             email.body,
             """Beste Jan Janssen,
 
-Je advies is vereist. Je hebt tot 2020-04-20 om te reageren.
+Je advies is vereist. Je hebt tot 20-04-2020 om te reageren.
 
 Ga alsjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
 
@@ -133,7 +133,7 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
             email.body,
             """Beste Jan Janssen,
 
-Je advies is vereist. Je hebt tot 2020-04-20 om te reageren.
+Je advies is vereist. Je hebt tot 20-04-2020 om te reageren.
 
 Ga alsjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
 
