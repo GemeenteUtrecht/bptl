@@ -19,7 +19,7 @@ class EmailPersonSerializer(serializers.Serializer):
 
 class ContextSerializer(serializers.Serializer):
     kownslFrontendUrl = serializers.CharField(required=False)
-    deadline = serializers.DateField(required=False)
+    deadline = serializers.DateField(format="%d-%m-%Y", required=False)
     reviewType = serializers.CharField(required=False)
     zaakDetailUrl = serializers.CharField(required=False)
 
