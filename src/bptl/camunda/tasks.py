@@ -1,6 +1,7 @@
 """ celery tasks to process camunda external tasks"""
 from django.conf import settings
 
+import requests
 from celery.utils.log import get_task_logger
 from celery_once import QueueOnce
 from timeline_logger.models import TimelineLog
@@ -11,6 +12,7 @@ from bptl.camunda.utils import fetch_and_lock
 from bptl.tasks.api import TaskExpired, execute
 from bptl.tasks.registry import register
 from bptl.utils.constants import Statuses
+from bptl.utils.decorators import retry
 
 from ..celery import app
 from .utils import extend_task, fail_task
@@ -86,6 +88,13 @@ def task_execute_and_complete(fetched_task_id):
     fetched_task.status = Statuses.in_progress
     fetched_task.save(update_fields=["status"])
 
+    # Catch and retry on http errors other than 500
+    @retry(
+        times=3,
+        exceptions=(requests.HTTPError,),
+        condition=lambda exc: exc.response.status_code == 500,
+        on_failure=fail_task,
+    )
     def _execute(fetched_task: ExternalTask):
         try:
             execute(fetched_task, registry=register)
