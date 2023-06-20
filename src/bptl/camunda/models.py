@@ -29,6 +29,7 @@ class ExternalTask(BaseTask):
 
     We keep a number of fields to identify/match the tasks in the remote Camunda
     installation.
+
     """
 
     worker_id = models.CharField(

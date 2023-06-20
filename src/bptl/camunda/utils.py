@@ -3,7 +3,7 @@ Module for Camunda API interaction.
 """
 import json
 import logging
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import requests
 from dateutil import parser
@@ -131,7 +131,7 @@ def complete_task(
         response.raise_for_status()
 
 
-def fail_task(task: ExternalTask, reason: str = "") -> None:
+def fail_task(task: Union[ExternalTask, str], reason: str = "") -> None:
     """
     Mark an external task as failed.
 
@@ -139,6 +139,10 @@ def fail_task(task: ExternalTask, reason: str = "") -> None:
 
     When the number of retries becomes 0, an incident is created in Camunda.
     """
+    if type(task) == str:
+        logger.info("Received task execution request (ID %d)", task)
+        task = ExternalTask.objects.get(id=task)
+
     camunda = get_client()
 
     if not reason:

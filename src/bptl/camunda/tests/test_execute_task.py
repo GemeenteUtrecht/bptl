@@ -7,6 +7,7 @@ from django.test import TestCase
 import requests_mock
 from django_camunda.models import CamundaConfig
 from django_camunda.utils import serialize_variable
+from requests import HTTPError
 from requests.exceptions import ConnectionError
 from zgw_consumers.test import mock_service_oas_get
 
@@ -167,3 +168,34 @@ class ExecuteCommandTests(TestCase):
         self.assertTrue(task.execution_error.strip().endswith("some connection error"))
 
         mock_fail_task.assert_called_once_with(task)
+
+    @patch("bptl.utils.decorators.logger")
+    @patch("bptl.camunda.tasks.fail_task")
+    def test_retry_execute_fail_http_error(self, m, mock_fail_task, mock_logger):
+        task = ExternalTaskFactory.create(
+            topic_name="zaak-initialize",
+            variables={
+                "zaaktype": serialize_variable(ZAAKTYPE),
+                "organisatieRSIN": serialize_variable("123456788"),
+                "services": serialize_variable(
+                    {
+                        "ZRC": {"jwt": "Bearer 12345"},
+                        "ZTC": {"jwt": "Bearer 789"},
+                    }
+                ),
+            },
+        )
+        # mock openzaak services
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+        m.post(f"{ZRC_URL}zaken", exc=HTTPError("some http error"))
+
+        stdout = StringIO()
+        call_command("execute_task", task_id=task.id, stdout=stdout)
+
+        task.refresh_from_db()
+        self.assertEqual(task.status, Statuses.failed)
+        self.assertTrue(task.execution_error.strip().endswith("some http error"))
+
+        mock_fail_task.assert_called_once_with(task)
+        mock_logger.info.assert_called()
