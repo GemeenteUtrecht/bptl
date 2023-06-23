@@ -16,11 +16,17 @@ from bptl.work_units.services import get_alias_service
 logger = logging.getLogger(__name__)
 
 OBJECTS_ALIAS = "objects"
+OBJECTTYPES_ALIAS = "objecttypes"
 
 require_objects_service = register.require_service(
     APITypes.orc,
     description=_("The OBJECTS API to use."),
     alias=OBJECTS_ALIAS,
+)
+require_objecttypes_service = register.require_service(
+    APITypes.orc,
+    description=_("The OBJECTTYPES API to use."),
+    alias=OBJECTTYPES_ALIAS,
 )
 
 
@@ -30,5 +36,15 @@ def get_objects_client(task: BaseTask) -> "ObjectsClient":
     return _get_client(task, service, cls=ObjectsClient)
 
 
+def get_objecttypes_client(task: BaseTask) -> "ObjectTypesClient":
+    # get the service and credentials
+    service = get_alias_service(task, OBJECTTYPES_ALIAS)
+    return _get_client(task, service, cls=ObjectTypesClient)
+
+
 class ObjectsClient(JSONClient):
+    pass
+
+
+class ObjectTypesClient(JSONClient):
     pass
