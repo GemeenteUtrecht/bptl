@@ -5,8 +5,9 @@ from django.forms import fields
 
 from solo.admin import SingletonModelAdmin
 
-from bptl.work_units.zgw.objects.models import MetaObjectTypesConfig
 from bptl.core.models import CoreConfig
+from bptl.work_units.zgw.objects.models import MetaObjectTypesConfig
+
 
 def get_objecttypes_choices() -> List[Tuple[str, str]]:
     config = CoreConfig.get_solo()
