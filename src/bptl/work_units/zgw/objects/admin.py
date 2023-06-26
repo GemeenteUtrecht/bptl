@@ -24,7 +24,7 @@ class MetaObjectTypesConfigAdmin(SingletonModelAdmin):
         objecttype_fields = [
             "start_camunda_process_form_objecttype",
             "checklisttype_objecttype",
-            "checklist_objecttype"
+            "checklist_objecttype",
         ]
         for field in objecttype_fields:
             form.base_fields[field] = fields.ChoiceField(
