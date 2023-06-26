@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from django.test import TestCase
 
@@ -41,42 +41,60 @@ class ObjectsServicesTests(TestCase):
             alias="objects",
         )
 
-    @patch(
-        "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
-    )
+    @patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
     def test_wrongly_configured_meta_config(self, mock_meta_config):
-        with self.assertRaises(RuntimeError):
-            fetch_start_camunda_process_form(self.task, zaaktype={}, catalogus={})
+        mock_meta_config.start_camunda_process_form_objecttype = ""
+        with patch(
+            "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig.get_solo",
+            return_value=mock_meta_config,
+        ):
+            with self.assertRaises(RuntimeError):
+                fetch_start_camunda_process_form(
+                    self.task, zaaktype_identificatie="", catalogus_domein=""
+                )
 
-    @patch(
-        "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
-    )
+    @patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
     def test_no_zaaktype_provided(self, mock_meta_config):
-        with self.assertRaises(RuntimeError):
-            fetch_start_camunda_process_form(
-                self.task, zaaktype={"key": "val"}, catalogus={}
-            )
+        mock_meta_config.start_camunda_process_form_objecttype = (
+            START_CAMUNDA_PROCESS_FORM_OT["url"]
+        )
+        with patch(
+            "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig.get_solo",
+            return_value=mock_meta_config,
+        ):
+            with patch("bptl.work_units.zgw.objects.services.logger") as mock_logger:
+                fetch_start_camunda_process_form(
+                    self.task, zaaktype_identificatie="", catalogus_domein="val"
+                )
+        mock_logger.warning.assert_called_once_with(
+            "If ZAAK is not provided - zaaktype_identificatie and catalogus_domein MUST be provided."
+        )
 
     @patch(
         "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
     )
     def test_no_catalogus_provided(self, mock_meta_config):
-        config = MagicMock()
-        config.ot_url = START_CAMUNDA_PROCESS_FORM_OT["url"]
-        mock_meta_config.get_solo = config
-        with self.assertRaises(RuntimeError):
-            fetch_start_camunda_process_form(
-                self.task, zaaktype={}, catalogus={"key": "val"}
-            )
+        mock_meta_config.start_camunda_process_form_objecttype = (
+            START_CAMUNDA_PROCESS_FORM_OT["url"]
+        )
+        with patch(
+            "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig.get_solo",
+            return_value=mock_meta_config,
+        ):
+            with patch("bptl.work_units.zgw.objects.services.logger") as mock_logger:
+                fetch_start_camunda_process_form(
+                    self.task, zaaktype_identificatie="val", catalogus_domein=""
+                )
+        mock_logger.warning.assert_called_once_with(
+            "If ZAAK is not provided - zaaktype_identificatie and catalogus_domein MUST be provided."
+        )
 
     @patch("bptl.work_units.zgw.objects.services.search_objects", return_value=[])
     @patch("bptl.work_units.zgw.objects.services.logger")
     @patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
     def test_no_objects_found(self, mock_meta_config, mock_logger, mock_search_objects):
-        zaaktype = {"identificatie": "some-id"}
-        catalogus = {"domein": "some-domein"}
         fetch_start_camunda_process_form(
-            self.task, zaaktype=zaaktype, catalogus=catalogus
+            self.task, zaaktype_identificatie="some-id", catalogus_domein="some-domein"
         )
         mock_logger.warning.assert_called_once()
 
@@ -91,10 +109,8 @@ class ObjectsServicesTests(TestCase):
     def test_more_than_one_objects_found(
         self, mock_meta_config, mock_logger, mock_search_objects
     ):
-        zaaktype = {"identificatie": "some-id"}
-        catalogus = {"domein": "some-domein"}
         fetch_start_camunda_process_form(
-            self.task, zaaktype=zaaktype, catalogus=catalogus
+            self.task, zaaktype_identificatie="zaaktype", catalogus_domein="catalogus"
         )
         mock_logger.warning.assert_called_once()
 
@@ -107,14 +123,14 @@ class ObjectsServicesTests(TestCase):
         "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
     )
     def test_success(self, mock_meta, mock_logger, mock_search_objects):
-        zaaktype = {"identificatie": "some-id"}
-        catalogus = {"domein": "some-domein"}
         with patch(
             "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
             side_effect=Exception,
         ):
             fetch_start_camunda_process_form(
-                self.task, zaaktype=zaaktype, catalogus=catalogus
+                self.task,
+                zaaktype_identificatie="zaaktype",
+                catalogus_domein="catalogus",
             )
 
         mock_search_objects.assert_called_once()

@@ -15,6 +15,20 @@ class MetaObjectTypesConfig(SingletonModel):
         ),
         default="",
     )
+    checklisttype_objecttype = models.URLField(
+        _("URL-reference to ChecklistType in OBJECTTYPES API."),
+        help_text=_(
+            "A URL-reference to the ChecklistType OBJECTTYPE. This is used to get the questions for a checklist for a ZAAKTYPE."
+        ),
+        default="",
+    )
+    checklist_objecttype = models.URLField(
+        _("URL-reference to Checklist in OBJECTTYPES API."),
+        help_text=_(
+            "A URL-reference to the Checklist OBJECTTYPE. This is used to fetch the checklist objecttype for a ZAAK."
+        ),
+        default="",
+    )
 
     class Meta:
         verbose_name = _("meta objecttype configuration")

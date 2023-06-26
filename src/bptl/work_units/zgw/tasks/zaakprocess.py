@@ -78,7 +78,9 @@ class StartCamundaProcessTask(ZGWWorkUnit):
 
         # If no form is found - return here
         form = fetch_start_camunda_process_form(
-            self.task, zaaktype=zaaktype, catalogus=catalogus
+            self.task,
+            zaaktype_identificatie=zaaktype["identificatie"],
+            catalogus_domein=catalogus["domein"],
         )
         if not form:
             logger.warning(
