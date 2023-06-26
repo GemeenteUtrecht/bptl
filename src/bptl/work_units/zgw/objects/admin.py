@@ -5,14 +5,16 @@ from django.forms import fields
 
 from solo.admin import SingletonModelAdmin
 
+from bptl.core.models import CoreConfig
 from bptl.work_units.zgw.objects.models import MetaObjectTypesConfig
 
 
 def get_objecttypes_choices() -> List[Tuple[str, str]]:
-    from bptl.work_units.zgw.objects.services import fetch_objecttypes
-
-    ots = fetch_objecttypes()
-    return [(ot["url"], ot["name"]) for ot in ots]
+    config = CoreConfig.get_solo()
+    service = config.primary_objecttypes_api
+    client = service.build_client()
+    response = client.list("objecttype")
+    return [(ot["url"], ot["name"]) for ot in response]
 
 
 @admin.register(MetaObjectTypesConfig)
