@@ -158,21 +158,19 @@ class InitializeChecklistTaskTest(TestCase):
 
     def test_checklist_already_initalized(self, m):
         mock_service_oas_get(m, CATALOGI_ROOT, "ztc")
+        mock_service_oas_get(m, OBJECTS_ROOT, "objects")
         catalogus = generate_oas_component(
             "ztc", "schemas/Catalogus", url=CATALOGUS, domein="some-domein"
         )
         m.get(CATALOGUS, json=catalogus)
         task = InitializeChecklistTask(self.task)
+        m.post(f"{OBJECTS_ROOT}objects/search", json=[CHECKLIST_OBJECT])
         with patch(
             "bptl.work_units.zgw.objects.tasks.fetch_checklisttype",
             return_value=CHECKLISTTYPE_OBJECT,
         ):
-            with patch(
-                "bptl.work_units.zgw.objects.tasks.fetch_checklist",
-                return_value=CHECKLIST_OBJECT,
-            ):
-                with patch("bptl.work_units.zgw.objects.tasks.logger") as mock_logger:
-                    response = task.perform()
+            with patch("bptl.work_units.zgw.objects.tasks.logger") as mock_logger:
+                response = task.perform()
 
         mock_logger.warning.assert_called_with("CHECKLIST already exists for ZAAK.")
         self.assertEqual(response, {"initializedChecklist": False})
