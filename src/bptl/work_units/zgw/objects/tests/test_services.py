@@ -7,6 +7,7 @@ from zgw_consumers.constants import APITypes, AuthTypes
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.tests.utils import paginated_response
 from bptl.work_units.zgw.objects.services import fetch_start_camunda_process_form
 from bptl.work_units.zgw.objects.tests.utils import (
     START_CAMUNDA_PROCESS_FORM_OBJ,
@@ -89,7 +90,10 @@ class ObjectsServicesTests(TestCase):
             "If ZAAK is not provided - zaaktype_identificatie and catalogus_domein MUST be provided."
         )
 
-    @patch("bptl.work_units.zgw.objects.services.search_objects", return_value=[])
+    @patch(
+        "bptl.work_units.zgw.objects.services.search_objects",
+        return_value=[paginated_response([]), {}],
+    )
     @patch("bptl.work_units.zgw.objects.services.logger")
     @patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
     def test_no_objects_found(self, mock_meta_config, mock_logger, mock_search_objects):
@@ -100,7 +104,7 @@ class ObjectsServicesTests(TestCase):
 
     @patch(
         "bptl.work_units.zgw.objects.services.search_objects",
-        return_value=[START_CAMUNDA_PROCESS_FORM_OBJ, 2],
+        return_value=[paginated_response([START_CAMUNDA_PROCESS_FORM_OBJ, 2]), {}],
     )
     @patch("bptl.work_units.zgw.objects.services.logger")
     @patch(
@@ -116,7 +120,7 @@ class ObjectsServicesTests(TestCase):
 
     @patch(
         "bptl.work_units.zgw.objects.services.search_objects",
-        return_value=[START_CAMUNDA_PROCESS_FORM_OBJ],
+        return_value=[paginated_response([START_CAMUNDA_PROCESS_FORM_OBJ]), {}],
     )
     @patch("bptl.work_units.zgw.objects.services.logger")
     @patch(

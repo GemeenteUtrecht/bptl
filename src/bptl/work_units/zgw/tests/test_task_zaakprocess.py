@@ -15,6 +15,7 @@ from bptl.camunda.models import ExternalTask
 from bptl.core.models import CoreConfig
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.tests.utils import paginated_response
 from bptl.work_units.zgw.objects.models import MetaObjectTypesConfig
 from bptl.work_units.zgw.objects.tests.utils import (
     START_CAMUNDA_PROCESS_FORM,
@@ -144,7 +145,7 @@ class StartCamundaProcessTests(TestCase):
         )
         m.post(
             f"{OBJECTS_ROOT}objects/search",
-            json=[START_CAMUNDA_PROCESS_FORM_OBJ],
+            json=paginated_response([START_CAMUNDA_PROCESS_FORM_OBJ]),
         )
         with patch(
             "bptl.work_units.zgw.tasks.zaakprocess.start_process",
@@ -179,7 +180,7 @@ class StartCamundaProcessTests(TestCase):
         m.get(CATALOGUS_URL, json=self.catalogus)
         m.post(
             f"{OBJECTS_ROOT}objects/search",
-            json=[],
+            json=paginated_response([]),
         )
         task = StartCamundaProcessTask(self.task)
         response = task.perform()
@@ -201,7 +202,7 @@ class StartCamundaProcessTests(TestCase):
 
         m.post(
             f"{OBJECTS_ROOT}objects/search",
-            json=[START_CAMUNDA_PROCESS_FORM_OBJ],
+            json=paginated_response([START_CAMUNDA_PROCESS_FORM_OBJ]),
         )
         rol_url = f"{ZRC_ROOT}rollen?zaak={self.zaak['url']}"
         task_dict = deepcopy(self.task_dict)
