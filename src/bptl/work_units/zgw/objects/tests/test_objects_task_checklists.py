@@ -12,7 +12,7 @@ from bptl.camunda.models import ExternalTask
 from bptl.credentials.tests.factories import AppFactory, AppServiceCredentialsFactory
 from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
-from bptl.tests.utils import mock_parallel
+from bptl.tests.utils import mock_parallel, paginated_response
 
 from ..models import MetaObjectTypesConfig
 from ..tasks import InitializeChecklistTask
@@ -146,7 +146,7 @@ class InitializeChecklistTaskTest(TestCase):
             "ztc", "schemas/Catalogus", url=CATALOGUS, domein="some-domein"
         )
         m.get(CATALOGUS, json=catalogus)
-        m.post(f"{OBJECTS_ROOT}objects/search", json=[])
+        m.post(f"{OBJECTS_ROOT}objects/search", json=paginated_response([]))
         task = InitializeChecklistTask(self.task)
         with patch("bptl.work_units.zgw.objects.tasks.logger") as mock_logger:
             response = task.perform()
@@ -164,7 +164,10 @@ class InitializeChecklistTaskTest(TestCase):
         )
         m.get(CATALOGUS, json=catalogus)
         task = InitializeChecklistTask(self.task)
-        m.post(f"{OBJECTS_ROOT}objects/search", json=[CHECKLIST_OBJECT])
+        m.post(
+            f"{OBJECTS_ROOT}objects/search",
+            json=paginated_response([CHECKLIST_OBJECT]),
+        )
         with patch(
             "bptl.work_units.zgw.objects.tasks.fetch_checklisttype",
             return_value=CHECKLISTTYPE_OBJECT,

@@ -1,8 +1,9 @@
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from django.utils.translation import ugettext_lazy as _
 
+from bptl.core.utils import fetch_next_url_pagination
 from bptl.tasks.models import BaseTask
 
 from .client import get_objects_client, get_objecttypes_client
@@ -29,9 +30,18 @@ def fetch_objecttypes(task: BaseTask, query_params: dict = dict) -> List[dict]:
     return client.get("objecttypes", params=query_params)
 
 
-def search_objects(task: BaseTask, filters: Dict) -> List[Dict]:
+def search_objects(
+    task: BaseTask, filters: Dict, query_params: Optional[Dict]
+) -> Tuple[List[dict], Dict]:
     client = get_objects_client(task)
-    return client.operation("object_search", path="objects/search", data=filters)
+    response = client.operation(
+        "object_search",
+        path="objects/search",
+        data=filters,
+        request_kwargs={"params": query_params},
+    )
+    query_params = fetch_next_url_pagination(response, query_params)
+    return response, query_params
 
 
 def _search_meta_objects(
@@ -67,7 +77,13 @@ def _search_meta_objects(
         ]
 
     object_filters["data_attrs"] = ",".join(object_filters["data_attrs"])
-    meta_objects = search_objects(task, object_filters)
+    query_params = {"pageSize": 100}
+    get_more = True
+    meta_objects = []
+    while get_more:
+        response, query_params = search_objects(task, object_filters, query_params)
+        meta_objects += response["results"]
+        get_more = query_params.get("page", None)
 
     if not meta_objects:
         logger.warning("No `{url}` object is found.".format(url=ot_url))
