@@ -105,7 +105,7 @@ def fetch_start_camunda_process_form(
 ###################################################
 
 
-def fetch_checklist_object(
+def fetch_checklist(
     task: BaseTask,
     zaak: str,
 ) -> Optional[Dict]:
@@ -124,42 +124,15 @@ def fetch_checklist_objecttype(task: BaseTask):
     return fetch_objecttype(task, max(checklist_obj_type["versions"]))
 
 
-def fetch_checklist(task: BaseTask, zaak: str) -> Optional[Dict]:
-    checklist_object_data = fetch_checklist_object(task, zaak)
-    return checklist_object_data
-
-
-def fetch_checklisttype_object(task: BaseTask) -> Optional[Dict]:
-    """
-    Cache the broader group of checklisttypes to increase performance
-    related to fetching meta objects.
-
-    The key relates to the field name on MetaObjectsConfig singletonmodel
-    found in zac.core.models.
-
-    """
-    if objs := _search_meta_objects(task, "checklisttype_objecttype", unique=False):
-        return objs
-    return None
-
-
 def fetch_checklisttype(
     task: BaseTask, catalogus_domein: str, zaaktype_identificatie: str
 ) -> Optional[Dict]:
-    checklisttypes = fetch_checklisttype_object(task)
-    if not checklisttypes:
-        return None
-
-    checklisttypes = [
-        clt
-        for clt in checklisttypes
-        if zaaktype_identificatie in clt["record"]["data"]["zaaktypeIdentificaties"]
-        and catalogus_domein in clt["record"]["data"]["zaaktypeCatalogus"]
-    ]
-    if not checklisttypes:
-        return None
-
-    if len(checklisttypes) > 1:
-        logger.warning("More than 1 checklisttype_objecttype object is found.")
-
-    return (checklisttypes[0]["record"]["data"],)
+    if checklisttypes := _search_meta_objects(
+        task,
+        "checklisttype_objecttype",
+        zaaktype_identificatie=zaaktype_identificatie,
+        catalogus_domein=catalogus_domein,
+        unique=True,
+    ):
+        return checklisttypes[0]["record"]["data"]
+    return None
