@@ -3,6 +3,8 @@ from typing import Dict, List, Optional, Tuple
 
 from django.utils.translation import ugettext_lazy as _
 
+from zgw_consumers.concurrent import parallel
+
 from bptl.core.utils import fetch_next_url_pagination
 from bptl.tasks.models import BaseTask
 
@@ -11,6 +13,28 @@ from .models import MetaObjectTypesConfig
 
 logger = logging.getLogger(__name__)
 perf_logger = logging.getLogger("performance")
+
+
+def update_object_record_data(
+    object: Dict,
+    data: Dict,
+    user: Optional[str] = "service-account",
+):
+    client = get_objects_client()
+    new_data = {
+        "record": {
+            **object["record"],
+            **{"data": data},
+            "correctionFor": object["record"]["index"],
+            "correctedBy": user,
+        }
+    }
+    obj = client.partial_update(
+        "object",
+        uuid=object["uuid"],
+        data=new_data,
+    )
+    return obj
 
 
 def create_object(task: BaseTask, data: Dict) -> Dict:
@@ -152,3 +176,24 @@ def fetch_checklisttype(
     ):
         return checklisttypes[0]["record"]["data"]
     return None
+
+
+def fetch_all_locked_checklists():
+    data_attrs = ["lockedBy__icontains__"]
+    if objs := _search_meta_objects("checklist_objecttype", data_attrs=data_attrs):
+        return objs
+    return []
+
+
+def unlock_checklists(checklists: List[Dict]) -> List[Dict]:
+    def _unlock_checklists(checklist_obj: Dict) -> Dict:
+        checklist_obj["record"]["data"]["lockedBy"] = None
+        return update_object_record_data(
+            object=checklist_obj,
+            data=checklist_obj["record"]["data"],
+        )
+
+    with parallel() as executor:
+        results = list(executor.map(_unlock_checklists, checklists))
+
+    return results

@@ -362,7 +362,7 @@ class CreateZaakObject(ZGWWorkUnit):
 
     * ``zaakUrl`` [str]: URL-reference to the ZAAK to create a new ZaakObject for.
     * ``objectUrl`` [str]: URL-reference to the OBJECT to set.
-    * ``objectType`` [str]: URL-reference to the type of the OBJECT.
+    * ``objectType`` [str]: Description of OBJECT [i.e., adres, besluit, etc].
     * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
 
