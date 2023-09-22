@@ -1,20 +1,25 @@
 import datetime
 import logging
+from copy import deepcopy
 from typing import Dict
 
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
 
+from bptl.camunda.constants import AssigneeTypeChoices
 from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 from bptl.work_units.zgw.tasks.base import ZGWWorkUnit, require_zrc, require_ztc
+from bptl.work_units.zgw.zac.client import require_zac_service
 
 from .client import require_objects_service, require_objecttypes_service
 from .services import (
     create_object,
+    fetch_all_locked_checklists,
     fetch_checklist,
     fetch_checklist_objecttype,
     fetch_checklisttype,
+    unlock_checklists,
 )
 
 logger = logging.getLogger(__name__)
@@ -115,3 +120,35 @@ class InitializeChecklistTask(ZGWWorkUnit):
         client = self.get_client(APITypes.zrc)
         client.create("zaakobject", relation_data)
         return {"initializedChecklist": True}
+
+
+@register
+@require_objects_service
+@require_objecttypes_service
+class UnlockChecklists(ZGWWorkUnit):
+    """
+    Unlocks locked CHECKLISTs.
+
+    **Sets the process variables**
+
+    * ``checklistLockers`` [list[str, str]]: List of tuples that include
+    the username and the zaak of the checklist that got unlocked.
+
+    """
+
+    def perform(self) -> dict:
+        checklists = fetch_all_locked_checklists()
+        unlock_checklists(deepcopy(checklists))
+        list_to_email = []
+        for checklist in checklists:
+            if (username := checklist["record"]["data"]["lockedBy"]) and (
+                zaak := checklist["record"]["data"]["zaak"]
+            ):
+                list_to_email.append(
+                    (
+                        f"{AssigneeTypeChoices.user}:{username}",
+                        zaak,
+                    )
+                )
+
+        return {"checklistLockers": list_to_email}
