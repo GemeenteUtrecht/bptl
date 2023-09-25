@@ -29,4 +29,5 @@ def get_betrokkene_identificatie(rol: Dict, task: BaseTask) -> Dict:
                     f"api/core/rollen/medewerker/betrokkeneIdentificatie",
                     json={"betrokkeneIdentificatie": betrokkene_identificatie},
                 ).get("betrokkeneIdentificatie", {})
+
     return betrokkene_identificatie

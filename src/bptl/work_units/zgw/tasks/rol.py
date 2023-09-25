@@ -3,6 +3,7 @@ from typing import Optional
 
 from zgw_consumers.constants import APITypes
 
+from bptl.camunda.constants import AssigneeTypeChoices
 from bptl.tasks.base import check_variable
 from bptl.tasks.registry import register
 
@@ -48,6 +49,11 @@ class CreateRolTask(ZGWWorkUnit):
             logger.info("Received empty rol-omschrijving process variable, skipping.")
             return
 
+        identificatie = get_betrokkene_identificatie(betrokkene, self.task)
+        if f"{AssigneeTypeChoices.group}:" in identificatie.get("identificatie", ""):
+            logger.info("Received group as role, currently not supported.")
+            return
+
         zrc_client = self.get_client(APITypes.zrc)
         zaak_url = check_variable(variables, "zaakUrl")
         zaak = zrc_client.retrieve("zaak", url=zaak_url)
@@ -74,9 +80,7 @@ class CreateRolTask(ZGWWorkUnit):
             "roltype": rol_typen[0]["url"],
             "roltoelichting": betrokkene["roltoelichting"],
             "indicatieMachtiging": betrokkene.get("indicatieMachtiging", ""),
-            "betrokkeneIdentificatie": get_betrokkene_identificatie(
-                betrokkene, self.task
-            ),
+            "betrokkeneIdentificatie": identificatie,
         }
         rol = zrc_client.create(
             "rol",

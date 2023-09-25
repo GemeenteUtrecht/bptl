@@ -229,3 +229,32 @@ class CreateRolTaskTests(TestCase):
 
         self.assertIsNone(result)
         self.assertEqual(len(m.request_history), 0)
+
+    def test_no_create_rol_group(self, m):
+        fetched_task = ExternalTask.objects.create(
+            topic_name="some-topic",
+            worker_id="test-worker-id",
+            task_id="test-task-id",
+            variables={
+                "zaakUrl": serialize_variable(ZAAK),
+                "omschrijving": serialize_variable("roltype omschrijving"),
+                "betrokkene": serialize_variable(
+                    {
+                        "betrokkeneType": RolTypes.medewerker,
+                        "roltoelichting": "A test roltoelichting",
+                        "betrokkeneIdentificatie": {
+                            "identificatie": f"{AssigneeTypeChoices.group}:some-group"
+                        },
+                    }
+                ),
+                "services": serialize_variable(
+                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
+                ),
+            },
+        )
+        task = CreateRolTask(fetched_task)
+
+        result = task.perform()
+
+        self.assertIsNone(result)
+        self.assertEqual(len(m.request_history), 0)
