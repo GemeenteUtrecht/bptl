@@ -188,38 +188,44 @@ class CreateZaakTask(ZGWWorkUnit):
             return None
 
         ztc_client = self.get_client(APITypes.ztc)
-        query_params = {
-            "zaaktype": self._get_zaaktype(variables),
-            "omschrijvingGeneriek": hoofdbehandelaar.get(
-                "omschrijvingGeneriek", RolOmschrijving.initiator
-            ),
-        }
-        rol_typen = ztc_client.list("roltype", query_params)
-        if not rol_typen:
-            logger.info(
-                "Roltype specified, but no matching roltype found in the zaaktype.",
-                extra={"query_params": query_params},
-            )
-            return None
 
-        zrc_client = self.get_client(APITypes.zrc)
-        request_body = {
-            "zaak": zaak["url"],
-            "betrokkene": hoofdbehandelaar.get("betrokkene", ""),
-            "betrokkeneType": hoofdbehandelaar.get(
-                "betrokkeneType", "natuurlijk_persoon"
-            ),
-            "roltype": rol_typen["results"][0]["url"],
-            "roltoelichting": hoofdbehandelaar.get("roltoelichting", ""),
-            "indicatieMachtiging": hoofdbehandelaar.get("indicatieMachtiging", ""),
-            "betrokkeneIdentificatie": get_betrokkene_identificatie(
-                hoofdbehandelaar, self.task
-            ),
-        }
-        rol = zrc_client.create(
-            "rol",
-            request_body,
-        )
+        for omschrijving in ["Hoofdbehandelaar", "Initiator"]:
+            query_params = {
+                "zaaktype": self._get_zaaktype(variables),
+                "omschrijving": omschrijving,
+            }
+            rol_typen = ztc_client.list("roltype", query_params)
+            if not rol_typen:
+                logger.info(
+                    "Roltype specified, but no matching roltype found in the zaaktype.",
+                    extra={"query_params": query_params},
+                )
+                return None
+
+            zrc_client = self.get_client(APITypes.zrc)
+
+            for rt in rol_typen["results"]:
+                request_body = {
+                    "zaak": zaak["url"],
+                    "betrokkene": hoofdbehandelaar.get("betrokkene", ""),
+                    "betrokkeneType": hoofdbehandelaar.get(
+                        "betrokkeneType", "natuurlijk_persoon"
+                    ),
+                    "roltype": rt["url"],
+                    "roltoelichting": hoofdbehandelaar.get(
+                        "roltoelichting", rt["omschrijvingGeneriek"]
+                    ),
+                    "indicatieMachtiging": hoofdbehandelaar.get(
+                        "indicatieMachtiging", ""
+                    ),
+                    "betrokkeneIdentificatie": get_betrokkene_identificatie(
+                        hoofdbehandelaar, self.task
+                    ),
+                }
+                rol = zrc_client.create(
+                    "rol",
+                    request_body,
+                )
         return rol
 
     def create_status(self, zaak: dict) -> dict:
