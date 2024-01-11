@@ -79,7 +79,7 @@ def mock_status_post(m):
 
 def mock_roltype_get(m):
     m.get(
-        f"{ROLTYPE_URL}?zaaktype={ZAAKTYPE}&omschrijving=Initiator",
+        f"{ROLTYPE_URL}?zaaktype={ZAAKTYPE}&omschrijvingGeneriek=initiator",
         json={
             "count": 1,
             "next": None,
@@ -95,7 +95,7 @@ def mock_roltype_get(m):
         },
     )
     m.get(
-        f"{ROLTYPE_URL}?zaaktype={ZAAKTYPE}&omschrijving=Hoofdbehandelaar",
+        f"{ROLTYPE_URL}?zaaktype={ZAAKTYPE}&omschrijvingGeneriek=behandelaar",
         json={
             "count": 1,
             "next": None,

@@ -94,10 +94,8 @@ CHECKLISTTYPE_OBJECTTYPE = {
             "zaaktypeCatalogus",
             "zaaktypeIdentificaties",
             "questions",
-            "meta",
         ],
         "properties": {
-            "meta": True,
             "questions": {
                 "type": "array",
                 "items": {
@@ -137,7 +135,6 @@ CHECKLISTTYPE_OBJECT = {
         "index": 1,
         "typeVersion": 4,
         "data": {
-            "meta": True,
             "zaaktypeCatalogus": "UTRE",
             "zaaktypeIdentificaties": ["ZT1"],
             "questions": [
@@ -194,9 +191,8 @@ CHECKLIST_OBJECTTYPE_LATEST_VERSION = {
     "jsonSchema": {
         "type": "object",
         "title": "Checklist",
-        "required": ["answers", "zaak", "meta"],
+        "required": ["answers", "zaak"],
         "properties": {
-            "meta": True,
             "zaak": {"type": "string"},
             "answers": {
                 "type": "array",
@@ -229,7 +225,6 @@ CHECKLIST_OBJECT = {
         "index": 1,
         "typeVersion": 3,
         "data": {
-            "meta": True,
             "zaak": ZAAK_URL,
             "answers": [
                 {"answer": "Ja", "question": "Ja?"},
