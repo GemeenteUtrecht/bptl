@@ -40,7 +40,7 @@ class InitializeChecklistTask(ZGWWorkUnit):
 
     """
 
-    def check_if_checklisttype_exists(self, variables: Dict) -> bool:
+    def check_if_checklisttype_does_not_exist(self, variables: Dict) -> bool:
         # Check if checklisttype exists
         catalogus_url = check_variable(variables, "zaaktypeCatalogus")
         ztc_client = self.get_client(APITypes.ztc)
@@ -75,7 +75,7 @@ class InitializeChecklistTask(ZGWWorkUnit):
                 executor.map(
                     lambda func: func(variables),
                     [
-                        self.check_if_checklisttype_exists,
+                        self.check_if_checklisttype_does_not_exist,
                         self.check_if_checklist_exists,
                     ],
                 )
@@ -87,7 +87,6 @@ class InitializeChecklistTask(ZGWWorkUnit):
         latest_version = fetch_checklist_objecttype(self.task)
         record = {
             "answers": [],
-            "meta": True,
             "zaak": zaak_url,
             "lockedBy": None,
         }
