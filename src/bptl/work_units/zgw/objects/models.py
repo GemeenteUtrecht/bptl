@@ -80,7 +80,11 @@ class MetaObjectTypesConfig(SingletonModel):
         if self.default and self.meta_list_objecttype:
             from .services import search_objects
 
-            response, qp = search_objects({"type": self.meta_list_objecttype})
+            object_filters = {"type": self.meta_list_objecttype}
+            query_params = {"pageSize": 1}
+            response, qp = search_objects(
+                filters=object_filters, query_params=query_params
+            )
             if response["count"] == 1:
                 urls = response["results"][0]["record"]["data"].get(
                     "metalistobjecttypes", dict()
