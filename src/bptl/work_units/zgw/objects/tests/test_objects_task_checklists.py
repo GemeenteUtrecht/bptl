@@ -134,7 +134,8 @@ class InitializeChecklistTaskTest(TestCase):
         with self.assertRaises(MissingVariable) as exc:
             task.perform()
         self.assertEqual(
-            exc.exception.args[0], "The variable catalogusDomein is missing or empty."
+            exc.exception.args[0],
+            "The variables `catalogusDomein` and `zaaktypeCatalogus` are missing or empty. Please supply either one.",
         )
 
     def test_missing_checklisttype(self, m):

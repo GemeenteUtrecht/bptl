@@ -5,7 +5,7 @@ from typing import Dict
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
 
-from bptl.tasks.base import check_variable
+from bptl.tasks.base import MissingVariable, check_variable
 from bptl.tasks.registry import register
 from bptl.work_units.zgw.tasks.base import ZGWWorkUnit, require_zrc, require_ztc
 
@@ -31,7 +31,7 @@ class InitializeChecklistTask(ZGWWorkUnit):
 
     **Required process variables**
     * ``zaakUrl`` [str]: URL-reference of the ZAAK in Open Zaak.
-    * ``catalogusDomein`` [str]: `domein` of the CATALOGUS in Open Zaak.
+    * ``catalogusDomein`` [str]: `domein` of the CATALOGUS in Open Zaak OR ``zaaktypeCatalogus`` [str]: URL-reference of CATALOGUS in CATALOGUS of Open Zaak.
     * ``zaaktypeIdentificatie`` [str]: URL-reference of ZAAKTYPE in CATALOGUS of Open Zaak.
 
     **Sets the process variables**
@@ -42,7 +42,19 @@ class InitializeChecklistTask(ZGWWorkUnit):
 
     def check_if_checklisttype_does_not_exist(self, variables: Dict) -> bool:
         # Check if checklisttype exists
-        catalogus_domein = check_variable(variables, "catalogusDomein")
+        catalogus_domein = variables.get("catalogusDomein", None)
+        if not catalogus_domein:
+            catalogus_url = variables.get("zaaktypeCatalogus", None)
+            if catalogus_url:
+                ztc_client = self.get_client(APITypes.ztc)
+                catalogus = ztc_client.retrieve("catalogus", url=catalogus_url)
+                catalogus_domein = catalogus.get("domein", None)
+
+        if not catalogus_domein:
+            raise MissingVariable(
+                "The variables `catalogusDomein` and `zaaktypeCatalogus` are missing or empty. Please supply either one."
+            )
+
         zaaktype_identificatie = check_variable(variables, "zaaktypeIdentificatie")
         checklisttype = fetch_checklisttype(
             self.task, catalogus_domein, zaaktype_identificatie
