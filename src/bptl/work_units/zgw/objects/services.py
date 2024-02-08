@@ -61,7 +61,7 @@ def _search_meta_objects(
             )
         )
 
-    object_filters = {"type": ot_url, "data_attrs": ["meta__icontains__true"]}
+    object_filters = {"type": ot_url, "data_attrs": []}
     if (not zaaktype_identificatie or not catalogus_domein) and not zaak:
         logger.warning(
             "If ZAAK is not provided - zaaktype_identificatie and catalogus_domein MUST be provided."
