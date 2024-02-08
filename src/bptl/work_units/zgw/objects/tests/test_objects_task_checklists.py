@@ -51,7 +51,7 @@ class InitializeChecklistTaskTest(TestCase):
             "variables": {
                 "zaakUrl": serialize_variable(ZAAK_URL),
                 "zaaktypeIdentificatie": serialize_variable(ZAAKTYPE_IDENTIFICATIE),
-                "zaaktypeCatalogus": serialize_variable(CATALOGUS),
+                "catalogusDomein": serialize_variable("UTRE"),
                 "bptlAppId": serialize_variable("some-app-id"),
             },
         }
@@ -134,25 +134,20 @@ class InitializeChecklistTaskTest(TestCase):
         with self.assertRaises(MissingVariable) as exc:
             task.perform()
         self.assertEqual(
-            exc.exception.args[0], "The variable zaaktypeCatalogus is missing or empty."
+            exc.exception.args[0], "The variable catalogusDomein is missing or empty."
         )
 
     def test_missing_checklisttype(self, m):
         mock_service_oas_get(m, CATALOGI_ROOT, "ztc")
         mock_service_oas_get(m, OBJECTS_ROOT, "objects")
         mock_service_oas_get(m, OBJECTTYPES_ROOT, "objecttypes")
-
-        catalogus = generate_oas_component(
-            "ztc", "schemas/Catalogus", url=CATALOGUS, domein="some-domein"
-        )
-        m.get(CATALOGUS, json=catalogus)
         m.post(f"{OBJECTS_ROOT}objects/search", json=paginated_response([]))
         task = InitializeChecklistTask(self.task)
         with patch("bptl.work_units.zgw.objects.tasks.logger") as mock_logger:
             response = task.perform()
 
         mock_logger.warning.assert_called_with(
-            f"CHECKLISTTYPE not found for ZAAKTYPE with identificatie: `{ZAAKTYPE_IDENTIFICATIE}` in CATALOGUS with domein: `some-domein`."
+            f"CHECKLISTTYPE not found for ZAAKTYPE with identificatie: `{ZAAKTYPE_IDENTIFICATIE}` in CATALOGUS with domein: `UTRE`."
         )
         self.assertEqual(response, {"initializedChecklist": False})
 

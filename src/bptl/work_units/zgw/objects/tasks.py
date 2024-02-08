@@ -30,8 +30,8 @@ class InitializeChecklistTask(ZGWWorkUnit):
     Creates an empty CHECKLIST for ZAAK if CHECKLISTTYPE for ZAAKTYPE exists.
 
     **Required process variables**
-    * ``zaakUrl`` [str]: URL-reference of a ZAAK in Open Zaak.
-    * ``zaaktypeCatalogus`` [str]: URL-reference of a CATALOGUS in Open Zaak.
+    * ``zaakUrl`` [str]: URL-reference of the ZAAK in Open Zaak.
+    * ``catalogusDomein`` [str]: `domein` of the CATALOGUS in Open Zaak.
     * ``zaaktypeIdentificatie`` [str]: URL-reference of ZAAKTYPE in CATALOGUS of Open Zaak.
 
     **Sets the process variables**
@@ -42,10 +42,7 @@ class InitializeChecklistTask(ZGWWorkUnit):
 
     def check_if_checklisttype_does_not_exist(self, variables: Dict) -> bool:
         # Check if checklisttype exists
-        catalogus_url = check_variable(variables, "zaaktypeCatalogus")
-        ztc_client = self.get_client(APITypes.ztc)
-        catalogus = ztc_client.retrieve("catalogus", url=catalogus_url)
-        catalogus_domein = catalogus["domein"]
+        catalogus_domein = check_variable(variables, "catalogusDomein")
         zaaktype_identificatie = check_variable(variables, "zaaktypeIdentificatie")
         checklisttype = fetch_checklisttype(
             self.task, catalogus_domein, zaaktype_identificatie
