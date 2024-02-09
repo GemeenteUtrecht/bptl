@@ -1,9 +1,14 @@
 import logging
 from typing import Dict, List, Optional, Tuple
 
+from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
+from djangorestframework_camel_case.settings import api_settings
+from djangorestframework_camel_case.util import camelize
+
 from bptl.core.utils import fetch_next_url_pagination
+from bptl.tasks.base import check_variable
 from bptl.tasks.models import BaseTask
 
 from .client import get_objects_client, get_objecttypes_client
@@ -30,6 +35,27 @@ def fetch_objecttypes(task: BaseTask, query_params: dict = dict) -> List[dict]:
     return client.get("objecttypes", params=query_params)
 
 
+def update_object_record_data(
+    task, object: Dict, data: Dict, username: Optional[str] = None
+) -> Dict:
+    client = get_objects_client(task)
+    new_data = {
+        "record": {
+            **object["record"],
+            "data": data,
+            "correctionFor": object["record"]["index"],
+            "correctedBy": username if username else "service-account",
+        }
+    }
+    obj = client.operation(
+        "object_partial_update",
+        path="objects/" + object["uuid"],
+        data=new_data,
+        method="PATCH",
+    )
+    return obj
+
+
 def search_objects(
     task: BaseTask, filters: Dict, query_params: Optional[Dict]
 ) -> Tuple[List[dict], Dict]:
@@ -47,10 +73,8 @@ def search_objects(
 def _search_meta_objects(
     task: BaseTask,
     attribute_name: str,
-    zaaktype_identificatie: str = "",
-    catalogus_domein: str = "",
-    zaak: str = "",
     unique: bool = False,
+    data_attrs: Optional[List] = None,
 ) -> List[dict]:
     config = MetaObjectTypesConfig.get_solo()
     ot_url = getattr(config, attribute_name)
@@ -61,21 +85,11 @@ def _search_meta_objects(
             )
         )
 
-    object_filters = {"type": ot_url, "data_attrs": []}
-    if (not zaaktype_identificatie or not catalogus_domein) and not zaak:
-        logger.warning(
-            "If ZAAK is not provided - zaaktype_identificatie and catalogus_domein MUST be provided."
-        )
+    if not data_attrs:
+        logger.warning("Searching on `meta` objecttypes needs filtering.")
         return []
 
-    if zaak:
-        object_filters["data_attrs"] += [f"zaak__icontains__{zaak}"]
-    else:
-        object_filters["data_attrs"] += [
-            f"zaaktypeIdentificaties__icontains__{zaaktype_identificatie}",
-            f"zaaktypeCatalogus__exact__{catalogus_domein}",
-        ]
-
+    object_filters = {"type": ot_url, "data_attrs": data_attrs}
     object_filters["data_attrs"] = ",".join(object_filters["data_attrs"])
     query_params = {"pageSize": 100}
     get_more = True
@@ -103,11 +117,14 @@ def _search_meta_objects(
 def fetch_start_camunda_process_form(
     task: BaseTask, zaaktype_identificatie: str, catalogus_domein: str
 ) -> Optional[Dict]:
+    data_attrs = [
+        f"zaaktypeIdentificaties__icontains__{zaaktype_identificatie}",
+        f"zaaktypeCatalogus__exact__{catalogus_domein}",
+    ]
     start_camunda_process_form = _search_meta_objects(
         task,
         "start_camunda_process_form_objecttype",
-        zaaktype_identificatie,
-        catalogus_domein,
+        data_attrs=data_attrs,
         unique=True,
     )
     if not start_camunda_process_form:
@@ -125,8 +142,9 @@ def fetch_checklist(
     task: BaseTask,
     zaak: str,
 ) -> Optional[Dict]:
+    data_attrs = [f"zaak__icontains__{zaak}"]
     if objs := _search_meta_objects(
-        task, "checklist_objecttype", zaak=zaak, unique=True
+        task, "checklist_objecttype", data_attrs=data_attrs, unique=True
     ):
         return objs[0]
     return None
@@ -143,12 +161,107 @@ def fetch_checklist_objecttype(task: BaseTask):
 def fetch_checklisttype(
     task: BaseTask, catalogus_domein: str, zaaktype_identificatie: str
 ) -> Optional[Dict]:
+    data_attrs = [
+        f"zaaktypeIdentificaties__icontains__{zaaktype_identificatie}",
+        f"zaaktypeCatalogus__exact__{catalogus_domein}",
+    ]
     if checklisttypes := _search_meta_objects(
         task,
         "checklisttype_objecttype",
-        zaaktype_identificatie=zaaktype_identificatie,
-        catalogus_domein=catalogus_domein,
+        data_attrs=data_attrs,
         unique=True,
     ):
         return checklisttypes[0]["record"]["data"]
+    return None
+
+
+###################################################
+#            KOWNSL - review requests             #
+###################################################
+
+
+def fetch_review_request(task: BaseTask) -> Optional[Dict]:
+    variables = task.get_variables()
+    review_request_id = check_variable(variables, "kownslReviewRequestId")
+    data_attrs = [f"id__exact__{review_request_id}"]
+    if objs := _search_meta_objects(
+        task, "review_request_objecttype", data_attrs=data_attrs, unique=True
+    ):
+
+        return objs[0]
+    return None
+
+
+def get_review_request(task: BaseTask) -> Optional[Dict]:
+    if obj := fetch_review_request(task):
+        return obj["record"]["data"]
+    return None
+
+
+def update_review_request(
+    task: BaseTask,
+    data: Dict = dict,
+    requester: Optional[str] = None,
+) -> Optional[Dict]:
+    if rr := fetch_review_request(task):
+        rr["record"]["data"] = {
+            **rr["record"]["data"],
+            **camelize(data, **api_settings.JSON_UNDERSCOREIZE),
+        }
+        result = update_object_record_data(
+            task, rr, rr["record"]["data"], username=requester
+        )
+    else:
+        raise Http404(
+            _("Review request with for task: {task} could not be found..").format(
+                task=str(task)
+            )
+        )
+
+    return result["record"]["data"]
+
+
+###################################################
+#                KOWNSL - reviews                 #
+###################################################
+
+
+def fetch_reviews(
+    task,
+    review_request: Optional[str] = None,
+    id: Optional[str] = None,
+    zaak: Optional[str] = None,
+    requester: Optional[str] = None,
+) -> List[Dict]:
+
+    data_attrs = []
+
+    if review_request:
+        data_attrs += [f"review_request__exact__{review_request}"]
+    if id:
+        data_attrs += [f"id__exact__{id}"]
+    if zaak:
+        data_attrs += [f"zaak__exact__{zaak}"]
+    if requester:
+        data_attrs += [f"requester__exact__{requester}"]
+
+    if objs := _search_meta_objects(
+        task,
+        "review_objecttype",
+        data_attrs=data_attrs,
+        unique=True if review_request or id else False,
+    ):
+        return objs
+
+    return list()
+
+
+def get_reviews_for_review_request(
+    task: BaseTask,
+) -> Optional[Dict]:
+    variables = task.get_variables()
+    review_request_id = check_variable(variables, "kownslReviewRequestId")
+    reviews = fetch_reviews(task, review_request=review_request_id)
+    if reviews:
+        return reviews["record"]["data"]
     return None
