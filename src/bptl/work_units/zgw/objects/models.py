@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import Dict
 
 from django.db import models
 from django.utils.encoding import force_str
@@ -55,6 +55,20 @@ class MetaObjectTypesConfig(SingletonModel):
         ),
         default="",
     )
+    review_objecttype = models.URLField(
+        _("URL-reference to review in OBJECTTYPES API."),
+        help_text=_(
+            "URL-reference to the review OBJECTTYPE. This is used to register an advice/approval to a review request."
+        ),
+        default="",
+    )
+    review_request_objecttype = models.URLField(
+        _("URL-reference to review request in OBJECTTYPES API."),
+        help_text=_(
+            "URL-reference to the review request OBJECTTYPE. This is used to register a review request."
+        ),
+        default="",
+    )
     start_camunda_process_form_objecttype = models.URLField(
         _("URL-reference to StartCamundaForms in OBJECTTYPES API."),
         help_text=_(
@@ -80,11 +94,7 @@ class MetaObjectTypesConfig(SingletonModel):
         if self.default and self.meta_list_objecttype:
             from .services import search_objects
 
-            object_filters = {"type": self.meta_list_objecttype}
-            query_params = {"pageSize": 1}
-            response, qp = search_objects(
-                filters=object_filters, query_params=query_params
-            )
+            response, qp = search_objects({"type": self.meta_list_objecttype})
             if response["count"] == 1:
                 urls = response["results"][0]["record"]["data"].get(
                     "metalistobjecttypes", dict()
@@ -100,9 +110,9 @@ class MetaObjectTypesConfig(SingletonModel):
         return super().save(*args, **kwargs)
 
     @property
-    def meta_objecttype_urls(self) -> List[str]:
-        return [
-            getattr(self, field.name)
+    def meta_objecttype_urls(self) -> Dict[str, str]:
+        return {
+            field.get_attname(): getattr(self, field.name)
             for field in self._meta.get_fields()
             if isinstance(field, models.URLField)
-        ]
+        }

@@ -5,7 +5,7 @@ from typing import Dict
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
 
-from bptl.tasks.base import MissingVariable, check_variable
+from bptl.tasks.base import BaseTask, MissingVariable, check_variable
 from bptl.tasks.registry import register
 from bptl.work_units.zgw.tasks.base import ZGWWorkUnit, require_zrc, require_ztc
 
@@ -15,9 +15,17 @@ from .services import (
     fetch_checklist,
     fetch_checklist_objecttype,
     fetch_checklisttype,
+    get_review_request,
+    get_reviews_for_review_request,
+    update_review_request,
 )
 
 logger = logging.getLogger(__name__)
+
+
+###################################################
+#                   Checklists                    #
+###################################################
 
 
 @register
@@ -123,3 +131,213 @@ class InitializeChecklistTask(ZGWWorkUnit):
         client = self.get_client(APITypes.zrc)
         client.create("zaakobject", relation_data)
         return {"initializedChecklist": True}
+
+
+###################################################
+#            KOWNSL - review requests             #
+###################################################
+
+
+@register
+@require_objects_service
+@require_objecttypes_service
+def get_approval_status(task: BaseTask) -> dict:
+    """
+    Get the result of an approval review request.
+
+    Once all reviewers have submitted their approval or rejection, derive the end-result
+    from the review session. If all reviewers approve, the result is positive. If any
+    rejections are present, the result is negative.
+
+    In the task binding, the service with alias ``kownsl`` must be connected, so that
+    this task knows which endpoints to contact.
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+
+    **Sets the process variables**
+
+    * ``approvalResult`` [bool]: a boolean indication approval status.
+
+    """
+
+    reviews = get_reviews_for_review_request(task)
+
+    num_approved, num_rejected = 0, 0
+    for rev in reviews["reviews"]:
+        if rev["approved"]:
+            num_approved += 1
+        else:
+            num_rejected += 1
+
+    return {"approvalResult": num_approved > 0 and num_rejected == 0}
+
+
+@register
+@require_objects_service
+@require_objecttypes_service
+def get_review_response_status(task: BaseTask) -> dict:
+    """
+    Get the reviewers who have not yet responded to a review request so that
+    a reminder email can be sent to them if they exist.
+
+    In the task binding, the service with alias ``kownsl`` must be connected, so that
+    this task knows which endpoints to contact.
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+    * ``kownslUsers`` [list[str]]: list of users or groups that have been configured in the review request configuration.
+
+    **Sets the process variables**
+
+    * ``remindThese`` [list[str]]: a JSON-object containing a list of users or groups who need reminding:
+
+      .. code-block:: json
+
+            [
+                "user:user1",
+                "user:user2",
+            ]
+    """
+    # Check who should respond
+    variables = task.get_variables()
+    needs_to_respond = check_variable(variables, "kownslUsers")
+
+    # Get approvals/advices belonging to review request
+    reviews = get_reviews_for_review_request(task)
+
+    # Build a list of users that have responded
+    already_responded = []
+    for review in reviews["reviews"]:
+        user = (
+            f"group:{review['group']}"
+            if review.get("group", None)
+            else f"user:{review['author']['username']}"
+        )
+        already_responded.append(user)
+
+    # Finally figure out who hasn't responded yet
+    not_responded = [
+        username for username in needs_to_respond if username not in already_responded
+    ]
+    return {
+        "remindThese": not_responded,
+    }
+
+
+@register
+@require_objects_service
+@require_objecttypes_service
+def get_review_request_start_process_information(task: BaseTask) -> dict:
+    """
+    Get the process information for the review request.
+    The process information consists of the:
+
+    - deadline of the review request,
+    - reminder date of the review request,
+    - lock status of the review request,
+    - the username of the requester,
+    - and finally, the review type.
+
+    In the task binding, the service with alias ``kownsl`` must be connected, so that
+    this task knows which endpoints to contact.
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+    * ``kownslUsers`` [list[str]]: list of usernames that have been configured in the review request configuration.
+
+    **Sets the process variables**
+
+    * ``reminderDate`` [str]: the email reminder date: "2020-02-29".
+    * ``deadline`` [str]: the review deadline date: "2020-03-01".
+    * ``locked`` [bool]: the lock status of the review request.
+    * ``requester`` [str]: the username of the review requester.
+    * ``reviewType`` [str]: the review type (i.e., "advice" or "approval").
+
+    """
+    # Get kownslUsers
+    variables = task.get_variables()
+    kownsl_users = check_variable(variables, "kownslUsers")
+
+    # Get user deadlines
+    review_request = get_review_request(task)
+    user_deadlines = review_request["userDeadlines"]
+
+    # Get deadline belonging to that specific set of kownslUsers
+    deadline_str = user_deadlines[kownsl_users[0]]
+    deadline = datetime.datetime.strptime(deadline_str, "%Y-%m-%d").date()
+
+    # Set reminder date - 1 day less than deadline
+    reminder = deadline - datetime.timedelta(days=1)
+    reminder_str = reminder.strftime("%Y-%m-%d")
+    return {
+        "deadline": deadline_str,
+        "reminderDate": reminder_str,
+        "locked": review_request["locked"],
+        "requester": f"user:{review_request['requester']['username']}",
+        "reviewType": "advies"
+        if review_request["reviewType"] == "advice"
+        else "accordering",
+    }
+
+
+@register
+@require_objects_service
+@require_objecttypes_service
+def set_review_request_metadata(task: BaseTask) -> dict:
+    """
+    Set the metadata for a Kownsl review request.
+
+    Metadata is a set of arbitrary key-value labels, allowing you to attach extra data
+    required for your process routing/handling.
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+    * ``metadata`` [json]: a JSON structure holding key-values of the metadata. This will be
+      set directly on the matching review request. Example:
+
+      .. code-block:: json
+
+            {
+                "processInstanceId": "aProcessInstanceId"
+            }
+
+    **Sets no process variables**
+
+    """
+    variables = task.get_variables()
+    metadata = check_variable(variables, "metadata")
+    data = {"metadata": metadata}
+    update_review_request(task, requester=None, data=data)
+    return dict()
+
+
+@register
+@require_objects_service
+@require_objecttypes_service
+def get_approval_toelichtingen(task: BaseTask) -> dict:
+    """
+    Get the "toelichtingen" of all reviewers that responded to the review request.
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+
+    **Sets the process variables**
+
+    * ``toelichtingen`` [str]: the "toelichtingen" of all reviewers.
+
+    """
+    # Get approvals/advices belonging to review request
+    reviews = get_reviews_for_review_request(task)
+
+    # Get their toelichtingen
+    toelichtingen = [
+        rev.get("toelichting", None) or "Geen" for rev in reviews["reviews"]
+    ]
+
+    return {"toelichtingen": "\n\n".join(toelichtingen)}
