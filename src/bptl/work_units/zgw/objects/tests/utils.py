@@ -318,6 +318,7 @@ class ReviewRequestFactory(factory.DictFactory):
         }
     )
     zaak = deepcopy(ZAAK_URL)
+    zaakeigenschappen = factory.List([])
 
     class Meta:
         rename = {
@@ -481,7 +482,6 @@ REVIEW_REQUEST_OBJECTTYPE_LATEST_VERSION = {
             "isBeingReconfigured",
             "locked",
             "lockReason",
-            "meta",
             "metadata",
             "numReviewsGivenBeforeChange",
             "requester",
@@ -492,7 +492,6 @@ REVIEW_REQUEST_OBJECTTYPE_LATEST_VERSION = {
         ],
         "properties": {
             "id": {"type": "string"},
-            "meta": True,
             "zaak": {"type": "string"},
             "locked": {"type": "boolean"},
             "created": {"type": "string"},
@@ -640,10 +639,9 @@ REVIEW_OBJECTTYPE_LATEST_VERSION = {
             },
         },
         "title": "Reviews",
-        "required": ["id", "meta", "reviewRequest", "reviewType", "zaak", "reviews"],
+        "required": ["id", "reviewRequest", "reviewType", "zaak", "reviews"],
         "properties": {
             "id": {"$ref": "#/$defs/id"},
-            "meta": True,
             "zaak": {"$ref": "#/$defs/zaak"},
             "reviews": {
                 "type": "array",
