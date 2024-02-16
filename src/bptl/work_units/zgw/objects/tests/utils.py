@@ -4,14 +4,15 @@ import factory
 
 from ..constants import KownslTypes
 
-CATALOGI_ROOT = "http://catalogus.nl/api/v1/"
-DOCUMENTS_ROOT = "http://documents.nl/api/v1/"
-ZAKEN_ROOT = "http://zaken.nl/api/v1/"
+ZAKEN_ROOT = "https://zaken.nl/"
+DOCUMENTS_ROOT = "https://drc.nl/"
+CATALOGI_ROOT = "http://ztc.nl/"
 OBJECTTYPES_ROOT = "http://objecttype.nl/api/v1/"
 OBJECTS_ROOT = "http://object.nl/api/v2/"
 
-ZAAK_URL = f"{ZAKEN_ROOT}zaken/30a98ef3-bf35-4287-ac9c-fed048619dd7"
 DOCUMENT_URL = f"{DOCUMENTS_ROOT}enkelvoudiginformatieobjecten/30e4deca-29ca-4798-bab1-3ad75cf29c30"
+ZAAK_URL = f"{ZAKEN_ROOT}zaken/0c79c41d-72ef-4ea2-8c4c-03c9945da2a2"
+
 CATALOGUS = f"{CATALOGI_ROOT}catalogussen/7022a89e-0dd1-4074-9c3a-1a990e6c18ab"
 BRONORGANISATIE = "123456789"
 IDENTIFICATIE = "ZAAK-0000001"
@@ -250,21 +251,12 @@ CHECKLIST_OBJECT = {
 }
 
 
-ZAAK_DOCUMENT = {
-    "bronorganisatie": "002220647",
-    "identificatie": "0000027735",
-    "downloadUrl": "",
-    "name": "raadsvoorstel.docx",
-    "extra": "(Zaakvertrouwelijk)",
-    "title": "v2",
-}
-
-
 class UserAssigneeFactory(factory.DictFactory):
-    username = "some-author"
+    email = "some-author@email.zac"
     first_name = "Some First"
-    last_name = "Some Last"
     full_name = "Some First Some Last"
+    username = "some-author"
+    last_name = "Some Last"
 
     class Meta:
         rename = {
@@ -330,38 +322,53 @@ class ReviewRequestFactory(factory.DictFactory):
         }
 
 
-class AdviceDocumentFactory(factory.DictFactory):
-    document = deepcopy(DOCUMENT_URL)
+class ReviewDocumentFactory(factory.DictFactory):
+    document = deepcopy(DOCUMENT_URL) + "?versie=1"
     source_version = 1
-    advice_version = 2
+    review_version = 2
 
     class Meta:
-        rename = {"source_version": "sourceVersion", "advice_version": "adviceVersion"}
+        rename = {"source_version": "sourceVersion", "review_version": "reviewVersion"}
+
+
+class KownslZaakEigenschapFactory(factory.DictFactory):
+    url = f"{ZAAK_URL}zaakeigenschappen/c0524527-3539-4313-8c00-41358069e65b"
+    naam = "SomeEigenschap"
+    waarde = "SomeWaarde"
 
 
 class AdviceFactory(factory.DictFactory):
-    created = "2022-04-14T15:50:09.830235Z"
     author = factory.SubFactory(UserAssigneeFactory)
     advice = "some-advice"
-    advice_documents = factory.List([factory.SubFactory(AdviceDocumentFactory)])
-    group = ""
+    created = "2022-04-14T15:50:09.830235Z"
+    group = factory.Dict(dict())
+    review_documents = factory.List([factory.SubFactory(ReviewDocumentFactory)])
+    zaakeigenschappen = factory.List([factory.SubFactory(KownslZaakEigenschapFactory)])
 
     class Meta:
         rename = {
-            "advice_documents": "adviceDocuments",
+            "review_documents": "reviewDocuments",
         }
 
 
 class ApprovalFactory(factory.DictFactory):
-    created = "2022-04-14T15:51:09.830235Z"
     author = factory.SubFactory(UserAssigneeFactory)
     approved = True
+    created = "2022-04-14T15:51:09.830235Z"
+    group = factory.Dict(dict())
+    review_documents = factory.List([factory.SubFactory(ReviewDocumentFactory)])
     toelichting = "some-toelichting"
-    group = ""
+    zaakeigenschappen = factory.List([factory.SubFactory(KownslZaakEigenschapFactory)])
+
+    class Meta:
+        rename = {
+            "review_documents": "reviewDocuments",
+        }
 
 
-class ReviewsAdviceFactory(factory.DictFactory):
+class ReviewsFactory(factory.DictFactory):
     id = "6a9a169e-aa6f-4dd7-bbea-6bedea74c456"
+    requester = factory.SubFactory(UserAssigneeFactory)
     reviews = factory.List([factory.SubFactory(AdviceFactory)])
     review_request = deepcopy(RR_ID)
     review_type = KownslTypes.advice
@@ -376,9 +383,10 @@ class ReviewsAdviceFactory(factory.DictFactory):
 
 class ReviewsApprovalFactory(factory.DictFactory):
     id = "6a9a169e-aa6f-4dd7-bbea-6bedea74c457"
+    requester = factory.SubFactory(UserAssigneeFactory)
     reviews = factory.List([factory.SubFactory(ApprovalFactory)])
     review_request = deepcopy(RR_ID)
-    review_type = KownslTypes.approval
+    revtest_get_review_request_start_process_informationiew_type = KownslTypes.approval
     zaak = deepcopy(ZAAK_URL)
 
     class Meta:
@@ -482,6 +490,7 @@ REVIEW_REQUEST_OBJECTTYPE_LATEST_VERSION = {
             "isBeingReconfigured",
             "locked",
             "lockReason",
+            "meta",
             "metadata",
             "numReviewsGivenBeforeChange",
             "requester",
@@ -606,9 +615,13 @@ REVIEW_OBJECTTYPE_LATEST_VERSION = {
                     "advice": {"type": "string"},
                     "author": {"$ref": "#/$defs/user"},
                     "created": {"$ref": "#/$defs/created"},
-                    "adviceDocuments": {
+                    "reviewDocuments": {
                         "type": "array",
-                        "items": {"$ref": "#/$defs/adviceDocument"},
+                        "items": {"$ref": "#/$defs/reviewDocument"},
+                    },
+                    "zaakeigenschappen": {
+                        "type": "array",
+                        "items": {"$ref": "#/$defs/zaakeigenschap"},
                     },
                 },
             },
@@ -623,23 +636,48 @@ REVIEW_OBJECTTYPE_LATEST_VERSION = {
                     "created": {"$ref": "#/$defs/created"},
                     "approved": {"type": "boolean"},
                     "toelichting": {"type": "string"},
+                    "reviewDocuments": {
+                        "type": "array",
+                        "items": {"$ref": "#/$defs/reviewDocument"},
+                    },
+                    "zaakeigenschappen": {
+                        "type": "array",
+                        "items": {"$ref": "#/$defs/zaakeigenschap"},
+                    },
                 },
             },
             "reviewType": {"type": "string"},
             "reviewRequest": {"type": "string"},
-            "adviceDocument": {
+            "reviewDocument": {
                 "type": "object",
-                "title": "AdviceDocument",
-                "required": ["url", "sourceVersion", "adviceVersion"],
+                "title": "reviewDocument",
+                "required": ["document", "sourceVersion", "reviewVersion"],
+                "properties": {
+                    "document": {"type": "string"},
+                    "reviewVersion": {"type": "string"},
+                    "sourceVersion": {"type": "string"},
+                },
+            },
+            "zaakeigenschap": {
+                "type": "object",
+                "title": "zaakeigenschap",
+                "required": ["url", "naam", "waarde"],
                 "properties": {
                     "url": {"type": "string"},
-                    "adviceVersion": {"type": "string"},
-                    "sourceVersion": {"type": "string"},
+                    "naam": {"type": "string"},
+                    "waarde": {"type": "string"},
                 },
             },
         },
         "title": "Reviews",
-        "required": ["id", "reviewRequest", "reviewType", "zaak", "reviews"],
+        "required": [
+            "id",
+            "requester",
+            "reviewRequest",
+            "reviewType",
+            "reviews",
+            "zaak",
+        ],
         "properties": {
             "id": {"$ref": "#/$defs/id"},
             "zaak": {"$ref": "#/$defs/zaak"},
@@ -649,6 +687,7 @@ REVIEW_OBJECTTYPE_LATEST_VERSION = {
                     "oneOf": [{"$ref": "#/$defs/advice"}, {"$ref": "#/$defs/approval"}]
                 },
             },
+            "requester": {"$ref": "#/$defs/user"},
             "reviewType": {"$ref": "#/$defs/reviewType"},
             "reviewRequest": {"$ref": "#/$defs/reviewRequest"},
         },
@@ -665,7 +704,7 @@ REVIEW_OBJECT = {
     "record": {
         "index": 1,
         "typeVersion": 4,
-        "data": ReviewsApprovalFactory(),
+        "data": {},
         "geometry": "None",
         "startAt": "1999-12-31",
         "endAt": "None",
