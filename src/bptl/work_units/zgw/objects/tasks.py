@@ -166,7 +166,7 @@ def get_approval_status(task: BaseTask) -> dict:
 
     num_approved, num_rejected = 0, 0
     for rev in reviews["reviews"]:
-        if rev["approved"]:
+        if rev.get("approved", None):
             num_approved += 1
         else:
             num_rejected += 1
