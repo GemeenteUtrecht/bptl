@@ -263,5 +263,5 @@ def get_reviews_for_review_request(
     review_request_id = check_variable(variables, "kownslReviewRequestId")
     reviews = fetch_reviews(task, review_request=review_request_id)
     if reviews:
-        return reviews["record"]["data"]
+        return reviews[0]["record"]["data"]
     return None
