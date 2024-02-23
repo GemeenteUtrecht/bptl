@@ -6,14 +6,11 @@ from django.test import TestCase
 import requests_mock
 from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes, AuthTypes
-from zgw_consumers.models import Service
-from zgw_consumers.test import generate_oas_component, mock_service_oas_get
+from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
-from bptl.credentials.tests.factories import AppFactory, AppServiceCredentialsFactory
-from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
-from bptl.tests.utils import mock_parallel, paginated_response
+from bptl.tests.utils import paginated_response
 from bptl.work_units.zgw.objects.services import fetch_start_camunda_process_form
 from bptl.work_units.zgw.objects.tests.utils import START_CAMUNDA_PROCESS_FORM_OBJ
 
@@ -26,110 +23,105 @@ from ..services import (
     update_review_request,
 )
 from .utils import (
-    CATALOGI_ROOT,
-    CATALOGUS,
     OBJECTS_ROOT,
     OBJECTTYPES_ROOT,
     REVIEW_OBJECT,
     REVIEW_OBJECTTYPE,
-    REVIEW_OBJECTTYPE_LATEST_VERSION,
     REVIEW_REQUEST_OBJECT,
     REVIEW_REQUEST_OBJECTTYPE,
-    REVIEW_REQUEST_OBJECTTYPE_LATEST_VERSION,
-    ZAAK_URL,
-    ZAKEN_ROOT,
     AssignedUsersFactory,
     ReviewRequestFactory,
     ReviewsApprovalFactory,
     UserAssigneeFactory,
 )
 
-# class ObjectsServicesTests(TestCase):
-#     @classmethod
-#     def setUpTestData(cls):
-#         super().setUpTestData()
 
-#         cls.task_dict = {
-#             "topic_name": "some-topic-name",
-#             "worker_id": "test-worker-id",
-#             "task_id": "test-task-id",
-#             "variables": {
-#                 "bptlAppId": serialize_variable("some-app-id"),
-#             },
-#         }
-#         cls.task = ExternalTask.objects.create(
-#             **cls.task_dict,
-#         )
-#         mapping = TaskMappingFactory.create(topic_name="some-topic-name")
-#         DefaultServiceFactory.create(
-#             task_mapping=mapping,
-#             service__api_root=OBJECTS_ROOT,
-#             service__api_type=APITypes.orc,
-#             service__auth_type=AuthTypes.no_auth,
-#             alias="objects",
-#         )
+class ObjectsServicesTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
 
-#     @patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
-#     def test_wrongly_configured_meta_config(self, mock_meta_config):
-#         mock_meta_config.start_camunda_process_form_objecttype = ""
-#         with patch(
-#             "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig.get_solo",
-#             return_value=mock_meta_config,
-#         ):
-#             with self.assertRaises(RuntimeError):
-#                 fetch_start_camunda_process_form(
-#                     self.task, zaaktype_identificatie="", catalogus_domein=""
-#                 )
+        cls.task_dict = {
+            "topic_name": "some-topic-name",
+            "worker_id": "test-worker-id",
+            "task_id": "test-task-id",
+            "variables": {
+                "bptlAppId": serialize_variable("some-app-id"),
+            },
+        }
+        cls.task = ExternalTask.objects.create(
+            **cls.task_dict,
+        )
+        mapping = TaskMappingFactory.create(topic_name="some-topic-name")
+        DefaultServiceFactory.create(
+            task_mapping=mapping,
+            service__api_root=OBJECTS_ROOT,
+            service__api_type=APITypes.orc,
+            service__auth_type=AuthTypes.no_auth,
+            alias="objects",
+        )
 
-#     @patch(
-#         "bptl.work_units.zgw.objects.services.search_objects",
-#         return_value=[paginated_response([]), {}],
-#     )
-#     @patch("bptl.work_units.zgw.objects.services.logger")
-#     @patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
-#     def test_no_objects_found(self, mock_meta_config, mock_logger, mock_search_objects):
-#         fetch_start_camunda_process_form(
-#             self.task, zaaktype_identificatie="some-id", catalogus_domein="some-domein"
-#         )
-#         mock_logger.warning.assert_called_once()
+    @patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
+    def test_wrongly_configured_meta_config(self, mock_meta_config):
+        mock_meta_config.start_camunda_process_form_objecttype = ""
+        with patch(
+            "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig.get_solo",
+            return_value=mock_meta_config,
+        ):
+            with self.assertRaises(RuntimeError):
+                fetch_start_camunda_process_form(
+                    self.task, zaaktype_identificatie="", catalogus_domein=""
+                )
 
-#     @patch(
-#         "bptl.work_units.zgw.objects.services.search_objects",
-#         return_value=[paginated_response([START_CAMUNDA_PROCESS_FORM_OBJ, 2]), {}],
-#     )
-#     @patch("bptl.work_units.zgw.objects.services.logger")
-#     @patch(
-#         "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
-#     )
-#     def test_more_than_one_objects_found(
-#         self, mock_meta_config, mock_logger, mock_search_objects
-#     ):
-#         fetch_start_camunda_process_form(
-#             self.task, zaaktype_identificatie="zaaktype", catalogus_domein="catalogus"
-#         )
-#         mock_logger.warning.assert_called_once()
+    @patch(
+        "bptl.work_units.zgw.objects.services.search_objects",
+        return_value=[paginated_response([]), {}],
+    )
+    @patch("bptl.work_units.zgw.objects.services.logger")
+    @patch("bptl.work_units.zgw.objects.services.MetaObjectTypesConfig")
+    def test_no_objects_found(self, mock_meta_config, mock_logger, mock_search_objects):
+        fetch_start_camunda_process_form(
+            self.task, zaaktype_identificatie="some-id", catalogus_domein="some-domein"
+        )
+        mock_logger.warning.assert_called_once()
 
-#     @patch(
-#         "bptl.work_units.zgw.objects.services.search_objects",
-#         return_value=[paginated_response([START_CAMUNDA_PROCESS_FORM_OBJ]), {}],
-#     )
-#     @patch("bptl.work_units.zgw.objects.services.logger")
-#     @patch(
-#         "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
-#     )
-#     def test_success(self, mock_meta, mock_logger, mock_search_objects):
-#         with patch(
-#             "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
-#             side_effect=Exception,
-#         ):
-#             fetch_start_camunda_process_form(
-#                 self.task,
-#                 zaaktype_identificatie="zaaktype",
-#                 catalogus_domein="catalogus",
-#             )
+    @patch(
+        "bptl.work_units.zgw.objects.services.search_objects",
+        return_value=[paginated_response([START_CAMUNDA_PROCESS_FORM_OBJ, 2]), {}],
+    )
+    @patch("bptl.work_units.zgw.objects.services.logger")
+    @patch(
+        "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
+    )
+    def test_more_than_one_objects_found(
+        self, mock_meta_config, mock_logger, mock_search_objects
+    ):
+        fetch_start_camunda_process_form(
+            self.task, zaaktype_identificatie="zaaktype", catalogus_domein="catalogus"
+        )
+        mock_logger.warning.assert_called_once()
 
-#         mock_search_objects.assert_called_once()
-#         mock_logger.warning.assert_not_called()
+    @patch(
+        "bptl.work_units.zgw.objects.services.search_objects",
+        return_value=[paginated_response([START_CAMUNDA_PROCESS_FORM_OBJ]), {}],
+    )
+    @patch("bptl.work_units.zgw.objects.services.logger")
+    @patch(
+        "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
+    )
+    def test_success(self, mock_meta, mock_logger, mock_search_objects):
+        with patch(
+            "bptl.work_units.zgw.objects.services.MetaObjectTypesConfig",
+            side_effect=Exception,
+        ):
+            fetch_start_camunda_process_form(
+                self.task,
+                zaaktype_identificatie="zaaktype",
+                catalogus_domein="catalogus",
+            )
+
+        mock_search_objects.assert_called_once()
+        mock_logger.warning.assert_not_called()
 
 
 @requests_mock.Mocker()
