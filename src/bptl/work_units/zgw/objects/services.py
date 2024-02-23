@@ -237,7 +237,7 @@ def fetch_reviews(
     data_attrs = []
 
     if review_request:
-        data_attrs += [f"review_request__exact__{review_request}"]
+        data_attrs += [f"reviewRequest__exact__{review_request}"]
     if id:
         data_attrs += [f"id__exact__{id}"]
     if zaak:
