@@ -1,5 +1,28 @@
 {% extends "email/mails/base.txt" %}
-{% load i18n %}{% block body %}Je {{ reviewType }} is vereist. {% if deadline %}Je hebt tot {{ deadline }} om te reageren.{% endif %}
+{% load i18n %}{% block body %}Graag willen we je informeren dat binnen de zaak met zaaknummer <a href={zaakDetailUrl}>{zaakIdentificatie}</a> een {{ reviewType }} is vereist, en de deadline hiervoor is {{ deadline }}.
+<br>
+<br>
+<ul>
+  <li>Zaaknummer: {zaakIdentificatie}.</li>
+  <li>Omschrijving van de zaak: {zaakOmschrijving}.</li>
+  <li>Deadline voor de {{ reviewType }}: {{ deadline }}.</li>
+</ul>
+<br>
+<br>
+Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, vragen we je vriendelijk om de benodigde {{ reviewType }} te geven vóór de genoemde deadline.
+<br>
+<br>
+<a href={{ }}> </a>
+Stappen om te accorderen:
+    1. Log in op het Zaak Afhandel Component via [inloglink].
+    2. Navigeer naar het tabblad ‘’Acties’’.
+    3. Selecteer de Accorderings ‘’actie’’
+    4. Volg de instructies op het scherm om de accordering te voltooien.
+
+Bedankt voor je medewerking en prompte aandacht voor deze zaak.
+
+Met vriendelijke groet,
+[Voor + Achternaam verzender mail)
 
 Ga alsjeblieft hierheen: {{ kownslFrontendUrl }}{% if receiver.assignee %}&assignee={{ receiver.assignee|urlencode }}{% endif %}{% if email.content %}
 
