@@ -347,3 +347,22 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
         )
 
     return {"toelichtingen": "\n\n".join(toelichtingen)}
+
+
+@register
+@require_objects_service
+@require_objecttypes_service
+def lock_review_request(task: BaseTask) -> dict:
+    """
+    Lock review request after all reviews have been given.
+
+    **Required process variables**
+
+    * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
+
+    **Sets no process variables**
+
+    """
+    data = {"locked": True, "lock_reason": "Alle verzoeken zijn uitgevoerd."}
+    update_review_request(task, requester=None, data=data)
+    return dict()
