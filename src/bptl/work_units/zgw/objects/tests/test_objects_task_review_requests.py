@@ -48,7 +48,6 @@ class KownslTasktests(TestCase):
         )
         cls.review_request = ReviewRequestFactory()
         cls.review_request["assignedUsers"].append(assigned_users2)
-
         cls.reviews_approval = ReviewsApprovalFactory()
         cls.task_dict = {
             "topic_name": "some-topic-name",
@@ -162,7 +161,7 @@ class KownslTasktests(TestCase):
                 "The variable kownslReviewRequestId is missing or empty.",
             )
 
-    def test_get_approval_status(self, m):
+    def test_success_get_approval_status(self, m):
         task = ExternalTask.objects.create(
             **self.task_dict,
         )
@@ -172,6 +171,17 @@ class KownslTasktests(TestCase):
         ):
             result = get_approval_status(task)
         self.assertEqual(result["approvalResult"], True)
+
+    def test_get_approval_status_no_reviews(self, m):
+        task = ExternalTask.objects.create(
+            **self.task_dict,
+        )
+        with patch(
+            "bptl.work_units.zgw.objects.tasks.get_reviews_for_review_request",
+            return_value=None,
+        ):
+            result = get_approval_status(task)
+        self.assertEqual(result["approvalResult"], False)
 
     def test_get_review_response_status(self, m):
         task = ExternalTask.objects.create(
@@ -183,6 +193,17 @@ class KownslTasktests(TestCase):
         ):
             result = get_review_response_status(task)
         self.assertEqual(result["remindThese"], ["user:some-user"])
+
+    def test_get_review_response_status_no_reviews(self, m):
+        task = ExternalTask.objects.create(
+            **self.task_dict,
+        )
+        with patch(
+            "bptl.work_units.zgw.objects.tasks.get_reviews_for_review_request",
+            return_value=None,
+        ):
+            result = get_review_response_status(task)
+        self.assertEqual(result["remindThese"], ["user:some-user", "user:some-author"])
 
     def test_get_review_request_start_process_information(self, m):
         task = ExternalTask.objects.create(
@@ -230,3 +251,14 @@ class KownslTasktests(TestCase):
         ):
             result = get_approval_toelichtingen(task)
         self.assertEqual(result, {"toelichtingen": "some-toelichting"})
+
+    def test_get_approval_toelichtingen_no_reviews(self, m):
+        task = ExternalTask.objects.create(
+            **self.task_dict,
+        )
+        with patch(
+            "bptl.work_units.zgw.objects.tasks.get_reviews_for_review_request",
+            return_value=None,
+        ):
+            result = get_approval_toelichtingen(task)
+        self.assertEqual(result, {"toelichtingen": ""})
