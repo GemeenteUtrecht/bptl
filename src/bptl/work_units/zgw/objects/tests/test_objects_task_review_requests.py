@@ -14,6 +14,7 @@ from ..tasks import (
     get_approval_toelichtingen,
     get_review_request_start_process_information,
     get_review_response_status,
+    lock_review_request,
     set_review_request_metadata,
 )
 from .utils import (
@@ -262,3 +263,97 @@ class KownslTasktests(TestCase):
         ):
             result = get_approval_toelichtingen(task)
         self.assertEqual(result, {"toelichtingen": ""})
+
+    def test_set_review_request_metadata(self, m):
+        task = ExternalTask.objects.create(
+            **self.task_dict,
+        )
+        with patch(
+            "bptl.work_units.zgw.objects.services.fetch_review_request",
+            return_value=deepcopy(REVIEW_REQUEST_OBJECT),
+        ):
+            with patch(
+                "bptl.work_units.zgw.objects.services.update_object_record_data",
+                return_value=deepcopy(REVIEW_REQUEST_OBJECT),
+            ) as mock_update_object_record_data:
+                result = lock_review_request(task)
+
+        mock_update_object_record_data.assert_called_once_with(
+            task,
+            {
+                "url": REVIEW_REQUEST_OBJECT["url"],
+                "uuid": REVIEW_REQUEST_OBJECT["uuid"],
+                "type": REVIEW_REQUEST_OBJECT["type"],
+                "record": {
+                    "index": REVIEW_REQUEST_OBJECT["record"]["index"],
+                    "typeVersion": REVIEW_REQUEST_OBJECT["record"]["typeVersion"],
+                    "data": {
+                        "created": REVIEW_REQUEST_OBJECT["record"]["data"]["created"],
+                        "documents": REVIEW_REQUEST_OBJECT["record"]["data"][
+                            "documents"
+                        ],
+                        "id": REVIEW_REQUEST_OBJECT["record"]["data"]["id"],
+                        "locked": True,
+                        "lockReason": "Alle verzoeken zijn uitgevoerd.",
+                        "metadata": REVIEW_REQUEST_OBJECT["record"]["data"]["metadata"],
+                        "requester": REVIEW_REQUEST_OBJECT["record"]["data"][
+                            "requester"
+                        ],
+                        "toelichting": REVIEW_REQUEST_OBJECT["record"]["data"][
+                            "toelichting"
+                        ],
+                        "zaak": REVIEW_REQUEST_OBJECT["record"]["data"]["zaak"],
+                        "zaakeigenschappen": [],
+                        "assignedUsers": REVIEW_REQUEST_OBJECT["record"]["data"][
+                            "assignedUsers"
+                        ],
+                        "isBeingReconfigured": REVIEW_REQUEST_OBJECT["record"]["data"][
+                            "isBeingReconfigured"
+                        ],
+                        "numReviewsGivenBeforeChange": REVIEW_REQUEST_OBJECT["record"][
+                            "data"
+                        ]["numReviewsGivenBeforeChange"],
+                        "reviewType": REVIEW_REQUEST_OBJECT["record"]["data"][
+                            "reviewType"
+                        ],
+                        "userDeadlines": REVIEW_REQUEST_OBJECT["record"]["data"][
+                            "userDeadlines"
+                        ],
+                    },
+                    "geometry": REVIEW_REQUEST_OBJECT["record"]["geometry"],
+                    "startAt": REVIEW_REQUEST_OBJECT["record"]["startAt"],
+                    "endAt": REVIEW_REQUEST_OBJECT["record"]["endAt"],
+                    "registrationAt": REVIEW_REQUEST_OBJECT["record"]["registrationAt"],
+                    "correctionFor": REVIEW_REQUEST_OBJECT["record"]["correctionFor"],
+                    "correctedBy": "None",
+                },
+            },
+            {
+                "created": REVIEW_REQUEST_OBJECT["record"]["data"]["created"],
+                "documents": REVIEW_REQUEST_OBJECT["record"]["data"]["documents"],
+                "id": REVIEW_REQUEST_OBJECT["record"]["data"]["id"],
+                "locked": True,
+                "lockReason": "Alle verzoeken zijn uitgevoerd.",
+                "metadata": REVIEW_REQUEST_OBJECT["record"]["data"]["metadata"],
+                "requester": REVIEW_REQUEST_OBJECT["record"]["data"]["requester"],
+                "toelichting": REVIEW_REQUEST_OBJECT["record"]["data"]["toelichting"],
+                "zaak": REVIEW_REQUEST_OBJECT["record"]["data"]["zaak"],
+                "zaakeigenschappen": [],
+                "assignedUsers": REVIEW_REQUEST_OBJECT["record"]["data"][
+                    "assignedUsers"
+                ],
+                "isBeingReconfigured": REVIEW_REQUEST_OBJECT["record"]["data"][
+                    "isBeingReconfigured"
+                ],
+                "numReviewsGivenBeforeChange": REVIEW_REQUEST_OBJECT["record"]["data"][
+                    "numReviewsGivenBeforeChange"
+                ],
+                "reviewType": REVIEW_REQUEST_OBJECT["record"]["data"]["reviewType"],
+                "userDeadlines": REVIEW_REQUEST_OBJECT["record"]["data"][
+                    "userDeadlines"
+                ],
+            },
+            username=None,
+        )
+
+        self.assertEqual(result, dict())
