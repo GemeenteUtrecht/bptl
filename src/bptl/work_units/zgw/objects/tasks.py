@@ -165,11 +165,12 @@ def get_approval_status(task: BaseTask) -> dict:
     reviews = get_reviews_for_review_request(task)
 
     num_approved, num_rejected = 0, 0
-    for rev in reviews["reviews"]:
-        if rev.get("approved", None):
-            num_approved += 1
-        else:
-            num_rejected += 1
+    if reviews:
+        for rev in reviews.get("reviews", []):
+            if rev.get("approved", None):
+                num_approved += 1
+            else:
+                num_rejected += 1
 
     return {"approvalResult": num_approved > 0 and num_rejected == 0}
 
@@ -210,13 +211,14 @@ def get_review_response_status(task: BaseTask) -> dict:
 
     # Build a list of users that have responded
     already_responded = []
-    for review in reviews["reviews"]:
-        user = (
-            f"group:{review['group']}"
-            if review.get("group", None)
-            else f"user:{review['author']['username']}"
-        )
-        already_responded.append(user)
+    if reviews:
+        for review in reviews.get("reviews", []):
+            user = (
+                f"group:{review['group']}"
+                if review.get("group", None)
+                else f"user:{review['author']['username']}"
+            )
+            already_responded.append(user)
 
     # Finally figure out who hasn't responded yet
     not_responded = [
@@ -335,9 +337,13 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
     # Get approvals/advices belonging to review request
     reviews = get_reviews_for_review_request(task)
 
-    # Get their toelichtingen
-    toelichtingen = [
-        rev.get("toelichting", None) or "Geen" for rev in reviews["reviews"]
-    ]
+    toelichtingen = []
+    if reviews:
+        # Get their toelichtingen
+        toelichtingen = (
+            [rev.get("toelichting", None) or "Geen" for rev in reviews["reviews"]]
+            if reviews.get("reviews", None)
+            else []
+        )
 
     return {"toelichtingen": "\n\n".join(toelichtingen)}
