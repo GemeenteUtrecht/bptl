@@ -201,9 +201,10 @@ CHECKLIST_OBJECTTYPE_LATEST_VERSION = {
     "jsonSchema": {
         "type": "object",
         "title": "Checklist",
-        "required": ["answers", "zaak"],
+        "required": ["answers", "zaak", "locked"],
         "properties": {
             "zaak": {"type": "string"},
+            "locked": {"type": "boolean"},
             "answers": {
                 "type": "array",
                 "items": {
@@ -240,6 +241,7 @@ CHECKLIST_OBJECT = {
                 {"answer": "Ja", "question": "Ja?"},
                 {"answer": "Nee", "question": "Nee?"},
             ],
+            "locked": False,
         },
         "geometry": "None",
         "startAt": "1999-12-31",

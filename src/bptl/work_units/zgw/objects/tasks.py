@@ -105,7 +105,7 @@ class InitializeChecklistTask(ZGWWorkUnit):
         record = {
             "answers": [],
             "zaak": zaak_url,
-            "lockedBy": None,
+            "locked": False,
         }
         data = {
             "type": latest_version["objectType"],
