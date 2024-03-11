@@ -40,6 +40,7 @@ class StartCamundaProcessTask(ZGWWorkUnit):
 
     **Required process variables**
     * ``zaakUrl`` [str]: URL-reference of a ZAAK in Open Zaak.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
 
     **Sets the process variables**
 
@@ -91,12 +92,14 @@ class StartCamundaProcessTask(ZGWWorkUnit):
             return {}
 
         set_variables = {
+            "bptlAppId": serialize_variable(check_variable(variables, "bptlAppId")),
             "zaakUrl": serialize_variable(zaak["url"]),
             "zaakIdentificatie": serialize_variable(zaak["identificatie"]),
             "zaakDetails": serialize_variable(
                 {
                     "omschrijving": zaak["omschrijving"],
                     "zaaktypeOmschrijving": zaaktype["omschrijving"],
+                    "toelichting": zaak["toelichting"],
                 }
             ),
         }
