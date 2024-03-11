@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from django.test import TestCase
 
 import requests_mock
@@ -34,7 +36,7 @@ def _get_datum_eigenschap(naam: str) -> dict:
 
 
 @requests_mock.Mocker(real_http=False)
-class CreateDocumentRelationTaskTests(TestCase):
+class CreateEigenschapRelationTaskTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -97,6 +99,11 @@ class CreateDocumentRelationTaskTests(TestCase):
                 "results": [_get_datum_eigenschap("einde")],
             },
         )
+        m.get(
+            f"{ZAAK}/zaakeigenschappen",
+            status_code=200,
+            json=[],
+        )
         m.post(
             f"{ZAAK}/zaakeigenschappen",
             status_code=201,
@@ -120,6 +127,81 @@ class CreateDocumentRelationTaskTests(TestCase):
                 "eigenschap": f"{ZTC_URL}eigenschappen/start",
                 "waarde": "2020-05-01",
             },
+        )
+        self.assertEqual(
+            m.last_request.method,
+            "POST",
+        )
+
+    def test_relate_eigenschap_update_eigenschap(self, m):
+        mock_service_oas_get(m, ZRC_URL, "zrc")
+        mock_service_oas_get(m, ZTC_URL, "ztc")
+
+        m.get(ZAAK, json={"zaaktype": ZAAKTYPE})
+        # https://catalogi-api.vng.cloud/api/v1/schema/#operation/eigenschap_list
+        m.get(
+            f"{ZTC_URL}eigenschappen?zaaktype={ZAAKTYPE}",
+            json={
+                "count": 2,
+                "next": f"{ZTC_URL}eigenschappen?zaaktype={ZAAKTYPE}&page=2",
+                "previous": None,
+                "results": [_get_datum_eigenschap("start")],
+            },
+        )
+        m.get(
+            f"{ZTC_URL}eigenschappen?zaaktype={ZAAKTYPE}&page=2",
+            json={
+                "count": 2,
+                "next": None,
+                "previous": f"{ZTC_URL}eigenschappen?zaaktype={ZAAKTYPE}&page=1",
+                "results": [_get_datum_eigenschap("einde")],
+            },
+        )
+        m.get(
+            f"{ZAAK}/zaakeigenschappen",
+            status_code=200,
+            json=[
+                {
+                    "url": f"{ZAAK}/zaakeigenschappen/1234",
+                    "uuid": "1234",
+                    "zaak": ZAAK,
+                    "eigenschap": f"{ZTC_URL}eigenschappen/start",
+                    "naam": "start",
+                    "waarde": "2020-04-01",
+                }
+            ],
+        )
+        m.patch(
+            f"{ZAAK}/zaakeigenschappen/1234",
+            status_code=200,
+            json={
+                "url": f"{ZAAK}/zaakeigenschappen/1234",
+                "uuid": "1234",
+                "zaak": ZAAK,
+                "eigenschap": f"{ZTC_URL}eigenschappen/start",
+                "naam": "start",
+                "waarde": "2020-05-01",
+            },
+        )
+        fetched_task = deepcopy(self.fetched_task)
+        fetched_task.variables["eigenschap"] = serialize_variable(
+            {
+                "naam": "start",
+                "waarde": "2020-04-01",
+            }
+        )
+        task = CreateEigenschap(self.fetched_task)
+        task.perform()
+
+        self.assertEqual(
+            m.last_request.json(),
+            {
+                "waarde": "2020-05-01",
+            },
+        )
+        self.assertEqual(
+            m.last_request.method,
+            "PATCH",
         )
 
     def test_eigenschap_does_not_exist(self, m):
