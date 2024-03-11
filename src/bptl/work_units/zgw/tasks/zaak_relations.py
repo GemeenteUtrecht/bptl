@@ -225,16 +225,34 @@ class CreateEigenschap(ZGWWorkUnit):
             logger.info("Eigenschap '%s' did not exist on the zaaktype, aborting.")
             return {}
 
-        zrc_client.create(
-            "zaakeigenschap",
-            {
-                "zaak": zaak_url,
-                "eigenschap": eigenschap_url,
-                "waarde": waarde,
-            },
-            zaak_uuid=zaak_uuid,
-            request_kwargs={"headers": get_nlx_headers(variables)},
-        )
+        # Now make sure eigenschap doesnt already exist
+        zaak = zrc_client.retrieve("zaak", uuid=zaak_uuid)
+        zaakeigenschappen = {
+            zei["naam"]: zei
+            for zei in zrc_client.list("zaakeigenschap", zaak_uuid=zaak_uuid)
+        }
+        if zei := zaakeigenschappen.get(naam, None):
+            zrc_client.partial_update(
+                "zaakeigenschap",
+                {
+                    "waarde": waarde,
+                },
+                uuid=zei["uuid"],
+                zaak_uuid=zaak_uuid,
+                request_kwargs={"headers": get_nlx_headers(variables)},
+            )
+
+        else:
+            zrc_client.create(
+                "zaakeigenschap",
+                {
+                    "zaak": zaak_url,
+                    "eigenschap": eigenschap_url,
+                    "waarde": waarde,
+                },
+                zaak_uuid=zaak_uuid,
+                request_kwargs={"headers": get_nlx_headers(variables)},
+            )
 
         return {}
 
