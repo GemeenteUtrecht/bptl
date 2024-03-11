@@ -163,9 +163,11 @@ class StartCamundaProcessTests(TestCase):
                     {
                         "omschrijving": self.zaak["omschrijving"],
                         "zaaktypeOmschrijving": self.zaaktype["omschrijving"],
+                        "toelichting": self.zaak["toelichting"],
                     }
                 ),
                 "initiator": serialize_variable("user:some-user"),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 
@@ -228,9 +230,11 @@ class StartCamundaProcessTests(TestCase):
                     {
                         "omschrijving": self.zaak["omschrijving"],
                         "zaaktypeOmschrijving": self.zaaktype["omschrijving"],
+                        "toelichting": self.zaak["toelichting"],
                     }
                 ),
                 "initiator": serialize_variable("user:some-other-user"),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 
