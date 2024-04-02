@@ -98,15 +98,29 @@ class SendEmailTests(TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
+        print(email.body)
         self.assertEqual(
             email.body,
             """Beste Jan Janssen,
 
-Je advies is vereist. Je hebt tot 20-04-2020 om te reageren.
+We willen je op de hoogte brengen van een belangrijke ontwikkeling met betrekking tot zaak:  met omschrijving: "", waarbij jouw advies essentieel is. De deadline hiervoor is 20-04-2020.
 
-Ga alsjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
+Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om de benodigde advies te geven voor 20-04-2020.
 
-Dit is pas leuk.
+Volg eenvoudig deze stappen om te advies:
+
+    Klik <a href="">hier</a> om direct naar de  te gaan.
+
+Of volg de volgende stappen:
+
+    <ol>
+        <li>Log in op <a href="">zaakafhandelcomponent</a></li>.
+        <li>Navigeer naar het tabblad "Acties".</li>
+        <li>Selecteer de advies-"actie".</li>
+        <li>Volg de instructies op het scherm om de  te voltooien.</li>
+    </ol>
+
+Jouw medewerking is essentieel voor een snelle afhandeling. Dank je wel voor je prompte aandacht. Dit is pas leuk.
 
 Met vriendelijke groeten,
 
@@ -133,9 +147,24 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
             email.body,
             """Beste Jan Janssen,
 
-Je advies is vereist. Je hebt tot 20-04-2020 om te reageren.
+We willen je op de hoogte brengen van een belangrijke ontwikkeling met betrekking tot zaak:  met omschrijving: "", waarbij jouw advies essentieel is. De deadline hiervoor is 20-04-2020.
 
-Ga alsjeblieft hierheen: test.com?uuid=123456&assignee=user%3Ajanjansen
+Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om de benodigde advies te geven voor 20-04-2020.
+
+Volg eenvoudig deze stappen om te advies:
+
+    Klik <a href="">hier</a> om direct naar de  te gaan.
+
+Of volg de volgende stappen:
+
+    <ol>
+        <li>Log in op <a href="">zaakafhandelcomponent</a></li>.
+        <li>Navigeer naar het tabblad "Acties".</li>
+        <li>Selecteer de advies-"actie".</li>
+        <li>Volg de instructies op het scherm om de  te voltooien.</li>
+    </ol>
+
+Jouw medewerking is essentieel voor een snelle afhandeling. Dank je wel voor je prompte aandacht. 
 
 Met vriendelijke groeten,
 
@@ -217,9 +246,18 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
             email.body,
             """Beste Jan Janssen,
 
-some content
+We willen je graag informeren dat er zojuist antwoord is gegeven op je  binnen de zaak .
 
-Via de volgende link kun je naar de zaak: http://some-detail-url.com/.
+Volg eenvoudig deze stappen om de reactie te bekijken:
+
+    <ol>
+        <li>Klik <a href="http://some-detail-url.com/">hier</a> om direct naar de zaak te gaan.</li>
+        <li>Navigeer naar het tabblad "Acties".</li>
+        <li>Kijk onderaan de pagina bij "Advisering en accordering".</li>
+        <li>Klik op de accordering om meer informatie te zien.</li>
+    </ol>
+
+some content
 
 Met vriendelijke groeten,
 

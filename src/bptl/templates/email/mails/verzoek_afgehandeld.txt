@@ -1,4 +1,13 @@
 {% extends "email/mails/base.txt" %}
-{% load i18n %}{% block body %}{{ email.content }}
+{% load i18n %}{% block body %}We willen je graag informeren dat er zojuist antwoord is gegeven op je {{ vraag }} binnen de zaak {{ zaakIdentificatie }}.
 
-Via de volgende link kun je naar de zaak: {{ zaakDetailUrl }}.{% endblock %}
+Volg eenvoudig deze stappen om de reactie te bekijken:
+
+    <ol>
+        <li>Klik <a href="{{ zaakDetailUrl }}">hier</a> om direct naar de zaak te gaan.</li>
+        <li>Navigeer naar het tabblad "Acties".</li>
+        <li>Kijk onderaan de pagina bij "Advisering en accordering".</li>
+        <li>Klik op de accordering om meer informatie te zien.</li>
+    </ol>
+
+{{ email.content }}{% endblock %}

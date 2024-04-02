@@ -61,7 +61,7 @@ class SendEmailTask(WorkUnit):
 
             {
               "reviewType": "accordering/advies",
-              "kownslFrontendUrl": "https://kownsl.cg-intern.*.utrecht.nl/kownsl/<uuid>/",
+              "doReviewUrl": "https://kownsl.cg-intern.*.utrecht.nl/kownsl/<uuid>/",
               "deadline`": "2020-04-20"
             }
 
