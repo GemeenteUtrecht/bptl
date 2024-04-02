@@ -1,6 +1,19 @@
 {% extends "email/mails/base.txt" %}
-{% load i18n %}{% block body %}Je {{ reviewType }} is vereist. {% if deadline %}Je hebt tot {{ deadline }} om te reageren.{% endif %}
+{% load i18n %}{% block body %}We willen je op de hoogte brengen van een belangrijke ontwikkeling met betrekking tot zaak: {{ zaakIdentificatie }} met omschrijving: "{{ zaakOmschrijving }}", waarbij jouw {{ reviewType }} essentieel is. De deadline hiervoor is {{ deadline }}.
 
-Ga alsjeblieft hierheen: {{ kownslFrontendUrl }}{% if receiver.assignee %}&assignee={{ receiver.assignee|urlencode }}{% endif %}{% if email.content %}
+Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om de benodigde {{ reviewType }} te geven voor {{ deadline }}.
 
-{{ email.content }}{% endif %}{% endblock %}
+Volg eenvoudig deze stappen om te {{ reviewType }}:
+
+    Klik <a href="{{ doReviewUrl }}">hier</a> om direct naar de {{ vraag }} te gaan.
+
+Of volg de volgende stappen:
+
+    <ol>
+        <li>Log in op <a href="{{ zaakDetailUrl }}">zaakafhandelcomponent</a></li>.
+        <li>Navigeer naar het tabblad "Acties".</li>
+        <li>Selecteer de {{ reviewType }}-"actie".</li>
+        <li>Volg de instructies op het scherm om de {{ vraag }} te voltooien.</li>
+    </ol>
+
+Jouw medewerking is essentieel voor een snelle afhandeling. Dank je wel voor je prompte aandacht. {{ email.content }}{% endblock %}
