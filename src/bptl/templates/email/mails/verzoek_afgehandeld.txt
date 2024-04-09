@@ -3,11 +3,9 @@
 
 Volg eenvoudig deze stappen om de reactie te bekijken:
 
-    <ol>
-        <li>Klik <a href="{{ zaakDetailUrl }}">hier</a> om direct naar de zaak te gaan.</li>
-        <li>Navigeer naar het tabblad "Acties".</li>
-        <li>Kijk onderaan de pagina bij "Advisering en accordering".</li>
-        <li>Klik op de accordering om meer informatie te zien.</li>
-    </ol>
+    Klik op {{ zaakDetailUrl }}  om direct naar de zaak te gaan.
+    Navigeer naar het tabblad "Acties".
+    Kijk onderaan de pagina bij "Advisering en accordering".
+    Klik op de accordering om meer informatie te zien.
 
 {{ email.content }}{% endblock %}

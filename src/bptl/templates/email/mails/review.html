@@ -1,0 +1,24 @@
+
+{% extends "email/mails/base.html" %}
+{% load i18n %}{% block body %}<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">We willen je op de hoogte brengen van een belangrijke ontwikkeling met betrekking tot zaak: {{ zaakIdentificatie }} met omschrijving: "{{ zaakOmschrijving }}", waarbij jouw {{ reviewType }} essentieel is. De deadline hiervoor is {{ deadline }}.</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om de benodigde {{ reviewType }} te geven voor {{ deadline }}.</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">Volg eenvoudig deze stappen om te {{ reviewType }}:</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+Klik <a href="{{ doReviewUrl }}">hier</a> om direct naar de {{ vraag }} te gaan.
+</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+Of volg de volgende stappen:
+</p>
+<ol style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+    <li>Log in op <a href="{{ zaakDetailUrl }}">zaakafhandelcomponent</a></li>.
+    <li>Navigeer naar het tabblad "Acties".</li>
+    <li>Selecteer de {{ reviewType }}-"actie".</li>
+    <li>Volg de instructies op het scherm om de {{ vraag }} te voltooien.</li>
+</ol>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+Jouw medewerking is essentieel voor een snelle afhandeling. Dank je wel voor je prompte aandacht. 
+</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+{{ email.content }}
+</p>
+{% endblock %}

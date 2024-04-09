@@ -1,0 +1,15 @@
+{% extends "email/mails/base.html" %}
+{% load i18n %}{% block body %}<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">We willen je graag informeren dat er zojuist antwoord is gegeven op je {{ vraag }} binnen de zaak {{ zaakIdentificatie }}.</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+Volg eenvoudig deze stappen om de reactie te bekijken:
+</p>
+<ol style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+    <li>Klik <a href="{{ zaakDetailUrl }}">hier</a> om direct naar de zaak te gaan.</li>
+    <li>Navigeer naar het tabblad "Acties".</li>
+    <li>Kijk onderaan de pagina bij "Advisering en accordering".</li>
+    <li>Klik op de accordering om meer informatie te zien.</li>
+</ol>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+{{ email.content }}
+</p>
+{% endblock %}

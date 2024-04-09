@@ -3,11 +3,20 @@ from rest_framework import exceptions, serializers
 from bptl.tasks.base import MissingVariable
 
 VALID_TEMPLATE_CHOICES = {
-    "generiek": "email/mails/generic_email.txt",
-    "accordering": "email/mails/review.txt",
-    "advies": "email/mails/review.txt",
-    "nen2580": "email/mails/nen2580.txt",
-    "verzoek_afgehandeld": "email/mails/verzoek_afgehandeld.txt",
+    "generiek": {
+        "html": "email/mails/generic_email.html",
+        "plain": "email/mails/generic_email.txt",
+    },
+    "accordering": {
+        "html": "email/mails/review.html",
+        "plain": "email/mails/review.txt",
+    },
+    "advies": {"html": "email/mails/review.html", "plain": "email/mails/review.txt"},
+    "nen2580": {"html": "email/mails/nen2580.html", "plain": "email/mails/nen2580.txt"},
+    "verzoek_afgehandeld": {
+        "html": "email/mails/verzoek_afgehandeld.html",
+        "plain": "email/mails/verzoek_afgehandeld.txt",
+    },
 }
 
 
@@ -18,7 +27,10 @@ class EmailPersonSerializer(serializers.Serializer):
 
 
 class ContextSerializer(serializers.Serializer):
-    kownslFrontendUrl = serializers.CharField(required=False)
+    vraag = serializers.CharField(required=False)
+    zaakIdentificatie = serializers.CharField(required=False)
+    zaakOmschrijving = serializers.CharField(required=False)
+    doReviewUrl = serializers.CharField(required=False)
     deadline = serializers.DateField(format="%d-%m-%Y", required=False)
     reviewType = serializers.CharField(required=False)
     zaakDetailUrl = serializers.CharField(required=False)
