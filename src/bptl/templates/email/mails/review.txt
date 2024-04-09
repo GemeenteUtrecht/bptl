@@ -5,15 +5,13 @@ Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, h
 
 Volg eenvoudig deze stappen om te {{ reviewType }}:
 
-    Klik <a href="{{ doReviewUrl }}">hier</a> om direct naar de {{ vraag }} te gaan.
+    Klik op {{ doReviewUrl }} om direct naar de {{ vraag }} te gaan.
 
 Of volg de volgende stappen:
 
-    <ol>
-        <li>Log in op <a href="{{ zaakDetailUrl }}">zaakafhandelcomponent</a></li>.
-        <li>Navigeer naar het tabblad "Acties".</li>
-        <li>Selecteer de {{ reviewType }}-"actie".</li>
-        <li>Volg de instructies op het scherm om de {{ vraag }} te voltooien.</li>
-    </ol>
+    Log in op {{ zaakDetailUrl }}.
+    Navigeer naar het tabblad "Acties".
+    Selecteer de {{ reviewType }}-"actie".
+    Volg de instructies op het scherm om de {{ vraag }} te voltooien.
 
 Jouw medewerking is essentieel voor een snelle afhandeling. Dank je wel voor je prompte aandacht. {{ email.content }}{% endblock %}

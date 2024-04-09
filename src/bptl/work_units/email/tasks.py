@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 
 from bptl.tasks.base import WorkUnit
@@ -77,20 +77,28 @@ class SendEmailTask(WorkUnit):
             "sender": send_email.data["sender"],
             "receiver": send_email.data["receiver"],
             "email": send_email.data["email"],
+            "subject": send_email.data["email"]["subject"],
             **send_email.data["context"],
         }
 
         # Get email template
         template_path = VALID_TEMPLATE_CHOICES[send_email.data["template"]]
-        email_template = get_template(template_path)
+        email_plain_template = get_template(template_path["plain"])
+        email_html_template = get_template(template_path["html"])
 
-        # Render and send
-        email_message = email_template.render(email_context)
-        email = EmailMessage(
+        # Render
+        email_plain_message = email_plain_template.render(email_context)
+        email_html_message = email_html_template.render(email_context)
+
+        # Create
+        email = EmailMultiAlternatives(
             subject=send_email.data["email"]["subject"],
-            body=email_message,
+            body=email_plain_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             reply_to=[send_email.data["sender"]["email"]],
             to=[send_email.data["receiver"]["email"]],
         )
+        email.attach_alternative(email_html_message, "text/html")
+
+        # Send
         email.send(fail_silently=False)
