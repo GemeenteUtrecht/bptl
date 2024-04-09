@@ -1,5 +1,5 @@
 {% extends "email/mails/base.txt" %}
-{% load i18n %}{% block body %}We willen je graag informeren dat er zojuist antwoord is gegeven op je {{ vraag }} binnen de zaak {{ zaakIdentificatie }}.
+{% load i18n %}{% block body %}We willen je graag informeren dat er zojuist antwoord is gegeven op je {{ vraag }} binnen zaak: {{ zaakIdentificatie }}.
 
 Volg eenvoudig deze stappen om de reactie te bekijken:
 

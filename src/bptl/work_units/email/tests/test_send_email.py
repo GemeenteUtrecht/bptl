@@ -104,9 +104,9 @@ class SendEmailTests(TestCase):
 
 We willen je op de hoogte brengen van een belangrijke ontwikkeling met betrekking tot zaak:  met omschrijving: "", waarbij jouw advies essentieel is. De deadline hiervoor is 20-04-2020.
 
-Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om de benodigde advies te geven voor 20-04-2020.
+Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om jouw benodigde advies te behandelen voor 20-04-2020.
 
-Volg eenvoudig deze stappen om te advies:
+Volg eenvoudig deze stappen om jouw advies te geven:
 
     Klik op test.com?uuid=123456&amp;assignee=user%3Ajanjansen om direct naar de  te gaan.
 
@@ -146,9 +146,9 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
 
 We willen je op de hoogte brengen van een belangrijke ontwikkeling met betrekking tot zaak:  met omschrijving: "", waarbij jouw advies essentieel is. De deadline hiervoor is 20-04-2020.
 
-Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om de benodigde advies te geven voor 20-04-2020.
+Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om jouw benodigde advies te behandelen voor 20-04-2020.
 
-Volg eenvoudig deze stappen om te advies:
+Volg eenvoudig deze stappen om jouw advies te geven:
 
     Klik op test.com?uuid=123456&amp;assignee=user%3Ajanjansen om direct naar de  te gaan.
 
@@ -240,7 +240,7 @@ Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het 
             email.body,
             """Beste Jan Janssen,
 
-We willen je graag informeren dat er zojuist antwoord is gegeven op je  binnen de zaak .
+We willen je graag informeren dat er zojuist antwoord is gegeven op je  binnen zaak: .
 
 Volg eenvoudig deze stappen om de reactie te bekijken:
 

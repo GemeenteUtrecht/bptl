@@ -1,9 +1,9 @@
 {% extends "email/mails/base.txt" %}
 {% load i18n %}{% block body %}We willen je op de hoogte brengen van een belangrijke ontwikkeling met betrekking tot zaak: {{ zaakIdentificatie }} met omschrijving: "{{ zaakOmschrijving }}", waarbij jouw {{ reviewType }} essentieel is. De deadline hiervoor is {{ deadline }}.
 
-Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om de benodigde {{ reviewType }} te geven voor {{ deadline }}.
+Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om jouw benodigde {{ reviewType }} te behandelen voor {{ deadline }}.
 
-Volg eenvoudig deze stappen om te {{ reviewType }}:
+Volg eenvoudig deze stappen om jouw {{ reviewType }} te geven:
 
     Klik op {{ doReviewUrl }} om direct naar de {{ vraag }} te gaan.
 
