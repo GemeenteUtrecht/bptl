@@ -38,7 +38,7 @@ class SendEmailTests(TestCase):
                 "context": serialize_variable(
                     {
                         "deadline": "2020-04-20",
-                        "kownslFrontendUrl": "test.com?uuid=123456",
+                        "doReviewUrl": "test.com?uuid=123456",
                         "reviewType": "advies",
                     }
                 ),
@@ -108,7 +108,7 @@ Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, h
 
 Volg eenvoudig deze stappen om te advies:
 
-    Klik op  om direct naar de  te gaan.
+    Klik op test.com?uuid=123456&amp;assignee=user%3Ajanjansen om direct naar de  te gaan.
 
 Of volg de volgende stappen:
 
@@ -150,7 +150,7 @@ Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, h
 
 Volg eenvoudig deze stappen om te advies:
 
-    Klik op  om direct naar de  te gaan.
+    Klik op test.com?uuid=123456&amp;assignee=user%3Ajanjansen om direct naar de  te gaan.
 
 Of volg de volgende stappen:
 

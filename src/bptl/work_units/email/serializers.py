@@ -1,3 +1,4 @@
+from furl import furl
 from rest_framework import exceptions, serializers
 
 from bptl.tasks.base import MissingVariable
@@ -50,6 +51,17 @@ class SendEmailSerializer(serializers.Serializer):
         required=True,
     )
     context = ContextSerializer(required=True)
+
+    def validate(self, data):
+        validated_data = super().validate(data)
+        if (
+            "doReviewUrl" in validated_data["context"]
+            and "assignee" in validated_data["receiver"]
+        ):
+            url = furl(validated_data["context"]["doReviewUrl"])
+            url.add({"assignee": validated_data["receiver"]["assignee"]})
+            validated_data["context"]["doReviewUrl"] = url.url
+        return validated_data
 
     def is_valid(self, raise_exception=False):
         codes_to_catch = (
