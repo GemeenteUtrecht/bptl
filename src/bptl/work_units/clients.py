@@ -82,7 +82,7 @@ class JSONClient:
         operation: str = "",
         request_kwargs: Optional[Dict] = None,
         **kwargs,
-    ):
+    ) -> Optional[Dict]:
         assert not path.startswith("/"), "Only relative paths are supported."
         url = urljoin(self.api_root, path)
 
@@ -104,7 +104,7 @@ class JSONClient:
 
         response = self.session.request(method=method, url=url, **kwargs)
         response.raise_for_status()
-        return response.json()
+        return response.json() if response.content else None
 
     def get(self, path: str, params=None, **kwargs):
         kwargs.setdefault("allow_redirects", True)

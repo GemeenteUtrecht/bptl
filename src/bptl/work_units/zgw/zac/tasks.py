@@ -10,7 +10,11 @@ from bptl.tasks.registry import register
 from bptl.work_units.zgw.tasks.base import ZGWWorkUnit, require_zrc
 
 from .client import get_client, require_zac_service
-from .serializers import ZaakDetailURLSerializer, ZacUserDetailSerializer
+from .serializers import (
+    RecipientListSerializer,
+    ZaakDetailURLSerializer,
+    ZacUserDetailSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -203,3 +207,43 @@ class ZaakDetailURLTask(ZGWWorkUnit):
         zaak_detail_url = self.get_client_response()
         validated_data = self.validate_data(zaak_detail_url)
         return validated_data
+
+
+@register
+@require_zac_service
+class ZacEmailUserLogs(ZGWWorkUnit):
+    """
+    Requests the URL to the zaak detail page of a ZAAK in open zaak.
+
+    **Required process variables**
+    * ``recipientList`` List[str]: List of email adresses to sent email to.
+
+    """
+
+    def validate_data(self, data: dict) -> dict:
+        check_variable(data, "recipientList", empty_allowed=False)
+        serializer = RecipientListSerializer(data=data)
+        codes_to_catch = (
+            "code='required'",
+            "code='blank'",
+        )
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            return serializer.data
+        except Exception as e:
+            if isinstance(e, exceptions.ValidationError):
+                error_codes = str(e.detail)
+                if any(code in error_codes for code in codes_to_catch):
+                    raise MissingVariable(e.detail)
+            raise e
+
+    def perform(self) -> None:
+        variables = self.task.get_variables()
+        data = self.validate_data(variables)
+        with get_client(self.task) as client:
+            client.post(
+                f"api/accounts/management/axes/logs",
+                json=data,
+            )
+        return None
