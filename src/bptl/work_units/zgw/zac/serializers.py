@@ -38,3 +38,12 @@ class CreatedProcessInstanceSerializer(serializers.Serializer):
     instanceUrl = serializers.URLField(
         help_text=_("The URL of the process instance."), required=True
     )
+
+
+class RecipientListSerializer(serializers.Serializer):
+    recipientList = serializers.ListField(
+        child=serializers.EmailField(
+            help_text=_("Email address of recipient."), allow_blank=False
+        ),
+        help_text=_("List of recipients."),
+    )
