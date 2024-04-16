@@ -52,7 +52,7 @@ References
     :target: https://github.com/psf/black
 
 .. |docs| image:: https://readthedocs.org/projects/business-process-task-library/badge/?version=latest
-    :target: https://business-process-task-library.readthedocs.io/en/latest/?badge=latest
+    :target: https://bptl.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 .. _Common Ground: https://commonground.nl/
