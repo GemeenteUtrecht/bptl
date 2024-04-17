@@ -8,7 +8,7 @@ Shortcuts:
 
 * :ref:`html`
 * :ref:`sass`
-* :ref:`javascript`
+* :ref:`javascript-style`
 
 
 .. _html:
@@ -340,7 +340,7 @@ Privatize variables by assigning them on top of the module.
     font-family: $article-font;
   }
 
-.. _javascript:
+.. _javascript-style:
 
 JavaScript
 ==========

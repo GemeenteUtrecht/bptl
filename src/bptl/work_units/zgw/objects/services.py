@@ -2,7 +2,7 @@ import logging
 from typing import Dict, List, Optional, Tuple
 
 from django.http import Http404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from djangorestframework_camel_case.settings import api_settings
 from djangorestframework_camel_case.util import camelize

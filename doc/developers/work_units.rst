@@ -1,3 +1,5 @@
+.. _work-units:
+
 ==========
 Work units
 ==========

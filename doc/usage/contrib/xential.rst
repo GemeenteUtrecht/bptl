@@ -17,7 +17,7 @@ The workflow for both the interactive and silent document creation is explained 
 Silent document creation
 ------------------------
 
-.. image:: ../images/silent-flow-xential.png
+.. image:: ../../images/silent-flow-xential.png
     :width: 100%
     :alt: Silent document creation
 
@@ -33,7 +33,7 @@ The steps are as follows:
 Interactive document creation
 -----------------------------
 
-.. image:: ../images/interactive-flow-xential.png
+.. image:: ../../images/interactive-flow-xential.png
     :width: 100%
     :alt: Interactive document creation
 
