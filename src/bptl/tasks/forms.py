@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.admin.widgets import AdminRadioSelect
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
 from django.utils.html import format_html, mark_safe, urlize
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from zgw_consumers.constants import APITypes
 from zgw_consumers.models import Service
