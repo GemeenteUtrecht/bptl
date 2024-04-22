@@ -57,6 +57,11 @@ jobs:
 
       - name: Publish coverage report
         uses: codecov/codecov-action@v1
+      
+      - name: Build and test docs
+        working-directory: doc
+        run: |
+          pytest check_sphinx.py -v --tb=auto
 
   docker:
     needs: tests
