@@ -23,14 +23,6 @@ Developed by `Maykin Media B.V.`_ for Gemeente Utrecht.
     usage/index
     developers/index
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-
 .. |build-status| image:: https://travis-ci.org/GemeenteUtrecht/bptl.svg?branch=master
     :alt: Build status
     :target: https://travis-ci.org/GemeenteUtrecht/bptl

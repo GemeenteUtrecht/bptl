@@ -39,7 +39,7 @@ jobs:
           node-version: '12'
 
       - name: Install dependencies
-        run: pip install -r requirements/dev.txt codecov
+        run: pip install -r requirements/dev.txt codecov pytest
       - name: Build frontend
         run: |
           npm ci
@@ -57,6 +57,11 @@ jobs:
 
       - name: Publish coverage report
         uses: codecov/codecov-action@v1
+
+      - name: Build and test docs
+        working-directory: doc
+        run: |
+          pytest check_sphinx.py -v --tb=auto
 
   docker:
     needs: tests
