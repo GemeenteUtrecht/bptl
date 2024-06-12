@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.utils.encoding import force_str
 
 import requests_mock
 from django_camunda.utils import serialize_variable
@@ -88,7 +89,38 @@ class ZacUIURLTaskTests(TestCase):
         self.assertEqual(cleaned_data, expected_response)
 
     @requests_mock.Mocker()
-    def test_get_zaak_detail_url_from_zaak_url_404(self, m):
+    def test_get_zaak_detail_url_from_zaak_url_404_open_zaak(self, m):
+        mock_service_oas_get(m, ZRC_ROOT, "zrc")
+        m.get(
+            ZAAK_URL,
+            status_code=404,
+            json={
+                "type": "https://open-zaak.cg-intern.ont.utrecht.nl/ref/fouten/NotFound/",
+                "code": "not_found",
+                "title": "Niet gevonden.",
+                "status": 404,
+                "detail": "Niet gevonden.",
+            },
+        )
+
+        task = ZaakDetailURLTask(self.task_url)
+        response = task.get_client_response()
+        expected_response = {
+            "error": force_str(
+                {
+                    "type": "https://open-zaak.cg-intern.ont.utrecht.nl/ref/fouten/NotFound/",
+                    "code": "not_found",
+                    "title": "Niet gevonden.",
+                    "status": 404,
+                    "detail": "Niet gevonden.",
+                }
+            ),
+            "retry": 1,
+        }
+        self.assertEqual(response, expected_response)
+
+    @requests_mock.Mocker()
+    def test_get_zaak_detail_url_from_zaak_url_404_zac(self, m):
         mock_service_oas_get(m, ZRC_ROOT, "zrc")
         mock_data = {
             "zaakDetailUrl": f"{ZAC_ROOT}ui/zaken/some-zaak",
@@ -100,7 +132,7 @@ class ZacUIURLTaskTests(TestCase):
 
         task = ZaakDetailURLTask(self.task_url)
         response = task.get_client_response()
-        expected_response = {"error": "Zaak not found.", "retry": 1}
+        expected_response = {"error": "Zaak not found in ZAC.", "retry": 1}
         self.assertEqual(response, expected_response)
 
         cleaned_data = task.perform()

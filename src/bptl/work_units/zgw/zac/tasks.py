@@ -1,10 +1,12 @@
 import logging
 from typing import List
 
+from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
 from requests.exceptions import HTTPError
 from rest_framework import exceptions
+from zds_client import ClientError
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
 
@@ -187,14 +189,16 @@ class ZaakDetailURLTask(ZGWWorkUnit):
                 response = client.get(
                     f"api/core/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/url"
                 )
-        except HTTPError as exc:
-            if (
-                exc.response.status_code == 404
-                and (retry := self.task.get_variables().get("retry", 0)) < 3
-            ):
-                response = {"error": "Zaak not found.", "retry": retry + 1}
-            else:
+        except (HTTPError, ClientError) as exc:
+            retry = self.task.get_variables().get("retry", 0)
+            if retry >= 3:
                 raise exc
+
+            retry += 1
+            if isinstance(exc, HTTPError) and exc.response.status_code == 404:
+                response = {"error": "Zaak not found in ZAC.", "retry": retry}
+            else:
+                response = {"error": force_str(exc.args[0]), "retry": retry}
 
         return response
 
