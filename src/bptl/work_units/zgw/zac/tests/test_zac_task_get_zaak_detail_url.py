@@ -2,6 +2,7 @@ from django.test import TestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
+from requests.exceptions import HTTPError
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
 from zgw_consumers.test import mock_service_oas_get
@@ -85,6 +86,47 @@ class ZacUIURLTaskTests(TestCase):
             ZAC_DETAIL_URL,
         )
         self.assertEqual(cleaned_data, expected_response)
+
+    @requests_mock.Mocker()
+    def test_get_zaak_detail_url_from_zaak_url_404(self, m):
+        mock_service_oas_get(m, ZRC_ROOT, "zrc")
+        mock_data = {
+            "zaakDetailUrl": f"{ZAC_ROOT}ui/zaken/some-zaak",
+        }
+        m.get(ZAC_DETAIL_URL, status_code=404)
+        m.get(
+            ZAAK_URL, json={"bronorganisatie": "123456789", "identificatie": "ZAAK-01"}
+        )
+
+        task = ZaakDetailURLTask(self.task_url)
+        response = task.get_client_response()
+        expected_response = {"error": "Zaak not found.", "retry": 1}
+        self.assertEqual(response, expected_response)
+
+        cleaned_data = task.perform()
+        self.assertEqual(cleaned_data, expected_response)
+
+        # check if error gets raised if retry hits 3
+        task_dict = {
+            "topic_name": "some-topic-name",
+            "worker_id": "test-worker-id",
+            "task_id": "test-task-id",
+            "variables": {
+                "zaakUrl": serialize_variable(ZAAK_URL),
+                "bptlAppId": serialize_variable("some-app-id"),
+                "error": serialize_variable(expected_response["error"]),
+                "retry": serialize_variable(3),
+            },
+        }
+        task_url = ExternalTask.objects.create(
+            **task_dict,
+        )
+
+        task = ZaakDetailURLTask(task_url)
+        with self.assertRaises(Exception) as e:
+            response = task.get_client_response()
+
+        self.assertEqual(type(e.exception), HTTPError)
 
     def test_get_zaak_detail_url_from_zaak_url_missing_zaak_url_variable(self):
         task_dict = {**self.task_dict}

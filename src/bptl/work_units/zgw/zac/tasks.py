@@ -1,6 +1,9 @@
 import logging
 from typing import List
 
+from django.utils.translation import gettext_lazy as _
+
+from requests.exceptions import HTTPError
 from rest_framework import exceptions
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
@@ -179,11 +182,21 @@ class ZaakDetailURLTask(ZGWWorkUnit):
         zrc_client = self.get_client(APITypes.zrc)
         zaak = zrc_client.retrieve("zaak", url=zaak_url)
 
-        with get_client(self.task) as client:
-            zaak_detail_url = client.get(
-                f"api/core/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/url"
-            )
-        return zaak_detail_url
+        try:
+            with get_client(self.task) as client:
+                response = client.get(
+                    f"api/core/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/url"
+                )
+        except HTTPError as exc:
+            if (
+                exc.response.status_code == 404
+                and (retry := self.task.get_variables().get("retry", 0)) < 3
+            ):
+                response = {"error": "Zaak not found.", "retry": retry + 1}
+            else:
+                raise exc
+
+        return response
 
     def validate_data(self, data: dict) -> dict:
         serializer = ZaakDetailURLSerializer(data=data)
@@ -204,8 +217,8 @@ class ZaakDetailURLTask(ZGWWorkUnit):
                 raise e
 
     def perform(self) -> dict:
-        zaak_detail_url = self.get_client_response()
-        validated_data = self.validate_data(zaak_detail_url)
+        response = self.get_client_response()
+        validated_data = self.validate_data(response)
         return validated_data
 
 

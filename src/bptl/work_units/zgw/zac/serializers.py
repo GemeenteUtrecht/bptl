@@ -24,10 +24,12 @@ class ZacUserDetailSerializer(serializers.Serializer):
 
 class ZaakDetailURLSerializer(serializers.Serializer):
     zaakDetailUrl = serializers.URLField(
-        required=True,
+        required=False,
         allow_blank=False,
         help_text=_("URL of the ZAAK detail page in the zaakafhandelcomponent."),
     )
+    error = serializers.CharField(required=False)
+    retry = serializers.IntegerField(required=False)
 
 
 class CreatedProcessInstanceSerializer(serializers.Serializer):
