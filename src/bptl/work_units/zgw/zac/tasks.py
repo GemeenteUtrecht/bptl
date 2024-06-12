@@ -180,9 +180,9 @@ class ZaakDetailURLTask(ZGWWorkUnit):
         variables = self.task.get_variables()
         zaak_url = check_variable(variables, "zaakUrl")
         zrc_client = self.get_client(APITypes.zrc)
-        zaak = zrc_client.retrieve("zaak", url=zaak_url)
 
         try:
+            zaak = zrc_client.retrieve("zaak", url=zaak_url)
             with get_client(self.task) as client:
                 response = client.get(
                     f"api/core/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/url"
