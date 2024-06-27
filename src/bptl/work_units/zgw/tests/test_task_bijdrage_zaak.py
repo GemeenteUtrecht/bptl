@@ -35,7 +35,7 @@ class RelateerZaakTests(TestCase):
             variables={
                 "zaakUrl": serialize_variable(BIJDRAGE_ZAAK),
                 "hoofdZaakUrl": serialize_variable(ZAAK),
-                "bijdrageAard": serialize_variable("bijdrage"),
+                "aardRelatie": serialize_variable("bijdrage"),
                 "services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}}),
             },
         )
@@ -155,7 +155,7 @@ class RelateerZaakTests(TestCase):
         )
 
         self.fetched_task.variables[
-            "bijdrageAardOmgekeerdeRichting"
+            "aardRelatieOmgekeerdeRichting"
         ] = serialize_variable("")
         self.fetched_task.save()
         task = RelateerZaak(self.fetched_task)
@@ -199,7 +199,7 @@ class RelateerZaakTests(TestCase):
         )
 
         self.fetched_task.variables[
-            "bijdrageAardOmgekeerdeRichting"
+            "aardRelatieOmgekeerdeRichting"
         ] = serialize_variable("niks")
         self.fetched_task.save()
         task = RelateerZaak(self.fetched_task)
@@ -207,5 +207,5 @@ class RelateerZaakTests(TestCase):
         with self.assertRaises(ValueError) as e:
             task.perform()
         self.assertEqual(
-            e.exception.__str__(), "Unknown 'bijdrageAardOmgekeerdeRichting': 'niks'"
+            e.exception.__str__(), "Unknown 'aardRelatieOmgekeerdeRichting': 'niks'"
         )

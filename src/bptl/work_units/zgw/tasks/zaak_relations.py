@@ -273,7 +273,7 @@ class RelateerZaak(ZGWWorkUnit):
       relations.
     * ``zaakUrl`` [str]: URL-reference to another ZAAK in a Zaken API, to be related
       to ``zaakUrl``.
-    * ``bijdrageAard`` [str]: the type of relation. One of ``vervolg``, ``onderwerp`` or
+    * ``aardRelatie`` [str]: the type of relation. One of ``vervolg``, ``onderwerp`` or
       ``bijdrage``.
     * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
@@ -282,7 +282,7 @@ class RelateerZaak(ZGWWorkUnit):
 
     * ``NLXProcessId`` [str]: a process id for purpose registration ("doelbinding").
     * ``NLXSubjectIdentifier`` [str]: a subject identifier for purpose registration ("doelbinding").
-    * ``bijdrageAardOmgekeerdeRichting`` [str]: the type of reverse relation. One of ``vervolg``, ``onderwerp``, ``bijdrage`` or empty (``""``).
+    * ``aardRelatieOmgekeerdeRichting`` [str]: the type of reverse relation. One of ``vervolg``, ``onderwerp``, ``bijdrage`` or empty (``""``).
       Default is ``onderwerp`` if the process variable isn't given.
 
     **Optional process variables (Camunda exclusive)**
@@ -305,10 +305,12 @@ class RelateerZaak(ZGWWorkUnit):
             return
 
         bijdrage_zaak_url = check_variable(variables, "zaakUrl")
-        bijdrage_aard = check_variable(variables, "bijdrageAard")
+        aard_relatie = variables.get(
+            "aardRelatie", check_variable(variables, "aardRelatie")
+        )  # for legacy purposes check aardRelatie
 
-        if bijdrage_aard not in AardRelatieChoices.values:
-            raise ValueError(f"Unknown 'bijdrage_aard': '{bijdrage_aard}'")
+        if aard_relatie not in AardRelatieChoices.values:
+            raise ValueError(f"Unknown 'aardRelatie': '{aard_relatie}'")
 
         headers = get_nlx_headers(variables)
 
@@ -318,7 +320,7 @@ class RelateerZaak(ZGWWorkUnit):
         relevante_andere_zaken.append(
             {
                 "url": bijdrage_zaak_url,
-                "aardRelatie": bijdrage_aard,
+                "aardRelatie": aard_relatie,
             }
         )
 
@@ -330,25 +332,25 @@ class RelateerZaak(ZGWWorkUnit):
         )
 
         try:
-            bijdrage_aard_omgekeerde_richting = check_variable(
-                variables, "bijdrageAardOmgekeerdeRichting", empty_allowed=True
+            aard_relatie_omgekeerde_richting = check_variable(
+                variables, "aardRelatieOmgekeerdeRichting", empty_allowed=True
             )
             if (
-                bijdrage_aard_omgekeerde_richting
-                and bijdrage_aard_omgekeerde_richting not in AardRelatieChoices.values
+                aard_relatie_omgekeerde_richting
+                and aard_relatie_omgekeerde_richting not in AardRelatieChoices.values
             ):
                 raise ValueError(
-                    f"Unknown 'bijdrageAardOmgekeerdeRichting': '{bijdrage_aard_omgekeerde_richting}'"
+                    f"Unknown 'aardRelatieOmgekeerdeRichting': '{aard_relatie_omgekeerde_richting}'"
                 )
         except MissingVariable:
             # To avoid having to edit BPMN models - default of bijdrage_aard_omgekeerde_richting
             # is "onderwerp" if it isn't explicitly given in the variables.
-            bijdrage_aard_omgekeerde_richting = AardRelatieChoices.onderwerp
+            aard_relatie_omgekeerde_richting = AardRelatieChoices.onderwerp
 
         # Relating of secondary zaken to their main zaak.
         if (
-            bijdrage_aard != AardRelatieChoices.onderwerp
-            and bijdrage_aard_omgekeerde_richting
+            aard_relatie != AardRelatieChoices.onderwerp
+            and aard_relatie_omgekeerde_richting
         ):
             bijdrage_zaak = zrc_client.retrieve(
                 "zaak", url=bijdrage_zaak_url, request_headers=headers
@@ -357,7 +359,7 @@ class RelateerZaak(ZGWWorkUnit):
             relevante_andere_zaken_bijdrage_zaak.append(
                 {
                     "url": zaak_url,
-                    "aardRelatie": bijdrage_aard_omgekeerde_richting,
+                    "aardRelatie": aard_relatie_omgekeerde_richting,
                 }
             )
             zrc_client.partial_update(
