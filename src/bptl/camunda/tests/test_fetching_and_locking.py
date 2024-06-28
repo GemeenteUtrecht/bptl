@@ -4,6 +4,7 @@ Test the fetching and locking of external tasks in Camunda.
 Example requests and response taken from
 https://docs.camunda.org/manual/7.12/reference/rest/external-task/fetch/#example-with-all-variables
 """
+
 from unittest.mock import patch
 
 from django.test import TestCase

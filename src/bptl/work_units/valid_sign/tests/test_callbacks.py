@@ -22,6 +22,7 @@ Example callback:
       "createdDate": "2020-08-21T14:12:34.544Z"
     }
 """
+
 from django.urls import reverse_lazy
 
 from rest_framework import status

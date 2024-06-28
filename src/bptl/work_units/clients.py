@@ -3,6 +3,7 @@ Provide base client implementations, based on requests.
 
 Note that for the time being only get/post are implemented.
 """
+
 import json
 import logging
 from typing import Any, Dict, List, Optional, Union

@@ -1,6 +1,7 @@
 """
 Implements a Xential client.
 """
+
 import logging
 from typing import Dict, List
 

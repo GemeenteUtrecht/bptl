@@ -1,6 +1,7 @@
 """
 Implements a BRP client.
 """
+
 import logging
 
 from django.utils.translation import gettext_lazy as _

@@ -4,6 +4,7 @@ Test marking tasks as failed to Camunda.
 Example requests and response taken from
 https://docs.camunda.org/manual/7.12/reference/rest/external-task/post-complete/
 """
+
 from django.test import TestCase
 
 import requests_mock
