@@ -1,6 +1,7 @@
 """
 Test the expected implementation of the registry.
 """
+
 from django.test import SimpleTestCase
 
 from bptl.camunda.models import ExternalTask

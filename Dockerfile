@@ -5,7 +5,7 @@
 
 # Stage 1 - Backend build environment
 # includes compilers and build tooling to create the environment
-FROM python:3.8-slim-buster AS backend-build
+FROM python:3.9-slim-buster AS backend-build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
@@ -16,7 +16,7 @@ WORKDIR /app
 RUN mkdir /app/src
 
 # Ensure we use the latest version of pip
-RUN pip install pip -U
+RUN pip install pip==21.3.1 # enter dependency hell
 COPY ./requirements /app/requirements
 RUN pip install -r requirements/production.txt
 
@@ -45,7 +45,7 @@ RUN npm run build --production
 
 
 # Stage 3 - Build docker image suitable for production
-FROM python:3.8-slim-buster
+FROM python:3.9-slim-buster
 
 # Stage 3.1 - Set up the needed production dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

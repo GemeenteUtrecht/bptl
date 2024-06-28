@@ -4,9 +4,9 @@ Database models to keep track of external tasks fetched from Camunda.
 We save tasks in our own database in case of crashes and for dev purposes, so that we
 can pick up work load again.
 """
+
 import uuid
 
-from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -44,7 +44,7 @@ class ExternalTask(BaseTask):
     task_id = models.CharField(_("task id"), max_length=50)
     instance_id = models.CharField(_("process instance id"), max_length=50)
     lock_expires_at = models.DateTimeField(_("lock expires at"), null=True, blank=True)
-    camunda_error = JSONField(
+    camunda_error = models.JSONField(
         _("camunda error"),
         blank=True,
         null=True,

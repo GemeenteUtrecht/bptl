@@ -1,6 +1,7 @@
 """
 Module for Camunda API interaction.
 """
+
 import json
 import logging
 from typing import List, Optional, Tuple, Union

@@ -3,7 +3,6 @@ Database model to map task topics and python code objects to process related tas
 """
 
 from django.contrib.contenttypes.fields import GenericRelation
-from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -86,7 +85,7 @@ class BaseTask(PolymorphicModel):
         max_length=255,
         help_text=_("Topics determine which functions need to run for a task."),
     )
-    variables = JSONField(default=dict)
+    variables = models.JSONField(default=dict)
     status = models.CharField(
         _("status"),
         max_length=50,
@@ -94,7 +93,7 @@ class BaseTask(PolymorphicModel):
         default=Statuses.initial,
         help_text=_("The current status of task processing"),
     )
-    result_variables = JSONField(default=dict)
+    result_variables = models.JSONField(default=dict)
     execution_error = models.TextField(
         _("execution error"),
         blank=True,

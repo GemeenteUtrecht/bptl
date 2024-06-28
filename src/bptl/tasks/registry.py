@@ -4,6 +4,7 @@ Manage a registry of tasks that can be used as callbacks.
 A Task is a callable which takes an external task instance as sole argument and
 performs a unit of work.
 """
+
 import inspect
 from dataclasses import dataclass
 from typing import List
