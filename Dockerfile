@@ -16,7 +16,7 @@ WORKDIR /app
 RUN mkdir /app/src
 
 # Ensure we use the latest version of pip
-RUN pip install pip==21.3.1
+RUN pip install pip==21.3.1 # enter dependency hell
 COPY ./requirements /app/requirements
 RUN pip install -r requirements/production.txt
 
