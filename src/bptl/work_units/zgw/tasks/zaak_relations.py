@@ -374,6 +374,85 @@ class RelateerZaak(ZGWWorkUnit):
 
 @register
 @require_zrc
+class FetchZaakRelaties(ZGWWorkUnit):
+    """
+    Fetch relevanteAndereZaken for ZAAK.
+
+    **Required process variables**
+
+    * ``zaakUrl`` [str]: URL-reference of ZAAK.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
+
+      **Sets the process variables**
+
+    * ``relatieZaken`` list[dict[str, str]]: A dictionary of URL-references of ZAAKen and their `aardRelatie`.
+
+    """
+
+    def perform(self) -> Optional[dict]:
+
+        # prep clients
+        zrc_client = self.get_client(APITypes.zrc)
+
+        # get vars
+        variables = self.task.get_variables()
+
+        zaak_url = variables.get("hoofdZaakUrl")
+        if not zaak_url:
+            logger.info("No 'hoofdZaakUrl' provided, skipping task execution.")
+            return
+
+        headers = get_nlx_headers(variables)
+        zaak = zrc_client.retrieve("zaak", url=zaak_url, request_headers=headers)
+        relevante_andere_zaken = [
+            {"url": z["url"], "aardRelatie": z["aardRelatie"]}
+            for z in zaak["relevanteAndereZaken"]
+        ]
+
+        return {"zaakRelaties": relevante_andere_zaken}
+
+
+# @register
+# @require_zrc
+# class FetchZaakObjectRelaties(ZGWWorkUnit):
+#     """
+#     Fetch all ZAAKOBJECTs for ZAAK that are not `meta` objecttypes.
+
+#     **Required process variables**
+
+#     * ``zaakUrl`` [str]: URL-reference of ZAAK.
+#     * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
+#       The app-specific credentials will be used for the API calls.
+
+#       **Sets the process variables**
+
+#     * ``zaakObjectUrls`` list[str]: A list of ZAAKOBJECTs.
+
+#     """
+#     # get vars
+#     variables = self.task.get_variables()
+
+#     zaak_url = variables.get("hoofdZaakUrl")
+#     if not zaak_url:
+#         logger.info("No 'hoofdZaakUrl' provided, skipping task execution.")
+#         return
+
+#     # prep clients
+#     zrc_client = self.get_client(APITypes.zrc)
+
+#     headers = get_nlx_headers(variables)
+#     zaakobjecten = get_paginated_results(
+#         client,
+#         "zaakobject",
+#         query_params={"zaak": zaak_url},
+#     )
+
+#     return {}
+
+
+@register
+@require_zrc
 class CreateZaakObject(ZGWWorkUnit):
     """
     Create a new ZAAKOBJECT for the ZAAK in the process.
