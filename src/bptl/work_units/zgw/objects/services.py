@@ -6,12 +6,14 @@ from django.utils.translation import gettext_lazy as _
 
 from djangorestframework_camel_case.settings import api_settings
 from djangorestframework_camel_case.util import camelize
+from zgw_consumers.concurrent import parallel
 
 from bptl.core.utils import fetch_next_url_pagination
 from bptl.tasks.base import check_variable
 from bptl.tasks.models import BaseTask
+from bptl.work_units.zgw.utils import get_paginated_results
 
-from .client import get_objects_client, get_objecttypes_client
+from .client import ObjectsClient, get_objects_client, get_objecttypes_client
 from .models import MetaObjectTypesConfig
 
 logger = logging.getLogger(__name__)
@@ -30,13 +32,45 @@ def fetch_objecttype(task: BaseTask, url: str) -> Dict:
     return client.get(path)
 
 
-def fetch_objecttypes(task: BaseTask, query_params: dict = dict) -> List[dict]:
+def fetch_objecttypes(task: BaseTask, query_params: dict = dict) -> List[Dict]:
     client = get_objecttypes_client(task)
-    return client.get("objecttypes", params=query_params)
+    objecttypes = get_paginated_results(
+        client, "objecttypes", query_params=query_params
+    )
+    return objecttypes
+
+
+def fetch_object(
+    object_url: str,
+    client: Optional[ObjectsClient] = None,
+    task: Optional[BaseTask] = None,
+) -> Dict:
+    if not client and not task:
+        raise RuntimeError(
+            "fetch_object requires one of keyword arguments client or task."
+        )
+
+    if task:
+        client = get_objects_client(task)
+
+    return client.get(
+        path=object_url.split(client.api_root)[-1], operation="object_read"
+    )
+
+
+def fetch_objects(task: BaseTask, objects: List[str]) -> List[Dict]:
+    client = get_objects_client(task)
+
+    def _fetch_object(object_url):
+        return fetch_object(client, object_url)
+
+    with parallel() as executor:
+        objects = list(executor.map(_fetch_object, objects))
+    return objects
 
 
 def update_object_record_data(
-    task, object: Dict, data: Dict, username: Optional[str] = None
+    task: BaseTask, object: Dict, data: Dict, username: Optional[str] = None
 ) -> Dict:
     client = get_objects_client(task)
     new_data = {

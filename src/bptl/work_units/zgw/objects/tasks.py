@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Dict
+from typing import Dict, List
 
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
@@ -15,12 +15,94 @@ from .services import (
     fetch_checklist,
     fetch_checklist_objecttype,
     fetch_checklisttype,
+    fetch_objects,
+    fetch_objecttypes,
     get_review_request,
     get_reviews_for_review_request,
     update_review_request,
 )
 
 logger = logging.getLogger(__name__)
+
+
+###################################################
+#                     Objects                     #
+###################################################
+
+
+@register
+@require_objects_service
+@require_objecttypes_service
+def filter_zaakobjects_on_objecttype_label(task: BaseTask) -> List[Dict]:
+    """
+    Filter objects through a label value of the objecttype of the objects.
+
+    In the task binding, the service with alias ``objects``, ``objecttypes`` and ``zrc`` must be connected, so that
+    this task knows which endpoints to contact.
+
+    **Required process variables**
+
+    * ``zaakObjects`` list[str]]: a list of ZAAKOBJECTs to be filtered.
+    * ``label`` [str]: a value to be filtered on. If value is not found - object is filtered out.
+
+    **Sets the process variables**
+
+    * ``filteredObjects`` [list[str]]: a list of JSONs:
+
+    .. code-block:: json
+
+            [
+                {
+                    "objectUrl" [str]: URL-reference,
+                    "objectType" [str]: URL-reference,
+                    "objectTypeOverige" [str]: <description>,
+                    "relatieomschrijving" [str]: <description>
+                },
+            ]
+
+
+    """
+
+    variables = task.get_variables()
+    zaakobjects = check_variable(variables, "zaakObjects", empty_allowed=True)
+    if not zaakobjects:
+        return dict()
+
+    label = check_variable(variables, "label", empty_allowed=True)
+
+    # fetch objecttypes to be filtered on
+    object_types = fetch_objecttypes(
+        task,
+    )
+    object_types = [
+        ot["url"]
+        for ot in object_types
+        if ot.get("labels", {}).get("filter", "") == label
+    ]
+    if not object_types:
+        return dict()
+
+    objects = fetch_objects(
+        task, list({zo["object"] for zo in zaakobjects if zo.get("object", None)})
+    )
+
+    # filter objects
+    objects = {obj["url"]: obj for obj in objects if obj["type"] in object_types}
+
+    # filter zaakobjects
+    filtered_objects = []
+    for zo in zaakobjects:
+        if object := objects.get(zo["object"]):
+            filtered_objects.append(
+                {
+                    "objectUrl": object["url"],
+                    "objectType": object["type"],
+                    "objectTypeOverige": zo.get("objectTypeOverige", ""),
+                    "relatieomschrijving": zo.get("relatieomschrijving", ""),
+                }
+            )
+
+    return filtered_objects
 
 
 ###################################################
@@ -36,6 +118,9 @@ logger = logging.getLogger(__name__)
 class InitializeChecklistTask(ZGWWorkUnit):
     """
     Creates an empty CHECKLIST for ZAAK if CHECKLISTTYPE for ZAAKTYPE exists.
+
+    In the task binding, the service with alias ``objects``, ``objecttypes``, ``zrc`` and ``ztc`` must be connected, so that
+    this task knows which endpoints to contact.
 
     **Required process variables**
     * ``zaakUrl`` [str]: URL-reference of the ZAAK in Open Zaak.
@@ -149,7 +234,7 @@ def get_approval_status(task: BaseTask) -> dict:
     from the review session. If all reviewers approve, the result is positive. If any
     rejections are present, the result is negative.
 
-    In the task binding, the service with alias ``kownsl`` must be connected, so that
+    In the task binding, the service with alias ``objects`` and ``objecttypes`` must be connected, so that
     this task knows which endpoints to contact.
 
     **Required process variables**
@@ -183,7 +268,7 @@ def get_review_response_status(task: BaseTask) -> dict:
     Get the reviewers who have not yet responded to a review request so that
     a reminder email can be sent to them if they exist.
 
-    In the task binding, the service with alias ``kownsl`` must be connected, so that
+    In the task binding, the service with alias ``objects`` and ``objecttypes`` must be connected, so that
     this task knows which endpoints to contact.
 
     **Required process variables**
@@ -243,7 +328,7 @@ def get_review_request_start_process_information(task: BaseTask) -> dict:
     - the username of the requester,
     - and finally, the review type.
 
-    In the task binding, the service with alias ``kownsl`` must be connected, so that
+    In the task binding, the service with alias ``objects`` and ``objecttypes`` must be connected, so that
     this task knows which endpoints to contact.
 
     **Required process variables**
@@ -296,6 +381,9 @@ def set_review_request_metadata(task: BaseTask) -> dict:
     Metadata is a set of arbitrary key-value labels, allowing you to attach extra data
     required for your process routing/handling.
 
+    In the task binding, the service with alias ``objects`` and ``objecttypes`` must be connected, so that
+    this task knows which endpoints to contact.
+
     **Required process variables**
 
     * ``kownslReviewRequestId`` [str]: the identifier of the Kownsl review request.
@@ -324,6 +412,9 @@ def set_review_request_metadata(task: BaseTask) -> dict:
 def get_approval_toelichtingen(task: BaseTask) -> dict:
     """
     Get the "toelichtingen" of all reviewers that responded to the review request.
+
+    In the task binding, the service with alias ``objects`` and ``objecttypes`` must be connected, so that
+    this task knows which endpoints to contact.
 
     **Required process variables**
 
@@ -355,6 +446,9 @@ def get_approval_toelichtingen(task: BaseTask) -> dict:
 def lock_review_request(task: BaseTask) -> dict:
     """
     Lock review request after all reviews have been given.
+
+    In the task binding, the service with alias ``objects`` and ``objecttypes`` must be connected, so that
+    this task knows which endpoints to contact.
 
     **Required process variables**
 

@@ -154,9 +154,9 @@ class RelateerZaakTests(TestCase):
             },
         )
 
-        self.fetched_task.variables["aardRelatieOmgekeerdeRichting"] = (
-            serialize_variable("")
-        )
+        self.fetched_task.variables[
+            "aardRelatieOmgekeerdeRichting"
+        ] = serialize_variable("")
         self.fetched_task.save()
         task = RelateerZaak(self.fetched_task)
 
@@ -198,9 +198,9 @@ class RelateerZaakTests(TestCase):
             },
         )
 
-        self.fetched_task.variables["aardRelatieOmgekeerdeRichting"] = (
-            serialize_variable("niks")
-        )
+        self.fetched_task.variables[
+            "aardRelatieOmgekeerdeRichting"
+        ] = serialize_variable("niks")
         self.fetched_task.save()
         task = RelateerZaak(self.fetched_task)
 
