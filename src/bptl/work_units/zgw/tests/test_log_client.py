@@ -3,6 +3,7 @@ import json
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes
 from zgw_consumers.test import mock_service_oas_get
 
@@ -22,7 +23,7 @@ class ZGWClientLogTests(TestCase):
         super().setUpClass()
 
         cls.mapping = TaskMappingFactory.create(topic_name="some-topic")
-        DefaultServiceFactory.create(
+        cls.service = DefaultServiceFactory.create(
             task_mapping=cls.mapping,
             service__api_type=APITypes.zrc,
             service__api_root=ZRC_URL,
@@ -30,12 +31,7 @@ class ZGWClientLogTests(TestCase):
         )
         cls.task = ExternalTaskFactory.create(
             topic_name="some-topic",
-            variables={
-                "services": {
-                    "type": "json",
-                    "value": json.dumps({"ZRC": {"jwt": "Bearer 12345"}}),
-                }
-            },
+            variables={"bptlAppId": serialize_variable("some-app-id")},
         )
         cls.work_unit = ZGWWorkUnit(cls.task)
 
@@ -50,6 +46,8 @@ class ZGWClientLogTests(TestCase):
         self.assertEqual(self.task.logs.count(), 1)
 
         log = self.task.logs.get()
+        client = self.service.service.build_client()
+        auth_header = client.auth_header
 
         self.assertEqual(
             log.extra_data,
@@ -65,7 +63,7 @@ class ZGWClientLogTests(TestCase):
                         "Accept-Crs": "EPSG:4326",
                         "Content-Crs": "EPSG:4326",
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer 12345",
+                        "Authorization": auth_header["Authorization"],
                     },
                 },
                 "response": {
@@ -86,6 +84,8 @@ class ZGWClientLogTests(TestCase):
         client.create("zaak", post_data)
 
         self.assertEqual(self.task.logs.count(), 1)
+        client = self.service.service.build_client()
+        auth_header = client.auth_header
 
         log = self.task.logs.get()
 
@@ -103,7 +103,7 @@ class ZGWClientLogTests(TestCase):
                         "Accept-Crs": "EPSG:4326",
                         "Content-Crs": "EPSG:4326",
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer 12345",
+                        "Authorization": auth_header["Authorization"],
                     },
                 },
                 "response": {

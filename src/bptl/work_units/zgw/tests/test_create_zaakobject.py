@@ -37,14 +37,7 @@ class CreateZaakObjectTests(TestCase):
                 "zaakUrl": {"type": "String", "value": ZAAK, "valueInfo": {}},
                 "objectUrl": {"type": "String", "value": OBJECT, "valueInfo": {}},
                 "objectType": {"type": "String", "value": "adres", "valueInfo": {}},
-                "services": {
-                    "type": "json",
-                    "value": json.dumps(
-                        {
-                            "ZRC": {"jwt": "Bearer 12345"},
-                        }
-                    ),
-                },
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 

@@ -44,7 +44,7 @@ class CreateStatusTaskTests(TestCase):
             variables={
                 "zaakUrl": serialize_variable(ZAAK),
                 "statustype": serialize_variable(STATUSTYPE),
-                "services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}}),
+                "bptlAppId": serialize_variable("some-app-id"),
                 "toelichting": serialize_variable("some description"),
             },
         )
@@ -92,12 +92,7 @@ class CreateStatusTaskTests(TestCase):
             variables={
                 "zaakUrl": serialize_variable(ZAAK),
                 "statusVolgnummer": serialize_variable(2),
-                "services": serialize_variable(
-                    {
-                        "ZRC": {"jwt": "Bearer 12345"},
-                        "ZTC": {"jwt": "Bearer 12345"},
-                    }
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
                 "toelichting": serialize_variable("some description"),
             },
         )

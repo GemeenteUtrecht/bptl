@@ -61,9 +61,7 @@ class CreateRolTaskTests(TestCase):
                         "roltoelichting": "A test roltoelichting",
                     }
                 ),
-                "services": serialize_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 
@@ -193,9 +191,7 @@ class CreateRolTaskTests(TestCase):
                         },
                     }
                 ),
-                "services": serialize_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
         task = CreateRolTask(fetched_task)
@@ -247,9 +243,7 @@ class CreateRolTaskTests(TestCase):
                         },
                     }
                 ),
-                "services": serialize_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
         task = CreateRolTask(fetched_task)

@@ -36,7 +36,7 @@ class RelateerZaakTests(TestCase):
                 "zaakUrl": serialize_variable(BIJDRAGE_ZAAK),
                 "hoofdZaakUrl": serialize_variable(ZAAK),
                 "aardRelatie": serialize_variable("bijdrage"),
-                "services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}}),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 
@@ -154,9 +154,9 @@ class RelateerZaakTests(TestCase):
             },
         )
 
-        self.fetched_task.variables["aardRelatieOmgekeerdeRichting"] = (
-            serialize_variable("")
-        )
+        self.fetched_task.variables[
+            "aardRelatieOmgekeerdeRichting"
+        ] = serialize_variable("")
         self.fetched_task.save()
         task = RelateerZaak(self.fetched_task)
 
@@ -198,9 +198,9 @@ class RelateerZaakTests(TestCase):
             },
         )
 
-        self.fetched_task.variables["aardRelatieOmgekeerdeRichting"] = (
-            serialize_variable("niks")
-        )
+        self.fetched_task.variables[
+            "aardRelatieOmgekeerdeRichting"
+        ] = serialize_variable("niks")
         self.fetched_task.save()
         task = RelateerZaak(self.fetched_task)
 

@@ -3,6 +3,7 @@ import json
 from django.test import TestCase
 
 import requests_mock
+from django_camunda.utils import serialize_variable
 from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
@@ -40,14 +41,7 @@ class RelatePandTests(TestCase):
                     "value": json.dumps([PAND]),
                     "valueInfo": {},
                 },
-                "services": {
-                    "type": "json",
-                    "value": json.dumps(
-                        {
-                            "ZRC": {"jwt": "Bearer 12345"},
-                        }
-                    ),
-                },
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 

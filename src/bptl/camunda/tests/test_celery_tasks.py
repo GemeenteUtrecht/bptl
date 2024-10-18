@@ -180,9 +180,7 @@ class RouteTaskTests(TestCase):
             variables={
                 "zaaktype": serialize_variable(ZAAKTYPE),
                 "organisatieRSIN": serialize_variable("123456788"),
-                "services": serialize_variable(
-                    {"ZRC": {"jwt": "Bearer 12345"}, "ZTC": {"jwt": "Bearer 789"}}
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
             lock_expires_at=timezone.make_aware(timezone.datetime(2020, 1, 1)),
         )

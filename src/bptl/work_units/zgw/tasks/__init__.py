@@ -6,6 +6,7 @@ from .zaak import CloseZaakTask, CreateZaakTask, LookupZaak  # noqa
 from .zaak_relations import (  # noqa
     CreateEigenschap,
     CreateZaakObject,
+    FetchZaakObjects,
     FetchZaakRelaties,
     RelateDocumentToZaakTask,
     RelateerZaak,

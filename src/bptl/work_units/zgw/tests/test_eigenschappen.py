@@ -59,12 +59,7 @@ class CreateEigenschapRelationTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "services": serialize_variable(
-                    {
-                        "ZRC": {"jwt": "Bearer 12345"},
-                        "ZTC": {"jwt": "Bearer 12345"},
-                    }
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
                 "zaakUrl": serialize_variable(ZAAK),
                 "eigenschap": serialize_variable(
                     {
@@ -235,12 +230,7 @@ class CreateEigenschapRelationTaskTests(TestCase):
             worker_id="test-worker-id",
             task_id="test-task-id",
             variables={
-                "services": serialize_variable(
-                    {
-                        "ZRC": {"jwt": "Bearer 12345"},
-                        "ZTC": {"jwt": "Bearer 12345"},
-                    }
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
                 "zaakUrl": serialize_variable(ZAAK),
                 "eigenschap": serialize_variable(
                     {
