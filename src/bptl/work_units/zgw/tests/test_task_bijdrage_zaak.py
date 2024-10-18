@@ -36,7 +36,7 @@ class RelateerZaakTests(TestCase):
                 "zaakUrl": serialize_variable(BIJDRAGE_ZAAK),
                 "hoofdZaakUrl": serialize_variable(ZAAK),
                 "aardRelatie": serialize_variable("bijdrage"),
-                "services": serialize_variable({"ZRC": {"jwt": "Bearer 12345"}}),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 

@@ -145,7 +145,7 @@ class ValidSignTests(TestCase):
                 "documents": serialize_variable([DOCUMENT_1, DOCUMENT_2]),
                 "signers": serialize_variable([SIGNER_1, SIGNER_2]),
                 "packageName": serialize_variable("Test package name"),
-                "services": serialize_variable({"drc": {"jwt": "Bearer 12345"}}),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 
@@ -190,7 +190,9 @@ class ValidSignTests(TestCase):
         self.assertEqual(documents[1][0], RESPONSE_2["titel"])
         self.assertEqual(documents[1][1].read(), CONTENT_2)
 
-        self.assertEqual(m.request_history[-1].headers["Authorization"], "Bearer 12345")
+        self.assertTrue(
+            m.request_history[-1].headers["Authorization"].startswith("Bearer ")
+        )
 
     def test_get_documents_from_api_credentials_store(self, m):
         mock_service_oas_get(m, DRC_URL, "drc")
@@ -420,12 +422,7 @@ class ValidSignMultipleDocsAPITests(TestCase):
                 "documents": serialize_variable([DOCUMENT_1, DOCUMENT_3]),
                 "signers": serialize_variable([SIGNER_1, SIGNER_2]),
                 "packageName": serialize_variable("Test package name"),
-                "services": serialize_variable(
-                    {
-                        "drc1": {"jwt": "Bearer 12345"},
-                        "drc2": {"jwt": "Bearer 789"},
-                    }
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 

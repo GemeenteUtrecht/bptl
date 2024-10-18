@@ -164,12 +164,7 @@ class CreateZaakTaskTests(TestCase):
                 "zaaktype": serialize_variable(ZAAKTYPE),
                 "organisatieRSIN": serialize_variable("002220647"),
                 "NLXProcessId": serialize_variable("12345"),
-                "services": serialize_variable(
-                    {
-                        "ZRC": {"jwt": "Bearer 12345"},
-                        "ZTC": {"jwt": "Bearer 789"},
-                    }
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 
@@ -199,7 +194,7 @@ class CreateZaakTaskTests(TestCase):
             )
         )
         self.assertEqual(request_zaak.headers["X-NLX-Request-Process-Id"], "12345")
-        self.assertEqual(request_zaak.headers["Authorization"], "Bearer 12345")
+        self.assertTrue(request_zaak.headers["Authorization"].startswith("Bearer "))
 
     def test_create_zaak_zaaktype_details_missing_raises_error(self, m):
         self.fetched_task.variables["zaaktype"] = serialize_variable("")
@@ -431,7 +426,7 @@ class CreateZaakTaskTests(TestCase):
             )
         )
         self.assertEqual(request_zaak.headers["X-NLX-Request-Process-Id"], "12345")
-        self.assertEqual(request_zaak.headers["Authorization"], "Bearer 12345")
+        self.assertTrue(request_zaak.headers["Authorization"].startswith("Bearer "))
 
     def test_extra_variables(self, m):
         self.fetched_task.variables["zaakDetails"] = serialize_variable(
@@ -515,12 +510,7 @@ class CreateZaakTaskTests(TestCase):
                 "zaaktype": serialize_variable(ZAAKTYPE),
                 "organisatieRSIN": serialize_variable("002220647"),
                 "NLXProcessId": serialize_variable("12345"),
-                "services": serialize_variable(
-                    {
-                        "ZRC": {"jwt": "Bearer 12345"},
-                        "ZTC": {"jwt": "Bearer 789"},
-                    }
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
                 "Hoofdbehandelaar": serialize_variable(
                     {
                         "betrokkeneType": RolTypes.medewerker,

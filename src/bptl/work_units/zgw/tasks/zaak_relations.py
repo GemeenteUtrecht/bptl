@@ -415,13 +415,13 @@ class FetchZaakRelaties(ZGWWorkUnit):
 
 @register
 @require_zrc
-class FetchObjectRelaties(ZGWWorkUnit):
+class FetchZaakObjects(ZGWWorkUnit):
     """
-    Fetch all OBJECTs for ZAAK.
+    Fetch all ZAAKOBJECTs for ZAAK.
 
     **Required process variables**
 
-    * ``zaakUrl`` [str]: URL-reference of ZAAK.
+    * ``hoofdZaakUrl`` [str]: URL-reference of ZAAK.
     * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
       The app-specific credentials will be used for the API calls.
 
