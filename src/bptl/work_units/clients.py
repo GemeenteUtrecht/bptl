@@ -102,14 +102,13 @@ class JSONClient:
 
         kwargs["headers"] = headers
         kwargs["hooks"] = {"response": self.log}
-
         response = self.session.request(method=method, url=url, **kwargs)
         response.raise_for_status()
         return response.json() if response.content else None
 
-    def get(self, path: str, params=None, **kwargs):
+    def get(self, path: str, request_kwargs=None, **kwargs):
         kwargs.setdefault("allow_redirects", True)
-        return self.request("get", path, params=params, **kwargs)
+        return self.request("get", path, request_kwargs=request_kwargs, **kwargs)
 
     def post(self, path: str, data=None, json=None, **kwargs):
         return self.request("post", path, data=data, json=json, **kwargs)

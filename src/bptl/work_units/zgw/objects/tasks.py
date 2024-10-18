@@ -66,28 +66,28 @@ def filter_zaakobjects_on_objecttype_label(task: BaseTask) -> List[Dict]:
     variables = task.get_variables()
     zaakobjects = check_variable(variables, "zaakObjects", empty_allowed=True)
     if not zaakobjects:
-        return dict()
+        return {"filteredObjects": []}
 
     label = check_variable(variables, "label", empty_allowed=True)
 
     # fetch objecttypes to be filtered on
-    object_types = fetch_objecttypes(
+    objecttypes = fetch_objecttypes(
         task,
     )
-    object_types = [
+    objecttypes = [
         ot["url"]
-        for ot in object_types
+        for ot in objecttypes
         if ot.get("labels", {}).get("filter", "") == label
     ]
-    if not object_types:
-        return dict()
+    if not objecttypes:
+        return {"filteredObjects": []}
 
     objects = fetch_objects(
         task, list({zo["object"] for zo in zaakobjects if zo.get("object", None)})
     )
 
     # filter objects
-    objects = {obj["url"]: obj for obj in objects if obj["type"] in object_types}
+    objects = {obj["url"]: obj for obj in objects if obj["type"] in objecttypes}
 
     # filter zaakobjects
     filtered_objects = []
@@ -102,7 +102,7 @@ def filter_zaakobjects_on_objecttype_label(task: BaseTask) -> List[Dict]:
                 }
             )
 
-    return filtered_objects
+    return {"filteredObjects": filtered_objects}
 
 
 ###################################################
