@@ -413,42 +413,45 @@ class FetchZaakRelaties(ZGWWorkUnit):
         return {"zaakRelaties": relevante_andere_zaken}
 
 
-# @register
-# @require_zrc
-# class FetchZaakObjectRelaties(ZGWWorkUnit):
-#     """
-#     Fetch all ZAAKOBJECTs for ZAAK that are not `meta` objecttypes.
+@register
+@require_zrc
+class FetchZaakObjects(ZGWWorkUnit):
+    """
+    Fetch all ZAAKOBJECTs for ZAAK.
 
-#     **Required process variables**
+    **Required process variables**
 
-#     * ``zaakUrl`` [str]: URL-reference of ZAAK.
-#     * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
-#       The app-specific credentials will be used for the API calls.
+    * ``hoofdZaakUrl`` [str]: URL-reference of ZAAK.
+    * ``bptlAppId`` [str]: the application ID of the app that caused this task to be executed.
+      The app-specific credentials will be used for the API calls.
 
-#       **Sets the process variables**
+      **Sets the process variables**
 
-#     * ``zaakObjectUrls`` list[str]: A list of ZAAKOBJECTs.
+    * ``zaakObjects`` list[dict[str,str]]: A list of ZAAKOBJECTs, with their objecttypes and objectTypeOverige and relatieomschrijving attributes.
 
-#     """
-#     # get vars
-#     variables = self.task.get_variables()
+    """
 
-#     zaak_url = variables.get("hoofdZaakUrl")
-#     if not zaak_url:
-#         logger.info("No 'hoofdZaakUrl' provided, skipping task execution.")
-#         return
+    def perform(self) -> Optional[dict]:
+        # get vars
+        variables = self.task.get_variables()
 
-#     # prep clients
-#     zrc_client = self.get_client(APITypes.zrc)
+        zaak_url = variables.get("hoofdZaakUrl")
+        if not zaak_url:
+            logger.info("No 'hoofdZaakUrl' provided, skipping task execution.")
+            return
 
-#     headers = get_nlx_headers(variables)
-#     zaakobjecten = get_paginated_results(
-#         client,
-#         "zaakobject",
-#         query_params={"zaak": zaak_url},
-#     )
+        # prep clients
+        zrc_client = self.get_client(APITypes.zrc)
 
-#     return {}
+        headers = get_nlx_headers(variables)
+        zaakobjecten = get_paginated_results(
+            zrc_client,
+            "zaakobject",
+            query_params={"zaak": zaak_url},
+            request_headers=headers,
+        )
+
+        return {"zaakObjects": zaakobjecten}
 
 
 @register

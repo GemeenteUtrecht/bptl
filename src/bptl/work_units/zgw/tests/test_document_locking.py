@@ -41,11 +41,7 @@ class LockDocumentsTests(TestCase):
             task_id="test-task-id",
             variables={
                 "informatieobject": serialize_variable(DOCUMENT_URL),
-                "services": serialize_variable(
-                    {
-                        "drc": {"jwt": "Bearer 12345"},
-                    }
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 
@@ -62,7 +58,7 @@ class LockDocumentsTests(TestCase):
 
         self.assertEqual(m.last_request.method, "POST")
         self.assertEqual(m.last_request.url, LOCK_DOCUMENT_URL)
-        self.assertEqual(m.last_request.headers["Authorization"], "Bearer 12345")
+        self.assertTrue(m.last_request.headers["Authorization"].startswith("Bearer "))
 
 
 @requests_mock.Mocker()
@@ -86,11 +82,7 @@ class UnlockDocumentsTests(TestCase):
             variables={
                 "informatieobject": serialize_variable(DOCUMENT_URL),
                 "lockId": serialize_variable("bacbaeaf-600d-4b79-9414-3e1a668addd3"),
-                "services": serialize_variable(
-                    {
-                        "drc": {"jwt": "Bearer 12345"},
-                    }
-                ),
+                "bptlAppId": serialize_variable("some-app-id"),
             },
         )
 
@@ -105,4 +97,4 @@ class UnlockDocumentsTests(TestCase):
         self.assertEqual(result, {})
         self.assertEqual(m.last_request.method, "POST")
         self.assertEqual(m.last_request.url, UNLOCK_DOCUMENT_URL)
-        self.assertEqual(m.last_request.headers["Authorization"], "Bearer 12345")
+        self.assertTrue(m.last_request.headers["Authorization"].startswith("Bearer "))
