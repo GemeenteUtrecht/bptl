@@ -47,12 +47,7 @@ def fetch_object(
     client: Optional[ObjectsClient] = None,
     task: Optional[BaseTask] = None,
 ) -> Dict:
-    if not client and not task:
-        raise RuntimeError(
-            "fetch_object requires one of keyword arguments client or task."
-        )
-
-    if task:
+    if not client:
         client = get_objects_client(task)
 
     return client.get(
@@ -64,7 +59,7 @@ def fetch_objects(task: BaseTask, objects: List[str]) -> List[Dict]:
     client = get_objects_client(task)
 
     def _fetch_object(object_url):
-        return fetch_object(client, object_url)
+        return fetch_object(object_url, client=client)
 
     with parallel() as executor:
         objects = list(executor.map(_fetch_object, objects))

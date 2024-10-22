@@ -32,6 +32,8 @@ require_objecttypes_service = register.require_service(
 
 
 def get_objects_client(task: BaseTask) -> "ObjectsClient":
+    if not task:
+        raise RuntimeError("get_objects_client requires task to be not None.")
     # get the service and credentials
     service = get_alias_service(task, OBJECTS_ALIAS)
     return _get_client(task, service, cls=ObjectsClient)

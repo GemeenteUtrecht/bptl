@@ -702,7 +702,7 @@ REVIEW_OBJECTTYPE_LATEST_VERSION = {
 REVIEW_OBJECT = {
     "url": f"{OBJECTS_ROOT}objects/85e6c250-9f51-4286-8340-25109d0b96d1",
     "uuid": "85e6c250-9f51-4286-8340-25109d0b96d1",
-    "type": f"{OBJECTTYPES_ROOT}objecttypes/b3ec3f47-bc20-4872-955c-cb5f67646ead",
+    "type": REVIEW_OBJECTTYPE["url"],
     "record": {
         "index": 1,
         "typeVersion": 4,
