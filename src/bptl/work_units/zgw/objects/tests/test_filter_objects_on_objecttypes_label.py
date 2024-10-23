@@ -10,7 +10,7 @@ from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
-from bptl.tests.utils import mock_parallel, paginated_response
+from bptl.tests.utils import mock_parallel
 
 from ..models import MetaObjectTypesConfig
 from ..tasks import filter_zaakobjects_on_objecttype_label
@@ -115,7 +115,7 @@ class FilterObjectsTaskTests(TestCase):
 
     def test_no_objecttypes(self, m):
         mock_service_oas_get(m, OBJECTTYPES_ROOT, "objecttypes")
-        m.get(f"{OBJECTTYPES_ROOT}objecttypes", json=paginated_response([]))
+        m.get(f"{OBJECTTYPES_ROOT}objecttypes", json=[])
         task_dict = {
             "topic_name": "some-topic-name",
             "worker_id": "test-worker-id",
@@ -137,7 +137,7 @@ class FilterObjectsTaskTests(TestCase):
         mock_service_oas_get(m, OBJECTTYPES_ROOT, "objecttypes")
         m.get(
             f"{OBJECTTYPES_ROOT}objecttypes",
-            json=paginated_response([REVIEW_OBJECTTYPE]),
+            json=[REVIEW_OBJECTTYPE],
         )
         m.get(f"{REVIEW_OBJECT['url']}", json=REVIEW_OBJECT)
         zaakobject = generate_oas_component(
@@ -176,7 +176,7 @@ class FilterObjectsTaskTests(TestCase):
         mock_service_oas_get(m, OBJECTTYPES_ROOT, "objecttypes")
         m.get(
             f"{OBJECTTYPES_ROOT}objecttypes",
-            json=paginated_response([REVIEW_OBJECTTYPE]),
+            json=[REVIEW_OBJECTTYPE],
         )
         m.get(f"{REVIEW_OBJECT['url']}", json=REVIEW_OBJECT)
         zaakobject = generate_oas_component(
