@@ -93,15 +93,17 @@ def filter_zaakobjects_on_objecttype_label(task: BaseTask) -> List[Dict]:
     filtered_objects = []
     for zo in zaakobjects:
         if object := objects.get(zo["object"]):
-            filtered_objects.append(
-                {
-                    "objectUrl": object["url"],
-                    "objectType": object["type"],
-                    "objectTypeOverige": zo.get("objectTypeOverige", ""),
-                    "relatieomschrijving": zo.get("relatieomschrijving", ""),
-                }
-            )
-
+            fobj = {
+                "objectUrl": object["url"],
+                "objectType": zo["objectType"],
+                "relatieomschrijving": zo.get("relatieomschrijving", ""),
+            }
+            if zo["objectType"] == "overige":
+                fobj["objectTypeOverige"] = zo.get("objectTypeOverige", "")
+                fobj["objectTypeOverigeDefinitie"] = zo.get(
+                    "objectTypeOverigeDefinitie", {}
+                )
+            filtered_objects.append(fobj)
     return {"filteredObjects": filtered_objects}
 
 

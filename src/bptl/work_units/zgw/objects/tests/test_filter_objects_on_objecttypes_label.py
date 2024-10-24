@@ -162,8 +162,7 @@ class FilterObjectsTaskTests(TestCase):
             {
                 "filteredObjects": [
                     {
-                        "objectType": REVIEW_OBJECTTYPE["url"],
-                        "objectTypeOverige": zaakobject["objectTypeOverige"],
+                        "objectType": zaakobject["objectType"],
                         "objectUrl": REVIEW_OBJECT["url"],
                         "relatieomschrijving": zaakobject["relatieomschrijving"],
                     }
@@ -199,4 +198,50 @@ class FilterObjectsTaskTests(TestCase):
         self.assertEqual(
             zaakobjects,
             {"filteredObjects": []},
+        )
+
+    def test_objecttypes_empty_label_objecttype_is_overige(self, m):
+        mock_service_oas_get(m, OBJECTS_ROOT, "objects")
+        mock_service_oas_get(m, OBJECTTYPES_ROOT, "objecttypes")
+        m.get(
+            f"{OBJECTTYPES_ROOT}objecttypes",
+            json=[REVIEW_OBJECTTYPE],
+        )
+        m.get(f"{REVIEW_OBJECT['url']}", json=REVIEW_OBJECT)
+        zaakobject = generate_oas_component(
+            "zrc",
+            "schemas/ZaakObject",
+            zaak=ZAAK_URL,
+            object=REVIEW_OBJECT["url"],
+            objectType="overige",
+        )
+        task_dict = {
+            "topic_name": "some-topic-name",
+            "worker_id": "test-worker-id",
+            "task_id": "test-task-id",
+            "variables": {
+                "bptlAppId": serialize_variable("some-app-id"),
+                "zaakObjects": serialize_variable([zaakobject]),
+                "label": serialize_variable(""),
+            },
+        }
+        task = ExternalTask.objects.create(
+            **task_dict,
+        )
+        zaakobjects = filter_zaakobjects_on_objecttype_label(task)
+        self.assertEqual(
+            zaakobjects,
+            {
+                "filteredObjects": [
+                    {
+                        "objectType": zaakobject["objectType"],
+                        "objectTypeOverige": zaakobject["objectTypeOverige"],
+                        "objectTypeOverigeDefinitie": zaakobject[
+                            "objectTypeOverigeDefinitie"
+                        ],
+                        "objectUrl": REVIEW_OBJECT["url"],
+                        "relatieomschrijving": zaakobject["relatieomschrijving"],
+                    }
+                ]
+            },
         )
