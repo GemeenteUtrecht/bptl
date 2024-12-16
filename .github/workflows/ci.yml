@@ -36,7 +36,7 @@ jobs:
           python-version: '3.9'
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: '12'
+          node-version: '13'
 
       - name: Install dependencies
         run: pip install -r requirements/dev.txt codecov pytest
