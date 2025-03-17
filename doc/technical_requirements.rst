@@ -6,7 +6,7 @@ Software requirements
 =======================  ==============
 Software/framework       Version        
 -----------------------  --------------
-Python                   3.9
+Python                   3.10
 PostgreSQL               9.6+  
 Node                     13
 =======================  ==============
