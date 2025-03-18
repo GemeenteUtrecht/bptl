@@ -53,7 +53,11 @@ class CreateStatusTask(ZGWWorkUnit):
             ztc_client = self.get_client(APITypes.ztc)
 
             logger.info("Deriving statustype URL from Catalogi API")
-            zaak = zrc_client.retrieve("zaak", url=zaak_url)
+            zaak = zrc_client.retrieve(
+                "zaak",
+                url=zaak_url,
+                request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}},
+            )
 
             statustypen = ztc_client.list(
                 "statustype", query_params={"zaaktype": zaak["zaaktype"]}

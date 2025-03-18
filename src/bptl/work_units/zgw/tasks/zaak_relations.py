@@ -205,7 +205,11 @@ class CreateEigenschap(ZGWWorkUnit):
         # fetch zaaktype - either from process variable or derive from zaak
         zaaktype = variables.get("zaaktype")
         if zaaktype is None or not isinstance(zaaktype, str):
-            zaak = zrc_client.retrieve("zaak", uuid=zaak_uuid)
+            zaak = zrc_client.retrieve(
+                "zaak",
+                uuid=zaak_uuid,
+                request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}},
+            )
             zaaktype = zaak["zaaktype"]
 
         # fetch eigenschappen
@@ -226,7 +230,11 @@ class CreateEigenschap(ZGWWorkUnit):
             return {}
 
         # Now make sure eigenschap doesnt already exist
-        zaak = zrc_client.retrieve("zaak", uuid=zaak_uuid)
+        zaak = zrc_client.retrieve(
+            "zaak",
+            uuid=zaak_uuid,
+            request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}},
+        )
         zaakeigenschappen = {
             zei["naam"]: zei
             for zei in zrc_client.list("zaakeigenschap", zaak_uuid=zaak_uuid)
@@ -313,8 +321,11 @@ class RelateerZaak(ZGWWorkUnit):
             raise ValueError(f"Unknown 'aardRelatie': '{aard_relatie}'")
 
         headers = get_nlx_headers(variables)
+        headers["Accept-Crs"] = "EPSG:4326"
 
-        zaak = zrc_client.retrieve("zaak", url=zaak_url, request_headers=headers)
+        zaak = zrc_client.retrieve(
+            "zaak", url=zaak_url, request_headers={"headers": headers}
+        )
 
         relevante_andere_zaken = zaak["relevanteAndereZaken"]
         relevante_andere_zaken.append(
@@ -324,6 +335,7 @@ class RelateerZaak(ZGWWorkUnit):
             }
         )
 
+        headers["Content-Crs"] = "EPSG:4326"
         zrc_client.partial_update(
             "zaak",
             {"relevanteAndereZaken": relevante_andere_zaken},
@@ -404,7 +416,10 @@ class FetchZaakRelaties(ZGWWorkUnit):
             return
 
         headers = get_nlx_headers(variables)
-        zaak = zrc_client.retrieve("zaak", url=zaak_url, request_headers=headers)
+        headers["Accept-Crs"] = "EPSG:4326"
+        zaak = zrc_client.retrieve(
+            "zaak", url=zaak_url, request_headers={"headers": headers}
+        )
         relevante_andere_zaken = [
             {"url": z["url"], "aardRelatie": z["aardRelatie"]}
             for z in zaak["relevanteAndereZaken"]
@@ -448,7 +463,7 @@ class FetchZaakObjects(ZGWWorkUnit):
             zrc_client,
             "zaakobject",
             query_params={"zaak": zaak_url},
-            request_headers=headers,
+            request_headers={"headers": headers},
         )
 
         return {"zaakObjects": zaakobjecten}

@@ -177,6 +177,8 @@ class CreateZaakTask(ZGWWorkUnit):
         }
 
         headers = get_nlx_headers(variables)
+        headers["Accept-Crs"] = "EPSG:4326"
+        headers["Content-Crs"] = "EPSG:4326"
         zaak = client_zrc.create("zaak", data, request_kwargs={"headers": headers})
         return zaak
 
@@ -321,7 +323,11 @@ class CloseZaakTask(ZGWWorkUnit):
 
         # get statustype to close zaak
         zaak_url = variables.get("zaakUrl", variables.get("zaak"))
-        zaaktype = zrc_client.retrieve("zaak", url=zaak_url)["zaaktype"]
+        zaaktype = zrc_client.retrieve(
+            "zaak",
+            url=zaak_url,
+            request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}},
+        )["zaaktype"]
         statustypen = ztc_client.list("statustype", {"zaaktype": zaaktype})["results"]
         statustype = next(filter(lambda x: x["isEindstatus"] is True, statustypen))
 
@@ -336,7 +342,11 @@ class CloseZaakTask(ZGWWorkUnit):
         zrc_client.create("status", data)
 
         # get zaak to receive calculated variables
-        zaak_closed = zrc_client.retrieve("zaak", url=zaak_url)
+        zaak_closed = zrc_client.retrieve(
+            "zaak",
+            url=zaak_url,
+            request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}},
+        )
         return zaak_closed
 
     def perform(self):
@@ -393,6 +403,7 @@ class LookupZaak(ZGWWorkUnit):
                 "bronorganisatie": bronorganisatie,
                 "identificatie": identificatie,
             },
+            request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}},
         )
 
         # paginated response

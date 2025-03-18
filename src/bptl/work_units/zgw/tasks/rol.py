@@ -56,7 +56,11 @@ class CreateRolTask(ZGWWorkUnit):
 
         zrc_client = self.get_client(APITypes.zrc)
         zaak_url = check_variable(variables, "zaakUrl")
-        zaak = zrc_client.retrieve("zaak", url=zaak_url)
+        zaak = zrc_client.retrieve(
+            "zaak",
+            url=zaak_url,
+            request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}},
+        )
 
         ztc_client = self.get_client(APITypes.ztc)
         query_params = {
