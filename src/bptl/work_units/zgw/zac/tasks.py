@@ -184,7 +184,11 @@ class ZaakDetailURLTask(ZGWWorkUnit):
         zrc_client = self.get_client(APITypes.zrc)
 
         try:
-            zaak = zrc_client.retrieve("zaak", url=zaak_url)
+            zaak = zrc_client.retrieve(
+                "zaak",
+                url=zaak_url,
+                request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}},
+            )
             with get_client(self.task) as client:
                 response = client.get(
                     f"api/core/cases/{zaak['bronorganisatie']}/{zaak['identificatie']}/url"
