@@ -12,6 +12,7 @@ from django_camunda.client import get_client
 from django_camunda.utils import serialize_variable
 from timeline_logger.models import TimelineLog
 
+from bptl.tasks.constants import EngineTypes
 from bptl.tasks.models import TaskMapping
 from bptl.utils.decorators import retry
 from bptl.utils.typing import Object, ProcessVariables
@@ -31,7 +32,7 @@ def fetch_and_lock(max_tasks: int, long_polling_timeout=None) -> Tuple[str, int,
     camunda = get_client()
 
     # Fetch the topics that are known (and active!) in this configured instance only
-    mappings = TaskMapping.objects.filter(active=True)
+    mappings = TaskMapping.objects.filter(active=True, engine_type=EngineTypes.camunda)
     topics = [
         {
             "topicName": mapping.topic_name,

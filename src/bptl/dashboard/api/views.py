@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from timeline_logger.models import TimelineLog
 
-from bptl.tasks.constants import ENGINETYPE_MODEL_MAPPING
+from bptl.tasks.engine_mapping import ENGINETYPE_MODEL_MAPPING
 from bptl.utils.constants import Statuses
 
 TASK_STATUS_HISTORY = timedelta(hours=24)

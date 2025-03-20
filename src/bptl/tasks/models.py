@@ -12,6 +12,7 @@ from timeline_logger.models import TimelineLog
 
 from bptl.utils.constants import Statuses
 
+from .constants import EngineTypes
 from .query import BaseTaskQuerySet, TaskQuerySet
 
 
@@ -25,6 +26,7 @@ class TaskMapping(models.Model):
             "to decide which listener to run for a task."
         ),
     )
+
     callback = models.CharField(
         _("callback"),
         max_length=255,
@@ -38,6 +40,13 @@ class TaskMapping(models.Model):
         "zgw_consumers.Service",
         related_name="task_mappings",
         through="DefaultService",
+    )
+    engine_type = models.CharField(
+        _("engine_type"),
+        max_length=50,
+        choices=EngineTypes.choices,
+        default=EngineTypes.camunda,
+        help_text=_("The engine type used for the task."),
     )
 
     objects = TaskQuerySet.as_manager()
