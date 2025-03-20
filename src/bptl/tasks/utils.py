@@ -67,3 +67,9 @@ def _write_html(document) -> str:
     docwriter.write(document, destination)
     docwriter.assemble_parts()
     return docwriter.parts["body"]
+
+
+def get_worker_id() -> str:
+    prefix = "bptl"
+    guid = uuid.uuid4()
+    return f"{prefix}-{guid}"

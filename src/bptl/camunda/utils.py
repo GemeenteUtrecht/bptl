@@ -31,7 +31,7 @@ def fetch_and_lock(max_tasks: int, long_polling_timeout=None) -> Tuple[str, int,
     camunda = get_client()
 
     # Fetch the topics that are known (and active!) in this configured instance only
-    mappings = TaskMapping.objects.filter(active=True)
+    mappings = TaskMapping.objects.filter(active=True, task_engine=EngineTypes.camunda)
     topics = [
         {
             "topicName": mapping.topic_name,
