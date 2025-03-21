@@ -12,6 +12,7 @@ from django_camunda.client import get_client
 from django_camunda.utils import serialize_variable
 from timeline_logger.models import TimelineLog
 
+from bptl.tasks.constants import EngineTypes
 from bptl.tasks.models import TaskMapping
 from bptl.utils.decorators import retry
 from bptl.utils.typing import Object, ProcessVariables
