@@ -5,8 +5,6 @@ We save tasks in our own database in case of crashes and for dev purposes, so th
 can pick up work load again.
 """
 
-import uuid
-
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -15,12 +13,7 @@ from django_camunda.client import get_client
 from django_camunda.utils import deserialize_variable
 
 from bptl.tasks.models import BaseTask
-
-
-def get_worker_id() -> str:
-    prefix = "bptl"
-    guid = uuid.uuid4()
-    return f"{prefix}-{guid}"
+from bptl.tasks.utils import get_worker_id
 
 
 class ExternalTask(BaseTask):

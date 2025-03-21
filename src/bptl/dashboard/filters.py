@@ -4,7 +4,8 @@ from django.db.models import QuerySet
 import django_filters
 from django_filters import FilterSet
 
-from bptl.tasks.constants import ENGINETYPE_MODEL_MAPPING, EngineTypes
+from bptl.tasks.constants import EngineTypes
+from bptl.tasks.engine_mapping import ENGINETYPE_MODEL_MAPPING
 from bptl.tasks.models import BaseTask
 from bptl.utils.constants import Statuses
 
