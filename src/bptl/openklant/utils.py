@@ -52,7 +52,7 @@ def fetch_and_change_status(openklant_config: OpenKlantConfig) -> Tuple[str, int
                 worker_id=worker_id,
                 topic_name=task["gevraagdeHandeling"],
                 task_id=task["uuid"],
-                variables=dict(),
+                variables=task,
             )
         )
 
