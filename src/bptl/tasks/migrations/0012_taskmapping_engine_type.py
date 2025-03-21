@@ -6,13 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tasks', '0011_auto_20240628_1305'),
+        ("tasks", "0011_auto_20240628_1305"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='taskmapping',
-            name='engine_type',
-            field=models.CharField(choices=[('camunda', 'Camunda'), ('activiti', 'Activiti'), ('openklant', 'OpenKlant')], default='camunda', help_text='The engine type used for the task.', max_length=50, verbose_name='engine_type'),
+            model_name="taskmapping",
+            name="engine_type",
+            field=models.CharField(
+                choices=[
+                    ("camunda", "Camunda"),
+                    ("activiti", "Activiti"),
+                    ("openklant", "OpenKlant"),
+                ],
+                default="camunda",
+                help_text="The engine type used for the task.",
+                max_length=50,
+                verbose_name="engine_type",
+            ),
         ),
     ]

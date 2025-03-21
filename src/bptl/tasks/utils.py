@@ -1,5 +1,6 @@
 import functools
 import tempfile
+import uuid
 
 from docutils.core import publish_doctree
 from docutils.frontend import OptionParser
