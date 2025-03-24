@@ -14,7 +14,7 @@ from bptl.utils.constants import Statuses
 from bptl.utils.decorators import retry
 
 from ..celery import app
-from .models import OpenKlantConfig, OpenKlantInternalTaskModel
+from .models import OpenKlantInternalTaskModel
 
 logger = get_task_logger(__name__)
 
@@ -32,8 +32,7 @@ __all__ = ("task_fetch", "task_execute")
 )
 def task_fetch_and_patch():
     logger.debug("Fetching and locking tasks (long poll)")
-    openklant_config = OpenKlantConfig.get_solo()
-    worker_id, num_tasks, tasks = fetch_and_change_status(openklant_config)
+    worker_id, num_tasks, tasks = fetch_and_change_status()
     logger.info("Fetched %r tasks with %r", num_tasks, worker_id)
 
     for task in tasks:

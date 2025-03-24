@@ -18,12 +18,15 @@ from bptl.utils.decorators import retry
 from bptl.utils.typing import Object, ProcessVariables
 from bptl.work_units.zgw.utils import get_paginated_results
 
+from .client import get_openklant_client
 from .models import OpenKlantConfig, OpenKlantInternalTaskModel
 
 logger = logging.getLogger(__name__)
 
 
-def fetch_and_change_status(openklant_config: OpenKlantConfig) -> Tuple[str, int, list]:
+def fetch_and_change_status(
+    openklant_config: Optional[OpenKlantConfig] = None,
+) -> Tuple[str, int, list]:
     """
     Fetch an internal task
     """
@@ -31,8 +34,11 @@ def fetch_and_change_status(openklant_config: OpenKlantConfig) -> Tuple[str, int
     mappings = TaskMapping.objects.filter(
         engine_type=EngineTypes.openklant, active=True
     )
-    openklant_client = openklant_config.service.build_client()
+    openklant_config = (
+        OpenKlantConfig.get_solo() if not openklant_config else openklant_config
+    )
     actor = openklant_config.actor.name
+    openklant_client = get_openklant_client(openklant_config)
     openklant_tasks: List[Object] = get_paginated_results(
         openklant_client,
         "internetaken",
