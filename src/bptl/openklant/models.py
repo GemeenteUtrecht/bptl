@@ -48,12 +48,14 @@ class OpenKlantConfig(SingletonModel):
         on_delete=models.CASCADE,
         verbose_name=_("service"),
         help_text=_("External service to configure credentials for."),
+        null=True,
     )
     actor = models.ForeignKey(
-        OpenKlantActorModel,
+        "OpenKlantActorModel",
         on_delete=models.CASCADE,
         verbose_name=_("OpenKlant Actor"),
         help_text=_("Actor associated with BPTL in OpenKlant."),
+        null=True,
     )
 
 
