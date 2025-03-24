@@ -432,7 +432,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = 30 * 60
 # Setup Celery routes for long-polling
 CELERY_TASK_ROUTES = {
     "bptl.camunda.tasks.task_fetch_and_lock": {"queue": "long-polling"},
-    "bptl.openklant.tasks.task_fetch_and_patch": {"queue": "openklant"},
+    "bptl.openklant.tasks.task_fetch_and_patch": {"queue": "klantcontact"},
 }
 
 CELERY_BEAT_SCHEDULE = {
