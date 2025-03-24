@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     "bptl.accounts",
     "bptl.activiti",
     "bptl.camunda",
+    "bptl.openklant",
     "bptl.core",
     "bptl.credentials",
     "bptl.dashboard",
@@ -102,6 +103,7 @@ INSTALLED_APPS = [
     "bptl.work_units.valid_sign",
     "bptl.work_units.email",
     "bptl.work_units.xential",
+    "bptl.work_units.open_klant",
 ]
 
 MIDDLEWARE = [
@@ -429,7 +431,8 @@ CELERY_TASK_SOFT_TIME_LIMIT = 30 * 60
 
 # Setup Celery routes for long-polling
 CELERY_TASK_ROUTES = {
-    "bptl.camunda.tasks.task_fetch_and_lock": {"queue": "long-polling"}
+    "bptl.camunda.tasks.task_fetch_and_lock": {"queue": "long-polling"},
+    "bptl.openklant.tasks.task_fetch_and_patch": {"queue": "openklant"},
 }
 
 CELERY_BEAT_SCHEDULE = {
@@ -441,9 +444,9 @@ CELERY_BEAT_SCHEDULE = {
         # is marked graceful, so it'll just return None and not be scheduled again.
         "schedule": schedule(run_every=10),
     },
-    "xential-docs-status-check": {
-        "task": "bptl.work_units.xential.tasks.check_failed_document_builds",
-        "schedule": schedule(run_every=43200),  # 12 hours
+    "interne-taak-pull": {
+        "task": "bptl.openklant.tasks.task_fetch_and_patch",
+        "schedule": schedule(run_every=10),
     },
 }
 

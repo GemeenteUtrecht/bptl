@@ -3,7 +3,8 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import Library
 
-from bptl.tasks.constants import ENGINETYPE_MODEL_MAPPING, EngineTypes
+from bptl.tasks.constants import EngineTypes
+from bptl.tasks.engine_mapping import ENGINETYPE_MODEL_MAPPING
 from bptl.utils.constants import Statuses
 
 register = Library()
