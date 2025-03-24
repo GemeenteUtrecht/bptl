@@ -10,7 +10,7 @@ def get_openklant_client(openklant_config: Optional[OpenKlantConfig] = None) -> 
         OpenKlantConfig.get_solo() if not openklant_config else openklant_config
     )
 
-    client = openklant_config.build_client()
+    client = openklant_config.service.build_client()
     client.operation_suffix_mapping = {
         "list": "List",
         "retrieve": "Read",
