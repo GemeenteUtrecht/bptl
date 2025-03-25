@@ -34,7 +34,7 @@ class NotificeerBetrokkene(WorkUnit):
             subject="test email",
             body=email_openklant_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            reply_to=settings.DEFAULT_FROM_EMAIL,
+            reply_to=[settings.DEFAULT_FROM_EMAIL],
             to=["danielammeraal@gmail.com"],
         )
         # email.attach_alternative(email_html_message, "text/html")
