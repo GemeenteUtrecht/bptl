@@ -22,7 +22,7 @@ class NotificeerBetrokkene(WorkUnit):
 
         # Get email template
         #  template_path =
-        email_openklant_template = "email/mails/openklant.txt"
+        email_openklant_template = get_template("email/mails/openklant.txt")
         # email_html_template = get_template(template_path["html"])
 
         # Render
