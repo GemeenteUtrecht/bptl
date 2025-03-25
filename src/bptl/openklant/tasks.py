@@ -47,7 +47,7 @@ def task_fetch_and_patch():
     # a new long-poll! this needs to run _after_ the current task has exited, otherwise
     # the celery-once lock kicks in
     task_schedule_new_fetch_and_patch.apply_async(
-        countdown=0.5,
+        countdown=15,
     )
     return num_tasks
 

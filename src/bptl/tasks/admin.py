@@ -4,6 +4,7 @@ from polymorphic.admin import PolymorphicChildModelFilter, PolymorphicParentMode
 
 from bptl.activiti.models import ServiceTask
 from bptl.camunda.models import ExternalTask
+from bptl.openklant.models import OpenKlantInternalTaskModel
 
 from .forms import AdminTaskMappingForm
 from .models import BaseTask, DefaultService, TaskMapping
@@ -26,5 +27,5 @@ class TaskMappingAdmin(admin.ModelAdmin):
 
 @admin.register(BaseTask)
 class BaseTaskAdmin(PolymorphicParentModelAdmin):
-    child_models = (ExternalTask, ServiceTask)
+    child_models = (ExternalTask, ServiceTask, OpenKlantInternalTaskModel)
     list_filter = (PolymorphicChildModelFilter, "status")
