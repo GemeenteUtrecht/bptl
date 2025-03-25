@@ -447,7 +447,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "interne-taak-pull": {
         "task": "bptl.openklant.tasks.task_fetch_and_patch",
-        "schedule": schedule(run_every=10),
+        "schedule": schedule(run_every=30),
     },
 }
 

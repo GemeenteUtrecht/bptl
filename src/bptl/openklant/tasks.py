@@ -61,7 +61,7 @@ def task_schedule_new_fetch_and_patch():
     task itself as the run-once lock is checked while scheduling rather then at
     execution time.
     """
-    task_fetch_and_patch.delay()
+    task_fetch_and_patch.apply_async(countdown=15)
 
 
 @app.task()
@@ -85,7 +85,6 @@ def task_execute(fetched_task_id):
         times=3,
         exceptions=(requests.HTTPError,),
         condition=lambda exc: exc.response.status_code == 500,
-        on_failure=fail_task,
     )
     def _execute(fetched_task: OpenKlantInternalTaskModel):
         execute(fetched_task, registry=register)
