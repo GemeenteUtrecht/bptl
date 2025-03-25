@@ -74,8 +74,8 @@ def task_execute(fetched_task_id):
         logger.warning("Task %r has been already run", fetched_task_id)
         return
 
-    task_uuid = fetched_task.task_uuid
-    logger.info("Task UUID is %s", task_uuid)
+    task_id = fetched_task.task_id
+    logger.info("Task UUID is %s", task_id)
 
     fetched_task.status = Statuses.in_progress
     fetched_task.save(update_fields=["status"])

@@ -20,4 +20,4 @@ class OpenKlantActorAdmin(SingletonModelAdmin):
 class OpenKlantInternalTaskAdmin(PolymorphicChildModelAdmin):
     list_display = ("__str__", "status")
     list_filter = ("topic_name", "status")
-    search_fields = ("task_uuid", "worker_id")
+    search_fields = ("task_id", "worker_id")

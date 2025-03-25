@@ -75,7 +75,7 @@ class OpenKlantInternalTaskModel(BaseTask):
             "worker ID is allowed to unlock/modify the task. Used as a lock."
         ),
     )
-    task_uuid = models.CharField(_("task uuid"), max_length=50)
+    task_id = models.CharField(_("task uuid"), max_length=50)
     openklant_error = models.JSONField(
         _("openklant error"),
         blank=True,
@@ -88,4 +88,4 @@ class OpenKlantInternalTaskModel(BaseTask):
         verbose_name_plural = _("openklant internal tasks")
 
     def __str__(self):
-        return f"{self.topic_name} / {self.task_uuid}"
+        return f"{self.topic_name} / {self.task_id}"
