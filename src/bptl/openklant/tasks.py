@@ -46,7 +46,7 @@ def task_fetch_and_patch():
     # once we're completed, which may be way within the timeout, we need to-reschedule
     # a new long-poll! this needs to run _after_ the current task has exited, otherwise
     # the celery-once lock kicks in
-    task_schedule_new_fetch.apply_async(
+    task_schedule_new_fetch_and_patch.apply_async(
         countdown=0.5,
     )
     return num_tasks
