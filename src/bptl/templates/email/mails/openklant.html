@@ -1,0 +1,94 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>{{ subject }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.3;
+            background-color: #f4f5f6;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .main {
+            background: #ffffff;
+            border: 1px solid #eaebed;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .left-column {
+            width: 33%;
+            font-weight: bold;
+        }
+        .right-column {
+            width: 66%;
+        }
+        @media only screen and (max-width: 640px) {
+            .container, .main {
+                padding: 8px !important;
+                width: 100% !important;
+            }
+            .row {
+                flex-direction: column;
+            }
+            .left-column, .right-column {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <table role="presentation" width="100%" bgcolor="#f4f5f6" style="border-collapse: collapse;">
+        <tr>
+            <td>&nbsp;</td>
+            <td class="container">
+                <img src="{{ logo_url }}" alt="Wapen Utrecht Rood">
+                <div class="main">
+                    <p>Beste Collega,</p>
+                    <p>Het is ons niet gelukt om de inwoner, het bedrijf of de instelling naar je door te verbinden. We willen je daarom vragen om binnen 48 uur contact op te nemen met de betrokkene. Hieronder vind je de gegevens en het onderwerp.</p>
+                    <div class="row" style="margin-bottom: 12px;">
+                        <div class="left-column">Toelichting voor de collega:</div>
+                        <div class="right-column">{% toelichting %}</div>
+                    </div>
+                    <div class="row">
+                        <div class="left-column">Naam:</div>
+                        <div class="right-column">{% naam %}</div>
+                    </div>
+                    <div class="row">
+                        <div class="left-column">Telefoonnummer:</div>
+                        <div class="right-column">{% telefoonnummer %}</div>
+                    </div>
+                    <div class="row">
+                        <div class="left-column">E-mailadres:</div>
+                        <div class="right-column">{% email %}</div>
+                    </div>
+                    <div class="row">
+                        <div class="left-column">Vraag:</div>
+                        <div class="right-column">{% vraag %}</div>
+                    </div>
+                    <p>Met vriendelijke groeten,</p>
+                    <p>Het Klantcontactcentrum</p>
+                    <p>Dit is een automatisch gegenereerd bericht; het is niet mogelijk via dit bericht te reageren.</p>
+                </div>
+            </td>
+            <td>&nbsp;</td>
+        </tr>
+    </table>
+</body>
+</html>

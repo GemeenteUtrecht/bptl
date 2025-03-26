@@ -1,1 +1,18 @@
-{% load i18n %}Well, well, well, Mr. Anderson.
+{% load i18n %}Beste Collega,
+
+Het is ons niet gelukt om de inwoner, het bedrijf of de instelling naar je door te verbinden.
+We willen je daarom vragen om binnen 48 uur contact op te nemen met de betrokkene.
+Hieronder vind je de gegevens en het onderwerp.
+
+{% onderwerp %}
+
+Toelichting voor de collega: {% toelichting %}
+
+Naam: {% naam %}
+Telefoonnummer: {% telefoonnummer %}
+E-mailadres: {% email %}
+Vraag: {% vraag %}
+
+Met vriendelijke groet,
+
+Het Klantcontactcentrum
