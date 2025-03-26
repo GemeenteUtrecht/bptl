@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.templatetags.static import static
