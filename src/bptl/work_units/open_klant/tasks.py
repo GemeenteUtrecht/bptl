@@ -55,6 +55,9 @@ class NotificeerBetrokkene(WorkUnit):
             email_context["telefoonnummer"] = ", ".join(telefoonnummers)
             email_context["naam"] = ", ".join(namen)
             email_context["email"] = ", ".join(emails)
+            email_context["onderwerp"] = klantcontact.get("onderwerp", "N.B.")
+
+        email_context["subject"] = "Verzoek om contact op te nemen met betrokkene"
 
         # Get email template
         email_openklant_template = get_template("email/mails/openklant.txt")
