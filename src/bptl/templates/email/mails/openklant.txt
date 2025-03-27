@@ -4,14 +4,14 @@ Het is ons niet gelukt om de inwoner, het bedrijf of de instelling naar je door 
 We willen je daarom vragen om binnen 48 uur contact op te nemen met de betrokkene.
 Hieronder vind je de gegevens en het onderwerp.
 
-Onderwerp: {% onderwerp %}
+Onderwerp: {{ onderwerp }}
 
-Toelichting voor de collega: {% toelichting %}
+Toelichting voor de collega: {{ toelichting }}
 
-Naam: {% naam %}
-Telefoonnummer: {% telefoonnummer %}
-E-mailadres: {% email %}
-Vraag: {% vraag %}
+Naam: {{ naam }}
+Telefoonnummer: {{ telefoonnummer }}
+E-mailadres: {{ email }}
+Vraag: {{ vraag }}
 
 Met vriendelijke groet,
 
