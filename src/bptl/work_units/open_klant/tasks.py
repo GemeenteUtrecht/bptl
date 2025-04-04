@@ -8,7 +8,7 @@ from bptl.openklant.client import get_openklant_client
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
-from .api import get_klantcontact_for_interne_taak
+from .api import get_details_betrokkene, get_klantcontact_for_interne_taak
 from .utils import get_actor_email_from_interne_taak, get_logo_url
 
 __all__ = ["SendEmailTask"]
