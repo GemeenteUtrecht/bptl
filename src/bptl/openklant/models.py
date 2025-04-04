@@ -50,6 +50,20 @@ class OpenKlantConfig(SingletonModel):
         help_text=_("External service to configure credentials for."),
         null=True,
     )
+    objects_service = models.ForeignKey(
+        "zgw_consumers.Service",
+        on_delete=models.CASCADE,
+        verbose_name=_("objects service"),
+        help_text=_("External objects service used by OpenKlant."),
+        null=True,
+    )
+    objecttypes_service = models.ForeignKey(
+        "zgw_consumers.Service",
+        on_delete=models.CASCADE,
+        verbose_name=_("objecttypes service"),
+        help_text=_("External objecttypes service used by OpenKlant."),
+        null=True,
+    )
     actor = models.ForeignKey(
         "OpenKlantActorModel",
         on_delete=models.CASCADE,
@@ -57,6 +71,23 @@ class OpenKlantConfig(SingletonModel):
         help_text=_("Actor associated with BPTL in OpenKlant."),
         null=True,
     )
+
+
+class InterneTask(models.Model):
+    gevraagde_handeling = models.CharField(
+        max_length=200,
+        default="",
+        unique=True,
+        help_text=_(
+            "Gevraagde handeling voor actor(en) van interne taak in OpenKlant."
+        ),
+    )
+
+    class Meta:
+        verbose_name = _("Interne Tasks gevraagde handeling")
+
+    def __str__(self):
+        return self.gevraagde_handeling
 
 
 class OpenKlantInternalTaskModel(BaseTask):

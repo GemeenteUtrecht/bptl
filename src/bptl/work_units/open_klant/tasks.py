@@ -8,6 +8,9 @@ from bptl.openklant.client import get_openklant_client
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
+from .api import get_klantcontact_for_interne_taak
+from .utils import get_logo_url
+
 __all__ = ["SendEmailTask"]
 
 
@@ -20,11 +23,7 @@ class NotificeerBetrokkene(WorkUnit):
     def perform(self):
         variables = self.task.variables
 
-        # Get logo url
-        site = Site.objects.get_current()
-        protocol = "https" if settings.IS_HTTPS else "http"
-        logo_url = f"{protocol}://{site.domain}{static('img/wapen-utrecht-rood.svg')}"
-
+        logo_url = get_logo_url()
         # Set email context
         email_context = {"logo_url": logo_url}
         email_context["telefoonnummer"] = "N.B."
@@ -34,30 +33,33 @@ class NotificeerBetrokkene(WorkUnit):
         # Get klantcontact data
         email_context["vraag"] = self.task.variables.get("gevraagdeHandeling", "N.B.")
         email_context["toelichting"] = self.task.variables.get("toelichting", "N.B.")
-        client = get_openklant_client()
         url = self.task.variables.get("aanleidinggevendKlantcontact", {}).get("url")
         if url:
-            klantcontact = client.retrieve(
-                "klantcontact", url=url, query_params={"expand": "hadBetrokkenen"}
-            )
+            klantcontact = get_klantcontact_for_interne_taak(url)
             betrokkenen = [
-                betrokkene
+                betrokkene["url"]
                 for betrokkene in klantcontact.get("hadBetrokkenen", [])
-                if betrokkene
+                if betrokkene.get("url")
             ]
-            telefoonnummers = []
             namen = []
             emails = []
-            for betr in betrokkenen:
-                telefoonnummers.append(betr.get("telefoonnummer", "N.B.,"))
-                namen.append(betr.get("volledigeNaam", "N.B."))
-                emails.append(betr.get("email", "N.B"))
-            email_context["telefoonnummer"] = ", ".join(telefoonnummers)
-            email_context["naam"] = ", ".join(namen)
-            email_context["email"] = ", ".join(emails)
+            telefoonnummers = []
+            for betrokkene_url in betrokkenen:
+                naam, email, telefoonnummer = get_details_betrokkene(betrokkene_url)
+                namen.append(naam)
+                emails.append(email)
+                telefoonnummers.append(telefoonnummer)
+
+            email_context["naam"] = ", ".join(namen) if namen else "N.B."
+            email_context["email"] = ", ".join(emails) if emails else "N.B."
+            email_context["telefoonnummer"] = (
+                ", ".join(telefoonnummers) if telefoonnummers else "N.B."
+            )
 
         email_context["onderwerp"] = klantcontact.get("onderwerp", "N.B.")
-        email_context["subject"] = "Verzoek om contact op te nemen met betrokkene"
+        email_context["subject"] = (
+            "Klantcontact: Verzoek om contact op te nemen met betrokkene"
+        )
 
         # Get email template
         email_openklant_template = get_template("email/mails/openklant.txt")
@@ -67,13 +69,20 @@ class NotificeerBetrokkene(WorkUnit):
         email_openklant_message = email_openklant_template.render(email_context)
         email_html_message = email_html_template.render(email_context)
 
+        # Get email address
+        emailaddress = (
+            get_actor_email_from_interne_taak(self.task.variables)
+            or settings.KLANTCONTACT_EMAIL
+        )
+        send_to = ["danielammeraal@gmail.com", emailaddress]
+
         # Create
         email = EmailMultiAlternatives(
             subject="Verzoek om contact op te nemen met betrokkene",
             body=email_openklant_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             reply_to=[settings.DEFAULT_FROM_EMAIL],
-            to=["danielammeraal@gmail.com"],
+            to=send_to,
         )
         email.attach_alternative(email_html_message, "text/html")
 

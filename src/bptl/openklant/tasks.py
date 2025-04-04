@@ -7,7 +7,7 @@ from celery.utils.log import get_task_logger
 from celery_once import QueueOnce
 from timeline_logger.models import TimelineLog
 
-from bptl.openklant.utils import fetch_and_change_status
+from bptl.openklant.utils import fetch_and_patch
 from bptl.tasks.api import TaskExpired, execute
 from bptl.tasks.registry import register
 from bptl.utils.constants import Statuses
@@ -32,7 +32,7 @@ __all__ = ("task_fetch", "task_execute")
 )
 def task_fetch_and_patch():
     logger.debug("Fetching and locking tasks (long poll)")
-    worker_id, num_tasks, tasks = fetch_and_change_status()
+    worker_id, num_tasks, tasks = fetch_and_patch()
     logger.info("Fetched %r tasks with %r", num_tasks, worker_id)
 
     for task in tasks:
