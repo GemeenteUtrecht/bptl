@@ -3,12 +3,22 @@ from django.contrib import admin
 from polymorphic.admin import PolymorphicChildModelAdmin
 from solo.admin import SingletonModelAdmin
 
-from .models import OpenKlantActorModel, OpenKlantConfig, OpenKlantInternalTaskModel
+from .models import (
+    InterneTask,
+    OpenKlantActorModel,
+    OpenKlantConfig,
+    OpenKlantInternalTaskModel,
+)
 
 
 @admin.register(OpenKlantConfig)
 class OpenKlantConfigAdmin(SingletonModelAdmin):
     pass
+
+
+@admin.register(InterneTask)
+class InterneTaskAdmin(admin.ModelAdmin):
+    list_display = ("__str__",)
 
 
 @admin.register(OpenKlantActorModel)

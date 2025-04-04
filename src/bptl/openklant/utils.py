@@ -14,17 +14,24 @@ from timeline_logger.models import TimelineLog
 from bptl.tasks.constants import EngineTypes
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.utils import get_worker_id
+from bptl.utils import cache
 from bptl.utils.decorators import retry
 from bptl.utils.typing import Object, ProcessVariables
 from bptl.work_units.zgw.utils import get_paginated_results
 
 from .client import get_openklant_client
-from .models import OpenKlantConfig, OpenKlantInternalTaskModel
+from .models import InterneTask, OpenKlantConfig, OpenKlantInternalTaskModel
 
 logger = logging.getLogger(__name__)
 
 
-def fetch_and_change_status(
+@cache("interne_task_gevraagde_handelingen")
+def get_gevraagde_handelingen() -> List[str]:
+    # Get gevraagde handelingen in a list of strings - caching gets cleared on every save of an InterneTask object.
+    return [t.gevraagde_handeling for t in InterneTask.objects.all()]
+
+
+def fetch_and_patch(
     openklant_config: Optional[OpenKlantConfig] = None,
 ) -> Tuple[str, int, list]:
     """
@@ -39,12 +46,23 @@ def fetch_and_change_status(
     )
     actor = openklant_config.actor.name
     openklant_client = get_openklant_client(openklant_config)
-    openklant_tasks: List[Object] = get_paginated_results(
+
+    # Get all tasks that still need to be "verwerkt"
+    openklant_tasks = get_paginated_results(
         openklant_client,
         "internetaken",
-        query_params={"actoren__naam": actor, "status": "te_verwerken"},
+        query_params={"status": "te_verwerken"},
     )
 
+    # Filter out tasks that have an InterneTask model in BPTL.
+    gevraagde_handelingen = get_gevraagde_handelingen()
+    openklant_tasks = [
+        t
+        for t in openklant_tasks
+        if t.get("gevraagdeHandeling") in gevraagde_handelingen
+    ]
+
+    # Update status in open klant to "verwerkt"
     for task in openklant_tasks:
         openklant_client.partial_update(
             "internetaak", {"status": "verwerkt"}, url=task["url"]
