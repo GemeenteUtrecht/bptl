@@ -8,7 +8,7 @@ from django.templatetags.static import static
 from zds_client.client import Client as ZDSClient
 
 from bptl.openklant.models import OpenKlantConfig
-from bptl.utils import cache
+from bptl.utils.decorators import cache
 from bptl.work_units.zgw.utils import get_paginated_results
 
 logger = logging.getLogger(__name__)

@@ -56,6 +56,7 @@ class OpenKlantConfig(SingletonModel):
         verbose_name=_("objects service"),
         help_text=_("External objects service used by OpenKlant."),
         null=True,
+        related_name="objects_service",
     )
     objecttypes_service = models.ForeignKey(
         "zgw_consumers.Service",
@@ -63,6 +64,7 @@ class OpenKlantConfig(SingletonModel):
         verbose_name=_("objecttypes service"),
         help_text=_("External objecttypes service used by OpenKlant."),
         null=True,
+        related_name="objecttypes_service",
     )
     actor = models.ForeignKey(
         "OpenKlantActorModel",

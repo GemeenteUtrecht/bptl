@@ -14,8 +14,7 @@ from timeline_logger.models import TimelineLog
 from bptl.tasks.constants import EngineTypes
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.utils import get_worker_id
-from bptl.utils import cache
-from bptl.utils.decorators import retry
+from bptl.utils.decorators import cache, retry
 from bptl.utils.typing import Object, ProcessVariables
 from bptl.work_units.zgw.utils import get_paginated_results
 

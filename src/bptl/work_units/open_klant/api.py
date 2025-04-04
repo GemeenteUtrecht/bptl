@@ -1,8 +1,8 @@
 from typing import Dict, Optional, Tuple
 
-from bptl.openklant.client import get_openklant_client
+from zds_client.client import Client as ZDSClient
 
-client = get_openklant_client()
+from bptl.openklant.client import get_openklant_client
 
 
 def get_klantcontact_for_interne_taak(
