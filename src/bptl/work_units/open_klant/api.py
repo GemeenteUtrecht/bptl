@@ -33,13 +33,13 @@ def get_details_betrokkene(
     emails = []
     for da in digital_addresses:
         if (da.get("soortDigitaalAdres", "") == "email") and (
-            email := data.get(
+            email := da.get(
                 "adres",
             )
         ):
             emails.append(email)
         elif (da.get("soortDigitaalAdres", "") == "telefoonnummer") and (
-            telefoonnummer := data.get(
+            telefoonnummer := da.get(
                 "adres",
             )
         ):
