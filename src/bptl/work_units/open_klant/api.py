@@ -3,6 +3,7 @@ from typing import Dict, Optional, Tuple
 from zds_client.client import Client as ZDSClient
 
 from bptl.openklant.client import get_openklant_client
+from bptl.work_units.zgw.utils import get_paginated_results
 
 
 def get_klantcontact_for_interne_taak(
