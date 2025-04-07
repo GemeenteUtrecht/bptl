@@ -1,12 +1,14 @@
 import logging
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.templatetags.static import static
 
 from zds_client.client import Client as ZDSClient
+from zgw_consumers.concurrent import parallel
 
+from bptl.openklant.client import get_openklant_client
 from bptl.openklant.models import OpenKlantConfig
 from bptl.utils.decorators import cache
 from bptl.work_units.zgw.utils import get_paginated_results
@@ -55,13 +57,28 @@ def get_organisatie_eenheid_email(
     return emails[0]
 
 
-def get_actor_email_from_interne_taak(interne_taak: Dict) -> str:
+def get_actor_email_from_interne_taak(
+    interne_taak: Dict, client: Optional[ZDSClient] = None
+) -> str:
+    actor_urls = [
+        actor["url"] for actor in interne_taak.get("toegewezenAanActoren", [])
+    ]
+    if not actor_urls:
+        return ""
+
+    client = get_openklant_client() if not client else client
+
+    def _get_actor_from_url(actor_url: str) -> Dict:
+        nonlocal client
+        return client.retrieve("actor", url=actor_url)
+
+    with parallel() as executor:
+        actoren = list(executor.map(_get_actor_from_url, actor_urls))
+
     actor_is_medewerker = False
     found_actor = None
     actieve_actoren = [
-        actor
-        for actor in interne_taak.get("toegewezenAanActoren", [])
-        if actor.get("indicatieActief", False)
+        actor for actor in actoren if actor.get("indicatieActief", False)
     ]
     if not actieve_actoren:
         return ""

@@ -79,7 +79,7 @@ class NotificeerBetrokkene(WorkUnit):
 
         # Get email address
         emailaddress = (
-            get_actor_email_from_interne_taak(self.task.variables)
+            get_actor_email_from_interne_taak(self.task.variables, client=client)
             or settings.KLANTCONTACT_EMAIL
         )
         send_to = ["danielammeraal@gmail.com", emailaddress]
