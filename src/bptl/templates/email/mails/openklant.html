@@ -2,97 +2,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>{{ subject }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.3;
-            background-color: #f4f5f6;
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-            -ms-text-size-adjust: 100%;
-            -webkit-text-size-adjust: 100%;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-        .main {
-            background: #ffffff;
-            border: 1px solid #eaebed;
-            border-radius: 12px;
-            padding: 24px;
-        }
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .left-column {
-            width: 33%;
-            font-weight: bold;
-        }
-        .right-column {
-            width: 66%;
-        }
-        @media only screen and (max-width: 640px) {
-            .container, .main {
-                padding: 8px !important;
-                width: 100% !important;
-            }
-            .row {
-                flex-direction: column;
-            }
-            .left-column, .right-column {
-                width: 100%;
-            }
-        }
-    </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>{{ subject }}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f4f5f6;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .main {
+      background-color: #ffffff;
+      border: 1px solid #eaebed;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .row {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .label-cell {
+      width: 33%;
+      font-weight: bold;
+      vertical-align: top;
+      padding-right: 10px;
+    }
+    .value-cell {
+      width: 67%;
+    }
+    @media only screen and (max-width: 640px) {
+      .container {
+        padding: 8px !important;
+      }
+      .main {
+        padding: 16px !important;
+      }
+      .label-cell, .value-cell {
+        display: block;
+        width: 100% !important;
+      }
+    }
+  </style>
 </head>
 <body>
-    <table role="presentation" width="100%" bgcolor="#f4f5f6" style="border-collapse: collapse;">
-        <tr>
-            <td>&nbsp;</td>
-            <td class="container">
-                <img src="{{ logo_url }}" alt="Wapen Utrecht Rood">
-                <div class="main">
-                    <p>Beste Collega,</p>
-                    <p>Het is ons niet gelukt om de inwoner, het bedrijf of de instelling naar je door te verbinden. We willen je daarom vragen om <strong>binnen 48 uur</strong> contact op te nemen met de betrokkene. Hieronder vind je de gegevens en het onderwerp.</p>
-                    <div class="row" style="margin-bottom: 12px;">
-                        <div class="left-column">Onderwerp:</div>
-                        <div class="right-column">{{ onderwerp }}</div>
-                    </div>
-                    <div class="row" style="margin-bottom: 12px;">
-                        <div class="left-column">Toelichting:</div>
-                        <div class="right-column">{{ toelichting }}</div>
-                    </div>
-                    <div class="row">
-                        <div class="left-column">Naam:</div>
-                        <div class="right-column">{{ naam }}</div>
-                    </div>
-                    <div class="row">
-                        <div class="left-column">Telefoonnummer:</div>
-                        <div class="right-column">{{ telefoonnummer }}</div>
-                    </div>
-                    <div class="row" style="margin-bottom: 12px;">
-                        <div class="left-column">E-mailadres:</div>
-                        <div class="right-column">{{ email }}</div>
-                    </div>
-                    <div class="row" style="margin-bottom: 12px;">
-                        <div class="left-column">Vraag:<div>
-                        <div class="right-column">{{ vraag }}</div>
-                    </div>
-                    <p>Met vriendelijke groeten,</p>
-                    <p>Het Klantcontactcentrum</p>
-                    <p>Dit is een automatisch gegenereerd bericht; het is niet mogelijk via dit bericht te reageren.</p>
-                </div>
+  <table role="presentation" width="100%" bgcolor="#f4f5f6" cellpadding="0" cellspacing="0">
+    <tr>
+      <td>&nbsp;</td>
+      <td align="center" class="container">
+        <img src="{{ logo_url }}" alt="Wapen Utrecht Rood" style="max-width: 100%; height: auto; margin-bottom: 16px;" />
+        <table role="presentation" class="main" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <p>Beste Collega,</p>
+              <p>
+                Het is ons niet gelukt om de inwoner, het bedrijf of de instelling naar je door te verbinden. 
+                We willen je daarom vragen om <strong>binnen 48 uur</strong> contact op te nemen met de betrokkene. 
+                Hieronder vind je de gegevens en het onderwerp.
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr class="row">
+                  <td class="label-cell">Onderwerp:</td>
+                  <td class="value-cell">{{ onderwerp }}</td>
+                </tr>
+                <tr class="row">
+                  <td class="label-cell">Toelichting:</td>
+                  <td class="value-cell">{{ toelichting }}</td>
+                </tr>
+                <tr class="row">
+                  <td class="label-cell">Naam:</td>
+                  <td class="value-cell">{{ naam }}</td>
+                </tr>
+                <tr class="row">
+                  <td class="label-cell">Telefoonnummer:</td>
+                  <td class="value-cell">{{ telefoonnummer }}</td>
+                </tr>
+                <tr class="row">
+                  <td class="label-cell">E-mailadres:</td>
+                  <td class="value-cell">{{ email }}</td>
+                </tr>
+                <tr class="row">
+                  <td class="label-cell">Vraag:</td>
+                  <td class="value-cell">{{ vraag }}</td>
+                </tr>
+              </table>
+
+              <p>Met vriendelijke groeten,</p>
+              <p>Het Klantcontactcentrum</p>
+              <p style="font-size: 11px; color: #777;">
+                Dit is een automatisch gegenereerd bericht; het is niet mogelijk via dit bericht te reageren.
+              </p>
             </td>
-            <td>&nbsp;</td>
-        </tr>
-    </table>
+          </tr>
+        </table>
+      </td>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
 </body>
 </html>
