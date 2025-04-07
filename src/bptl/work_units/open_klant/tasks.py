@@ -34,6 +34,7 @@ class NotificeerBetrokkene(WorkUnit):
         email_context["vraag"] = self.task.variables.get("gevraagdeHandeling", "N.B.")
         email_context["toelichting"] = self.task.variables.get("toelichting", "N.B.")
         url = self.task.variables.get("aanleidinggevendKlantcontact", {}).get("url")
+        client = get_openklant_client()
         if url:
             klantcontact = get_klantcontact_for_interne_taak(url)
             betrokkenen = [
@@ -45,7 +46,9 @@ class NotificeerBetrokkene(WorkUnit):
             emails = []
             telefoonnummers = []
             for betrokkene_url in betrokkenen:
-                naam, email, telefoonnummer = get_details_betrokkene(betrokkene_url)
+                naam, email, telefoonnummer = get_details_betrokkene(
+                    betrokkene_url, client=client
+                )
                 namen.append(naam)
                 emails.append(email)
                 telefoonnummers.append(telefoonnummer)

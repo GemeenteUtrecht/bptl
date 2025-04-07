@@ -18,6 +18,10 @@ def get_klantcontact_for_interne_taak(
 def get_details_betrokkene(
     betrokkene_url: str, client: Optional[ZDSClient] = None
 ) -> Tuple[str, str, str]:
+
+    if not client:
+        client = get_openklant_client()
+
     digital_addresses = get_paginated_results(
         client,
         "digitaleadressen",
