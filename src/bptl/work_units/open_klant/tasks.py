@@ -4,6 +4,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.templatetags.static import static
 
+from premailer import transform
+
 from bptl.openklant.client import get_openklant_client
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
@@ -71,6 +73,9 @@ class NotificeerBetrokkene(WorkUnit):
         # Render
         email_openklant_message = email_openklant_template.render(email_context)
         email_html_message = email_html_template.render(email_context)
+        inlined_email_html_message = transform(
+            email_html_message
+        )  # This inlines all the styles
 
         # Get email address
         emailaddress = (
@@ -87,7 +92,7 @@ class NotificeerBetrokkene(WorkUnit):
             reply_to=[settings.DEFAULT_FROM_EMAIL],
             to=send_to,
         )
-        email.attach_alternative(email_html_message, "text/html")
+        email.attach_alternative(inlined_email_html_message, "text/html")
 
         # Send
         email.send(fail_silently=False)

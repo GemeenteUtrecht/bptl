@@ -30,6 +30,10 @@ bitly-api-py3==0.3
     # via
     #   -r requirements/base.txt
     #   django-docutils
+cachetools==5.5.2
+    # via
+    #   -r requirements/base.txt
+    #   premailer
 celery==5.4.0
     # via
     #   -r requirements/base.txt
@@ -77,8 +81,15 @@ cryptography==3.4.7
     # via
     #   -r requirements/base.txt
     #   django-auth-adfs
-cssselect==1.1.0
-    # via pyquery
+cssselect==1.3.0
+    # via
+    #   -r requirements/base.txt
+    #   premailer
+    #   pyquery
+cssutils==2.11.1
+    # via
+    #   -r requirements/base.txt
+    #   premailer
 defusedxml==0.7.1
     # via
     #   -r requirements/base.txt
@@ -257,11 +268,16 @@ lxml==4.7.1
     # via
     #   -r requirements/base.txt
     #   django-docutils
+    #   premailer
     #   pyquery
 markupsafe==2.0.1
     # via
     #   -r requirements/base.txt
     #   jinja2
+more-itertools==10.6.0
+    # via
+    #   -r requirements/base.txt
+    #   cssutils
 orderedmultidict==1.0.1
     # via
     #   -r requirements/base.txt
@@ -275,6 +291,8 @@ polib==1.1.1
     # via
     #   -r requirements/base.txt
     #   django-rosetta
+premailer==3.10.0
+    # via -r requirements/base.txt
 prometheus-client==0.11.0
     # via
     #   -r requirements/base.txt
@@ -336,6 +354,7 @@ requests==2.26.0
     #   django-camunda
     #   django-rosetta
     #   gemma-zds-client
+    #   premailer
     #   requests-mock
     #   sphinx
     #   zgw-consumers
