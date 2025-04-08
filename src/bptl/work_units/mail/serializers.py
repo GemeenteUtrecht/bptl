@@ -5,18 +5,18 @@ from bptl.tasks.base import MissingVariable
 
 VALID_TEMPLATE_CHOICES = {
     "generiek": {
-        "html": "email/mails/generic_email.html",
-        "plain": "email/mails/generic_email.txt",
+        "html": "mails/generic_email.html",
+        "plain": "mails/generic_email.txt",
     },
     "accordering": {
-        "html": "email/mails/review.html",
-        "plain": "email/mails/review.txt",
+        "html": "mails/review.html",
+        "plain": "mails/review.txt",
     },
-    "advies": {"html": "email/mails/review.html", "plain": "email/mails/review.txt"},
-    "nen2580": {"html": "email/mails/nen2580.html", "plain": "email/mails/nen2580.txt"},
+    "advies": {"html": "mails/review.html", "plain": "mails/review.txt"},
+    "nen2580": {"html": "mails/nen2580.html", "plain": "mails/nen2580.txt"},
     "verzoek_afgehandeld": {
-        "html": "email/mails/verzoek_afgehandeld.html",
-        "plain": "email/mails/verzoek_afgehandeld.txt",
+        "html": "mails/verzoek_afgehandeld.html",
+        "plain": "mails/verzoek_afgehandeld.txt",
     },
 }
 

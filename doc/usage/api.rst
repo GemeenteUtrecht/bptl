@@ -57,6 +57,13 @@ Camunda
 .. automodule:: bptl.work_units.camunda_api.tasks
     :members:
 
+OpenKlant
+---------
+
+.. automodule:: bptl.work_units.open_klant.tasks
+    :members:
+
+
 ValidSign
 ---------
 
@@ -66,7 +73,7 @@ ValidSign
 Email
 -----
 
-.. automodule:: bptl.work_units.email.tasks
+.. automodule:: bptl.work_units.mail.tasks
     :members:
 
 Kownsl

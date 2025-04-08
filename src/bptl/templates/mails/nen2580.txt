@@ -1,4 +1,4 @@
-{% extends "email/mails/base.txt" %}
+{% extends "mails/base.txt" %}
 {% load i18n %}{% block body %}Wij hebben de door jou aangeleverde documenten bekeken en vragen je de onderstaande wijzigingen hier te doen:
 
 {{ email.content }}

@@ -1,5 +1,6 @@
+from email.mime.image import MIMEImage
+
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.templatetags.static import static
@@ -11,7 +12,7 @@ from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
 from .api import get_details_betrokkene, get_klantcontact_for_interne_taak
-from .utils import get_actor_email_from_interne_taak, get_logo_url
+from .utils import get_actor_email_from_interne_taak
 
 __all__ = ["SendEmailTask"]
 
@@ -25,9 +26,8 @@ class NotificeerBetrokkene(WorkUnit):
     def perform(self):
         variables = self.task.variables
 
-        logo_url = get_logo_url()
         # Set email context
-        email_context = {"logo_url": logo_url}
+        email_context = {}
         email_context["telefoonnummer"] = "N.B."
         email_context["naam"] = "N.B."
         email_context["email"] = "N.B."
@@ -67,8 +67,8 @@ class NotificeerBetrokkene(WorkUnit):
         )
 
         # Get email template
-        email_openklant_template = get_template("email/mails/openklant.txt")
-        email_html_template = get_template("email/mails/openklant.html")
+        email_openklant_template = get_template("mails/openklant.txt")
+        email_html_template = get_template("mails/openklant.html")
 
         # Render
         email_openklant_message = email_openklant_template.render(email_context)
@@ -93,6 +93,14 @@ class NotificeerBetrokkene(WorkUnit):
             to=send_to,
         )
         email.attach_alternative(inlined_email_html_message, "text/html")
+
+        with open(static("img/wapen-utrecht-rood.svg"), "rb") as wapen:
+            mime_image = MIMEImage(img.read())
+            mime_image.add_header("Content-ID", "<wapen_utrecht_cid>")
+            mime_image.add_header(
+                "Content-Disposition", "inline", filename="wapen-utrecht-rood.svg"
+            )
+            email.attach(mime_image)
 
         # Send
         email.send(fail_silently=False)
