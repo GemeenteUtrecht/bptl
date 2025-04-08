@@ -57,13 +57,6 @@ Camunda
 .. automodule:: bptl.work_units.camunda_api.tasks
     :members:
 
-OpenKlant
----------
-
-.. automodule:: bptl.work_units.open_klant.tasks
-    :members:
-
-
 ValidSign
 ---------
 
