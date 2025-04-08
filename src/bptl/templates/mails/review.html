@@ -1,5 +1,5 @@
 
-{% extends "email/mails/base.html" %}
+{% extends "mails/base.html" %}
 {% load i18n %}{% block body %}<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">We willen je op de hoogte brengen van een belangrijke ontwikkeling met betrekking tot zaak: {{ zaakIdentificatie }} met omschrijving: "{{ zaakOmschrijving }}", waarbij jouw {{ reviewType }} essentieel is. De deadline hiervoor is {{ deadline }}.</p>
 <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">Om het proces vlot te laten verlopen en een tijdige afhandeling te waarborgen, hebben we jouw medewerking nodig. We vragen je vriendelijk om jouw benodigde {{ reviewType }} te geven voor {{ deadline }}.</p>
 <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">Volg eenvoudig deze stappen om de {{ vraag }} af te handelen:</p>

@@ -101,7 +101,7 @@ INSTALLED_APPS = [
     "bptl.work_units.zgw.objects",
     "bptl.work_units.zgw.zac",
     "bptl.work_units.valid_sign",
-    "bptl.work_units.email",
+    "bptl.work_units.mail",
     "bptl.work_units.xential",
     "bptl.work_units.open_klant",
 ]

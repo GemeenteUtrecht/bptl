@@ -1,28 +1,14 @@
 import logging
 from typing import Dict, List, Optional
 
-from django.conf import settings
-from django.contrib.sites.models import Site
-from django.templatetags.static import static
-
 from zds_client.client import Client as ZDSClient
 from zgw_consumers.concurrent import parallel
 
 from bptl.openklant.client import get_openklant_client
 from bptl.openklant.models import OpenKlantConfig
-from bptl.utils.decorators import cache
 from bptl.work_units.zgw.utils import get_paginated_results
 
 logger = logging.getLogger(__name__)
-
-
-@cache("utrecht_logo_url")
-def get_logo_url() -> str:
-    # Get logo url - caching gets cleared on every save of the Site object.
-    site = Site.objects.get_current()
-    protocol = "https" if settings.IS_HTTPS else "http"
-    logo_url = f"{protocol}://{site.domain}{static('img/wapen-utrecht-rood.svg')}"
-    return logo_url
 
 
 def get_organisatie_eenheid_email(
