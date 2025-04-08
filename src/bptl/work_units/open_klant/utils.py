@@ -34,7 +34,7 @@ def get_organisatie_eenheid_email(
 
     results = get_paginated_results(
         obj_client,
-        "objects",
+        "object",
         query_params={"data_attr": f"identificatie__exact__{actor_object_id}"},
     )
     if not results:
