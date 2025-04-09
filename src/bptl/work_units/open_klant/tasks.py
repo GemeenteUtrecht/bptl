@@ -95,7 +95,7 @@ class NotificeerBetrokkene(WorkUnit):
         email.attach_alternative(inlined_email_html_message, "text/html")
 
         with open(static("img/wapen-utrecht-rood.svg"), "rb") as wapen:
-            mime_image = MIMEImage(img.read())
+            mime_image = MIMEImage(wapen.read())
             mime_image.add_header("Content-ID", "<wapen_utrecht_cid>")
             mime_image.add_header(
                 "Content-Disposition", "inline", filename="wapen-utrecht-rood.svg"

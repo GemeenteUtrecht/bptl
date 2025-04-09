@@ -82,6 +82,7 @@ ENVIRONMENT = "development"
 ELASTIC_APM["DEBUG"] = True
 
 # Django debug toolbar
+INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS
 INSTALLED_APPS += [
     "debug_toolbar",
     "ddt_api_calls",
