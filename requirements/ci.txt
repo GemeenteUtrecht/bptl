@@ -454,6 +454,8 @@ webob==1.8.7
     # via webtest
 webtest==2.0.35
     # via django-webtest
+whitenoise==6.9.0
+    # via -r requirements/base.txt
 zgw-consumers==0.15.2
     # via -r requirements/base.txt
 

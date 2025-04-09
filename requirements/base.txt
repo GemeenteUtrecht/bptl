@@ -307,6 +307,8 @@ vine==5.1.0
     #   kombu
 wcwidth==0.2.5
     # via prompt-toolkit
+whitenoise==6.9.0
+    # via -r requirements/base.in
 zgw-consumers==0.15.2
     # via -r requirements/base.in
 

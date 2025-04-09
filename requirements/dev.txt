@@ -512,6 +512,8 @@ webtest==2.0.35
     #   django-webtest
 wheel==0.36.2
     # via pip-tools
+whitenoise==6.9.0
+    # via -r requirements/ci.txt
 zgw-consumers==0.15.2
     # via -r requirements/ci.txt
 
