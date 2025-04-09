@@ -93,8 +93,9 @@ class NotificeerBetrokkene(WorkUnit):
             to=send_to,
         )
         email.attach_alternative(inlined_email_html_message, "text/html")
+        filepath = os.path.join(settings.STATIC_ROOT, "img/wapen-utrecht-rood.svg")
 
-        with open(static("img/wapen-utrecht-rood.svg"), "rb") as wapen:
+        with open(filepath, "rb") as wapen:
             mime_image = MIMEImage(wapen.read())
             mime_image.add_header("Content-ID", "<wapen_utrecht_cid>")
             mime_image.add_header(
