@@ -1,3 +1,4 @@
+import os
 from email.mime.image import MIMEImage
 
 from django.conf import settings
