@@ -57,14 +57,20 @@ class NotificeerBetrokkene(WorkUnit):
                 telefoonnummers.append(telefoonnummer)
 
             email_context["naam"] = ", ".join(namen) if namen else "N.B."
-            email_context["email"] = ", ".join(emails) if emails else "N.B."
+            email_context["email"] = (
+                ", ".join([mail for mail in emails if mail]) if emails else "N.B."
+            )
             email_context["telefoonnummer"] = (
-                ", ".join(telefoonnummers) if telefoonnummers else "N.B."
+                ", ".join([tel for tel in telefoonnummers if tel])
+                if telefoonnummers
+                else "N.B."
             )
 
         email_context["onderwerp"] = klantcontact.get("onderwerp", "N.B.")
         email_context["subject"] = (
-            "Klantcontact: Verzoek om contact op te nemen met betrokkene"
+            "KISS contactverzoek %s" % email_context["email"]
+            if email_context["email"] != "N.B."
+            else email_context["telefoonnummer"].split(", ")[0]
         )
 
         # Get email template
@@ -89,8 +95,8 @@ class NotificeerBetrokkene(WorkUnit):
         email = EmailMultiAlternatives(
             subject="Verzoek om contact op te nemen met betrokkene",
             body=email_openklant_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            reply_to=[settings.DEFAULT_FROM_EMAIL],
+            from_email=settings.DEFAULT_KCC_FROM_EMAIL,
+            reply_to=[settings.DEFAULT_KCC_FROM_EMAIL],
             to=send_to,
         )
         email.attach_alternative(inlined_email_html_message, "text/html")
