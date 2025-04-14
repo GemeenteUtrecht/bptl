@@ -93,7 +93,7 @@ class NotificeerBetrokkene(WorkUnit):
 
         # Create
         email = EmailMultiAlternatives(
-            subject="Verzoek om contact op te nemen met betrokkene",
+            subject=email_context["subject"],
             body=email_openklant_message,
             from_email=settings.DEFAULT_KCC_FROM_EMAIL,
             reply_to=[settings.DEFAULT_KCC_FROM_EMAIL],
