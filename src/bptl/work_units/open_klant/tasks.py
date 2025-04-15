@@ -67,11 +67,12 @@ class NotificeerBetrokkene(WorkUnit):
             )
 
         email_context["onderwerp"] = klantcontact.get("onderwerp", "N.B.")
-        email_context["subject"] = (
-            "KISS contactverzoek %s" % email_context["email"]
+        klantcontact_informatie = (
+            email_context["email"]
             if email_context["email"] != "N.B."
             else email_context["telefoonnummer"].split(", ")[0]
         )
+        email_context["subject"] = "KISS contactverzoek %s" % klantcontact_informatie
 
         # Get email template
         email_openklant_template = get_template("mails/openklant.txt")
