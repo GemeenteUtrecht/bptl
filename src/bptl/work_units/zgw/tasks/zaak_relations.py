@@ -418,7 +418,7 @@ class FetchZaakRelaties(ZGWWorkUnit):
         headers = get_nlx_headers(variables)
         headers["Accept-Crs"] = "EPSG:4326"
         zaak = zrc_client.retrieve(
-            "zaak", url=zaak_url, request_headers={"headers": headers}
+            "zaak", url=zaak_url, request_kwargs={"headers": headers}
         )
         relevante_andere_zaken = [
             {"url": z["url"], "aardRelatie": z["aardRelatie"]}
