@@ -96,6 +96,9 @@ def save_and_log(status=Statuses.performed):
 
 def retry(
     times=3,
+    exponential_rate=1.0,
+    max_times=10,
+    max_backoff=30,
     exceptions=(Exception,),
     condition: callable = lambda exc: True,
     delay=1.0,
@@ -105,13 +108,16 @@ def retry(
     Retry the decorated callable up to ``times`` if it raises a known exception.
 
     If the retries are all spent, then on_failure will be invoked.
+
+    Idiot proof
+    Default max times = 10
+    Default max backoff = 30 seconds
     """
 
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            tries_left = times + 1
-
+            tries_left = min(times, max_times) + 1
             logger.info("Tries left: %d, %r", tries_left, func)
 
             while tries_left > 0:
@@ -132,7 +138,11 @@ def retry(
                         on_failure(exc, *args, **kwargs)
                         raise
 
-                time.sleep(delay)
+                backoff = delay * pow(
+                    exponential_rate, min(times, max_times) - tries_left
+                )
+                backoff = min(backoff, max_backoff)
+                time.sleep(backoff)
 
         return wrapper
 

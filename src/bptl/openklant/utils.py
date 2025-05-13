@@ -1,5 +1,5 @@
 """
-Module for Camunda API interaction.
+Module for OpenKlant API interaction.
 """
 
 import json
