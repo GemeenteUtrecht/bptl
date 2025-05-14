@@ -82,9 +82,10 @@ def task_execute(fetched_task_id):
 
     # Catch and retry on http errors other than 500
     @retry(
-        times=3,
-        exceptions=(requests.HTTPError,),
-        condition=lambda exc: exc.response.status_code == 500,
+        times=5,
+        delay=3.0,
+        exponential_rate=2.0,
+        exceptions=(Exception,),
     )
     def _execute(fetched_task: OpenKlantInternalTaskModel):
         execute(fetched_task, registry=register)
