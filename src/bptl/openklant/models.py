@@ -5,18 +5,15 @@ We save tasks in our own database in case of crashes and for dev purposes, so th
 can pick up work load again.
 """
 
-from urllib.parse import urljoin
-
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, ugettext_lazy as _
 
 from solo.models import SingletonModel
-from zds_client.client import Client
 
 from bptl.tasks.models import BaseTask
 from bptl.tasks.utils import get_worker_id
+
+from .constants import FailedTaskStatuses
 
 
 class OpenKlantActorModel(SingletonModel):
@@ -122,3 +119,32 @@ class OpenKlantInternalTaskModel(BaseTask):
 
     def __str__(self):
         return f"{self.topic_name} / {self.task_id}"
+
+
+class FailedOpenKlantTasks(models.Model):
+    task = models.OneToOneField(
+        OpenKlantInternalTaskModel,
+        on_delete=models.CASCADE,
+        related_name="failed_task",
+        help_text="The OpenKlantInternalTaskModel that failed.",
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True, help_text=_("When the task failed.")
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True, help_text=_("Last updated timestamp.")
+    )
+    reason = models.TextField(
+        blank=True,
+        null=True,
+        help_text=_("The reason why the task failed, including the exception message."),
+    )
+    status = models.CharField(
+        max_length=50,
+        choices=FailedTaskStatuses.choices,
+        default=FailedTaskStatuses.initial,
+        help_text=_("The status of the failed task."),
+    )
+
+    def __str__(self):
+        return f"Failed OpenKlant InternalTask: {self.task.id}"

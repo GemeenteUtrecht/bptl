@@ -1,0 +1,9 @@
+{% load i18n %}Beste Collega,
+
+{% block body %}{% endblock %}
+
+Met vriendelijke groet,
+
+Het Klantcontactcentrum
+
+Dit is een automatisch gegenereerd bericht; het is niet mogelijk via dit bericht te reageren.

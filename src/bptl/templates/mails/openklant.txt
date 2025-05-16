@@ -1,6 +1,5 @@
-{% load i18n %}Beste Collega,
-
-Het is ons niet gelukt om de inwoner, het bedrijf of de instelling naar je door te verbinden.
+{% extends "mails/openklant_base.txt" %}
+{% load i18n %}{% block body %}Het is ons niet gelukt om de inwoner, het bedrijf of de instelling naar je door te verbinden.
 We willen je daarom vragen om binnen 48 uur contact op te nemen met de betrokkene.
 Hieronder vind je de gegevens en het onderwerp.
 
@@ -9,8 +8,4 @@ Toelichting voor de collega: {{ toelichting }}
 Naam: {{ naam }}
 Telefoonnummer: {{ telefoonnummer }}
 E-mailadres: {{ email }}
-Vraag: {{ vraag }}
-
-Met vriendelijke groet,
-
-Het Klantcontactcentrum
+Vraag: {{ vraag }}{% endblock %}
