@@ -150,54 +150,57 @@ def retry_failed_tasks():
             }
         )
 
-    email_openklant_template = get_template("mails/openklant_failed.txt")
-    email_html_template = get_template("mails/openklant_failed.html")
-    email_openklant_message = email_openklant_template.render(
-        {"aantal": len(failed_data)}
-    )
-    email_html_message = email_html_template.render({"aantal": len(failed_data)})
-    inlined_email_html_message = transform(email_html_message)
-    send_to = ["danielammeraal@gmail.com", settings.KLANTCONTACT_EMAIL]
-    with StringIO() as csv_buffer:
-        csv_writer = csv.writer(csv_buffer)
-        csv_writer.writerow(
-            [
-                "Email",
-                "Klantcontact Nummer",
-                "Klantcontact UUID",
-                "Klantcontact Naam",
-                "Klantcontact Onderwerp",
-                "Klantcontact Telefoonnummer",
-                "Klantcontact Toelichting",
-                "Klantcontact Vraag",
-                "Medewerker Email",
-                "Reden Error",
-            ]
+    if failed_data:
+        email_openklant_template = get_template("mails/openklant_failed.txt")
+        email_html_template = get_template("mails/openklant_failed.html")
+        email_openklant_message = email_openklant_template.render(
+            {"aantal": len(failed_data)}
         )
-        for task in failed_data:
+        email_html_message = email_html_template.render({"aantal": len(failed_data)})
+        inlined_email_html_message = transform(email_html_message)
+        send_to = ["danielammeraal@gmail.com", settings.KLANTCONTACT_EMAIL]
+        with StringIO() as csv_buffer:
+            csv_writer = csv.writer(csv_buffer)
             csv_writer.writerow(
                 [
-                    task["email"],
-                    task["klantcontact_nummer"],
-                    task["klantcontact_uuid"],
-                    task["klantcontact_naam"],
-                    task["klantcontact_onderwerp"],
-                    task["klantcontact_telefoonnummer"],
-                    task["klantcontact_toelichting"],
-                    task["klantcontact_vraag"],
-                    task["medewerker_email"],
-                    task["reden_error"],
+                    "Email",
+                    "Klantcontact Nummer",
+                    "Klantcontact UUID",
+                    "Klantcontact Naam",
+                    "Klantcontact Onderwerp",
+                    "Klantcontact Telefoonnummer",
+                    "Klantcontact Toelichting",
+                    "Klantcontact Vraag",
+                    "Medewerker Email",
+                    "Reden Error",
                 ]
             )
-        csv_content = csv_buffer.getvalue()
+            for task in failed_data:
+                csv_writer.writerow(
+                    [
+                        task["email"],
+                        task["klantcontact_nummer"],
+                        task["klantcontact_uuid"],
+                        task["klantcontact_naam"],
+                        task["klantcontact_onderwerp"],
+                        task["klantcontact_telefoonnummer"],
+                        task["klantcontact_toelichting"],
+                        task["klantcontact_vraag"],
+                        task["medewerker_email"],
+                        task["reden_error"],
+                    ]
+                )
+            csv_content = csv_buffer.getvalue()
 
-    attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
-    email = create_email(
-        subject="Logging gefaalde KCC contactverzoeken",
-        body=email_openklant_message,
-        inlined_body=inlined_email_html_message,
-        to=send_to,
-        attachments=attachments,
-    )
-    email.send(fail_silently=False)
+        attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
+        email = create_email(
+            subject="Logging gefaalde KCC contactverzoeken",
+            body=email_openklant_message,
+            inlined_body=inlined_email_html_message,
+            to=send_to,
+            attachments=attachments,
+        )
+        email.send(fail_silently=False)
+    else:
+        logger.info("No failed tasks to notify.")
     return
