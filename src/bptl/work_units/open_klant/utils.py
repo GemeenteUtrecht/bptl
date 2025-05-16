@@ -1,12 +1,19 @@
 import logging
-from typing import Dict, List, Optional
+import os
+from email.mime.image import MIMEImage
+from typing import Dict, Optional
 
-from zds_client.client import Client as ZDSClient
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+
+from zds_client.client import Client, Client as ZDSClient
 from zgw_consumers.concurrent import parallel
 
 from bptl.openklant.client import get_openklant_client
-from bptl.openklant.models import OpenKlantConfig
+from bptl.openklant.models import OpenKlantConfig, OpenKlantInternalTaskModel
 from bptl.work_units.zgw.utils import get_paginated_results
+
+from .api import get_details_betrokkene, get_klantcontact_for_interne_taak
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +68,6 @@ def get_actor_email_from_interne_taak(
     with parallel() as executor:
         actoren = list(executor.map(_get_actor_from_url, actor_urls))
 
-    actor_is_medewerker = False
-    found_actor = None
     actieve_actoren = [
         actor for actor in actoren if actor.get("indicatieActief", False)
     ]
@@ -139,3 +144,117 @@ def get_actor_email_from_interne_taak(
         return ""
 
     return emailaddress[0]
+
+
+def build_email_context(
+    task: OpenKlantInternalTaskModel,
+    client: Optional[Client] = None,
+) -> dict:
+    """
+    Build the email context for the task.
+    """
+    variables = task.variables
+    email_context = {
+        "naam": "N.B.",
+        "telefoonnummer": "N.B.",
+        "email": "N.B.",
+        "onderwerp": "N.B.",
+        "vraag": variables.get("gevraagdeHandeling", "N.B."),
+        "toelichting": variables.get("toelichting", "N.B."),
+    }
+
+    if not client:
+        client = get_openklant_client()
+
+    # Get klantcontact data
+    url = variables.get("aanleidinggevendKlantcontact", {}).get("url")
+
+    email_context["klantcontact"] = None
+    if url:
+        klantcontact = get_klantcontact_for_interne_taak(url)
+        betrokkenen = [
+            betrokkene["url"]
+            for betrokkene in klantcontact.get("hadBetrokkenen", [])
+            if betrokkene.get("url")
+        ]
+        namen = []
+        emails = []
+        telefoonnummers = []
+        for betrokkene_url in betrokkenen:
+            naam, email, telefoonnummer = get_details_betrokkene(
+                betrokkene_url, client=client
+            )
+            namen.append(naam)
+            emails.append(email)
+            telefoonnummers.append(telefoonnummer)
+
+        email_context["naam"] = ", ".join(namen) if namen else "N.B."
+        email_context["email"] = (
+            ", ".join([mail for mail in emails if mail]) if emails else "N.B."
+        )
+        email_context["telefoonnummer"] = (
+            ", ".join([tel for tel in telefoonnummers if tel])
+            if telefoonnummers
+            else "N.B."
+        )
+
+        email_context["onderwerp"] = klantcontact.get("onderwerp", "N.B.")
+        email_context["klantcontact"] = klantcontact
+
+    klantcontact_informatie = (
+        email_context["email"]
+        if email_context["email"] != "N.B."
+        else email_context["telefoonnummer"].split(", ")[0]
+    )
+    email_context["subject"] = "KISS contactverzoek %s" % klantcontact_informatie
+    return email_context
+
+
+def create_email(
+    subject: str,
+    body: str,
+    inlined_body: str,
+    to: str,
+    from_email: str = settings.DEFAULT_KCC_FROM_EMAIL,
+    reply_to: list[str] = [settings.DEFAULT_KCC_FROM_EMAIL],
+    attachments: Optional[
+        list[tuple[str, bytes, str]]
+    ] = None,  # List of (filename, content, mimetype)
+):
+    """
+    Create an email message with optional attachments.
+
+    :param subject: Email subject
+    :param body: Plain text email body
+    :param inlined_body: HTML email body
+    :param to: Recipient email address
+    :param from_email: Sender email address
+    :param reply_to: List of reply-to email addresses
+    :param attachments: List of attachments as tuples (filename, content, mimetype)
+    """
+    # Create email
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body=body,
+        from_email=from_email,
+        reply_to=reply_to,
+        to=to,
+    )
+    # Attach the plain text version
+    email.attach_alternative(inlined_body, "text/html")
+
+    # Attach the image
+    filepath = os.path.join(settings.STATIC_ROOT, "img/wapen-utrecht-rood.svg")
+    with open(filepath, "rb") as wapen:
+        mime_image = MIMEImage(wapen.read())
+        mime_image.add_header("Content-ID", "<wapen_utrecht_cid>")
+        mime_image.add_header(
+            "Content-Disposition", "inline", filename="wapen-utrecht-rood.svg"
+        )
+        email.attach(mime_image)
+
+    if attachments:
+        for filename, content, mimetype in attachments:
+            email.attach(filename, content, mimetype)
+
+    return email

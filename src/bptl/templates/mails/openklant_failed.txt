@@ -1,0 +1,3 @@
+{% extends "mails/openklant_base.txt" %}
+{% load i18n %}{% block body %}Het is niet gelukt om {{ aantal_gefaald }} klantcontactverzoek(en) succesvol af te ronden. 
+In de bijlage vind je alle details van de gefaalde klantcontactverzoek(en).{% endblock %}

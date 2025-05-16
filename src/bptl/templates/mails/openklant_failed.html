@@ -1,0 +1,7 @@
+{% extends "mails/base.html" %}
+{% load i18n %}{% block body %}
+<p>
+  Het is niet gelukt om {{ aantal_gefaald }} klantcontactverzoek(en) succesvol af te ronden. 
+  In de bijlage vind je alle details van de gefaalde klantcontactverzoek(en).
+</p>
+{% endblock %}

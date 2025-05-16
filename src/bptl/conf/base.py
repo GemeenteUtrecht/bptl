@@ -3,7 +3,7 @@ import os
 # Django-hijack (and Django-hijack-admin)
 from django.urls import reverse_lazy
 
-from celery.schedules import schedule
+from celery.schedules import crontab, schedule
 from sentry_sdk.integrations import django, redis
 
 try:
@@ -451,6 +451,10 @@ CELERY_BEAT_SCHEDULE = {
     "interne-taak-pull": {
         "task": "bptl.openklant.tasks.task_fetch_and_patch",
         "schedule": schedule(run_every=30),
+    },
+    "retry-failed-tasks": {
+        "task": "bptl.openklant.tasks.task_schedule_new_fetch_and_patch",
+        "schedule": crontab(hour=18, minute=0),  # Runs every day at 18:00 UTC
     },
 }
 

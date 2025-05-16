@@ -1,20 +1,32 @@
-""" celery tasks to process openklant interne tasks"""
+"""Celery tasks to process OpenKlant internal tasks."""
+
+import csv
+from io import StringIO
 
 from django.conf import settings
+from django.template.loader import get_template
 
-import requests
 from celery.utils.log import get_task_logger
 from celery_once import QueueOnce
+from premailer import transform
 from timeline_logger.models import TimelineLog
 
-from bptl.openklant.utils import fetch_and_patch
-from bptl.tasks.api import TaskExpired, execute
+from bptl.openklant.models import FailedOpenKlantTasks
+from bptl.tasks.api import execute
 from bptl.tasks.registry import register
 from bptl.utils.constants import Statuses
 from bptl.utils.decorators import retry
+from bptl.work_units.open_klant.utils import (
+    build_email_context,
+    create_email,
+    get_actor_email_from_interne_taak,
+)
 
 from ..celery import app
+from .client import get_openklant_client
+from .constants import FailedTaskStatuses
 from .models import OpenKlantInternalTaskModel
+from .utils import fetch_and_patch, save_failed_task
 
 logger = get_task_logger(__name__)
 
@@ -23,12 +35,9 @@ __all__ = ("task_fetch", "task_execute")
 
 @app.task(
     base=QueueOnce,
-    autoretry_for=(Exception,),  # if something goes wrong, automatically retry the task
+    autoretry_for=(Exception,),
     retry_backoff=True,
-    once={
-        "graceful": True,  # raise no exception if we're scheduling this more often (beat!)
-        "timeout": (60),  # timeout if something goes wrong, in seconds
-    },
+    once={"graceful": True, "timeout": 60},
 )
 def task_fetch_and_patch():
     logger.debug("Fetching and locking tasks (long poll)")
@@ -36,32 +45,30 @@ def task_fetch_and_patch():
     logger.info("Fetched %r tasks with %r", num_tasks, worker_id)
 
     for task in tasks:
-        # initial logging
         TimelineLog.objects.create(
             content_object=task, extra_data={"status": task.status}
         )
-
         task_execute.delay(task.id)
 
-    # once we're completed, which may be way within the timeout, we need to-reschedule
-    # a new long-poll! this needs to run _after_ the current task has exited, otherwise
-    # the celery-once lock kicks in
-    task_schedule_new_fetch_and_patch.apply_async(
-        countdown=15,
-    )
+    task_schedule_new_fetch_and_patch.apply_async(countdown=15)
     return num_tasks
 
 
 @app.task()
 def task_schedule_new_fetch_and_patch():
-    """
-    Schedule a new long-poll.
-
-    The scheduling needs to be done through a separate task, and not from inside the
-    task itself as the run-once lock is checked while scheduling rather then at
-    execution time.
-    """
+    """Schedule a new long-poll."""
     task_fetch_and_patch.apply_async(countdown=15)
+
+
+@retry(
+    times=5,
+    delay=3.0,
+    exponential_rate=2.0,
+    exceptions=(Exception,),
+    on_failure=lambda task, exc: save_failed_task(task, exc),
+)
+def _execute(fetched_task: OpenKlantInternalTaskModel):
+    execute(fetched_task, registry=register)
 
 
 @app.task()
@@ -69,37 +76,128 @@ def task_execute(fetched_task_id):
     logger.info("Received task execution request (ID %d)", fetched_task_id)
     fetched_task = OpenKlantInternalTaskModel.objects.get(id=fetched_task_id)
 
-    # make task idempotent
     if fetched_task.status != Statuses.initial:
-        logger.warning("Task %r has been already run", fetched_task_id)
+        logger.warning("Task %r has already been run", fetched_task_id)
         return
 
-    task_id = fetched_task.task_id
-    logger.info("Task UUID is %s", task_id)
-
+    logger.info("Task UUID is %s", fetched_task.task_id)
     fetched_task.status = Statuses.in_progress
     fetched_task.save(update_fields=["status"])
-
-    # Catch and retry on http errors other than 500
-    @retry(
-        times=5,
-        delay=3.0,
-        exponential_rate=2.0,
-        exceptions=(Exception,),
-    )
-    def _execute(fetched_task: OpenKlantInternalTaskModel):
-        execute(fetched_task, registry=register)
 
     try:
         _execute(fetched_task)
     except Exception as exc:
         logger.warning(
-            "Task %r has failed during execution with error: %r",
+            "Task %r failed during execution with error: %r",
             fetched_task_id,
             exc,
             exc_info=True,
         )
         return
 
-    logger.info("Task %r is executed", fetched_task_id)
+    logger.info("Task %r executed successfully", fetched_task_id)
+
+
+@app.task()
+def retry_failed_tasks():
+    logger.info("Started retrying failed tasks.")
+    failed_tasks = FailedOpenKlantTasks.objects.filter(
+        status=FailedTaskStatuses.initial
+    )
+    failed_again = []
+
+    for failed_task in failed_tasks:
+        task = failed_task.task.get()
+        try:
+            _execute(task)
+            failed_task.status = FailedTaskStatuses.succeeded
+            failed_task.save(update_fields=["status"])
+        except Exception as e:
+            logger.warning(
+                "Retry failed for task %r: %r", failed_task.task.id, e, exc_info=True
+            )
+            failed_task.status = FailedTaskStatuses.failed
+            failed_task.save(update_fields=["status"])
+            failed_again.append(failed_task)
+
+    logger.info("%d tasks failed again. Notifying the receiver.", len(failed_again))
+    failed_data = []
+    client = get_openklant_client()
+    for failed_task in failed_again:
+        task = failed_task.task.get()
+        email_context = build_email_context(task, client=client)
+        try:
+            medewerker_email = get_actor_email_from_interne_taak(
+                task.variables, client=client
+            )
+        except Exception:
+            medewerker_email = "N.B. <- ?ERROR?"
+
+        failed_data.append(
+            {
+                "email": email_context["email"],
+                "klantcontact_nummer": email_context["klantcontact"].get(
+                    "nummer", "N.B."
+                ),
+                "klantcontact_uuid": email_context["klantcontact"].get("uuid", "N.B."),
+                "klantcontact_naam": email_context["naam"],
+                "klantcontact_onderwerp": email_context["onderwerp"],
+                "klantcontact_telefoonnummer": email_context["telefoonnummer"],
+                "klantcontact_toelichting": email_context["toelichting"],
+                "klantcontact_vraag": email_context["vraag"],
+                "medewerker_email": medewerker_email,
+                "reden_error": failed_task.reason,
+            }
+        )
+
+    email_openklant_template = get_template("mails/openklant_failed.txt")
+    email_html_template = get_template("mails/openklant_failed.html")
+    email_openklant_message = email_openklant_template.render(
+        {"aantal": len(failed_data)}
+    )
+    email_html_message = email_html_template.render({"aantal": len(failed_data)})
+    inlined_email_html_message = transform(email_html_message)
+    send_to = ["danielammeraal@gmail.com", settings.KLANTCONTACT_EMAIL]
+    with StringIO() as csv_buffer:
+        csv_writer = csv.writer(csv_buffer)
+        csv_writer.writerow(
+            [
+                "Email",
+                "Klantcontact Nummer",
+                "Klantcontact UUID",
+                "Klantcontact Naam",
+                "Klantcontact Onderwerp",
+                "Klantcontact Telefoonnummer",
+                "Klantcontact Toelichting",
+                "Klantcontact Vraag",
+                "Medewerker Email",
+                "Reden Error",
+            ]
+        )
+        for task in failed_data:
+            csv_writer.writerow(
+                [
+                    task["email"],
+                    task["klantcontact_nummer"],
+                    task["klantcontact_uuid"],
+                    task["klantcontact_naam"],
+                    task["klantcontact_onderwerp"],
+                    task["klantcontact_telefoonnummer"],
+                    task["klantcontact_toelichting"],
+                    task["klantcontact_vraag"],
+                    task["medewerker_email"],
+                    task["reden_error"],
+                ]
+            )
+        csv_content = csv_buffer.getvalue()
+
+    attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
+    email = create_email(
+        subject="Logging gefaalde KCC contactverzoeken",
+        body=email_openklant_message,
+        inlined_body=inlined_email_html_message,
+        to=send_to,
+        attachments=attachments,
+    )
+    email.send(fail_silently=False)
     return

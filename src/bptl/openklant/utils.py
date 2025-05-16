@@ -2,24 +2,22 @@
 Module for OpenKlant API interaction.
 """
 
-import json
 import logging
-import uuid
-from typing import List, Optional, Tuple, Union
-
-import requests
-from dateutil import parser
-from timeline_logger.models import TimelineLog
+from typing import List, Optional, Tuple
 
 from bptl.tasks.constants import EngineTypes
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.utils import get_worker_id
-from bptl.utils.decorators import cache, retry
-from bptl.utils.typing import Object, ProcessVariables
+from bptl.utils.decorators import cache
 from bptl.work_units.zgw.utils import get_paginated_results
 
 from .client import get_openklant_client
-from .models import InterneTask, OpenKlantConfig, OpenKlantInternalTaskModel
+from .models import (
+    FailedOpenKlantTasks,
+    InterneTask,
+    OpenKlantConfig,
+    OpenKlantInternalTaskModel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -80,3 +78,11 @@ def fetch_and_patch(
         )
 
     return (worker_id, len(fetched), fetched)
+
+
+def save_failed_task(task, exception):
+    """Save the failed task and the reason for failure."""
+    FailedOpenKlantTasks.objects.update_or_create(
+        task=task,
+        defaults={"reason": str(exception)},
+    )

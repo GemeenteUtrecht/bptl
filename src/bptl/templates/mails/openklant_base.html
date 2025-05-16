@@ -1,0 +1,81 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>{{ subject }}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f4f5f6;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .main {
+      background-color: #ffffff;
+      border: 1px solid #eaebed;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .row {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .label-cell {
+      width: 33%;
+      font-weight: bold;
+      vertical-align: top;
+      padding-right: 10px;
+    }
+    .value-cell {
+      width: 67%;
+    }
+    @media only screen and (max-width: 640px) {
+      .container {
+        padding: 8px !important;
+      }
+      .main {
+        padding: 16px !important;
+      }
+      .label-cell, .value-cell {
+        display: block;
+        width: 100% !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <table role="presentation" width="100%" bgcolor="#f4f5f6" cellpadding="0" cellspacing="0">
+    <tr>
+      <td>&nbsp;</td>
+      <td align="center" class="container">
+        <img src="cid:wapen_utrecht_cid" alt="Wapen Utrecht Rood" style="max-width: 12em; height: auto; margin-bottom: 16px;" />
+        <table role="presentation" class="main" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <p>Beste Collega,</p>
+                {% block body %}{% endblock %}
+              <p>Met vriendelijke groeten,</p>
+              <p>Het Klantcontactcentrum</p>
+              <p style="font-size: 11px; color: #777;">
+                Dit is een automatisch gegenereerd bericht; het is niet mogelijk via dit bericht te reageren.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</body>
+</html>
+    
