@@ -3,10 +3,9 @@ Module for OpenKlant API interaction.
 """
 
 import logging
+from datetime import datetime
 from typing import List, Optional, Tuple
 
-from bptl.tasks.constants import EngineTypes
-from bptl.tasks.models import TaskMapping
 from bptl.tasks.utils import get_worker_id
 from bptl.utils.decorators import cache
 from bptl.work_units.zgw.utils import get_paginated_results
@@ -34,14 +33,9 @@ def fetch_and_patch(
     """
     Fetch an internal task
     """
-    # Fetch the mappings that are known (and active!) in this configured instance only
-    mappings = TaskMapping.objects.filter(
-        engine_type=EngineTypes.openklant, active=True
-    )
     openklant_config = (
         OpenKlantConfig.get_solo() if not openklant_config else openklant_config
     )
-    actor = openklant_config.actor.name
     openklant_client = get_openklant_client(openklant_config)
 
     # Get all tasks that still need to be "verwerkt"
@@ -82,7 +76,22 @@ def fetch_and_patch(
 
 def save_failed_task(task, exception):
     """Save the failed task and the reason for failure."""
-    FailedOpenKlantTasks.objects.update_or_create(
+    task, created = FailedOpenKlantTasks.objects.update_or_create(
         task=task,
         defaults={"reason": str(exception)},
+    )
+
+    openklant_client = get_openklant_client()
+    toelichting = task.variables.get("toelichting", "")
+    toelichting = "[BPTL] - {tijd}: {bericht}. \n\n {toelichting}".format(
+        tijd=datetime.now().isoformat(),
+        bericht="Mail versturen is mislukt.",
+        toelichting=toelichting,
+    )
+
+    # Update the toelichting of the task in OpenKlant to include failed message.
+    openklant_client.partial_update(
+        "internetaak",
+        {"toelichting": toelichting},
+        url=task.task.variables["url"],
     )
