@@ -76,7 +76,7 @@ def fetch_and_patch(
 
 def save_failed_task(task, exception):
     """Save the failed task and the reason for failure."""
-    task, created = FailedOpenKlantTasks.objects.update_or_create(
+    FailedOpenKlantTasks.objects.update_or_create(
         task=task,
         defaults={"reason": str(exception)},
     )
@@ -93,5 +93,5 @@ def save_failed_task(task, exception):
     openklant_client.partial_update(
         "internetaak",
         {"toelichting": toelichting},
-        url=task.task.variables["url"],
+        url=task.variables["url"],
     )
