@@ -47,6 +47,7 @@ celery==5.4.0
     #   -r requirements/ci.txt
     #   celery-once
     #   django-camunda
+    #   django-celery-beat
     #   flower
 celery-once==3.0.1
     # via -r requirements/ci.txt
@@ -87,6 +88,10 @@ click-repl==0.2.0
     #   celery
 coverage==4.5.4
     # via -r requirements/ci.txt
+cron-descriptor==1.4.5
+    # via
+    #   -r requirements/ci.txt
+    #   django-celery-beat
 cryptography==3.4.7
     # via
     #   -r requirements/ci.txt
@@ -116,6 +121,7 @@ django==3.2.12
     #   django-auth-adfs-db
     #   django-axes
     #   django-camunda
+    #   django-celery-beat
     #   django-choices
     #   django-debug-toolbar
     #   django-dirtyfields
@@ -130,6 +136,7 @@ django==3.2.12
     #   django-slugify-processor
     #   django-sniplates
     #   django-timeline-logger
+    #   django-timezone-field
     #   djangorestframework
     #   drf-extra-fields
     #   drf-yasg
@@ -149,6 +156,8 @@ django-auth-adfs-db==0.3.0
 django-axes==5.20.0
     # via -r requirements/ci.txt
 django-camunda==0.10.0
+    # via -r requirements/ci.txt
+django-celery-beat==2.8.1
     # via -r requirements/ci.txt
 django-choices==1.7.2
     # via
@@ -217,6 +226,10 @@ django-solo==1.1.5
     #   zgw-consumers
 django-timeline-logger==3.0.0
     # via -r requirements/ci.txt
+django-timezone-field==7.1
+    # via
+    #   -r requirements/ci.txt
+    #   django-celery-beat
 django-webtest==1.9.7
     # via -r requirements/ci.txt
 djangorestframework==3.12.4
@@ -357,6 +370,10 @@ pyjwt==2.1.0
     #   gemma-zds-client
 pyquery==1.4.3
     # via -r requirements/ci.txt
+python-crontab==3.2.0
+    # via
+    #   -r requirements/ci.txt
+    #   django-celery-beat
 python-dateutil==2.8.2
     # via
     #   -r requirements/ci.txt
@@ -364,6 +381,7 @@ python-dateutil==2.8.2
     #   django-camunda
     #   django-relativedelta
     #   freezegun
+    #   python-crontab
 python-decouple==3.4
     # via -r requirements/ci.txt
 python-dotenv==0.19.0
@@ -474,6 +492,7 @@ tzdata==2025.1
     # via
     #   -r requirements/ci.txt
     #   celery
+    #   django-celery-beat
     #   faker
     #   kombu
 uritemplate==3.0.1

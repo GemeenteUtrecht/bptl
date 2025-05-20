@@ -102,7 +102,10 @@ def task_execute(fetched_task_id):
     logger.info("Task %r executed successfully", fetched_task_id)
 
 
-@app.task()
+@app.task(
+    base=QueueOnce,
+    once={"graceful": True, "timeout": settings.CELERY_QUEUE_ONCE_TIMEOUT},
+)
 def retry_failed_tasks():
     """Retry tasks that previously failed."""
     logger.info("Started retrying failed tasks.")

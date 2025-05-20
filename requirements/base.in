@@ -35,6 +35,7 @@ django-rosetta
 django-sniplates
 django-timeline-logger
 drf-extra-fields
+django-celery-beat
 
 # API libraries
 djangorestframework
