@@ -23,6 +23,7 @@ celery==5.4.0
     #   -r requirements/base.in
     #   celery-once
     #   django-camunda
+    #   django-celery-beat
     #   flower
 celery-once==3.0.1
     # via -r requirements/base.in
@@ -47,6 +48,8 @@ click-plugins==1.1.1
     # via celery
 click-repl==0.2.0
     # via celery
+cron-descriptor==1.4.5
+    # via django-celery-beat
 cryptography==3.4.7
     # via django-auth-adfs
 cssselect==1.3.0
@@ -65,6 +68,7 @@ django==3.2.12
     #   django-auth-adfs-db
     #   django-axes
     #   django-camunda
+    #   django-celery-beat
     #   django-choices
     #   django-dirtyfields
     #   django-docutils
@@ -77,6 +81,7 @@ django==3.2.12
     #   django-slugify-processor
     #   django-sniplates
     #   django-timeline-logger
+    #   django-timezone-field
     #   djangorestframework
     #   drf-extra-fields
     #   drf-yasg
@@ -94,6 +99,8 @@ django-auth-adfs-db==0.3.0
 django-axes==5.20.0
     # via -r requirements/base.in
 django-camunda==0.10.0
+    # via -r requirements/base.in
+django-celery-beat==2.8.1
     # via -r requirements/base.in
 django-choices==1.7.2
     # via
@@ -140,6 +147,8 @@ django-solo==1.1.5
     #   zgw-consumers
 django-timeline-logger==3.0.0
     # via -r requirements/base.in
+django-timezone-field==7.1
+    # via django-celery-beat
 djangorestframework==3.12.4
     # via
     #   -r requirements/base.in
@@ -217,11 +226,14 @@ pyjwt==2.1.0
     # via
     #   django-auth-adfs
     #   gemma-zds-client
+python-crontab==3.2.0
+    # via django-celery-beat
 python-dateutil==2.8.2
     # via
     #   celery
     #   django-camunda
     #   django-relativedelta
+    #   python-crontab
 python-decouple==3.4
     # via -r requirements/base.in
 python-dotenv==0.19.0
@@ -289,6 +301,7 @@ tornado==6.1
 tzdata==2025.1
     # via
     #   celery
+    #   django-celery-beat
     #   faker
     #   kombu
 uritemplate==3.0.1

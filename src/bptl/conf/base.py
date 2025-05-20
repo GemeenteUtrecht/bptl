@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "timeline_logger",
     "zgw_consumers",
+    "django_celery_beat",
     # Project applications.
     "bptl.accounts",
     "bptl.activiti",
@@ -430,7 +431,12 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
 # Add a 30 minutes timeout to all Celery tasks.
-CELERY_TASK_SOFT_TIME_LIMIT = 30 * 60
+CELERY_TASK_SOFT_TIME_LIMIT = int(
+    os.getenv("CELERY_TASK_SOFT_TIME_LIMIT", default=30 * 60)
+)  # 30 minutes
+CELERY_QUEUE_ONCE_TIMEOUT = os.getenv(
+    "CELERY_QUEUE_ONCE_TIMEOUT", CELERY_TASK_SOFT_TIME_LIMIT
+)
 
 # Setup Celery routes for long-polling
 CELERY_TASK_ROUTES = {
@@ -452,10 +458,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "bptl.openklant.tasks.task_fetch_and_patch",
         "schedule": schedule(run_every=30),
     },
-    "retry-failed-tasks": {
-        "task": "bptl.openklant.tasks.task_schedule_new_fetch_and_patch",
-        "schedule": crontab(hour=18, minute=0),  # Runs every day at 18:00 UTC
-    },
+    # "retry-failed-tasks": {
+    #     "task": "bptl.openklant.tasks.task_schedule_new_fetch_and_patch",
+    #     "schedule": crontab(hour=18, minute=0),  # Runs every day at 18:00 UTC
+    # },
 }
 
 CELERY_TASK_ACKS_LATE = True
