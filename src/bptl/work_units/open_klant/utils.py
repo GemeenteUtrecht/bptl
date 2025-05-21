@@ -10,6 +10,7 @@ from zds_client.client import Client, Client as ZDSClient
 from zgw_consumers.concurrent import parallel
 
 from bptl.openklant.client import get_openklant_client
+from bptl.openklant.exceptions import OpenKlantEmailException
 from bptl.openklant.models import OpenKlantConfig, OpenKlantInternalTaskModel
 from bptl.work_units.zgw.utils import get_paginated_results
 
@@ -72,7 +73,7 @@ def get_actor_email_from_interne_taak(
         actor for actor in actoren if actor.get("indicatieActief", False)
     ]
     if not actieve_actoren:
-        return ""
+        raise OpenKlantEmailException("No active actors found for interne taak.")
 
     # Check for medewerkers
     medewerker = [
@@ -86,18 +87,21 @@ def get_actor_email_from_interne_taak(
             for mw in medewerker
             if mw.get("actoridentificator", {}).get("codeSoortObjectId", "") == "email"
         ]
+        error_msg = ""
         if len(emailaddress) > 1:
-            logger.warning(
-                "Found more than 1 active medewerker with an email for OpenKlant interne taak with uuid: %s. Sending to default email address."
+            error_msg = (
+                "Found more than 1 active medewerker with an email for OpenKlant interne taak with uuid: %s. "
                 % interne_taak["uuid"]
             )
-            return ""
         if not emailaddress:
-            logger.warning(
-                "Did not find an active medewerker with an email for OpenKlant interne taak with uuid: %s. Sending to default email address."
+            error_msg = (
+                "Did not find an active medewerker with an email for OpenKlant interne taak with uuid: %s. "
                 % interne_taak["uuid"]
             )
-            return ""
+        if error_msg:
+            logger.warning(error_msg)
+            raise OpenKlantEmailException(error_msg)
+
         return emailaddress[0]
 
     # Get organisatie-eenheid emailaddress from objects API
@@ -107,12 +111,12 @@ def get_actor_email_from_interne_taak(
         if actor.get("soortActor", "") == "organisatorische_eenheid"
     ]
     if not actoren:
-        logger.warning(
-            "Could not find an email address for any of the active actoren for OpenKlant interne taak with uuid: %s. Sending to default email address."
+        error_msg = (
+            "Could not find an email address for any of the active actoren for OpenKlant interne taak with uuid: %s."
             % interne_taak["uuid"]
         )
-        return ""
-
+        logger.warning(error_msg)
+        raise OpenKlantEmailException(error_msg)
     # Otherwise try to find email address in objects
     config = OpenKlantConfig.get_solo()
     obj_client = config.objects_service.build_client()
@@ -130,18 +134,22 @@ def get_actor_email_from_interne_taak(
             else:
                 emailaddress.append(email)
 
+    msg = ""
     if len(emailaddress) > 1:
-        logger.warning(
-            "Found more than 1 active organisatie eenheid with an email address for OpenKlant interne taak with uuid: %s. Sending to default email address."
+        msg = (
+            "Found more than 1 active organisatie eenheid with an email address for OpenKlant interne taak with uuid: %s. "
+            % interne_taak["uuid"]
         )
-        return ""
 
     if not emailaddress:
-        logger.warning(
+        msg = (
             "Did not find an active organisatie eenheid with an email for OpenKlant interne taak with uuid: %s. Sending to default email address."
             % interne_taak["uuid"]
         )
-        return ""
+
+    if msg:
+        logger.warning(msg)
+        raise OpenKlantEmailException(msg)
 
     return emailaddress[0]
 
