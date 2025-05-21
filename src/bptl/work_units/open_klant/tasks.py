@@ -40,7 +40,12 @@ class NotificeerBetrokkene(WorkUnit):
 
         # Validate email address
         email_validator = EmailValidator()
-        email_validator(emailaddress)
+        try:
+            email_validator(emailaddress)
+        except ValidationError as e:
+            self.task.status = "failed"
+            self.task.save(update_fields=["status"])
+            raise OpenKlantEmailException(f"Invalid email address: {emailaddress}. Error: {e}")
 
         send_to = ["danielammeraal@gmail.com", emailaddress]
         email = create_email(
