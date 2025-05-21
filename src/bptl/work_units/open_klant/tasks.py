@@ -1,9 +1,10 @@
-from django.conf import settings
+from django.core.validators import EmailValidator
 from django.template.loader import get_template
 
 from premailer import transform
 
 from bptl.openklant.client import get_openklant_client
+from bptl.openklant.exceptions import OpenKlantEmailException
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
@@ -33,10 +34,19 @@ class NotificeerBetrokkene(WorkUnit):
 
         # Get email address
         client = get_openklant_client()
-        emailaddress = (
-            get_actor_email_from_interne_taak(self.task.variables, client=client)
-            or settings.KLANTCONTACT_EMAIL
+        emailaddress = get_actor_email_from_interne_taak(
+            self.task.variables, client=client
         )
+
+        # Validate email address
+        email_validator = EmailValidator()
+        try:
+            email_validator(emailaddress)
+        except ValidationError as e:
+            self.task.status = "failed"
+            self.task.save(update_fields=["status"])
+            raise OpenKlantEmailException(f"Invalid email address: {emailaddress}. Error: {e}")
+
         send_to = ["danielammeraal@gmail.com", emailaddress]
         email = create_email(
             subject=email_context["subject"],
@@ -46,4 +56,11 @@ class NotificeerBetrokkene(WorkUnit):
         )
 
         # Send
-        email.send(fail_silently=False)
+        success = email.send(fail_silently=False)
+        if not success:
+            self.task.status = "failed"
+            self.task.save(update_fields=["status"])
+            raise OpenKlantEmailException("Failed to send email.")
+        else:
+            self.task.status = "success"
+            self.task.save(update_fields=["status"])
