@@ -5,20 +5,11 @@ from premailer import transform
 from rest_framework.exceptions import ValidationError
 
 from bptl.openklant.client import get_openklant_client
-from bptl.openklant.exceptions import OpenKlantEmailException
+from bptl.openklant.exceptions import EmailSendFailedException, OpenKlantEmailException
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
 from .utils import build_email_context, create_email, get_actor_email_from_interne_taak
-
-__all__ = ["SendEmailTask"]
-
-
-class EmailSendFailedException(Exception):
-    """Custom exception raised when email sending fails."""
-
-    def __init__(self, message="Failed to send email"):
-        super().__init__(message)
 
 
 @register

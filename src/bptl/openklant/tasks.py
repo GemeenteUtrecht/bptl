@@ -31,8 +31,6 @@ from .utils import fetch_and_patch, save_failed_task
 
 logger = get_task_logger(__name__)
 
-__all__ = ("task_fetch", "task_execute")
-
 
 @app.task(
     base=QueueOnce,
@@ -58,7 +56,7 @@ def task_fetch_and_patch():
 
 @app.task()
 def task_schedule_new_fetch_and_patch():
-    """Schedule a new long-poll."""
+    """Schedule a new fetch and patch task."""
     task_fetch_and_patch.apply_async(countdown=15)
 
 
@@ -116,7 +114,7 @@ def retry_failed_tasks():
     client = get_openklant_client()
 
     for failed_task in failed_tasks:
-        task = failed_task.task.get()
+        task = failed_task.task
         try:
             _execute(task)
             update_task_status(failed_task, client, task, success=True)
@@ -132,9 +130,12 @@ def retry_failed_tasks():
 
 def update_task_status(failed_task, client, task, success):
     """Update the status of a task in OpenKlant."""
+    failed_task.status = (
+        FailedTaskStatuses.succeeded if success else FailedTaskStatuses.failed
+    )
+    failed_task.save(update_fields=["status"])
+
     if success:
-        failed_task.status = FailedTaskStatuses.succeeded
-        failed_task.save(update_fields=["status"])
         tijd = datetime.now().isoformat()
         toelichting = "[BPTL] - {tijd}: Succesvol afgerond. \n\n {toelichting}".format(
             tijd=tijd, toelichting=task.variables.get("toelichting", "")
@@ -144,9 +145,6 @@ def update_task_status(failed_task, client, task, success):
             {"toelichting": toelichting},
             url=task.variables["url"],
         )
-    else:
-        failed_task.status = FailedTaskStatuses.failed
-        failed_task.save(update_fields=["status"])
 
 
 def notify_failed_tasks(failed_again, client):
@@ -156,10 +154,16 @@ def notify_failed_tasks(failed_again, client):
         return
 
     logger.info("%d tasks failed again. Notifying the receiver.", len(failed_again))
+    failed_data = collect_failed_task_data(failed_again, client)
+    send_failure_notification(failed_data)
+
+
+def collect_failed_task_data(failed_again, client):
+    """Collect data for failed tasks."""
     failed_data = []
 
     for failed_task in failed_again:
-        task = failed_task.task.get()
+        task = failed_task.task
         email_context = build_email_context(task, client=client)
         try:
             medewerker_email = get_actor_email_from_interne_taak(
@@ -185,7 +189,7 @@ def notify_failed_tasks(failed_again, client):
             }
         )
 
-    send_failure_notification(failed_data)
+    return failed_data
 
 
 def send_failure_notification(failed_data):
@@ -200,7 +204,21 @@ def send_failure_notification(failed_data):
     inlined_email_html_message = transform(email_html_message)
 
     send_to = ["danielammeraal@gmail.com", settings.KLANTCONTACT_EMAIL]
+    csv_content = generate_csv_content(failed_data)
 
+    attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
+    email = create_email(
+        subject="Logging gefaalde KCC contactverzoeken",
+        body=email_openklant_message,
+        inlined_body=inlined_email_html_message,
+        to=send_to,
+        attachments=attachments,
+    )
+    email.send(fail_silently=False)
+
+
+def generate_csv_content(failed_data):
+    """Generate CSV content for failed tasks."""
     with StringIO() as csv_buffer:
         csv_writer = csv.writer(csv_buffer)
         csv_writer.writerow(
@@ -232,14 +250,4 @@ def send_failure_notification(failed_data):
                     task["reden_error"],
                 ]
             )
-        csv_content = csv_buffer.getvalue()
-
-    attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
-    email = create_email(
-        subject="Logging gefaalde KCC contactverzoeken",
-        body=email_openklant_message,
-        inlined_body=inlined_email_html_message,
-        to=send_to,
-        attachments=attachments,
-    )
-    email.send(fail_silently=False)
+        return csv_buffer.getvalue()
