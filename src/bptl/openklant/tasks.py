@@ -67,7 +67,7 @@ def task_schedule_new_fetch_and_patch():
     delay=3.0,
     exponential_rate=2.0,
     exceptions=(Exception,),
-    on_failure=lambda task, exc: save_failed_task(task, exc),
+    on_failure=lambda exc, task: save_failed_task(task, exc),
 )
 def _execute(fetched_task: OpenKlantInternalTaskModel):
     """Execute a fetched task."""
