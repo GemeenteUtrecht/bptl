@@ -445,24 +445,26 @@ CELERY_TASK_ROUTES = {
     "bptl.openklant.tasks.task_schedule_new_fetch_and_patch": {"queue": "klantcontact"},
 }
 
-CELERY_BEAT_SCHEDULE = {
-    "task-pull": {
-        "task": "bptl.camunda.tasks.task_fetch_and_lock",
-        # run every 10 seconds - we leave this, even though the long-poll timeout is set
-        # to 10 minutes (see LONG_POLLING_TIMEOUT_MINUTES). This ensures that beat will
-        # start the polling after 10 seconds, and keep it running. The task itself
-        # is marked graceful, so it'll just return None and not be scheduled again.
-        "schedule": schedule(run_every=10),
-    },
-    "interne-taak-pull": {
-        "task": "bptl.openklant.tasks.task_fetch_and_patch",
-        "schedule": schedule(run_every=30),
-    },
-    # "retry-failed-tasks": {
-    #     "task": "bptl.openklant.tasks.task_schedule_new_fetch_and_patch",
-    #     "schedule": crontab(hour=18, minute=0),  # Runs every day at 18:00 UTC
-    # },
-}
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# CELERY_BEAT_SCHEDULE = {
+#     "task-pull": {
+#         "task": "bptl.camunda.tasks.task_fetch_and_lock",
+#         # run every 10 seconds - we leave this, even though the long-poll timeout is set
+#         # to 10 minutes (see LONG_POLLING_TIMEOUT_MINUTES). This ensures that beat will
+#         # start the polling after 10 seconds, and keep it running. The task itself
+#         # is marked graceful, so it'll just return None and not be scheduled again.
+#         "schedule": schedule(run_every=10),
+#     },
+#     "interne-taak-pull": {
+#         "task": "bptl.openklant.tasks.task_fetch_and_patch",
+#         "schedule": schedule(run_every=30),
+#     },
+#     "retry-failed-tasks": {
+#         "task": "bptl.openklant.tasks.task_schedule_new_fetch_and_patch",
+#         "schedule": crontab(hour=18, minute=0),  # Runs every day at 18:00 UTC
+#     },
+# }
 
 CELERY_TASK_ACKS_LATE = True
 # ensure that no tasks are scheduled to a worker that may be running a long-poll
