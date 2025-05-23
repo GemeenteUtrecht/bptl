@@ -120,8 +120,8 @@ def _update_task_toelichting_in_openklant(task, exception):
     """
     openklant_client = get_openklant_client()
     toelichting = task.variables.get("toelichting", "")
-    formatted_toelichting = "[BPTL] - {tijd}: {bericht}. \n\n {toelichting}".format(
-        tijd=datetime.now().isoformat(),
+    formatted_toelichting = "[BPTL] - {tijd}: {bericht} \n\n {toelichting}".format(
+        tijd=datetime.now().replace(second=0, microsecond=0).isoformat(),
         bericht="Mail versturen is mislukt.",
         toelichting=toelichting,
     )
