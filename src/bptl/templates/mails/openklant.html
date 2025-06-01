@@ -7,10 +7,13 @@
 </p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
   <tr class="row">
+    <td class="label-cell">Onderwerp:</td>
+    <td class="value-cell">{{ onderwerp }}</td>
+  </tr>
+  <tr class="row">
     <td class="label-cell">Toelichting voor de collega:</td>
     <td class="value-cell">{{ toelichting }}</td>
   </tr>
-  <tr class="row" style="height: 1.5em;"></tr>
   <tr class="row">
     <td class="label-cell">Naam:</td>
     <td class="value-cell">{{ naam }}</td>
@@ -22,10 +25,6 @@
   <tr class="row">
     <td class="label-cell">E-mailadres:</td>
     <td class="value-cell">{{ email }}</td>
-  </tr>
-  <tr class="row">
-    <td class="label-cell">Vraag:</td>
-    <td class="value-cell">{{ vraag }}</td>
   </tr>
 </table>
 {% endblock %}

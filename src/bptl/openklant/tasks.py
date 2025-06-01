@@ -50,14 +50,14 @@ def task_fetch_and_patch():
         )
         task_execute.delay(task.id)
 
-    task_schedule_new_fetch_and_patch.apply_async(countdown=15)
+    task_schedule_new_fetch_and_patch.apply_async(countdown=60)
     return num_tasks
 
 
 @app.task()
 def task_schedule_new_fetch_and_patch():
     """Schedule a new fetch and patch task."""
-    task_fetch_and_patch.apply_async(countdown=15)
+    task_fetch_and_patch.apply_async(countdown=60)
 
 
 @retry(
@@ -231,7 +231,7 @@ def generate_csv_content(failed_data):
                 "Klantcontact Telefoonnummer",
                 "Klantcontact Toelichting",
                 "Klantcontact Vraag",
-                "Medewerker Email",
+                "Groep/Medewerker Email",
                 "Reden Error",
             ]
         )

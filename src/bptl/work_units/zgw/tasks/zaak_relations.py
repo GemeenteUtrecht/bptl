@@ -324,7 +324,7 @@ class RelateerZaak(ZGWWorkUnit):
         headers["Accept-Crs"] = "EPSG:4326"
 
         zaak = zrc_client.retrieve(
-            "zaak", url=zaak_url, request_headers={"headers": headers}
+            "zaak", url=zaak_url, request_kwargs={"headers": headers}
         )
 
         relevante_andere_zaken = zaak["relevanteAndereZaken"]
