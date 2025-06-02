@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from bptl.openklant.client import get_openklant_client
 from bptl.openklant.exceptions import EmailSendFailedException, OpenKlantEmailException
+from bptl.openklant.models import OpenKlantConfig
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
 
@@ -29,8 +30,14 @@ class NotificeerBetrokkene(WorkUnit):
         # Get and validate email address
         emailaddress = self._get_and_validate_email_address()
 
+        config = OpenKlantConfig.get_solo()
+        send_to = []
+        if config.debug_email:
+            debug_email = config.debug_email
+            send_to += [debug_email]
+
         # Create and send email
-        send_to = ["danielammeraal@gmail.com", emailaddress]
+        send_to += [emailaddress]
         email = create_email(
             subject=email_context["subject"],
             body=email_openklant_message,
