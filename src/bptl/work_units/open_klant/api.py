@@ -45,7 +45,7 @@ def get_details_betrokkene(
         ):
             telefoonnummers.append(telefoonnummer)
     email = ", ".join(emails) if emails else "N.B."
-    telefoonnummer = ", ".join(telefoonnummers) if telefoonnummer else "N.B."
+    telefoonnummer = ", ".join(telefoonnummers) if telefoonnummers else "N.B."
 
     # Get volledige naam
     betrokkene = client.retrieve("betrokkene", url=betrokkene_url)
