@@ -70,6 +70,25 @@ class OpenKlantConfig(SingletonModel):
         help_text=_("Actor associated with BPTL in OpenKlant."),
         null=True,
     )
+    debug = models.BooleanField(
+        _("debug mode"),
+        default=False,
+        help_text=_("Enable debug mode for OpenKlant tasks."),
+    )
+    debug_email = models.EmailField(
+        _("debug email"),
+        max_length=254,
+        help_text=_("Email address for debugging emails in OpenKlant."),
+        blank=True,
+        null=True,
+    )
+    logging_email = models.EmailField(
+        _("logging email"),
+        max_length=254,
+        help_text=_("Email address for logging emails in OpenKlant."),
+        blank=True,
+        null=True,
+    )
 
 
 class InterneTask(models.Model):

@@ -26,7 +26,7 @@ from bptl.work_units.open_klant.utils import (
 from ..celery import app
 from .client import get_openklant_client
 from .constants import FailedTaskStatuses
-from .models import OpenKlantInternalTaskModel
+from .models import OpenKlantConfig, OpenKlantInternalTaskModel
 from .utils import fetch_and_patch, save_failed_task
 
 logger = get_task_logger(__name__)
@@ -203,7 +203,8 @@ def send_failure_notification(failed_data):
     email_html_message = email_html_template.render({"aantal": len(failed_data)})
     inlined_email_html_message = transform(email_html_message)
 
-    send_to = ["danielammeraal@gmail.com", settings.KLANTCONTACT_EMAIL]
+    config = OpenKlantConfig.get_solo()
+    send_to = [config.logging_email]
     csv_content = generate_csv_content(failed_data)
 
     attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
