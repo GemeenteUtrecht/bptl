@@ -342,7 +342,7 @@ class RelateerZaak(ZGWWorkUnit):
             "zaak",
             {"relevanteAndereZaken": relevante_andere_zaken},
             url=zaak_url,
-            request_headers=headers,
+            request_kwargs={"headers": headers},
         )
 
         try:
@@ -367,7 +367,7 @@ class RelateerZaak(ZGWWorkUnit):
             and aard_relatie_omgekeerde_richting
         ):
             bijdrage_zaak = zrc_client.retrieve(
-                "zaak", url=bijdrage_zaak_url, request_headers=headers
+                "zaak", url=bijdrage_zaak_url, request_kwargs={"headers": headers}
             )
             relevante_andere_zaken_bijdrage_zaak = bijdrage_zaak["relevanteAndereZaken"]
             relevante_andere_zaken_bijdrage_zaak.append(
@@ -380,7 +380,7 @@ class RelateerZaak(ZGWWorkUnit):
                 "zaak",
                 {"relevanteAndereZaken": relevante_andere_zaken_bijdrage_zaak},
                 url=bijdrage_zaak_url,
-                request_headers=headers,
+                request_kwargs={"headers": headers},
             )
 
         return {}
@@ -465,7 +465,7 @@ class FetchZaakObjects(ZGWWorkUnit):
             zrc_client,
             "zaakobject",
             query_params={"zaak": zaak_url},
-            request_headers={"headers": headers},
+            request_kwargs={"headers": headers},
         )
 
         return {"zaakObjects": zaakobjecten}
