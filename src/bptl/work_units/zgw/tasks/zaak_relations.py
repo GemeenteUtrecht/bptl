@@ -336,6 +336,8 @@ class RelateerZaak(ZGWWorkUnit):
         )
 
         headers["Content-Crs"] = "EPSG:4326"
+        headers["Accept-Crs"] = "EPSG:4326"
+
         zrc_client.partial_update(
             "zaak",
             {"relevanteAndereZaken": relevante_andere_zaken},

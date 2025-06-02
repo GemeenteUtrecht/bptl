@@ -32,7 +32,7 @@ class NotificeerBetrokkene(WorkUnit):
 
         config = OpenKlantConfig.get_solo()
         send_to = []
-        if config.debug_email:
+        if config.debug:
             debug_email = config.debug_email
             send_to += [debug_email]
 
