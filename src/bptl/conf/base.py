@@ -527,4 +527,6 @@ CHUNK_SIZE = os.getenv("CHUNK_SIZE", 4096)
 XENTIAL_URL_TOKEN_TIMEOUT_DAYS = os.getenv("XENTIAL_URL_TOKEN_TIMEOUT_DAYS", default=7)
 
 # KlantContact email settings
-DEFAULT_KCC_FROM_EMAIL = os.getenv("DEFAULT_KCC_FROM_EMAIL", DEFAULT_FROM_EMAIL)
+DEFAULT_KCC_FROM_EMAIL = os.getenv(
+    "DEFAULT_KCC_FROM_EMAIL", "klantcontactcentrum@utrecht.nl"
+)
