@@ -4,17 +4,19 @@ from email.mime.image import MIMEImage
 from typing import Dict, Optional
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 
 from zds_client.client import Client, Client as ZDSClient
 from zgw_consumers.concurrent import parallel
 
 from bptl.openklant.client import get_openklant_client
 from bptl.openklant.exceptions import OpenKlantEmailException
+from bptl.openklant.mail_backend import KCC_EMAIL_BACKEND
 from bptl.openklant.models import OpenKlantConfig, OpenKlantInternalTaskModel
 from bptl.work_units.zgw.utils import get_paginated_results
 
 from .api import get_details_betrokkene, get_klantcontact_for_interne_taak
+from .mail import get_kcc_email_connection
 
 logger = logging.getLogger(__name__)
 
@@ -247,6 +249,7 @@ def create_email(
         from_email=from_email,
         reply_to=reply_to,
         to=to,
+        connection=get_kcc_email_connection(),
     )
     # Attach the plain text version
     email.attach_alternative(inlined_body, "text/html")
