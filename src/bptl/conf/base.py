@@ -528,5 +528,5 @@ XENTIAL_URL_TOKEN_TIMEOUT_DAYS = os.getenv("XENTIAL_URL_TOKEN_TIMEOUT_DAYS", def
 
 # KlantContact email settings
 DEFAULT_KCC_FROM_EMAIL = os.getenv(
-    "DEFAULT_KCC_FROM_EMAIL", "klantcontactcentrum@utrecht.nl"
+    "DEFAULT_KCC_FROM_EMAIL", DEFAULT_FROM_EMAIL
 )
