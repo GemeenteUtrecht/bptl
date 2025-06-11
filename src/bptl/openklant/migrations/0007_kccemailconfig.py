@@ -6,26 +6,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('openklant', '0006_auto_20250602_0649'),
+        ("openklant", "0006_auto_20250602_0649"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='KCCEmailConfig',
+            name="KCCEmailConfig",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('host', models.CharField(default='smtp.kcc.nl', max_length=254)),
-                ('port', models.PositiveIntegerField()),
-                ('username', models.CharField(max_length=254)),
-                ('password', models.CharField(blank=True, max_length=254, null=True)),
-                ('use_tls', models.BooleanField(default=True)),
-                ('use_ssl', models.BooleanField(default=True)),
-                ('timeout', models.PositiveIntegerField(default=10)),
-                ('from_email', models.CharField(max_length=254)),
-                ('reply_to', models.CharField(blank=True, max_length=254, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("host", models.CharField(default="smtp.kcc.nl", max_length=254)),
+                ("port", models.PositiveIntegerField()),
+                ("username", models.CharField(max_length=254)),
+                ("password", models.CharField(blank=True, max_length=254, null=True)),
+                ("use_tls", models.BooleanField(default=True)),
+                ("use_ssl", models.BooleanField(default=True)),
+                ("timeout", models.PositiveIntegerField(default=10)),
+                ("from_email", models.CharField(max_length=254)),
+                ("reply_to", models.CharField(blank=True, max_length=254, null=True)),
             ],
             options={
-                'verbose_name': 'KCC Email Configuration',
+                "verbose_name": "KCC Email Configuration",
             },
         ),
     ]
