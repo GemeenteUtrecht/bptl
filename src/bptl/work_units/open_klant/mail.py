@@ -10,7 +10,11 @@ def get_kcc_email_connection() -> KCCEmailBackend:
         host=config.host,
         port=config.port,
         username=config.username,
-        password=config.password,
+        password=(
+            config.password
+            if config.password
+            else settings.KCC_EMAIL_HOST_PASSWORD or settings.EMAIL_HOST_PASSWORD
+        ),
         use_tls=config.use_tls,
         use_ssl=config.use_ssl,
         timeout=config.timeout,
