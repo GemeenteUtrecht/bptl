@@ -1,6 +1,6 @@
 from django.core.mail import get_connection
 
-from bptl.openklant.mail_backend import KCCEmailConfig
+from bptl.openklant.mail_backend import KCCEmailBackend, KCCEmailConfig
 
 
 def get_kcc_email_connection():
