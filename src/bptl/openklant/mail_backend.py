@@ -15,14 +15,16 @@ class KCCEmailConfig(SingletonModel):
     def __str__(self):
         return "KCC Email Configuration"
 
-    host = models.CharField(max_length=254, default="smtp.kcc.nl")
-    port = models.PositiveIntegerField()
-    username = models.CharField(max_length=254)
+    host = models.CharField(
+        max_length=254, default="smtp.kcc.nl", blank=True, null=True
+    )
+    port = models.PositiveIntegerField(default=587)
+    username = models.CharField(max_length=254, blank=True, null=True)
     password = models.CharField(max_length=254, blank=True, null=True)
     use_tls = models.BooleanField(default=True)
     use_ssl = models.BooleanField(default=True)
     timeout = models.PositiveIntegerField(default=10)
-    from_email = models.CharField(max_length=254)
+    from_email = models.CharField(max_length=254, blank=True, null=True)
     reply_to = models.CharField(max_length=254, blank=True, null=True)
 
 
