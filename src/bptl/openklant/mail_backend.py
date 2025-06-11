@@ -1,3 +1,6 @@
+import threading
+
+from django.conf import settings
 from django.core.mail.backends.smtp import EmailBackend
 from django.db import models
 
@@ -62,5 +65,5 @@ class KCCEmailBackend(EmailBackend):
                 "EMAIL_USE_TLS/EMAIL_USE_SSL are mutually exclusive, so only set "
                 "one of those settings to True."
             )
-        self.connection = Nonse
+        self.connection = None
         self._lock = threading.RLock()

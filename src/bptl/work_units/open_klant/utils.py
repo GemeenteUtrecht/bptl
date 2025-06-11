@@ -13,10 +13,12 @@ from bptl.openklant.client import get_openklant_client
 from bptl.openklant.exceptions import OpenKlantEmailException
 from bptl.openklant.mail_backend import KCCEmailConfig
 from bptl.openklant.models import OpenKlantConfig, OpenKlantInternalTaskModel
+from bptl.work_units.open_klant.api import (
+    get_details_betrokkene,
+    get_klantcontact_for_interne_taak,
+)
+from bptl.work_units.open_klant.mail import get_kcc_email_connection
 from bptl.work_units.zgw.utils import get_paginated_results
-
-from .api import get_details_betrokkene, get_klantcontact_for_interne_taak
-from .mail import get_kcc_email_connection
 
 logger = logging.getLogger(__name__)
 

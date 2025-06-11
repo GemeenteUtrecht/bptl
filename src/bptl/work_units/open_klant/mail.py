@@ -3,7 +3,8 @@ from django.core.mail import get_connection
 from bptl.openklant.mail_backend import KCCEmailBackend, KCCEmailConfig
 
 
-def get_kcc_email_connection():
+def get_kcc_email_connection() -> KCCEmailBackend:
+    # TODO: Wow dirty.
     config = KCCEmailConfig.get_solo()
     backend = KCCEmailBackend(
         host=config.host,
@@ -14,4 +15,4 @@ def get_kcc_email_connection():
         use_ssl=config.use_ssl,
         timeout=config.timeout,
     )
-    return get_connection(backend)
+    return backend

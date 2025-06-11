@@ -532,6 +532,6 @@ KCC_EMAIL_HOST = config("KCC_EMAIL_HOST", default="localhost")
 KCC_EMAIL_PORT = config("KCC_EMAIL_PORT", default=25)
 KCC_EMAIL_HOST_USER = config("KCC_EMAIL_HOST_USER", default="")
 KCC_EMAIL_HOST_PASSWORD = config("KCC_EMAIL_HOST_PASSWORD", default="")
-KCC_EMAIL_USE_TLS = config("KCC_EMAIL_USE_TLS", default=False)
-KCC_EMAIL_USE_SSL = config("KCC_EMAIL_USE_SSL", default=False)
+KCC_EMAIL_USE_TLS = config("KCC_EMAIL_USE_TLS", default=None)
+KCC_EMAIL_USE_SSL = config("KCC_EMAIL_USE_SSL", default=None)
 KCC_EMAIL_TIMEOUT = 10
