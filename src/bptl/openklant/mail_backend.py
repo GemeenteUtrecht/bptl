@@ -23,6 +23,7 @@ class KCCEmailConfig(SingletonModel):
     use_ssl = models.BooleanField(default=True)
     timeout = models.PositiveIntegerField(default=10)
     from_email = models.CharField(max_length=254)
+    reply_to = models.CharField(max_length=254, blank=True, null=True)
 
 
 class KCCEmailBackend(EmailBackend):
