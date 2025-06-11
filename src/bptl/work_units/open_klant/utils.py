@@ -4,17 +4,19 @@ from email.mime.image import MIMEImage
 from typing import Dict, Optional
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 
 from zds_client.client import Client, Client as ZDSClient
 from zgw_consumers.concurrent import parallel
 
 from bptl.openklant.client import get_openklant_client
 from bptl.openklant.exceptions import OpenKlantEmailException
+from bptl.openklant.mail_backend import KCCEmailConfig
 from bptl.openklant.models import OpenKlantConfig, OpenKlantInternalTaskModel
 from bptl.work_units.zgw.utils import get_paginated_results
 
 from .api import get_details_betrokkene, get_klantcontact_for_interne_taak
+from .mail import get_kcc_email_connection
 
 logger = logging.getLogger(__name__)
 
@@ -223,8 +225,8 @@ def create_email(
     body: str,
     inlined_body: str,
     to: str,
-    from_email: str = settings.DEFAULT_KCC_FROM_EMAIL,
-    reply_to: list[str] = [settings.DEFAULT_KCC_FROM_EMAIL],
+    from_email: str = "",
+    reply_to: Optional[list[str]] = None,
     attachments: Optional[
         list[tuple[str, bytes, str]]
     ] = None,  # List of (filename, content, mimetype)
@@ -240,6 +242,13 @@ def create_email(
     :param reply_to: List of reply-to email addresses
     :param attachments: List of attachments as tuples (filename, content, mimetype)
     """
+    # TODO: FIX BETTER
+    config = KCCEmailConfig.get_solo()
+    if not reply_to:
+        reply_to = [config.reply_to]
+    if not from_email:
+        from_email = config.from_email
+
     # Create email
     email = EmailMultiAlternatives(
         subject=subject,
@@ -247,6 +256,7 @@ def create_email(
         from_email=from_email,
         reply_to=reply_to,
         to=to,
+        connection=get_kcc_email_connection(),
     )
     # Attach the plain text version
     email.attach_alternative(inlined_body, "text/html")

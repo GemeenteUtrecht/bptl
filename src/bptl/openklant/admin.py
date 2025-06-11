@@ -5,12 +5,18 @@ from solo.admin import SingletonModelAdmin
 
 from bptl.openklant.models import FailedOpenKlantTasks
 
+from .mail_backend import KCCEmailConfig
 from .models import (
     InterneTask,
     OpenKlantActorModel,
     OpenKlantConfig,
     OpenKlantInternalTaskModel,
 )
+
+
+@admin.register(KCCEmailConfig)
+class KCCEmailConfigAdmin(SingletonModelAdmin):
+    pass
 
 
 @admin.register(OpenKlantConfig)
