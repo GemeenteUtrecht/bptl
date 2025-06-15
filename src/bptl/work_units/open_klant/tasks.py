@@ -31,18 +31,16 @@ class NotificeerBetrokkene(WorkUnit):
         emailaddress = self._get_and_validate_email_address()
 
         config = OpenKlantConfig.get_solo()
-        send_to = []
-        if config.debug:
-            debug_email = config.debug_email
-            send_to += [debug_email]
+        bcc = [config.debug_email] if config.debug_email else []
 
         # Create and send email
-        send_to += [emailaddress]
+        send_to = [emailaddress]
         email = create_email(
             subject=email_context["subject"],
             body=email_openklant_message,
             inlined_body=inlined_email_html_message,
             to=send_to,
+            bcc=bcc,
         )
         self._send_email(email)
 

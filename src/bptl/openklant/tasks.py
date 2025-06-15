@@ -208,11 +208,13 @@ def send_failure_notification(failed_data):
     csv_content = generate_csv_content(failed_data)
 
     attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
+    bcc = [config.debug_email] if config.debug_email else []
     email = create_email(
         subject="Logging gefaalde KCC contactverzoeken",
         body=email_openklant_message,
         inlined_body=inlined_email_html_message,
         to=send_to,
+        bcc=bcc,
         attachments=attachments,
     )
     email.send(fail_silently=False)

@@ -228,6 +228,7 @@ def create_email(
     inlined_body: str,
     to: str,
     from_email: str = "",
+    bcc: Optional[list[str]] = None,
     reply_to: Optional[list[str]] = None,
     attachments: Optional[
         list[tuple[str, bytes, str]]
@@ -241,6 +242,7 @@ def create_email(
     :param inlined_body: HTML email body
     :param to: Recipient email address
     :param from_email: Sender email address
+    :param bcc: List of BCC email addresses
     :param reply_to: List of reply-to email addresses
     :param attachments: List of attachments as tuples (filename, content, mimetype)
     """
@@ -256,8 +258,9 @@ def create_email(
         subject=subject,
         body=body,
         from_email=from_email,
-        reply_to=reply_to,
+        reply_to=reply_to or [],
         to=to,
+        bcc=bcc or [],
         connection=get_kcc_email_connection(),
     )
     # Attach the plain text version
