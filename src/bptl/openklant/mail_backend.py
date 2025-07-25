@@ -48,18 +48,18 @@ class KCCEmailBackend(EmailBackend):
         timeout=None,
         ssl_keyfile=None,
         ssl_certfile=None,
+        from_email=None,
         **kwargs
     ):
         super().__init__(fail_silently=fail_silently)
         self.host = host or settings.KCC_EMAIL_HOST
         self.port = port or settings.KCC_EMAIL_PORT
-        self.username = settings.KCC_EMAIL_HOST_USER if username is None else username
-        self.password = (
-            settings.KCC_EMAIL_HOST_PASSWORD if password is None else password
-        )
-        self.use_tls = settings.KCC_EMAIL_USE_TLS if use_tls is None else use_tls
-        self.use_ssl = settings.KCC_EMAIL_USE_SSL if use_ssl is None else use_ssl
-        self.timeout = settings.KCC_EMAIL_TIMEOUT if timeout is None else timeout
+        self.username = username or settings.KCC_EMAIL_HOST_USER
+        self.password = password or settings.KCC_EMAIL_HOST_PASSWORD
+        self.use_tls = use_tls or settings.KCC_EMAIL_USE_TLS
+        self.use_ssl = use_ssl or settings.KCC_EMAIL_USE_SSL
+        self.timeout = timeout or settings.KCC_EMAIL_TIMEOUT
+        self.from_email = from_email or settings.KCC_DEFAULT_FROM_EMAIL
         if self.use_ssl and self.use_tls:
             raise ValueError(
                 "EMAIL_USE_TLS/EMAIL_USE_SSL are mutually exclusive, so only set "
