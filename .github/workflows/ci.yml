@@ -36,14 +36,11 @@ jobs:
           python-version: '3.10'
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: '18'
+          node-version: '13'
       - name: Install dependencies
         run: pip install -r requirements/dev.txt codecov pytest
       - name: Build frontend
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3
-          sudo ln -sf /usr/bin/python3 /usr/bin/python
           npm ci
           npm run build
 
