@@ -26,6 +26,9 @@ FROM node:18-bookworm AS frontend-build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
+        python3 \
+        python3-distutils \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
