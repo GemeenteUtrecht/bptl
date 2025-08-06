@@ -1,5 +1,9 @@
-from typing import Dict
+import io
+from datetime import datetime, timedelta
+from typing import Dict, Tuple
 
+import pytz
+from openpyxl import Workbook
 from zgw_consumers.api_models.constants import RolTypes
 
 from bptl.camunda.constants import AssigneeTypeChoices
@@ -31,3 +35,45 @@ def get_betrokkene_identificatie(rol: Dict, task: BaseTask) -> Dict:
                 ).get("betrokkeneIdentificatie", {})
 
     return betrokkene_identificatie
+
+
+def create_zaken_report_xlsx(results) -> bytes:
+    # Create Excel workbook in memory
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Zaken"
+
+    # Write headers
+    if results:
+        headers = list(results[0].keys())
+        ws.append(headers)
+        for row in results:
+            ws.append([row.get(h, "") for h in headers])
+
+    # Save to buffer
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    data = buffer.read()
+    return data
+
+
+def get_last_month_period(timezone="Europe/Amsterdam") -> Tuple[datetime, datetime]:
+    """
+    Returns two timezone-aware datetimes:
+    1. The first day of the previous month at 00:00:00
+    2. The last day of the previous month at 23:59:59
+    """
+    tz = pytz.timezone(timezone)
+    today = datetime.now(tz)
+    first_of_this_month = today.replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    )
+    last_month_end = first_of_this_month - timedelta(seconds=1)
+    last_month_start = last_month_end.replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    )
+    last_month_end = last_month_end.replace(
+        hour=23, minute=59, second=59, microsecond=0
+    )
+    return last_month_start, last_month_end

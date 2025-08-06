@@ -235,6 +235,10 @@ drf-yasg==1.21.7
     # via -r requirements/base.txt
 elastic-apm==6.3.3
     # via -r requirements/base.txt
+et-xmlfile==2.0.0
+    # via
+    #   -r requirements/base.txt
+    #   openpyxl
 factory-boy==3.2.0
     # via -r requirements/test-tools.in
 faker==37.0.0
@@ -291,6 +295,8 @@ more-itertools==10.6.0
     # via
     #   -r requirements/base.txt
     #   cssutils
+openpyxl==3.1.5
+    # via -r requirements/base.txt
 orderedmultidict==1.0.1
     # via
     #   -r requirements/base.txt

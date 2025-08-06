@@ -49,3 +49,61 @@ class RecipientListSerializer(serializers.Serializer):
         ),
         help_text=_("List of recipients."),
     )
+    startPeriod = serializers.DateTimeField(
+        required=False,
+        allow_null=True,
+        help_text=_("The start date of the logging period."),
+    )
+    endPeriod = serializers.DateTimeField(
+        required=False,
+        allow_null=True,
+        help_text=_("The end date of the logging period."),
+    )
+
+    def validate_recipientList(self, value):
+        if not value:
+            raise serializers.ValidationError(_("Recipient list cannot be empty."))
+        return value
+
+    def validate_startPeriod(self, value):
+        if value and value > serializers.DateField().today():
+            raise serializers.ValidationError(
+                _("Start period cannot be in the future.")
+            )
+        return value
+
+    def validate_endPeriod(self, value):
+        if value and value > serializers.DateField().today():
+            raise serializers.ValidationError(_("End period cannot be in the future."))
+        return value
+
+    def validate(self, data):
+        if data.get("startPeriod") and data.get("endPeriod"):
+            if data["startPeriod"] > data["endPeriod"]:
+                raise serializers.ValidationError(
+                    _("Start period cannot be after end period.")
+                )
+        return data
+
+
+class VGUReportSerializer(serializers.Serializer):
+    identificatie = serializers.CharField(
+        help_text="Unique identifier of the ZAAK within bronorganisatie."
+    )
+    omschrijving = serializers.CharField(
+        help_text="Omschrijving of the ZAAK.", allow_blank=True
+    )
+    zaaktype = serializers.CharField(help_text="Omschrijving of the ZAAKTYPE.")
+    registratiedatum = serializers.DateField(
+        help_text="Date at which the ZAAK was registered (YYYY-MM-DD)."
+    )
+    initiator = serializers.EmailField(
+        help_text="The initiator of the ZAAK, if available.", allow_blank=True
+    )
+    objecten = serializers.CharField(
+        help_text="A comma-separated list of OBJECTs related to ZAAK. If no OBJECTs are related, this field will be empty.",
+        allow_blank=True,
+    )
+    aantalInformatieobjecten = serializers.IntegerField(
+        help_text="The number of INFORMATIEOBJECTs related to the ZAAK."
+    )

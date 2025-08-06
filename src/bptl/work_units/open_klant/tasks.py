@@ -1,16 +1,17 @@
 from django.core.validators import EmailValidator
-from django.template.loader import get_template
 
-from premailer import transform
 from rest_framework.exceptions import ValidationError
 
 from bptl.openklant.client import get_openklant_client
 from bptl.openklant.exceptions import EmailSendFailedException, OpenKlantEmailException
+from bptl.openklant.mail_backend import KCCEmailConfig
 from bptl.openklant.models import OpenKlantConfig
 from bptl.tasks.base import WorkUnit
 from bptl.tasks.registry import register
+from bptl.work_units.mail.mail import build_email_messages, create_email
+from bptl.work_units.open_klant.mail import get_kcc_email_connection
 
-from .utils import build_email_context, create_email, get_actor_email_from_interne_taak
+from .utils import build_email_context, get_actor_email_from_interne_taak
 
 
 @register
@@ -23,8 +24,8 @@ class NotificeerBetrokkene(WorkUnit):
         email_context = build_email_context(self.task)
 
         # Render email content
-        email_openklant_message, inlined_email_html_message = (
-            self._render_email_content(email_context)
+        email_openklant_message, inlined_email_html_message = build_email_messages(
+            "mails/openklant.txt", "mails/openklant.html", email_context
         )
 
         # Get and validate email address
@@ -35,27 +36,18 @@ class NotificeerBetrokkene(WorkUnit):
 
         # Create and send email
         send_to = [emailaddress]
+        email_config = KCCEmailConfig.get_solo()
+        connection = get_kcc_email_connection()
         email = create_email(
             subject=email_context["subject"],
             body=email_openklant_message,
             inlined_body=inlined_email_html_message,
             to=send_to,
             bcc=bcc,
+            config=email_config,
+            connection=connection,
         )
         self._send_email(email)
-
-    def _render_email_content(self, email_context):
-        """
-        Render the email content (plain text and HTML) and inline styles.
-        """
-        email_openklant_template = get_template("mails/openklant.txt")
-        email_html_template = get_template("mails/openklant.html")
-
-        email_openklant_message = email_openklant_template.render(email_context)
-        email_html_message = email_html_template.render(email_context)
-        inlined_email_html_message = transform(email_html_message)
-
-        return email_openklant_message, inlined_email_html_message
 
     def _get_and_validate_email_address(self):
         """

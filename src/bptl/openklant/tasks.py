@@ -5,11 +5,9 @@ from datetime import datetime
 from io import StringIO
 
 from django.conf import settings
-from django.template.loader import get_template
 
 from celery.utils.log import get_task_logger
 from celery_once import QueueOnce
-from premailer import transform
 from timeline_logger.models import TimelineLog
 
 from bptl.openklant.models import FailedOpenKlantTasks
@@ -17,9 +15,10 @@ from bptl.tasks.api import execute
 from bptl.tasks.registry import register
 from bptl.utils.constants import Statuses
 from bptl.utils.decorators import retry
+from bptl.work_units.mail.mail import build_email_messages, create_email
+from bptl.work_units.open_klant.mail import get_kcc_email_connection
 from bptl.work_units.open_klant.utils import (
     build_email_context,
-    create_email,
     get_actor_email_from_interne_taak,
 )
 
@@ -194,21 +193,18 @@ def collect_failed_task_data(failed_again, client):
 
 def send_failure_notification(failed_data):
     """Send an email notification about failed tasks."""
-    email_openklant_template = get_template("mails/openklant_failed.txt")
-    email_html_template = get_template("mails/openklant_failed.html")
-
-    email_openklant_message = email_openklant_template.render(
-        {"aantal": len(failed_data)}
+    email_openklant_message, inlined_email_html_message = build_email_messages(
+        "mails/openklant_failed.txt",
+        "mails/openklant_failed.html",
+        {"aantal": len(failed_data)},
     )
-    email_html_message = email_html_template.render({"aantal": len(failed_data)})
-    inlined_email_html_message = transform(email_html_message)
-
     config = OpenKlantConfig.get_solo()
     send_to = [config.logging_email]
     csv_content = generate_csv_content(failed_data)
 
     attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
     bcc = [config.debug_email] if config.debug_email else []
+    connection = get_kcc_email_connection()
     email = create_email(
         subject="Logging gefaalde KCC contactverzoeken",
         body=email_openklant_message,
@@ -216,6 +212,8 @@ def send_failure_notification(failed_data):
         to=send_to,
         bcc=bcc,
         attachments=attachments,
+        config=config,
+        connection=connection,
     )
     email.send(fail_silently=False)
 

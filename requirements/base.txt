@@ -168,6 +168,8 @@ drf-yasg==1.21.7
     # via -r requirements/base.in
 elastic-apm==6.3.3
     # via -r requirements/base.in
+et-xmlfile==2.0.0
+    # via openpyxl
 faker==37.0.0
     # via zgw-consumers
 flower==1.0.0
@@ -200,6 +202,8 @@ markupsafe==2.0.1
     # via jinja2
 more-itertools==10.6.0
     # via cssutils
+openpyxl==3.1.5
+    # via -r requirements/base.in
 orderedmultidict==1.0.1
     # via furl
 packaging==24.1
