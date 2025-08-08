@@ -1,23 +1,16 @@
 import logging
-import os
-from email.mime.image import MIMEImage
 from typing import Dict, Optional
 
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, get_connection
-
-from zds_client.client import Client, Client as ZDSClient
+from zds_client.client import Client as ZDSClient
 from zgw_consumers.concurrent import parallel
 
 from bptl.openklant.client import get_openklant_client
 from bptl.openklant.exceptions import OpenKlantEmailException
-from bptl.openklant.mail_backend import KCCEmailConfig
 from bptl.openklant.models import OpenKlantConfig, OpenKlantInternalTaskModel
 from bptl.work_units.open_klant.api import (
     get_details_betrokkene,
     get_klantcontact_for_interne_taak,
 )
-from bptl.work_units.open_klant.mail import get_kcc_email_connection
 from bptl.work_units.zgw.utils import get_paginated_results
 
 logger = logging.getLogger(__name__)
@@ -160,7 +153,7 @@ def get_actor_email_from_interne_taak(
 
 def build_email_context(
     task: OpenKlantInternalTaskModel,
-    client: Optional[Client] = None,
+    client: Optional[ZDSClient] = None,
 ) -> dict:
     """
     Build the email context for the task.
@@ -220,64 +213,3 @@ def build_email_context(
     )
     email_context["subject"] = "KISS contactverzoek %s" % klantcontact_informatie
     return email_context
-
-
-def create_email(
-    subject: str,
-    body: str,
-    inlined_body: str,
-    to: str,
-    from_email: str = "",
-    bcc: Optional[list[str]] = None,
-    reply_to: Optional[list[str]] = None,
-    attachments: Optional[
-        list[tuple[str, bytes, str]]
-    ] = None,  # List of (filename, content, mimetype)
-):
-    """
-    Create an email message with optional attachments.
-
-    :param subject: Email subject
-    :param body: Plain text email body
-    :param inlined_body: HTML email body
-    :param to: Recipient email address
-    :param from_email: Sender email address
-    :param bcc: List of BCC email addresses
-    :param reply_to: List of reply-to email addresses
-    :param attachments: List of attachments as tuples (filename, content, mimetype)
-    """
-    # TODO: FIX BETTER
-    config = KCCEmailConfig.get_solo()
-    if not reply_to:
-        reply_to = [config.reply_to]
-    if not from_email:
-        from_email = config.from_email
-
-    # Create email
-    email = EmailMultiAlternatives(
-        subject=subject,
-        body=body,
-        from_email=from_email,
-        reply_to=reply_to or [],
-        to=to,
-        bcc=bcc or [],
-        connection=get_kcc_email_connection(),
-    )
-    # Attach the plain text version
-    email.attach_alternative(inlined_body, "text/html")
-
-    # Attach the image
-    filepath = os.path.join(settings.STATIC_ROOT, "img/wapen-utrecht-rood.svg")
-    with open(filepath, "rb") as wapen:
-        mime_image = MIMEImage(wapen.read())
-        mime_image.add_header("Content-ID", "<wapen_utrecht_cid>")
-        mime_image.add_header(
-            "Content-Disposition", "inline", filename="wapen-utrecht-rood.svg"
-        )
-        email.attach(mime_image)
-
-    if attachments:
-        for filename, content, mimetype in attachments:
-            email.attach(filename, content, mimetype)
-
-    return email

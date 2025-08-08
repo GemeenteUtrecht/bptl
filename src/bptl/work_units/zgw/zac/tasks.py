@@ -1,18 +1,26 @@
 import logging
 from typing import List
 
+from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
+from celery_once import QueueOnce
 from requests.exceptions import HTTPError
 from rest_framework import exceptions
 from zds_client import ClientError
 from zgw_consumers.concurrent import parallel
 from zgw_consumers.constants import APITypes
 
+from bptl.celery import app
 from bptl.tasks.base import MissingVariable, WorkUnit, check_variable
 from bptl.tasks.registry import register
+from bptl.work_units.mail.mail import build_email_messages, create_email
 from bptl.work_units.zgw.tasks.base import ZGWWorkUnit, require_zrc
+from bptl.work_units.zgw.zac.utils import (
+    create_zaken_report_xlsx,
+    get_last_month_period,
+)
 
 from .client import get_client, require_zac_service
 from .serializers import (
@@ -230,14 +238,25 @@ class ZaakDetailURLTask(ZGWWorkUnit):
         return validated_data
 
 
+# @app.task(
+#     base=QueueOnce,
+#     autoretry_for=(Exception,),
+#     retry_backoff=True,
+#     once={"graceful": True, "timeout": settings.EMAIL_TIMEOUT},
+# )
 @register
 @require_zac_service
-class ZacEmailUserLogs(ZGWWorkUnit):
+class ZacEmailVGUReports(WorkUnit):
     """
-    Requests the URL to the zaak detail page of a ZAAK in open zaak.
+    Requests the VGU reports from the ZAC and sends them via email to the recipients.
+    If startPeriod and endPeriod are provided, the reports will be filtered by these dates, otherwise by default the last month.
 
-    **Required process variables**
-    * ``recipientList`` List[str]: List of email adresses to sent email to.
+    **Required task variables**
+    * ``recipientList`` [List[str]]: List of email addresses to send email to.
+
+    **Optional task variables**
+    * ``startPeriod`` [date]: the start of the logging period.
+    * ``endPeriod`` [date]: the end start of the logging period.
 
     """
 
@@ -260,11 +279,49 @@ class ZacEmailUserLogs(ZGWWorkUnit):
             raise e
 
     def perform(self) -> None:
-        variables = self.task.get_variables()
+        variables = self.task.get("variables", {})
         data = self.validate_data(variables)
+
+        if not data.get("startPeriod") or data.get("endPeriod"):
+            data["startPeriod"], data["endPeriod"] = get_last_month_period()
+
+        logger.info(
+            "Fetching data for VGU report for period %s - %s",
+            data["startPeriod"],
+            data["endPeriod"],
+        )
+        # Send the email with the VGU reports
         with get_client(self.task) as client:
-            client.post(
-                f"api/accounts/management/axes/logs",
+            results = client.post(
+                "api/search/vgu-reports",
                 json=data,
             )
+        sheet = create_zaken_report_xlsx(results)
+
+        body, inlined_body = build_email_messages(
+            template_path_txt="mails/vgu_report_email.txt",
+            template_path_html="mails/vgu_report_email.html",
+            context={
+                "startPeriod": data["startPeriod"],
+                "endPeriod": data["endPeriod"],
+            },
+        )
+        email = create_email(
+            subject=_("VGU Zaken Report"),
+            body=body,
+            inlined_body=inlined_body,
+            recipient_list=data["recipientList"],
+            attachment={
+                "filename": "zaken.xlsx",
+                "content": sheet,
+                "mimetype": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            },
+        )
+        email.send(fail_silently=False)
+        logger.info(
+            "VGU report email sent to %s for period %s - %s",
+            data["recipientList"],
+            data["startPeriod"],
+            data["endPeriod"],
+        )
         return None
