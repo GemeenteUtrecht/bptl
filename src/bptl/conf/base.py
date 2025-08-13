@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     "bptl.tasks",
     "bptl.dummy",
     "bptl.utils",
+    "bptl.crontask",
     "bptl.work_units.brp",
     "bptl.work_units.camunda_api",
     "bptl.work_units.kadaster",
