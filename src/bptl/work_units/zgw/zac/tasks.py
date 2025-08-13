@@ -238,12 +238,6 @@ class ZaakDetailURLTask(ZGWWorkUnit):
         return validated_data
 
 
-# @app.task(
-#     base=QueueOnce,
-#     autoretry_for=(Exception,),
-#     retry_backoff=True,
-#     once={"graceful": True, "timeout": settings.EMAIL_TIMEOUT},
-# )
 @register
 @require_zac_service
 class ZacEmailVGUReports(WorkUnit):
