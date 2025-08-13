@@ -9,19 +9,29 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('tasks', '0012_taskmapping_engine_type'),
+        ("tasks", "0012_taskmapping_engine_type"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CronTask',
+            name="CronTask",
             fields=[
-                ('basetask_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='tasks.basetask')),
+                (
+                    "basetask_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="tasks.basetask",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
-                'base_manager_name': 'objects',
+                "abstract": False,
+                "base_manager_name": "objects",
             },
-            bases=('tasks.basetask',),
+            bases=("tasks.basetask",),
         ),
     ]
