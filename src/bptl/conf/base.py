@@ -438,7 +438,7 @@ CELERY_QUEUE_ONCE_TIMEOUT = os.getenv(
     "CELERY_QUEUE_ONCE_TIMEOUT", CELERY_TASK_SOFT_TIME_LIMIT
 )
 
-# Setup Celery routes for long-polling
+# Setup Celery routes for long-polling and openklant
 CELERY_TASK_ROUTES = {
     "bptl.camunda.tasks.task_fetch_and_lock": {"queue": "long-polling"},
     "bptl.openklant.tasks.task_fetch_and_patch": {"queue": "klantcontact"},

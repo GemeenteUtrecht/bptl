@@ -31,9 +31,11 @@ __all__ = ("task_create_cron_task", "cron_task_execute_and_complete")
         ),  # timeout if something goes wrong, in seconds
     },
 )
-def task_create_cron_task(*args, **kwargs) -> CronTask:
+def task_create_cron_task(topic_name: str = "", variables: dict = None) -> CronTask:
+    message = f"topic_name: {topic_name}, variables: {variables}"
+    logger.error(message)
     logger.debug("Creating cron task")
-    task = CronTask.objects.create(**kwargs)
+    task = CronTask.objects.create(topic_name=topic_name, variables=variables)
     logger.info("Created `cron` tasks with task id %s" % task.id)
 
     # initial logging
