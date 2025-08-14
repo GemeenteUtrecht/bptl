@@ -305,11 +305,13 @@ class ZacEmailVGUReports(WorkUnit):
             body=body,
             inlined_body=inlined_body,
             to=data["recipientList"],
-            attachment={
-                "filename": "zaken.xlsx",
-                "content": sheet,
-                "mimetype": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            },
+            attachments=[
+                (
+                    "zaken.xlsx",
+                    sheet,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ),
+            ],
         )
         email.send(fail_silently=False)
         logger.info(
