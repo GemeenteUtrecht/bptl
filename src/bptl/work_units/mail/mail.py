@@ -30,7 +30,7 @@ def create_email(
     subject: str,
     body: str,
     inlined_body: str,
-    to: str,
+    to: list[str],
     from_email: str = "",
     bcc: Optional[list[str]] = None,
     reply_to: Optional[list[str]] = None,

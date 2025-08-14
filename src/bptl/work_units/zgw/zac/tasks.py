@@ -304,7 +304,7 @@ class ZacEmailVGUReports(WorkUnit):
             subject=_("VGU Zaken Report"),
             body=body,
             inlined_body=inlined_body,
-            recipient_list=data["recipientList"],
+            to=data["recipientList"],
             attachment={
                 "filename": "zaken.xlsx",
                 "content": sheet,
