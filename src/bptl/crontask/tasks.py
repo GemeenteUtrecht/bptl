@@ -31,7 +31,7 @@ __all__ = ("task_create_cron_task", "cron_task_execute_and_complete")
         ),  # timeout if something goes wrong, in seconds
     },
 )
-def task_create_cron_task(*args, **kwargs):
+def task_create_cron_task(*args, **kwargs) -> CronTask:
     logger.debug("Creating cron task")
     task = CronTask.objects.create(**kwargs)
     logger.info("Created `cron` tasks with task id %s" % task.id)
@@ -41,7 +41,7 @@ def task_create_cron_task(*args, **kwargs):
 
     cron_task_execute_and_complete.delay(task.id)
 
-    return num_tasks
+    return task
 
 
 @app.task()
