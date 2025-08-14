@@ -58,7 +58,7 @@ def create_zaken_report_xlsx(results) -> bytes:
     return data
 
 
-def get_last_month_period(timezone="Europe/Amsterdam") -> Tuple[datetime, datetime]:
+def get_last_month_period(timezone="Europe/Amsterdam") -> Tuple[str, str]:
     """
     Returns two timezone-aware datetimes:
     1. The first day of the previous month at 00:00:00
@@ -72,8 +72,8 @@ def get_last_month_period(timezone="Europe/Amsterdam") -> Tuple[datetime, dateti
     last_month_end = first_of_this_month - timedelta(seconds=1)
     last_month_start = last_month_end.replace(
         day=1, hour=0, minute=0, second=0, microsecond=0
-    )
+    ).isoformat()
     last_month_end = last_month_end.replace(
         hour=23, minute=59, second=59, microsecond=0
-    )
+    ).isoformat()
     return last_month_start, last_month_end

@@ -56,7 +56,10 @@ def create_email(
         (getattr(config, "reply_to", None) or settings.KCC_DEFAULT_FROM_EMAIL)
         if not reply_to
         else reply_to
-    )
+    ) or []
+    if type(default_reply_to) is str:
+        default_reply_to = [default_reply_to]
+
     default_from_email = (
         (getattr(config, "from_email", None) or settings.KCC_DEFAULT_FROM_EMAIL)
         if not from_email
@@ -68,7 +71,7 @@ def create_email(
         subject=subject,
         body=body,
         from_email=default_from_email,
-        reply_to=default_reply_to or [],
+        reply_to=default_reply_to,
         to=to,
         bcc=bcc or [],
         connection=connection if connection else None,
