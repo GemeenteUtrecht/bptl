@@ -14,11 +14,4 @@ class CronTask(BaseTask):
 
     """
 
-    def __init__(self, topic_name: str = "", variables: dict = None):
-        if not topic_name or not variables:
-            raise ValueError("Both topic_name and variables are required.")
-
-        self.topic_name = topic_name
-        self.variables = variables
-
-        return super().__init__(*args, **kwargs)
+    pass
