@@ -53,7 +53,7 @@ def create_email(
     :param attachments: List of attachments as tuples (filename, content, mimetype)
     """
     default_reply_to = (
-        (getattr(config, "reply_to", None) or settings.KCC_DEFAULT_FROM_EMAIL)
+        (getattr(config, "reply_to", None) or settings.DEFAULT_FROM_EMAIL)
         if not reply_to
         else reply_to
     ) or []
@@ -61,7 +61,7 @@ def create_email(
         default_reply_to = [default_reply_to]
 
     default_from_email = (
-        (getattr(config, "from_email", None) or settings.KCC_DEFAULT_FROM_EMAIL)
+        (getattr(config, "from_email", None) or settings.DEFAULT_FROM_EMAIL)
         if not from_email
         else from_email
     )

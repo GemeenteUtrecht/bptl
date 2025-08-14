@@ -305,6 +305,8 @@ class ZacEmailVGUReports(WorkUnit):
             body=body,
             inlined_body=inlined_body,
             to=data["recipientList"],
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            reply_to=settings.DEFAULT_FROM_EMAIL,
             attachments=[
                 (
                     "zaken.xlsx",

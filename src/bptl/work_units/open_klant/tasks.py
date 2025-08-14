@@ -43,7 +43,9 @@ class NotificeerBetrokkene(WorkUnit):
             body=email_openklant_message,
             inlined_body=inlined_email_html_message,
             to=send_to,
+            from_email=email_config.from_email or settings.KCC_DEFAULT_FROM_EMAIL,
             bcc=bcc,
+            reply_to=email_config.reply_to or settings.KCC_DEFAULT_FROM_EMAIL,
             config=email_config,
             connection=connection,
         )

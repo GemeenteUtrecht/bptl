@@ -25,6 +25,7 @@ from bptl.work_units.open_klant.utils import (
 from ..celery import app
 from .client import get_openklant_client
 from .constants import FailedTaskStatuses
+from .mail_backend import KCCEmailConfig
 from .models import OpenKlantConfig, OpenKlantInternalTaskModel
 from .utils import fetch_and_patch, save_failed_task
 
@@ -205,15 +206,18 @@ def send_failure_notification(failed_data):
     attachments = [("failed_tasks.csv", csv_content.encode("utf-8"), "text/csv")]
     bcc = [config.debug_email] if config.debug_email else []
     connection = get_kcc_email_connection()
+    email_config = KCCEmailConfig.get_solo()
     email = create_email(
         subject="Logging gefaalde KCC contactverzoeken",
         body=email_openklant_message,
         inlined_body=inlined_email_html_message,
         to=send_to,
+        from_email=email_config.from_email or settings.KCC_DEFAULT_FROM_EMAIL,
         bcc=bcc,
-        attachments=attachments,
-        config=config,
+        reply_to=email_config.reply_to or settings.KCC_DEFAULT_FROM_EMAIL,
+        config=email_config,
         connection=connection,
+        attachments=attachments,
     )
     email.send(fail_silently=False)
 
