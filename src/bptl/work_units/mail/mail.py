@@ -8,6 +8,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.mail.backends.smtp import EmailBackend
 from django.template.loader import get_template
 
+from premailer import transform
 from solo.models import SingletonModel
 
 logger = logging.getLogger(__name__)

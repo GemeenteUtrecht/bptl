@@ -273,7 +273,7 @@ class ZacEmailVGUReports(WorkUnit):
             raise e
 
     def perform(self) -> None:
-        variables = self.task.get("variables", {})
+        variables = self.task.get_variables()
         data = self.validate_data(variables)
 
         if not data.get("startPeriod") or data.get("endPeriod"):
