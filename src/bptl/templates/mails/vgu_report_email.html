@@ -1,7 +1,19 @@
 
-{% extends "mails/base.html" %}
-{% load i18n %}{% block body %}
+{% extends "mails/base_inline_css.html" %}
+{% load i18n %}{% block base %}
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+  Beste collega,
+</p>
 <p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
 Aan deze email toegevoegd vind je de zaken-, documenten- en gebruikersrapportages voor de periode {{ startPeriod|date:"Y-m-d" }}-{{ endPeriod|date:"Y-m-d" }}.
+</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+  Met vriendelijke groeten,
+</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+  VGU beheer
+</p>
+<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+  Dit is een automatisch gegenereerd bericht vanuit de zaakafhandelcomponent; het is niet mogelijk via dit bericht te reageren.
 </p>
 {% endblock %}

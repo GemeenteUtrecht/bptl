@@ -1,4 +1,4 @@
-{% load i18n %}Beste Collega,
+{% load i18n %}Beste collega,
 
 {% block body %}{% endblock %}
 
