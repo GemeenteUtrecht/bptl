@@ -18,6 +18,8 @@ from bptl.tasks.registry import register
 from bptl.work_units.mail.mail import build_email_messages, create_email
 from bptl.work_units.zgw.tasks.base import ZGWWorkUnit, require_zrc
 from bptl.work_units.zgw.zac.utils import (
+    add_informatieobjecten_sheet_xlsx,
+    add_users_sheet_xlsx,
     create_zaken_report_xlsx,
     get_last_month_period,
 )
@@ -303,7 +305,12 @@ class ZacEmailVGUReports(WorkUnit):
         report_excel = add_informatieobjecten_sheet_xlsx(
             report_excel, results_informatieobjecten
         )
-        report_excel = add_users_sheet_xlsx(report_excel, results_user_logins)
+        report_excel = add_users_sheet_xlsx(
+            report_excel,
+            results_user_logins,
+            start_period=data["startPeriod"],
+            end_period=data["endPeriod"],
+        )
 
         body, inlined_body = build_email_messages(
             template_path_txt="mails/vgu_report_email.txt",
