@@ -284,13 +284,26 @@ class ZacEmailVGUReports(WorkUnit):
             data["startPeriod"],
             data["endPeriod"],
         )
-        # Send the email with the VGU reports
+        # Get the data from the zaakafhandelcomponent with the VGU reports
         with get_client(self.task) as client:
-            results = client.post(
-                "api/search/vgu-reports",
+            results_zaken = client.post(
+                "api/search/vgu-reports/zaken",
                 json=data,
             )
-        sheet = create_zaken_report_xlsx(results)
+            results_informatieobjecten = client.post(
+                "api/search/vgu-reports/informatieobjecten",
+                json=data,
+            )
+            results_user_logins = client.post(
+                f"api/accounts/management/axes/logs",
+                json=data,
+            )
+
+        report_excel = create_zaken_report_xlsx(results_zaken)
+        report_excel = add_informatieobjecten_sheet_xlsx(
+            report_excel, results_informatieobjecten
+        )
+        report_excel = add_users_sheet_xlsx(report_excel, results_user_logins)
 
         body, inlined_body = build_email_messages(
             template_path_txt="mails/vgu_report_email.txt",
@@ -301,7 +314,7 @@ class ZacEmailVGUReports(WorkUnit):
             },
         )
         email = create_email(
-            subject=_("VGU Zaken Report"),
+            subject=_("Rapport gebruik VIL"),
             body=body,
             inlined_body=inlined_body,
             to=data["recipientList"],
@@ -309,8 +322,8 @@ class ZacEmailVGUReports(WorkUnit):
             reply_to=settings.DEFAULT_FROM_EMAIL,
             attachments=[
                 (
-                    "zaken.xlsx",
-                    sheet,
+                    "vgurapport_%s-%s.xlsx" % (data["startPeriod"], data["endPeriod"]),
+                    report_excel,
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 ),
             ],
