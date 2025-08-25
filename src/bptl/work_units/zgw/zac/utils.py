@@ -295,7 +295,7 @@ def add_informatieobjecten_sheet_xlsx(
         "creatiedatum",
         "gerelateerde zaken",
     ]
-    headers: List[str] = [h.replace("_", " ").title() for h in base_headers]
+    headers: List[str] = [h.title() for h in base_headers]
     ws.append(headers)
 
     for cell in ws[1]:
@@ -340,9 +340,7 @@ def add_informatieobjecten_sheet_xlsx(
         cd_val: Any = item.get("creatiedatum")
         cd_dt: Optional[datetime] = _parse_dt(cd_val)
 
-        gz: Any = item.get("gerelateerde zaken")
-        if gz is None:
-            gz = item.get("gerelateerdeZaken")
+        gz: Optional[List[str]] = item.get("gerelateerdeZaken")
         if isinstance(gz, list):
             gz_str = ", ".join([str(x) for x in gz])
         else:
