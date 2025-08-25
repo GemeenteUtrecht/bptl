@@ -1,9 +1,11 @@
 import io
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import pytz
 from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font
+from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 from zgw_consumers.api_models.constants import RolTypes
 
@@ -39,24 +41,104 @@ def get_betrokkene_identificatie(rol: Dict, task: BaseTask) -> Dict:
 
 
 def create_zaken_report_xlsx(results) -> bytes:
-    # Create Excel workbook in memory
+    """
+    Create an Excel workbook for ZAAK results with:
+    - Serializer-defined column order and header titles (underscores → spaces, Title Case)
+    - Sorted by registratiedatum (oldest first, blanks last)
+    - registratiedatum written as Excel date cells (yyyy-mm-dd)
+    - Bold + frozen header row, AutoFilter, auto-sized columns
+    """
+    # Serializer field order (as specified)
+    field_order = [
+        "identificatie",
+        "omschrijving",
+        "zaaktype",
+        "registratiedatum",
+        "initiator",
+        "objecten",
+        "aantal_informatieobjecten",
+    ]
+
+    # Header display names: "aantal_informatieobjecten" -> "Aantal Informatieobjecten"
+    headers_display = [f.replace("_", " ").title() for f in field_order]
+
     wb = Workbook()
     ws = wb.active
     ws.title = "Zaken"
 
     # Write headers
-    if results:
-        headers = list(results[0].keys())
-        ws.append(headers)
-        for row in results:
-            ws.append([row.get(h, "") for h in headers])
+    ws.append(headers_display)
 
-    # Save to buffer
+    # Style header
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
+    ws.freeze_panes = "A2"
+
+    # --- helpers ---
+    def _parse_dt(val):
+        """Return a datetime for sorting/writing, or None if not parseable."""
+        if isinstance(val, datetime):
+            return val
+        if isinstance(val, date):
+            # Convert date -> datetime for consistency
+            return datetime(val.year, val.month, val.day)
+        if isinstance(val, str) and val:
+            for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
+                try:
+                    return datetime.strptime(val, fmt)
+                except ValueError:
+                    continue
+            # Try fromisoformat last (handles offset-naive ISO variants)
+            try:
+                return datetime.fromisoformat(val)
+            except Exception:
+                return None
+        return None
+
+    def _sort_key(item: dict):
+        dt = _parse_dt(item.get("registratiedatum"))
+        return (dt is None, dt or datetime.max)
+
+    # Sort oldest -> newest, None last
+    sorted_rows = sorted(results or [], key=_sort_key)
+
+    # Write rows (follow field_order)
+    for row in sorted_rows:
+        out = []
+        for f in field_order:
+            out.append(row.get(f, ""))
+        ws.append(out)
+
+        # Format registratiedatum cell as an Excel date if possible
+        reg_idx = field_order.index("registratiedatum") + 1  # 1-based
+        dt = _parse_dt(row.get("registratiedatum"))
+        if dt:
+            c = ws.cell(row=ws.max_row, column=reg_idx)
+            c.value = dt
+            c.number_format = "yyyy-mm-dd"
+
+    # AutoFilter over all data
+    last_row = ws.max_row
+    last_col_letter = get_column_letter(len(headers_display))
+    ws.auto_filter.ref = f"A1:{last_col_letter}{last_row}"
+
+    # Auto-size columns to max content width (incl. header)
+    padding = 2
+    for col_idx in range(1, len(headers_display) + 1):
+        col_letter = get_column_letter(col_idx)
+        max_len = 0
+        for cell in ws[col_letter]:
+            val = "" if cell.value is None else str(cell.value)
+            cell_len = max((len(line) for line in val.splitlines()), default=0)
+            if cell_len > max_len:
+                max_len = cell_len
+        ws.column_dimensions[col_letter].width = max_len + padding
+
+    # Save
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
-    data = buffer.read()
-    return data
+    return buffer.read()
 
 
 def get_last_month_period(timezone="Europe/Amsterdam") -> Tuple[str, str]:
@@ -114,28 +196,13 @@ def add_users_sheet_xlsx(
     start_period: Optional[str] = None,
     end_period: Optional[str] = None,
     date_format: str = "%Y-%m-%d",
-    sheet_name: str = "gebruikers",
+    sheet_name: str = "Gebruikers",
 ) -> bytes:
     """
-    Add a 'gebruikers' sheet with columns:
-        naam, email, gebruikersnaam, totaal, <each date between start_period and end_period>
+    Add a 'Gebruikers' sheet with columns:
+        Naam, Email, Gebruikersnaam, Totaal, <each date between start_period and end_period>
 
-    Rows are ordered by 'naam'. If a user's logins_per_day lacks a date, fill 0.
-
-    Arguments:
-        report_excel: workbook bytes to augment.
-        results_user_logins: list of dicts:
-            {
-              "naam": str,
-              "email": str,
-              "gebruikersnaam": str,
-              "total_logins": int,
-              "logins_per_day": {"YYYY-MM-DD": int, ...}
-            }
-        start_period/end_period: optional ISO datetime strings. If omitted, range is inferred
-            from union of all logins_per_day date keys. When provided, they define the
-            complete header date range (inclusive).
-        date_format: format used in header cells for dates.
+    Rows are ordered by 'Naam'. If a user's logins_per_day lacks a date, fill 0.
     """
     wb = _load_wb(report_excel)
 
@@ -153,13 +220,11 @@ def add_users_sheet_xlsx(
                 try:
                     d = datetime.fromisoformat(ds)
                 except ValueError:
-                    # Fallback: accept plain date (YYYY-MM-DD)
                     d = datetime.strptime(ds, "%Y-%m-%d")
                 if (min_d is None) or (d < min_d):
                     min_d = d
                 if (max_d is None) or (d > max_d):
                     max_d = d
-        # If still None (no data), set a single-day range to avoid empty headers
         if min_d is None or max_d is None:
             today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
             min_d = max_d = today
@@ -168,9 +233,19 @@ def add_users_sheet_xlsx(
     # Build ordered date headers
     date_headers = [d.strftime(date_format) for d in _daterange(start_dt, end_dt)]
 
+    # Capitalize non-date headers
+    base_headers = ["naam", "email", "gebruikersnaam", "totaal"]
+    formatted_base_headers = [h.replace("_", " ").title() for h in base_headers]
+
+    headers = [*formatted_base_headers, *date_headers]
+
     ws = _ensure_new_sheet(wb, sheet_name)
-    headers = ["naam", "email", "gebruikersnaam", "totaal", *date_headers]
     ws.append(headers)
+
+    # --- style header: bold + freeze top row ---
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
+    ws.freeze_panes = "A2"
 
     # Sort rows by 'naam' (fallback to empty string)
     sorted_users = sorted(
@@ -181,22 +256,38 @@ def add_users_sheet_xlsx(
         naam = u.get("naam", "") or ""
         email = u.get("email", "") or ""
         gebruikersnaam = u.get("gebruikersnaam", "") or ""
-        totaal = u.get("total_logins", 0) or 0
+        totaal = int(u.get("total_logins", 0) or 0)
 
         per_day: Dict[str, int] = u.get("logins_per_day", {}) or {}
         # Normalize per_day keys to the chosen date_format for robust lookup
         normalized_per_day: Dict[str, int] = {}
         for k, v in per_day.items():
-            # Accept both "YYYY-MM-DD" and ISO datetime strings
             try:
                 dt = datetime.fromisoformat(k)
             except ValueError:
                 dt = datetime.strptime(k, "%Y-%m-%d")
             normalized_per_day[dt.strftime(date_format)] = int(v or 0)
 
-        row = [naam, email, gebruikersnaam, int(totaal)]
+        row = [naam, email, gebruikersnaam, totaal]
         row.extend(normalized_per_day.get(dh, 0) for dh in date_headers)
         ws.append(row)
+
+    # --- apply AutoFilter over the whole data range ---
+    last_row = ws.max_row
+    last_col_letter = get_column_letter(len(headers))
+    ws.auto_filter.ref = f"A1:{last_col_letter}{last_row}"
+
+    # --- auto-size columns to max content width (including header) ---
+    padding = 2
+    for col_idx in range(1, len(headers) + 1):
+        column_letter = get_column_letter(col_idx)
+        max_len = 0
+        for cell in ws[column_letter]:
+            val = "" if cell.value is None else str(cell.value)
+            cell_len = max((len(line) for line in val.splitlines()), default=0)
+            if cell_len > max_len:
+                max_len = cell_len
+        ws.column_dimensions[column_letter].width = max_len + padding
 
     return _wb_to_bytes(wb)
 
@@ -204,47 +295,67 @@ def add_users_sheet_xlsx(
 def add_informatieobjecten_sheet_xlsx(
     report_excel: bytes,
     results_informatieobjecten: List[Dict[str, Any]],
-    sheet_name: str = "informatieobjecten",
-    date_out_format: str = "%Y-%m-%d %H:%M:%S",
+    sheet_name: str = "Informatieobjecten",
+    date_out_format: str = "%Y-%m-%d %H:%M:%S",  # still used for string fallback
 ) -> bytes:
     """
-    Add an 'informatieobjecten' sheet with columns:
-        auteur, bestandsnaam, informatieobjecttype, creatiedatum, gerelateerde zaken
+    Add an 'Informatieobjecten' sheet with columns:
+        Auteur, Bestandsnaam, Informatieobjecttype, Creatiedatum, Gerelateerde Zaken
 
-    Rows are ordered by 'creatiedatum' (None last). The 'gerelateerde zaken' column
-    concatenates the list into a comma-separated string.
+    Rows are ordered by:
+        1. creatiedatum (ascending, None last)
+        2. informatieobjecttype
+        3. bestandsnaam
+        4. auteur
+
+    creatiedatum is written as an Excel date cell with format yyyy-mm-dd if possible.
+    Header is bold/frozen, columns auto-sized, and an AutoFilter is applied.
     """
     wb = _load_wb(report_excel)
     ws = _ensure_new_sheet(wb, sheet_name)
 
-    headers = [
+    base_headers = [
         "auteur",
         "bestandsnaam",
         "informatieobjecttype",
         "creatiedatum",
         "gerelateerde zaken",
     ]
+    headers = [h.replace("_", " ").title() for h in base_headers]
     ws.append(headers)
 
-    # Sort by creatiedatum ascending, None last
-    def _key(item: Dict[str, Any]):
-        cd = item.get("creatiedatum")
-        # Allow str/None/datetime
+    # --- make headers bold ---
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
+
+    # --- freeze top row ---
+    ws.freeze_panes = "A2"
+
+    def _parse_dt(cd):
         if isinstance(cd, str) and cd:
             try:
-                cd_dt = datetime.fromisoformat(cd)
+                return datetime.fromisoformat(cd)
             except ValueError:
-                # Try common fallback without 'T'
                 try:
-                    cd_dt = datetime.strptime(cd, "%Y-%m-%d %H:%M:%S")
+                    return datetime.strptime(cd, "%Y-%m-%d %H:%M:%S")
                 except ValueError:
-                    cd_dt = None
+                    return None
         elif isinstance(cd, datetime):
-            cd_dt = cd
-        else:
-            cd_dt = None
-        # Return tuple: (is_none, value) so None sorts last
-        return (cd_dt is None, cd_dt or datetime.max)
+            return cd
+        return None
+
+    def _key(item: Dict[str, Any]):
+        cd_dt = _parse_dt(item.get("creatiedatum"))
+        iot = item.get("informatieobjecttype") or ""
+        bestandsnaam = item.get("bestandsnaam") or ""
+        auteur = item.get("auteur") or ""
+        return (
+            cd_dt is None,  # None last
+            cd_dt or datetime.max,  # oldest first
+            iot.lower(),
+            bestandsnaam.lower(),
+            auteur.lower(),
+        )
 
     sorted_rows = sorted(results_informatieobjecten or [], key=_key)
 
@@ -253,16 +364,9 @@ def add_informatieobjecten_sheet_xlsx(
         bestandsnaam = item.get("bestandsnaam", "") or ""
         iot = item.get("informatieobjecttype", "") or ""
 
-        cd = item.get("creatiedatum")
-        if isinstance(cd, datetime):
-            cd_str = cd.strftime(date_out_format)
-        elif isinstance(cd, str):
-            # Leave as-is if already string
-            cd_str = cd
-        else:
-            cd_str = ""
+        cd_val = item.get("creatiedatum")
+        cd_dt = _parse_dt(cd_val)
 
-        # Accept both "gerelateerde zaken" and "gerelateerde_zaken" keys
         gz = item.get("gerelateerde zaken")
         if gz is None:
             gz = item.get("gerelateerde_zaken")
@@ -271,6 +375,31 @@ def add_informatieobjecten_sheet_xlsx(
         else:
             gz_str = str(gz or "")
 
-        ws.append([auteur, bestandsnaam, iot, cd_str, gz_str])
+        ws.append([auteur, bestandsnaam, iot, None, gz_str])
+
+        # Excel date cell with yyyy-mm-dd when possible
+        if cd_dt:
+            cell = ws.cell(row=ws.max_row, column=4)
+            cell.value = cd_dt
+            cell.number_format = "yyyy-mm-dd"
+        elif isinstance(cd_val, str):  # fallback to raw string
+            ws.cell(row=ws.max_row, column=4).value = cd_val
+
+    # --- autosize columns ---
+    padding = 2
+    for col_idx, _ in enumerate(headers, start=1):
+        column_letter = get_column_letter(col_idx)
+        max_len = 0
+        for cell in ws[column_letter]:
+            val = "" if cell.value is None else str(cell.value)
+            cell_len = max((len(line) for line in val.splitlines()), default=0)
+            if cell_len > max_len:
+                max_len = cell_len
+        ws.column_dimensions[column_letter].width = max_len + padding
+
+    # --- apply AutoFilter over the whole data range ---
+    last_row = ws.max_row
+    last_col_letter = get_column_letter(len(headers))
+    ws.auto_filter.ref = f"A1:{last_col_letter}{last_row}"
 
     return _wb_to_bytes(wb)
