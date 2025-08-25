@@ -342,7 +342,7 @@ def add_informatieobjecten_sheet_xlsx(
 
         gz: Any = item.get("gerelateerde zaken")
         if gz is None:
-            gz = item.get("gerelateerde_zaken")
+            gz = item.get("gerelateerdeZaken")
         if isinstance(gz, list):
             gz_str = ", ".join([str(x) for x in gz])
         else:
