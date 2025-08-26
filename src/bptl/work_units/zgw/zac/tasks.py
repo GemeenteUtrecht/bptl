@@ -312,12 +312,14 @@ class ZacEmailVGUReports(WorkUnit):
             end_period=data["endPeriod"],
         )
 
+        start_period = data["startPeriod"].date().isoformat()
+        end_period = data["endPeriod"].date().isoformat()
         body, inlined_body = build_email_messages(
             template_path_txt="mails/vgu_report_email.txt",
             template_path_html="mails/vgu_report_email.html",
             context={
-                "startPeriod": data["startPeriod"],
-                "endPeriod": data["endPeriod"],
+                "startPeriod": start_period,
+                "endPeriod": end_period,
             },
         )
         email = create_email(
@@ -331,8 +333,8 @@ class ZacEmailVGUReports(WorkUnit):
                 (
                     "vgurapport_%s-%s.xlsx"
                     % (
-                        data["startPeriod"].date().isoformat(),
-                        data["endPeriod"].date().isoformat(),
+                        start_period,
+                        end_period,
                     ),
                     report_excel,
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

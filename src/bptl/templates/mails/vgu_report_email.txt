@@ -1,7 +1,7 @@
 
 {% load i18n %}Beste collega,
 
-Aan deze email toegevoegd vind je de zaken-, documenten- en gebruikersrapportages voor de periode {{ startPeriod|date:"Y-m-d" }}-{{ endPeriod|date:"Y-m-d" }}.
+Aan deze email toegevoegd vind je de zaken-, documenten- en gebruikersrapportages voor de periode {{ startPeriod }}-{{ endPeriod }}.
 
 Met vriendelijke groeten,
 
