@@ -256,9 +256,13 @@ class ZacEmailVGUReports(WorkUnit):
 
     """
 
-    def validate_data(self, data: dict) -> dict:
-        check_variable(data, "recipientList", empty_allowed=False)
-        serializer = RecipientListSerializer(data=data)
+    def perform(self) -> None:
+        variables = self.task.get_variables()
+        if not variables.get("startPeriod") or variables.get("endPeriod"):
+            variables["startPeriod"], variables["endPeriod"] = get_last_month_period()
+
+        check_variable(variables, "recipientList", empty_allowed=False)
+        serializer = RecipientListSerializer(data=variables)
         codes_to_catch = (
             "code='required'",
             "code='blank'",
@@ -266,7 +270,6 @@ class ZacEmailVGUReports(WorkUnit):
 
         try:
             serializer.is_valid(raise_exception=True)
-            return serializer.data
         except Exception as e:
             if isinstance(e, exceptions.ValidationError):
                 error_codes = str(e.detail)
@@ -274,31 +277,27 @@ class ZacEmailVGUReports(WorkUnit):
                     raise MissingVariable(e.detail)
             raise e
 
-    def perform(self) -> None:
-        variables = self.task.get_variables()
-        data = self.validate_data(variables)
-
-        if not data.get("startPeriod") or data.get("endPeriod"):
-            data["startPeriod"], data["endPeriod"] = get_last_month_period()
+        start_period = serializer.validated_data["startPeriod"].date().isoformat()
+        end_period = serializer.validated_data["endPeriod"].date().isoformat()
 
         logger.info(
             "Fetching data for VGU report for period %s - %s",
-            data["startPeriod"],
-            data["endPeriod"],
+            start_period,
+            end_period,
         )
         # Get the data from the zaakafhandelcomponent with the VGU reports
         with get_client(self.task) as client:
             results_zaken = client.post(
                 "api/search/vgu-reports/zaken",
-                json=data,
+                json=serializer.data,
             )
             results_informatieobjecten = client.post(
                 "api/search/vgu-reports/informatieobjecten",
-                json=data,
+                json=serializer.data,
             )
             results_user_logins = client.post(
                 f"api/accounts/management/axes/logs",
-                json=data,
+                json=serializer.data,
             )
 
         report_excel = create_zaken_report_xlsx(results_zaken)
@@ -308,12 +307,10 @@ class ZacEmailVGUReports(WorkUnit):
         report_excel = add_users_sheet_xlsx(
             report_excel,
             results_user_logins,
-            start_period=data["startPeriod"],
-            end_period=data["endPeriod"],
+            start_period=start_period,
+            end_period=end_period,
         )
 
-        start_period = data["startPeriod"].date().isoformat()
-        end_period = data["endPeriod"].date().isoformat()
         body, inlined_body = build_email_messages(
             template_path_txt="mails/vgu_report_email.txt",
             template_path_html="mails/vgu_report_email.html",
@@ -326,7 +323,7 @@ class ZacEmailVGUReports(WorkUnit):
             subject=_("Rapport gebruik VIL"),
             body=body,
             inlined_body=inlined_body,
-            to=data["recipientList"],
+            to=serializer.validated_data["recipientList"],
             from_email=settings.DEFAULT_FROM_EMAIL,
             reply_to=settings.DEFAULT_FROM_EMAIL,
             attachments=[
@@ -344,8 +341,8 @@ class ZacEmailVGUReports(WorkUnit):
         email.send(fail_silently=False)
         logger.info(
             "VGU report email sent to %s for period %s - %s",
-            data["recipientList"],
-            data["startPeriod"],
-            data["endPeriod"],
+            serializer.validated_data["recipientList"],
+            start_period,
+            end_period,
         )
         return None

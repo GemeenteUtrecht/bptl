@@ -134,7 +134,9 @@ def get_betrokkene_identificatie(rol: Dict[str, Any], task: BaseTask) -> Dict[st
     return betrokkene_identificatie
 
 
-def get_last_month_period(timezone_str: str = "Europe/Amsterdam") -> Tuple[str, str]:
+def get_last_month_period(
+    timezone_str: str = "Europe/Amsterdam",
+) -> Tuple[datetime, datetime]:
     """
     Returns two timezone-aware ISO datetime strings:
     1) First day of previous month 00:00:00
@@ -148,10 +150,10 @@ def get_last_month_period(timezone_str: str = "Europe/Amsterdam") -> Tuple[str, 
     last_month_end = first_of_this_month - timedelta(seconds=1)
     last_month_start_iso = last_month_end.replace(
         day=1, hour=0, minute=0, second=0, microsecond=0
-    ).isoformat()
+    )
     last_month_end_iso = last_month_end.replace(
         hour=23, minute=59, second=59, microsecond=0
-    ).isoformat()
+    )
     return last_month_start_iso, last_month_end_iso
 
 
