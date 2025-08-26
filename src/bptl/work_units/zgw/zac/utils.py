@@ -1,5 +1,5 @@
 import io
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import pytz
@@ -17,6 +17,39 @@ from .client import get_client
 # -------------------------
 # Shared helpers
 # -------------------------
+
+
+def _parse_dt_any(val: Any) -> Optional[datetime]:
+    """Parse a value into datetime if possible; supports date, ISO (incl. 'Z'), and common formats."""
+    if isinstance(val, datetime):
+        return val
+    if isinstance(val, date):
+        return datetime(val.year, val.month, val.day)
+    if isinstance(val, str) and val:
+        s = val.replace("Z", "+00:00")  # support trailing 'Z' (UTC)
+        try:
+            return datetime.fromisoformat(s)  # handles offsets and naive ISO
+        except ValueError:
+            pass
+        for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
+            try:
+                return datetime.strptime(val, fmt)
+            except ValueError:
+                continue
+    return None
+
+
+def _to_excel_date(val: Any) -> Optional[date]:
+    """
+    Parse various date/datetime strings (incl. trailing 'Z' or offsets) and
+    return a timezone-naive date object for Excel.
+    """
+    dt = _parse_dt_any(val)
+    if not dt:
+        return None
+    if dt.tzinfo is not None:
+        dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt.date()
 
 
 def _load_wb(binary: bytes) -> Workbook:
@@ -73,28 +106,6 @@ def _autosize_columns(ws: Worksheet, num_cols: int, padding: int = 2) -> None:
         ws.column_dimensions[col_letter].width = max_len + padding
 
 
-def _parse_dt_any(val: Any) -> Optional[datetime]:
-    """Parse a value into datetime if possible; supports date, ISO (incl. 'Z'), and common formats."""
-    if isinstance(val, datetime):
-        return val
-    if isinstance(val, date):
-        return datetime(val.year, val.month, val.day)
-    if isinstance(val, str) and val:
-        s = val.replace("Z", "+00:00")  # support trailing 'Z' (UTC)
-        # Try ISO first (handles offsets, naive ISO)
-        try:
-            return datetime.fromisoformat(s)
-        except ValueError:
-            pass
-        # Then common explicit formats
-        for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
-            try:
-                return datetime.strptime(val, fmt)
-            except ValueError:
-                continue
-    return None
-
-
 # -------------------------
 # Domain helpers
 # -------------------------
@@ -123,13 +134,13 @@ def get_betrokkene_identificatie(rol: Dict[str, Any], task: BaseTask) -> Dict[st
     return betrokkene_identificatie
 
 
-def get_last_month_period(timezone: str = "Europe/Amsterdam") -> Tuple[str, str]:
+def get_last_month_period(timezone_str: str = "Europe/Amsterdam") -> Tuple[str, str]:
     """
     Returns two timezone-aware ISO datetime strings:
     1) First day of previous month 00:00:00
     2) Last day of previous month 23:59:59
     """
-    tz = pytz.timezone(timezone)
+    tz = pytz.timezone(timezone_str)
     today = datetime.now(tz)
     first_of_this_month = today.replace(
         day=1, hour=0, minute=0, second=0, microsecond=0
@@ -174,13 +185,13 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
             row["aantal_informatieobjecten"] = row["aantalInformatieobjecten"]
         return row
 
-    # Normalize + sort
+    # Normalize + sort (use timezone-naive date for sorting)
     normalized = [_normalize_keys(r.copy()) for r in (results or [])]
     sorted_rows = sorted(
         normalized,
         key=lambda item: (
-            (dt := _parse_dt_any(item.get("registratiedatum"))) is None,
-            dt or datetime.max,
+            (d := _to_excel_date(item.get("registratiedatum"))) is None,
+            d or date.max,
         ),
     )
 
@@ -196,12 +207,12 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
         out: List[Any] = [row.get(f, "") for f in field_order]
         ws.append(out)
 
-        # Format registratiedatum cell as date if possible
-        dt = _parse_dt_any(row.get("registratiedatum"))
-        if dt:
+        # Format registratiedatum cell as *date* (naive) if possible
+        excel_date = _to_excel_date(row.get("registratiedatum"))
+        if excel_date:
             reg_idx = field_order.index("registratiedatum") + 1
             cell = ws.cell(row=ws.max_row, column=reg_idx)
-            cell.value = dt
+            cell.value = excel_date
             cell.number_format = "yyyy-mm-dd"
 
     # Finish
@@ -326,11 +337,11 @@ def add_informatieobjecten_sheet_xlsx(
     ws.append(headers)
     _bold_and_freeze_header(ws)
 
-    def _sort_key(item: Dict[str, Any]) -> Tuple[bool, datetime, str, str, str]:
-        dt = _parse_dt_any(item.get("creatiedatum"))
+    def _sort_key(item: Dict[str, Any]) -> Tuple[bool, date, str, str, str]:
+        d = _to_excel_date(item.get("creatiedatum"))
         return (
-            dt is None,
-            dt or datetime.max,
+            d is None,
+            d or date.max,
             (item.get("informatieobjecttype") or "").lower(),
             (item.get("bestandsnaam") or "").lower(),
             (item.get("auteur") or "").lower(),
@@ -342,8 +353,7 @@ def add_informatieobjecten_sheet_xlsx(
         auteur = it.get("auteur", "") or ""
         bestandsnaam = it.get("bestandsnaam", "") or ""
         iot = it.get("informatieobjecttype", "") or ""
-        dt_raw = it.get("creatiedatum")
-        dt = _parse_dt_any(dt_raw)
+        excel_date = _to_excel_date(it.get("creatiedatum"))
 
         # Only use gerelateerdeZaken as requested
         gz_list = it.get("gerelateerdeZaken")
@@ -355,13 +365,15 @@ def add_informatieobjecten_sheet_xlsx(
         # Append row with placeholder for date (set below if parseable)
         ws.append([auteur, bestandsnaam, iot, None, gz_str])
 
-        # Write date as real Excel date if parseable, else as raw string
-        if dt:
+        # Write date as real Excel date (naive) if parseable, else as raw string (if provided)
+        if excel_date:
             c = ws.cell(row=ws.max_row, column=4)
-            c.value = dt
+            c.value = excel_date
             c.number_format = "yyyy-mm-dd"
-        elif isinstance(dt_raw, str):
-            ws.cell(row=ws.max_row, column=4).value = dt_raw
+        else:
+            dt_raw = it.get("creatiedatum")
+            if isinstance(dt_raw, str):
+                ws.cell(row=ws.max_row, column=4).value = dt_raw
 
     _apply_autofilter(ws, len(headers))
     _autosize_columns(ws, len(headers))
