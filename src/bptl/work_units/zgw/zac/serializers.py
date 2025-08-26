@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import serializers
@@ -60,29 +61,44 @@ class RecipientListSerializer(serializers.Serializer):
         help_text=_("The end date of the logging period."),
     )
 
+    def _ensure_aware(self, dt):
+        """Make a naive datetime aware in the current timezone."""
+        if dt is None:
+            return None
+        if timezone.is_aware(dt):
+            return dt
+        return timezone.make_aware(dt, timezone.get_current_timezone())
+
     def validate_recipientList(self, value):
         if not value:
             raise serializers.ValidationError(_("Recipient list cannot be empty."))
         return value
 
     def validate_startPeriod(self, value):
-        if value and value > serializers.DateField().today():
-            raise serializers.ValidationError(
-                _("Start period cannot be in the future.")
-            )
+        if value:
+            value_aware = self._ensure_aware(value)
+            if value_aware > timezone.now():
+                raise serializers.ValidationError(
+                    _("Start period cannot be in the future.")
+                )
         return value
 
     def validate_endPeriod(self, value):
-        if value and value > serializers.DateField().today():
-            raise serializers.ValidationError(_("End period cannot be in the future."))
+        if value:
+            value_aware = self._ensure_aware(value)
+            if value_aware > timezone.now():
+                raise serializers.ValidationError(
+                    _("End period cannot be in the future.")
+                )
         return value
 
     def validate(self, data):
-        if data.get("startPeriod") and data.get("endPeriod"):
-            if data["startPeriod"] > data["endPeriod"]:
-                raise serializers.ValidationError(
-                    _("Start period cannot be after end period.")
-                )
+        sp = self._ensure_aware(data.get("startPeriod"))
+        ep = self._ensure_aware(data.get("endPeriod"))
+        if sp and ep and sp > ep:
+            raise serializers.ValidationError(
+                _("Start period cannot be after end period.")
+            )
         return data
 
 
