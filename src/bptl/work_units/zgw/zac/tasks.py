@@ -329,7 +329,11 @@ class ZacEmailVGUReports(WorkUnit):
             reply_to=settings.DEFAULT_FROM_EMAIL,
             attachments=[
                 (
-                    "vgurapport_%s-%s.xlsx" % (data["startPeriod"], data["endPeriod"]),
+                    "vgurapport_%s-%s.xlsx"
+                    % (
+                        data["startPeriod"].date().isoformat(),
+                        data["endPeriod"].date().isoformat(),
+                    ),
                     report_excel,
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 ),

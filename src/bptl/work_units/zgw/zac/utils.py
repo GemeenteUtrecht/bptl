@@ -14,23 +14,106 @@ from bptl.tasks.models import BaseTask
 
 from .client import get_client
 
+# -------------------------
+# Shared helpers
+# -------------------------
+
+
+def _load_wb(binary: bytes) -> Workbook:
+    return load_workbook(io.BytesIO(binary))
+
+
+def _wb_to_bytes(wb: Workbook) -> bytes:
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf.read()
+
+
+def _ensure_new_sheet(wb: Workbook, name: str) -> Worksheet:
+    """Create a fresh sheet with given name (remove existing if present)."""
+    if name in wb.sheetnames:
+        wb.remove(wb[name])
+    return wb.create_sheet(title=name)
+
+
+def _daterange(start: datetime, end: datetime) -> Iterable[datetime]:
+    """Inclusive date range at day resolution."""
+    cur = start
+    one_day = timedelta(days=1)
+    while cur.date() <= end.date():
+        yield cur
+        cur = cur + one_day
+
+
+def _bold_and_freeze_header(ws: Worksheet) -> None:
+    """Bold the first row and freeze panes below it."""
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
+    ws.freeze_panes = "A2"
+
+
+def _apply_autofilter(ws: Worksheet, num_cols: int) -> None:
+    """Apply an AutoFilter over A1:<last_col_letter><last_row>."""
+    last_row = ws.max_row
+    last_col_letter = get_column_letter(num_cols)
+    ws.auto_filter.ref = f"A1:{last_col_letter}{last_row}"
+
+
+def _autosize_columns(ws: Worksheet, num_cols: int, padding: int = 2) -> None:
+    """Autosize columns to max content width (including header)."""
+    for col_idx in range(1, num_cols + 1):
+        col_letter = get_column_letter(col_idx)
+        max_len = 0
+        for cell in ws[col_letter]:
+            val = "" if cell.value is None else str(cell.value)
+            cell_len = max((len(line) for line in val.splitlines()), default=0)
+            if cell_len > max_len:
+                max_len = cell_len
+        ws.column_dimensions[col_letter].width = max_len + padding
+
+
+def _parse_dt_any(val: Any) -> Optional[datetime]:
+    """Parse a value into datetime if possible; supports date, ISO (incl. 'Z'), and common formats."""
+    if isinstance(val, datetime):
+        return val
+    if isinstance(val, date):
+        return datetime(val.year, val.month, val.day)
+    if isinstance(val, str) and val:
+        s = val.replace("Z", "+00:00")  # support trailing 'Z' (UTC)
+        # Try ISO first (handles offsets, naive ISO)
+        try:
+            return datetime.fromisoformat(s)
+        except ValueError:
+            pass
+        # Then common explicit formats
+        for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
+            try:
+                return datetime.strptime(val, fmt)
+            except ValueError:
+                continue
+    return None
+
+
+# -------------------------
+# Domain helpers
+# -------------------------
+
 
 def get_betrokkene_identificatie(rol: Dict[str, Any], task: BaseTask) -> Dict[str, Any]:
-    if not (betrokkene_identificatie := rol.get("betrokkeneIdentificatie")):
-        betrokkene_identificatie = {}
+    betrokkene_identificatie: Dict[str, Any] = rol.get("betrokkeneIdentificatie") or {}
 
     if rol.get(
         "betrokkeneType"
     ) == RolTypes.medewerker and f"{AssigneeTypeChoices.user}:" in betrokkene_identificatie.get(
         "identificatie", ""
     ):
-        if (
+        # Only fetch details if initials/prefix/surname are all missing
+        if not (
             betrokkene_identificatie.get("voorletters")
             or betrokkene_identificatie.get("voorvoegsel_achternaam")
             or betrokkene_identificatie.get("achternaam")
         ):
-            pass
-        else:
             with get_client(task) as client:
                 betrokkene_identificatie = client.post(
                     "api/core/rollen/medewerker/betrokkeneIdentificatie",
@@ -38,6 +121,32 @@ def get_betrokkene_identificatie(rol: Dict[str, Any], task: BaseTask) -> Dict[st
                 ).get("betrokkeneIdentificatie", {})
 
     return betrokkene_identificatie
+
+
+def get_last_month_period(timezone: str = "Europe/Amsterdam") -> Tuple[str, str]:
+    """
+    Returns two timezone-aware ISO datetime strings:
+    1) First day of previous month 00:00:00
+    2) Last day of previous month 23:59:59
+    """
+    tz = pytz.timezone(timezone)
+    today = datetime.now(tz)
+    first_of_this_month = today.replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    )
+    last_month_end = first_of_this_month - timedelta(seconds=1)
+    last_month_start_iso = last_month_end.replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    ).isoformat()
+    last_month_end_iso = last_month_end.replace(
+        hour=23, minute=59, second=59, microsecond=0
+    ).isoformat()
+    return last_month_start_iso, last_month_end_iso
+
+
+# -------------------------
+# Report: Zaken
+# -------------------------
 
 
 def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
@@ -59,118 +168,54 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
     ]
     headers_display: List[str] = [f.replace("_", " ").title() for f in field_order]
 
+    def _normalize_keys(row: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize known camelCase → snake_case keys."""
+        if "aantalInformatieobjecten" in row and "aantal_informatieobjecten" not in row:
+            row["aantal_informatieobjecten"] = row["aantalInformatieobjecten"]
+        return row
+
+    # Normalize + sort
+    normalized = [_normalize_keys(r.copy()) for r in (results or [])]
+    sorted_rows = sorted(
+        normalized,
+        key=lambda item: (
+            (dt := _parse_dt_any(item.get("registratiedatum"))) is None,
+            dt or datetime.max,
+        ),
+    )
+
+    # Build workbook
     wb: Workbook = Workbook()
     ws: Worksheet = wb.active
     ws.title = "Zaken"
-
     ws.append(headers_display)
+    _bold_and_freeze_header(ws)
 
-    for cell in ws[1]:
-        cell.font = Font(bold=True)
-    ws.freeze_panes = "A2"
-
-    def _parse_dt(val: Any) -> Optional[datetime]:
-        if isinstance(val, datetime):
-            return val
-        if isinstance(val, date):
-            return datetime(val.year, val.month, val.day)
-        if isinstance(val, str) and val:
-            for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"):
-                try:
-                    return datetime.strptime(val, fmt)
-                except ValueError:
-                    continue
-            try:
-                return datetime.fromisoformat(val)
-            except Exception:
-                return None
-        return None
-
-    def _sort_key(item: Dict[str, Any]) -> Tuple[bool, datetime]:
-        dt = _parse_dt(item.get("registratiedatum"))
-        return (dt is None, dt or datetime.max)
-
-    sorted_rows: List[Dict[str, Any]] = sorted(results or [], key=_sort_key)
-
+    # Rows
     for row in sorted_rows:
         out: List[Any] = [row.get(f, "") for f in field_order]
         ws.append(out)
 
-        reg_idx: int = field_order.index("registratiedatum") + 1
-        dt = _parse_dt(row.get("registratiedatum"))
+        # Format registratiedatum cell as date if possible
+        dt = _parse_dt_any(row.get("registratiedatum"))
         if dt:
-            c = ws.cell(row=ws.max_row, column=reg_idx)
-            c.value = dt
-            c.number_format = "yyyy-mm-dd"
+            reg_idx = field_order.index("registratiedatum") + 1
+            cell = ws.cell(row=ws.max_row, column=reg_idx)
+            cell.value = dt
+            cell.number_format = "yyyy-mm-dd"
 
-    last_row: int = ws.max_row
-    last_col_letter: str = get_column_letter(len(headers_display))
-    ws.auto_filter.ref = f"A1:{last_col_letter}{last_row}"
-
-    padding: int = 2
-    for col_idx in range(1, len(headers_display) + 1):
-        col_letter = get_column_letter(col_idx)
-        max_len = 0
-        for cell in ws[col_letter]:
-            val = "" if cell.value is None else str(cell.value)
-            cell_len = max((len(line) for line in val.splitlines()), default=0)
-            if cell_len > max_len:
-                max_len = cell_len
-        ws.column_dimensions[col_letter].width = max_len + padding
-
+    # Finish
+    _apply_autofilter(ws, len(headers_display))
+    _autosize_columns(ws, len(headers_display))
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
     return buffer.read()
 
 
-def get_last_month_period(timezone: str = "Europe/Amsterdam") -> Tuple[str, str]:
-    """
-    Returns two timezone-aware datetimes (ISO strings):
-    1. The first day of the previous month at 00:00:00
-    2. The last day of the previous month at 23:59:59
-    """
-    tz = pytz.timezone(timezone)
-    today = datetime.now(tz)
-    first_of_this_month = today.replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0
-    )
-    last_month_end = first_of_this_month - timedelta(seconds=1)
-    last_month_start_iso: str = last_month_end.replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0
-    ).isoformat()
-    last_month_end_iso: str = last_month_end.replace(
-        hour=23, minute=59, second=59, microsecond=0
-    ).isoformat()
-    return last_month_start_iso, last_month_end_iso
-
-
-def _load_wb(binary: bytes) -> Workbook:
-    return load_workbook(io.BytesIO(binary))
-
-
-def _wb_to_bytes(wb: Workbook) -> bytes:
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
-    return buf.read()
-
-
-def _ensure_new_sheet(wb: Workbook, name: str) -> Worksheet:
-    # Replace existing sheet of the same name to avoid duplicates
-    if name in wb.sheetnames:
-        ws_existing = wb[name]
-        wb.remove(ws_existing)
-    return wb.create_sheet(title=name)
-
-
-def _daterange(start: datetime, end: datetime) -> Iterable[datetime]:
-    """Inclusive date range at day resolution."""
-    cur = start
-    one_day = timedelta(days=1)
-    while cur.date() <= end.date():
-        yield cur
-        cur = cur + one_day
+# -------------------------
+# Report: Users
+# -------------------------
 
 
 def add_users_sheet_xlsx(
@@ -184,96 +229,79 @@ def add_users_sheet_xlsx(
     """
     Add a 'Gebruikers' sheet with columns:
         Naam, Email, Gebruikersnaam, Totaal, <each date between start_period and end_period>
-
     Rows are ordered by 'Naam'. If a user's logins_per_day lacks a date, fill 0.
     """
     wb: Workbook = _load_wb(report_excel)
 
+    # Date range for columns (supports ISO, 'Z', etc.)
     if start_period and end_period:
-        start_dt: datetime = datetime.fromisoformat(start_period)
-        end_dt: datetime = datetime.fromisoformat(end_period)
+        start_dt = _parse_dt_any(start_period) or datetime.fromisoformat(start_period)
+        end_dt = _parse_dt_any(end_period) or datetime.fromisoformat(end_period)
+        if end_dt < start_dt:  # defensive swap
+            start_dt, end_dt = end_dt, start_dt
     else:
         min_d: Optional[datetime] = None
         max_d: Optional[datetime] = None
         for u in results_user_logins or []:
-            per_day: Dict[str, Any] = u.get("logins_per_day", {}) or {}
+            per_day = u.get("logins_per_day", {}) or {}
             for ds in per_day.keys():
-                try:
-                    d = datetime.fromisoformat(ds)
-                except ValueError:
-                    d = datetime.strptime(ds, "%Y-%m-%d")
-                if (min_d is None) or (d < min_d):
+                d = _parse_dt_any(ds) or datetime.strptime(str(ds), "%Y-%m-%d")
+                if min_d is None or d < min_d:
                     min_d = d
-                if (max_d is None) or (d > max_d):
+                if max_d is None or d > max_d:
                     max_d = d
         if min_d is None or max_d is None:
             today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
             min_d = max_d = today
         start_dt, end_dt = min_d, max_d
 
-    date_headers: List[str] = [
-        d.strftime(date_format) for d in _daterange(start_dt, end_dt)
-    ]
+    date_headers = [d.strftime(date_format) for d in _daterange(start_dt, end_dt)]
 
-    base_headers: List[str] = ["naam", "email", "gebruikersnaam", "totaal"]
-    formatted_base_headers: List[str] = [
-        h.replace("_", " ").title() for h in base_headers
-    ]
-    headers: List[str] = [*formatted_base_headers, *date_headers]
+    base_headers = ["naam", "email", "gebruikersnaam", "totaal"]
+    formatted_base_headers = [h.replace("_", " ").title() for h in base_headers]
+    headers = [*formatted_base_headers, *date_headers]
 
-    ws: Worksheet = _ensure_new_sheet(wb, sheet_name)
+    ws = _ensure_new_sheet(wb, sheet_name)
     ws.append(headers)
+    _bold_and_freeze_header(ws)
 
-    for cell in ws[1]:
-        cell.font = Font(bold=True)
-    ws.freeze_panes = "A2"
-
-    sorted_users: List[Dict[str, Any]] = sorted(
+    # Sort by name
+    sorted_users = sorted(
         results_user_logins or [], key=lambda u: (u.get("naam") or "").lower()
     )
 
+    # Write rows
     for u in sorted_users:
-        naam: str = u.get("naam", "") or ""
-        email: str = u.get("email", "") or ""
-        gebruikersnaam: str = u.get("gebruikersnaam", "") or ""
-        totaal: int = int(u.get("total_logins", 0) or 0)
+        naam = u.get("naam", "") or ""
+        email = u.get("email", "") or ""
+        gebruikersnaam = u.get("gebruikersnaam", "") or ""
+        totaal = int(u.get("total_logins", 0) or 0)
 
         per_day: Dict[str, Any] = u.get("logins_per_day", {}) or {}
         normalized_per_day: Dict[str, int] = {}
         for k, v in per_day.items():
-            try:
-                dt = datetime.fromisoformat(k)
-            except ValueError:
-                dt = datetime.strptime(k, "%Y-%m-%d")
+            dt = _parse_dt_any(k) or datetime.strptime(str(k), "%Y-%m-%d")
             normalized_per_day[dt.strftime(date_format)] = int(v or 0)
 
-        row: List[Any] = [naam, email, gebruikersnaam, totaal]
+        row = [naam, email, gebruikersnaam, totaal]
         row.extend(normalized_per_day.get(dh, 0) for dh in date_headers)
         ws.append(row)
 
-    last_row: int = ws.max_row
-    last_col_letter: str = get_column_letter(len(headers))
-    ws.auto_filter.ref = f"A1:{last_col_letter}{last_row}"
-
-    padding: int = 2
-    for col_idx in range(1, len(headers) + 1):
-        column_letter = get_column_letter(col_idx)
-        max_len = 0
-        for cell in ws[column_letter]:
-            val = "" if cell.value is None else str(cell.value)
-            cell_len = max((len(line) for line in val.splitlines()), default=0)
-            if cell_len > max_len:
-                max_len = cell_len
-        ws.column_dimensions[column_letter].width = max_len + padding
-
+    _apply_autofilter(ws, len(headers))
+    _autosize_columns(ws, len(headers))
     return _wb_to_bytes(wb)
+
+
+# -------------------------
+# Report: Informatieobjecten
+# -------------------------
 
 
 def add_informatieobjecten_sheet_xlsx(
     report_excel: bytes,
     results_informatieobjecten: List[Dict[str, Any]],
-    sheet_name: str = "informatieobjecten",
-    date_out_format: str = "%Y-%m-%d %H:%M:%S",
+    sheet_name: str = "Informatieobjecten",
+    date_out_format: str = "%Y-%m-%d %H:%M:%S",  # kept for signature compatibility (not used)
 ) -> bytes:
     """
     Add an 'Informatieobjecten' sheet with columns:
@@ -282,92 +310,59 @@ def add_informatieobjecten_sheet_xlsx(
     Sorted by:
         creatiedatum (asc, None last) → informatieobjecttype → bestandsnaam → auteur
 
-    creatiedatum is written as an Excel date cell with format yyyy-mm-dd if possible.
-    Header is bold/frozen, columns auto-sized, and an AutoFilter is applied.
+    'creatiedatum' is written as an Excel date (yyyy-mm-dd) when parseable.
+    Expects 'gerelateerdeZaken' (list[str]) in each item.
     """
-    wb: Workbook = _load_wb(report_excel)
-    ws: Worksheet = _ensure_new_sheet(wb, sheet_name)
+    wb = _load_wb(report_excel)
+    ws = _ensure_new_sheet(wb, sheet_name)
 
-    base_headers: List[str] = [
-        "auteur",
-        "bestandsnaam",
-        "informatieobjecttype",
-        "creatiedatum",
-        "gerelateerde zaken",
+    headers = [
+        "Auteur",
+        "Bestandsnaam",
+        "Informatieobjecttype",
+        "Creatiedatum",
+        "Gerelateerde Zaken",
     ]
-    headers: List[str] = [h.title() for h in base_headers]
     ws.append(headers)
+    _bold_and_freeze_header(ws)
 
-    for cell in ws[1]:
-        cell.font = Font(bold=True)
-    ws.freeze_panes = "A2"
-
-    def _parse_dt(cd: Any) -> Optional[datetime]:
-        if isinstance(cd, str) and cd:
-            try:
-                return datetime.fromisoformat(cd)
-            except ValueError:
-                try:
-                    return datetime.strptime(cd, "%Y-%m-%d %H:%M:%S")
-                except ValueError:
-                    return None
-        elif isinstance(cd, datetime):
-            return cd
-        return None
-
-    def _key(item: Dict[str, Any]) -> Tuple[bool, datetime, str, str, str]:
-        cd_dt = _parse_dt(item.get("creatiedatum"))
-        iot = (item.get("informatieobjecttype") or "").lower()
-        bestandsnaam = (item.get("bestandsnaam") or "").lower()
-        auteur = (item.get("auteur") or "").lower()
+    def _sort_key(item: Dict[str, Any]) -> Tuple[bool, datetime, str, str, str]:
+        dt = _parse_dt_any(item.get("creatiedatum"))
         return (
-            cd_dt is None,
-            cd_dt or datetime.max,
-            iot,
-            bestandsnaam,
-            auteur,
+            dt is None,
+            dt or datetime.max,
+            (item.get("informatieobjecttype") or "").lower(),
+            (item.get("bestandsnaam") or "").lower(),
+            (item.get("auteur") or "").lower(),
         )
 
-    sorted_rows: List[Dict[str, Any]] = sorted(
-        results_informatieobjecten or [], key=_key
-    )
+    rows = sorted(results_informatieobjecten or [], key=_sort_key)
 
-    for item in sorted_rows:
-        auteur: str = item.get("auteur", "") or ""
-        bestandsnaam: str = item.get("bestandsnaam", "") or ""
-        iot: str = item.get("informatieobjecttype", "") or ""
+    for it in rows:
+        auteur = it.get("auteur", "") or ""
+        bestandsnaam = it.get("bestandsnaam", "") or ""
+        iot = it.get("informatieobjecttype", "") or ""
+        dt_raw = it.get("creatiedatum")
+        dt = _parse_dt_any(dt_raw)
 
-        cd_val: Any = item.get("creatiedatum")
-        cd_dt: Optional[datetime] = _parse_dt(cd_val)
-
-        gz: Optional[List[str]] = item.get("gerelateerdeZaken")
-        if isinstance(gz, list):
-            gz_str = ", ".join([str(x) for x in gz])
+        # Only use gerelateerdeZaken as requested
+        gz_list = it.get("gerelateerdeZaken")
+        if isinstance(gz_list, list):
+            gz_str = ", ".join(str(x) for x in gz_list)
         else:
-            gz_str = str(gz or "")
+            gz_str = str(gz_list or "")
 
+        # Append row with placeholder for date (set below if parseable)
         ws.append([auteur, bestandsnaam, iot, None, gz_str])
 
-        if cd_dt:
-            cell = ws.cell(row=ws.max_row, column=4)
-            cell.value = cd_dt
-            cell.number_format = "yyyy-mm-dd"
-        elif isinstance(cd_val, str):
-            ws.cell(row=ws.max_row, column=4).value = cd_val
+        # Write date as real Excel date if parseable, else as raw string
+        if dt:
+            c = ws.cell(row=ws.max_row, column=4)
+            c.value = dt
+            c.number_format = "yyyy-mm-dd"
+        elif isinstance(dt_raw, str):
+            ws.cell(row=ws.max_row, column=4).value = dt_raw
 
-    padding: int = 2
-    for col_idx, _ in enumerate(headers, start=1):
-        column_letter = get_column_letter(col_idx)
-        max_len = 0
-        for cell in ws[column_letter]:
-            val = "" if cell.value is None else str(cell.value)
-            cell_len = max((len(line) for line in val.splitlines()), default=0)
-            if cell_len > max_len:
-                max_len = cell_len
-        ws.column_dimensions[column_letter].width = max_len + padding
-
-    last_row: int = ws.max_row
-    last_col_letter: str = get_column_letter(len(headers))
-    ws.auto_filter.ref = f"A1:{last_col_letter}{last_row}"
-
+    _apply_autofilter(ws, len(headers))
+    _autosize_columns(ws, len(headers))
     return _wb_to_bytes(wb)
