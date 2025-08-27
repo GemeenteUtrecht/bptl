@@ -242,7 +242,7 @@ def add_users_sheet_xlsx(
     """
     Add a 'Gebruikers' sheet with columns:
         Naam, Email, Gebruikersnaam, Totaal, <each date between start_period and end_period>
-    Rows are ordered by 'Naam'. If a user's logins_per_day lacks a date, fill 0.
+    Rows are ordered by 'Naam'. If a user's loginsPerDay lacks a date, fill 0.
     """
     wb: Workbook = _load_wb(report_excel)
 
@@ -256,7 +256,7 @@ def add_users_sheet_xlsx(
         min_d: Optional[datetime] = None
         max_d: Optional[datetime] = None
         for u in results_user_logins or []:
-            per_day = u.get("logins_per_day", {}) or {}
+            per_day = u.get("loginsPerDay", {}) or {}
             for ds in per_day.keys():
                 d = _parse_dt_any(ds) or datetime.strptime(str(ds), "%Y-%m-%d")
                 if min_d is None or d < min_d:
@@ -288,9 +288,9 @@ def add_users_sheet_xlsx(
         naam = u.get("naam", "") or ""
         email = u.get("email", "") or ""
         gebruikersnaam = u.get("gebruikersnaam", "") or ""
-        totaal = int(u.get("total_logins", 0) or 0)
+        totaal = int(u.get("totalLogins", 0) or 0)
 
-        per_day: Dict[str, Any] = u.get("logins_per_day", {}) or {}
+        per_day: Dict[str, Any] = u.get("loginsPerDay", {}) or {}
         normalized_per_day: Dict[str, int] = {}
         for k, v in per_day.items():
             dt = _parse_dt_any(k) or datetime.strptime(str(k), "%Y-%m-%d")
