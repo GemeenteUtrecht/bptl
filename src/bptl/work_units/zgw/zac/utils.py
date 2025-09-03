@@ -165,25 +165,13 @@ def get_last_month_period(
 def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
     """
     Create an Excel workbook for ZAAK results with:
-    - Columns (with title-cased headers): identificatie, omschrijving, zaaktype, registratiedatum,
-      initiator, object, objecttype, aantal_informatieobjecten
-    - One row per *object* in `objecten` (list of {"object", "objecttype"}). If none, a single row with blanks.
+    - Columns: Identificatie, Omschrijving, Zaaktype, Registratiedatum, Initiator, Object, Objecttype, Aantal Informatieobjecten
+    - One row per *object* in `objecten` (list of {"object","objecttype"}). If none, a single row with blanks.
     - Sorted by registratiedatum (oldest first, blanks last)
     - registratiedatum written as Excel date cells (yyyy-mm-dd)
     - Bold + frozen header row, AutoFilter, auto-sized columns
     """
-    # Base fields in desired order; "objecten" is split into two columns below
-    base_field_order: List[str] = [
-        "identificatie",
-        "omschrijving",
-        "zaaktype",
-        "registratiedatum",
-        "initiator",
-        # "objecten" -> exploded to: "object", "objecttype"
-        "aantal_informatieobjecten",
-    ]
-
-    # Display headers (title case, with Object/Objecttype inserted)
+    # Display headers (explicit to avoid accidentally including "objecten")
     headers_display: List[str] = [
         "Identificatie",
         "Omschrijving",
@@ -205,7 +193,7 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
     # Normalize keys first
     normalized = [_normalize_keys(r) for r in (results or [])]
 
-    # Sort by registratiedatum (using timezone-naive date for sorting)
+    # Sort by registratiedatum using timezone-naive date for sorting
     sorted_rows = sorted(
         normalized,
         key=lambda item: (
@@ -223,9 +211,12 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
 
     # Helper to explode objecten to list[{"object","objecttype"}]
     def _explode_objects(obj_field: Any) -> List[Dict[str, str]]:
-        # Expected shape: list of {"object": <str>, "objecttype": <str>}
+        """
+        Expected shape now: list of {"object": <str>, "objecttype": <str>}
+        Also supports legacy: string or list of scalars.
+        """
         if isinstance(obj_field, list):
-            out = []
+            out: List[Dict[str, str]] = []
             for it in obj_field:
                 if isinstance(it, dict):
                     out.append(
@@ -238,13 +229,11 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
                     # list of scalars -> treat as single 'object' values
                     out.append({"object": str(it or ""), "objecttype": ""})
             return out
-        # If it's a string (legacy), make it one entry and leave type blank
         if isinstance(obj_field, str):
             return [{"object": obj_field, "objecttype": ""}]
-        # Otherwise, no objects
         return []
 
-    # Write rows (explode per object)
+    # Write rows (explode per object) — NEVER append the raw "objecten" list
     for row in sorted_rows:
         excel_date = _to_excel_date(row.get("registratiedatum"))
 
@@ -262,7 +251,7 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
                 row.get("initiator", ""),
                 obj_entry.get("object", ""),
                 obj_entry.get("objecttype", ""),
-                row.get("aantal_informatieobjecten", ""),
+                row.get("aantal_informatieobjecten", 0) or 0,
             ]
             ws.append(out)
 
@@ -280,70 +269,6 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
     wb.save(buffer)
     buffer.seek(0)
     return buffer.read()
-
-
-# def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
-#     """
-#     Create an Excel workbook for ZAAK results with:
-#     - Serializer-defined column order and header titles (underscores → spaces, Title Case)
-#     - Sorted by registratiedatum (oldest first, blanks last)
-#     - registratiedatum written as Excel date cells (yyyy-mm-dd)
-#     - Bold + frozen header row, AutoFilter, auto-sized columns
-#     """
-#     field_order: List[str] = [
-#         "identificatie",
-#         "omschrijving",
-#         "zaaktype",
-#         "registratiedatum",
-#         "initiator",
-#         "objecten",
-#         "aantal_informatieobjecten",
-#     ]
-#     headers_display: List[str] = [f.replace("_", " ").title() for f in field_order]
-
-#     def _normalize_keys(row: Dict[str, Any]) -> Dict[str, Any]:
-#         """Normalize known camelCase → snake_case keys."""
-#         if "aantalInformatieobjecten" in row and "aantal_informatieobjecten" not in row:
-#             row["aantal_informatieobjecten"] = row["aantalInformatieobjecten"]
-#         return row
-
-#     # Normalize + sort (use timezone-naive date for sorting)
-#     normalized = [_normalize_keys(r.copy()) for r in (results or [])]
-#     sorted_rows = sorted(
-#         normalized,
-#         key=lambda item: (
-#             (d := _to_excel_date(item.get("registratiedatum"))) is None,
-#             d or date.max,
-#         ),
-#     )
-
-#     # Build workbook
-#     wb: Workbook = Workbook()
-#     ws: Worksheet = wb.active
-#     ws.title = "Zaken"
-#     ws.append(headers_display)
-#     _bold_and_freeze_header(ws)
-
-#     # Rows
-#     for row in sorted_rows:
-#         out: List[Any] = [row.get(f, "") for f in field_order]
-#         ws.append(out)
-
-#         # Format registratiedatum cell as *date* (naive) if possible
-#         excel_date = _to_excel_date(row.get("registratiedatum"))
-#         if excel_date:
-#             reg_idx = field_order.index("registratiedatum") + 1
-#             cell = ws.cell(row=ws.max_row, column=reg_idx)
-#             cell.value = excel_date
-#             cell.number_format = "yyyy-mm-dd"
-
-#     # Finish
-#     _apply_autofilter(ws, len(headers_display))
-#     _autosize_columns(ws, len(headers_display))
-#     buffer = io.BytesIO()
-#     wb.save(buffer)
-#     buffer.seek(0)
-#     return buffer.read()
 
 
 # -------------------------
