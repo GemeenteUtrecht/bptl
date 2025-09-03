@@ -165,30 +165,47 @@ def get_last_month_period(
 def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
     """
     Create an Excel workbook for ZAAK results with:
-    - Serializer-defined column order and header titles (underscores → spaces, Title Case)
+    - Columns (with title-cased headers): identificatie, omschrijving, zaaktype, registratiedatum,
+      initiator, object, objecttype, aantal_informatieobjecten
+    - One row per *object* in `objecten` (list of {"object", "objecttype"}). If none, a single row with blanks.
     - Sorted by registratiedatum (oldest first, blanks last)
     - registratiedatum written as Excel date cells (yyyy-mm-dd)
     - Bold + frozen header row, AutoFilter, auto-sized columns
     """
-    field_order: List[str] = [
+    # Base fields in desired order; "objecten" is split into two columns below
+    base_field_order: List[str] = [
         "identificatie",
         "omschrijving",
         "zaaktype",
         "registratiedatum",
         "initiator",
-        "objecten",
+        # "objecten" -> exploded to: "object", "objecttype"
         "aantal_informatieobjecten",
     ]
-    headers_display: List[str] = [f.replace("_", " ").title() for f in field_order]
+
+    # Display headers (title case, with Object/Objecttype inserted)
+    headers_display: List[str] = [
+        "Identificatie",
+        "Omschrijving",
+        "Zaaktype",
+        "Registratiedatum",
+        "Initiator",
+        "Object",
+        "Objecttype",
+        "Aantal Informatieobjecten",
+    ]
 
     def _normalize_keys(row: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize known camelCase → snake_case keys."""
-        if "aantalInformatieobjecten" in row and "aantal_informatieobjecten" not in row:
-            row["aantal_informatieobjecten"] = row["aantalInformatieobjecten"]
-        return row
+        r = row.copy()
+        if "aantalInformatieobjecten" in r and "aantal_informatieobjecten" not in r:
+            r["aantal_informatieobjecten"] = r["aantalInformatieobjecten"]
+        return r
 
-    # Normalize + sort (use timezone-naive date for sorting)
-    normalized = [_normalize_keys(r.copy()) for r in (results or [])]
+    # Normalize keys first
+    normalized = [_normalize_keys(r) for r in (results or [])]
+
+    # Sort by registratiedatum (using timezone-naive date for sorting)
     sorted_rows = sorted(
         normalized,
         key=lambda item: (
@@ -204,18 +221,57 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
     ws.append(headers_display)
     _bold_and_freeze_header(ws)
 
-    # Rows
-    for row in sorted_rows:
-        out: List[Any] = [row.get(f, "") for f in field_order]
-        ws.append(out)
+    # Helper to explode objecten to list[{"object","objecttype"}]
+    def _explode_objects(obj_field: Any) -> List[Dict[str, str]]:
+        # Expected shape: list of {"object": <str>, "objecttype": <str>}
+        if isinstance(obj_field, list):
+            out = []
+            for it in obj_field:
+                if isinstance(it, dict):
+                    out.append(
+                        {
+                            "object": str(it.get("object", "") or ""),
+                            "objecttype": str(it.get("objecttype", "") or ""),
+                        }
+                    )
+                else:
+                    # list of scalars -> treat as single 'object' values
+                    out.append({"object": str(it or ""), "objecttype": ""})
+            return out
+        # If it's a string (legacy), make it one entry and leave type blank
+        if isinstance(obj_field, str):
+            return [{"object": obj_field, "objecttype": ""}]
+        # Otherwise, no objects
+        return []
 
-        # Format registratiedatum cell as *date* (naive) if possible
+    # Write rows (explode per object)
+    for row in sorted_rows:
         excel_date = _to_excel_date(row.get("registratiedatum"))
-        if excel_date:
-            reg_idx = field_order.index("registratiedatum") + 1
-            cell = ws.cell(row=ws.max_row, column=reg_idx)
-            cell.value = excel_date
-            cell.number_format = "yyyy-mm-dd"
+
+        objects_list = _explode_objects(row.get("objecten"))
+        if not objects_list:
+            # still write a single row with empty object/objecttype
+            objects_list = [{"object": "", "objecttype": ""}]
+
+        for obj_entry in objects_list:
+            out: List[Any] = [
+                row.get("identificatie", ""),
+                row.get("omschrijving", ""),
+                row.get("zaaktype", ""),
+                None,  # placeholder for date cell
+                row.get("initiator", ""),
+                obj_entry.get("object", ""),
+                obj_entry.get("objecttype", ""),
+                row.get("aantal_informatieobjecten", ""),
+            ]
+            ws.append(out)
+
+            # Format registratiedatum cell as *date* (naive) if possible
+            if excel_date:
+                reg_col_idx = 4  # "Registratiedatum" column
+                cell = ws.cell(row=ws.max_row, column=reg_col_idx)
+                cell.value = excel_date
+                cell.number_format = "yyyy-mm-dd"
 
     # Finish
     _apply_autofilter(ws, len(headers_display))
@@ -224,6 +280,70 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
     wb.save(buffer)
     buffer.seek(0)
     return buffer.read()
+
+
+# def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
+#     """
+#     Create an Excel workbook for ZAAK results with:
+#     - Serializer-defined column order and header titles (underscores → spaces, Title Case)
+#     - Sorted by registratiedatum (oldest first, blanks last)
+#     - registratiedatum written as Excel date cells (yyyy-mm-dd)
+#     - Bold + frozen header row, AutoFilter, auto-sized columns
+#     """
+#     field_order: List[str] = [
+#         "identificatie",
+#         "omschrijving",
+#         "zaaktype",
+#         "registratiedatum",
+#         "initiator",
+#         "objecten",
+#         "aantal_informatieobjecten",
+#     ]
+#     headers_display: List[str] = [f.replace("_", " ").title() for f in field_order]
+
+#     def _normalize_keys(row: Dict[str, Any]) -> Dict[str, Any]:
+#         """Normalize known camelCase → snake_case keys."""
+#         if "aantalInformatieobjecten" in row and "aantal_informatieobjecten" not in row:
+#             row["aantal_informatieobjecten"] = row["aantalInformatieobjecten"]
+#         return row
+
+#     # Normalize + sort (use timezone-naive date for sorting)
+#     normalized = [_normalize_keys(r.copy()) for r in (results or [])]
+#     sorted_rows = sorted(
+#         normalized,
+#         key=lambda item: (
+#             (d := _to_excel_date(item.get("registratiedatum"))) is None,
+#             d or date.max,
+#         ),
+#     )
+
+#     # Build workbook
+#     wb: Workbook = Workbook()
+#     ws: Worksheet = wb.active
+#     ws.title = "Zaken"
+#     ws.append(headers_display)
+#     _bold_and_freeze_header(ws)
+
+#     # Rows
+#     for row in sorted_rows:
+#         out: List[Any] = [row.get(f, "") for f in field_order]
+#         ws.append(out)
+
+#         # Format registratiedatum cell as *date* (naive) if possible
+#         excel_date = _to_excel_date(row.get("registratiedatum"))
+#         if excel_date:
+#             reg_idx = field_order.index("registratiedatum") + 1
+#             cell = ws.cell(row=ws.max_row, column=reg_idx)
+#             cell.value = excel_date
+#             cell.number_format = "yyyy-mm-dd"
+
+#     # Finish
+#     _apply_autofilter(ws, len(headers_display))
+#     _autosize_columns(ws, len(headers_display))
+#     buffer = io.BytesIO()
+#     wb.save(buffer)
+#     buffer.seek(0)
+#     return buffer.read()
 
 
 # -------------------------
@@ -318,13 +438,15 @@ def add_informatieobjecten_sheet_xlsx(
 ) -> bytes:
     """
     Add an 'Informatieobjecten' sheet with columns:
-        Auteur, Bestandsnaam, Informatieobjecttype, Creatiedatum, Gerelateerde Zaken
+        Auteur, Bestandsnaam, Beschrijving, Informatieobjecttype, Creatiedatum,
+        Gerelateerde Zaken, Zaaktype
 
-    Sorted by:
-        creatiedatum (asc, None last) → informatieobjecttype → bestandsnaam → auteur
-
-    'creatiedatum' is written as an Excel date (yyyy-mm-dd) when parseable.
-    Expects 'gerelateerdeZaken' (list[str]) in each item.
+    Behavior:
+    - Each related zaak in 'gerelateerdeZaken' becomes its own row (exploded).
+    - 'Zaaktype' column contains only the zaaktype.omschrijving (substring after ':').
+    - Sorting: creatiedatum (asc, None last) → informatieobjecttype → bestandsnaam → auteur → zaaktype
+    - 'creatiedatum' is written as an Excel date (yyyy-mm-dd) when parseable; otherwise the raw string is written.
+    - Header bold + frozen, AutoFilter on, columns auto-sized.
     """
     wb = _load_wb(report_excel)
     ws = _ensure_new_sheet(wb, sheet_name)
@@ -332,50 +454,85 @@ def add_informatieobjecten_sheet_xlsx(
     headers = [
         "Auteur",
         "Bestandsnaam",
+        "Beschrijving",
         "Informatieobjecttype",
         "Creatiedatum",
         "Gerelateerde Zaken",
+        "Zaaktype",
     ]
     ws.append(headers)
     _bold_and_freeze_header(ws)
 
-    def _sort_key(item: Dict[str, Any]) -> Tuple[bool, date, str, str, str]:
-        d = _to_excel_date(item.get("creatiedatum"))
-        return (
-            d is None,
-            d or date.max,
-            (item.get("informatieobjecttype") or "").lower(),
-            (item.get("bestandsnaam") or "").lower(),
-            (item.get("auteur") or "").lower(),
-        )
+    def _extract_zaaktype(s: Any) -> str:
+        """Extract the part after the first colon (':') — the zaaktype.omschrijving."""
+        if not s:
+            return ""
+        txt = str(s)
+        return txt.split(":", 1)[1].strip() if ":" in txt else txt.strip()
 
-    rows = sorted(results_informatieobjecten or [], key=_sort_key)
+    # Build exploded rows, carrying excel_date (date) and raw creatiedatum (str/Any) for fallback
+    exploded_rows: List[Tuple[Tuple, List[Any], Optional[date], Any]] = []
 
-    for it in rows:
-        auteur = it.get("auteur", "") or ""
-        bestandsnaam = it.get("bestandsnaam", "") or ""
-        iot = it.get("informatieobjecttype", "") or ""
-        excel_date = _to_excel_date(it.get("creatiedatum"))
+    for it in results_informatieobjecten or []:
+        auteur = it.get("auteur") or ""
+        bestandsnaam = it.get("bestandsnaam") or ""
+        beschrijving = it.get("beschrijving") or ""
+        iot = it.get("informatieobjecttype") or ""
 
-        # Only use gerelateerdeZaken as requested
-        gz_list = it.get("gerelateerdeZaken")
-        if isinstance(gz_list, list):
-            gz_str = ", ".join(str(x) for x in gz_list)
+        dt_raw = it.get("creatiedatum")
+        # Parse to naive date for Excel using your helper if available
+        try:
+            excel_date = _to_excel_date(dt_raw)  # Optional[date]
+        except NameError:
+            excel_date = None
+
+        related = it.get("gerelateerdeZaken")
+
+        if not related:
+            row_vals = [auteur, bestandsnaam, beschrijving, iot, None, "", ""]
+            sort_key = (
+                excel_date is None,
+                excel_date or date.max,
+                iot.lower(),
+                bestandsnaam.lower(),
+                auteur.lower(),
+                "",
+            )
+            exploded_rows.append((sort_key, row_vals, excel_date, dt_raw))
         else:
-            gz_str = str(gz_list or "")
+            for entry in related:
+                full_rel = str(entry) if entry is not None else ""
+                zaaktype_only = _extract_zaaktype(full_rel)
+                row_vals = [
+                    auteur,
+                    bestandsnaam,
+                    beschrijving,
+                    iot,
+                    None,  # we'll set date cell or raw string after append
+                    full_rel,
+                    zaaktype_only,
+                ]
+                sort_key = (
+                    excel_date is None,
+                    excel_date or date.max,
+                    iot.lower(),
+                    bestandsnaam.lower(),
+                    auteur.lower(),
+                    zaaktype_only.lower(),
+                )
+                exploded_rows.append((sort_key, row_vals, excel_date, dt_raw))
 
-        # Append row with placeholder for date (set below if parseable)
-        ws.append([auteur, bestandsnaam, iot, None, gz_str])
-
-        # Write date as real Excel date (naive) if parseable, else as raw string (if provided)
+    # Sort and write (set Excel date if available; else write raw string if present)
+    for sort_key, row_vals, excel_date, dt_raw in sorted(
+        exploded_rows, key=lambda x: x[0]
+    ):
+        ws.append(row_vals)
+        cell = ws.cell(row=ws.max_row, column=5)  # "Creatiedatum" column
         if excel_date:
-            c = ws.cell(row=ws.max_row, column=4)
-            c.value = excel_date
-            c.number_format = "yyyy-mm-dd"
-        else:
-            dt_raw = it.get("creatiedatum")
-            if isinstance(dt_raw, str):
-                ws.cell(row=ws.max_row, column=4).value = dt_raw
+            cell.value = excel_date
+            cell.number_format = "yyyy-mm-dd"
+        elif isinstance(dt_raw, str) and dt_raw:
+            cell.value = dt_raw  # fallback to raw string
 
     _apply_autofilter(ws, len(headers))
     _autosize_columns(ws, len(headers))
