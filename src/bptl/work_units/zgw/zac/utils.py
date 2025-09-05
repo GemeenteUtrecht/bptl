@@ -267,7 +267,7 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
     _autosize_columns(ws, len(headers_display))
     buffer = io.BytesIO()
     wb.save(buffer)
-    buffer.seek(0)
+    buffer.seek(0) #
     return buffer.read()
 
 
