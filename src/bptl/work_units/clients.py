@@ -13,7 +13,7 @@ import requests
 from requests.structures import CaseInsensitiveDict
 from timeline_logger.models import TimelineLog
 from zds_client.oas import schema_fetcher
-from zds_client.schema import get_headers
+from zds_client.schema import get_headers, get_operation_url
 from zgw_consumers.models import Service
 
 from bptl.credentials.api import get_credentials
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 APP_ID_PROCESS_VAR_NAME = "bptlAppId"
 
 Object = Dict[str, Any]
+DEFAULT_PATH_PARAMETERS = {"version": "1"}
 
 
 def get_client(task: BaseTask, service: Service, cls=None) -> "JSONClient":
@@ -53,6 +54,15 @@ class JSONClient:
 
     task = None
     _schema = None
+
+    operation_suffix_mapping = {
+        "list": "_list",
+        "retrieve": "_read",
+        "create": "_create",
+        "update": "_update",
+        "partial_update": "_partial_update",
+        "delete": "_delete",
+    }
 
     @property
     def schema(self):
@@ -144,6 +154,42 @@ class JSONClient:
             },
         }
         TimelineLog.objects.create(content_object=self.task, extra_data=extra_data)
+
+    def list(
+        self,
+        resource: str,
+        params=None,
+        request_kwargs: Optional[dict] = None,
+        **path_kwargs,
+    ) -> List[Object]:
+        op_suffix = self.operation_suffix_mapping["list"]
+        operation_id = f"{resource}{op_suffix}"
+        operation_path = None
+        for path, methods in self.schema["paths"].items():
+            for name, method in methods.items():
+                if name == "parameters":
+                    continue
+
+                if method["operationId"] == operation_id:
+                    format_kwargs = DEFAULT_PATH_PARAMETERS.copy()
+                    format_kwargs.update(**path_kwargs)
+                    operation_path = path.format(**format_kwargs)
+                    if operation_path.endswith("/") or operation_path.startswith("/"):
+                        operation_path = operation_path[1:]
+                    break
+
+        if not operation_path:
+            raise ValueError(
+                "Operation {operation} not found".format(operation=operation_id)
+            )
+
+        return self.request(
+            "get",
+            operation_path,
+            operation=operation_id,
+            request_kwargs=request_kwargs,
+            params=params,
+        )
 
     def operation(
         self,

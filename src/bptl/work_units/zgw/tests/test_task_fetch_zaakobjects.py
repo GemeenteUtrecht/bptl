@@ -8,7 +8,7 @@ from bptl.camunda.models import ExternalTask
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 from bptl.tests.utils import paginated_response
 
-from ..objects.tests.utils import OBJECTS_ROOT, OBJECTTYPES_ROOT
+from ..objects.tests.utils import OBJECTS_ROOT
 from ..tasks import FetchZaakObjects
 
 ZRC_URL = "https://some.zrc.nl/api/v1/"

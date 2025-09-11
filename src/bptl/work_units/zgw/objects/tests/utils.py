@@ -7,7 +7,7 @@ from ..constants import KownslTypes
 ZAKEN_ROOT = "https://zaken.nl/"
 DOCUMENTS_ROOT = "https://drc.nl/"
 CATALOGI_ROOT = "http://ztc.nl/"
-OBJECTTYPES_ROOT = "http://objecttype.nl/api/v1/"
+OBJECTTYPES_ROOT = "http://objecttype.nl/api/v2/"
 OBJECTS_ROOT = "http://object.nl/api/v2/"
 
 DOCUMENT_URL = f"{DOCUMENTS_ROOT}enkelvoudiginformatieobjecten/30e4deca-29ca-4798-bab1-3ad75cf29c30"

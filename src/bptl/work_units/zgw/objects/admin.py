@@ -7,13 +7,14 @@ from solo.admin import SingletonModelAdmin
 
 from bptl.core.models import CoreConfig
 from bptl.work_units.zgw.objects.models import MetaObjectTypesConfig
+from bptl.work_units.zgw.utils import get_paginated_results
 
 
 def get_objecttypes_choices() -> List[Tuple[str, str]]:
     config = CoreConfig.get_solo()
     service = config.primary_objecttypes_api
     client = service.build_client()
-    response = client.list("objecttype")
+    response = get_paginated_results(client, "objecttype")
     return [(ot["url"], ot["name"]) for ot in response]
 
 

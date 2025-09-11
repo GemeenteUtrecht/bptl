@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Objects API
-  version: 2.1.0 (v2)
+  version: 2.5.0 (v2)
   description: |
     An API to manage Objects.
 
@@ -89,12 +89,12 @@ paths:
           data. According to the GeoJSON spec, WGS84 is the default (EPSG: 4326 is
           the same as WGS84).'
       - in: query
-        name: data_attrs
+        name: data_attr
         schema:
           type: string
         description: |
           Only include objects that have attributes with certain values.
-          Data filtering expressions are comma-separated and are structured as follows:
+
           A valid parameter value has the form `key__operator__value`.
           `key` is the attribute name, `operator` is the comparison operator to be used and `value` is the attribute value.
           Note: Values can be string, numeric, or dates (ISO format; YYYY-MM-DD).
@@ -106,13 +106,59 @@ paths:
           * `lt` - lower than
           * `lte` - lower than or equal to
           * `icontains` - case-insensitive partial match
+          * `in` - in a list of values separated by `|`
 
           `value` may not contain double underscore or comma characters.
           `key` may not contain comma characters and includes double underscore only if it indicates nested attributes.
 
+
+
+          Example: in order to display only objects with `height` equal to 100, query `data_attr=height__exact__100`
+          should be used. If `height` is nested inside `dimensions` attribute, query should look like
+          `data_attr=dimensions__height__exact__100`
+
+          This filter is very similar to the old `data_attrs` filter, but it has two differences:
+
+          * `value` may contain commas
+          * only one filtering expression is allowed
+
+          If you want to use several filtering expressions, just use this `data_attr` several times in the query string.
+          Example: `data_attr=height__exact__100&data_attr=naam__icontains__boom`
+        explode: true
+      - in: query
+        name: data_attrs
+        schema:
+          type: string
+        description: |
+          **DEPRECATED: Use 'data_attr' instead**.
+          Only include objects that have attributes with certain values.
+          Data filtering expressions are comma-separated and are structured as follows:
+
+          A valid parameter value has the form `key__operator__value`.
+          `key` is the attribute name, `operator` is the comparison operator to be used and `value` is the attribute value.
+          Note: Values can be string, numeric, or dates (ISO format; YYYY-MM-DD).
+
+          Valid operator values are:
+          * `exact` - equal to
+          * `gt` - greater than
+          * `gte` - greater than or equal to
+          * `lt` - lower than
+          * `lte` - lower than or equal to
+          * `icontains` - case-insensitive partial match
+          * `in` - in a list of values separated by `|`
+
+          `value` may not contain double underscore or comma characters.
+          `key` may not contain comma characters and includes double underscore only if it indicates nested attributes.
+
+
+
           Example: in order to display only objects with `height` equal to 100, query `data_attrs=height__exact__100`
           should be used. If `height` is nested inside `dimensions` attribute, query should look like
           `data_attrs=dimensions__height__exact__100`
+
+          `value` may not contain comma, since commas are used as separator between filtering expressions.
+          If you want to use commas in `value` you can use `data_attr` query parameter.
+        deprecated: true
       - in: query
         name: data_icontains
         schema:
@@ -136,7 +182,7 @@ paths:
         required: false
         in: query
         description: 'Comma-separated fields, which are used to order results. For
-          descending order user ''-'' as prefix. Nested fileds are also supported.
+          descending order use ''-'' as prefix. Nested fields are also supported.
           For example: ''-record__data__length,record__index''.'
         schema:
           type: string
@@ -168,6 +214,11 @@ paths:
           maxLength: 1000
           minLength: 1
         description: Url reference to OBJECTTYPE in Objecttypes API
+      - in: query
+        name: typeVersion
+        schema:
+          type: integer
+        description: Display record data for the specified type version
       tags:
       - objects
       security:
@@ -372,6 +423,8 @@ paths:
     patch:
       operationId: object_partial_update
       description: Update the OBJECT by creating a new RECORD with the updates values.
+        The provided `record.data` value will be merged recursively with the existing
+        record data.
       parameters:
       - in: header
         name: Accept-Crs
@@ -450,6 +503,51 @@ paths:
       responses:
         '204':
           description: No response body
+  /objects/{uuid}/{index}:
+    get:
+      operationId: object_history_detail
+      description: Retrieve the specified OBJECT given an UUID and INDEX.
+      parameters:
+      - in: header
+        name: Accept-Crs
+        schema:
+          type: string
+          enum:
+          - EPSG:4326
+        description: 'The desired ''Coordinate Reference System'' (CRS) of the response
+          data. According to the GeoJSON spec, WGS84 is the default (EPSG: 4326 is
+          the same as WGS84).'
+      - in: path
+        name: index
+        schema:
+          type: number
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - objects
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          headers:
+            Content-Crs:
+              schema:
+                type: string
+                enum:
+                - EPSG:4326
+              description: 'The ''Coordinate Reference System'' (CRS) of the request
+                data. According to the GeoJSON spec, WGS84 is the default (EPSG: 4326
+                is the same as WGS84).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryRecord'
+          description: OK
   /objects/{uuid}/history:
     get:
       operationId: object_history
@@ -567,8 +665,10 @@ paths:
                   data_attrs:
                     type: string
                     description: |
+                      **DEPRECATED: Use 'data_attr' instead**.
                       Only include objects that have attributes with certain values.
                       Data filtering expressions are comma-separated and are structured as follows:
+
                       A valid parameter value has the form `key__operator__value`.
                       `key` is the attribute name, `operator` is the comparison operator to be used and `value` is the attribute value.
                       Note: Values can be string, numeric, or dates (ISO format; YYYY-MM-DD).
@@ -580,13 +680,53 @@ paths:
                       * `lt` - lower than
                       * `lte` - lower than or equal to
                       * `icontains` - case-insensitive partial match
+                      * `in` - in a list of values separated by `|`
 
                       `value` may not contain double underscore or comma characters.
                       `key` may not contain comma characters and includes double underscore only if it indicates nested attributes.
 
+
+
                       Example: in order to display only objects with `height` equal to 100, query `data_attrs=height__exact__100`
                       should be used. If `height` is nested inside `dimensions` attribute, query should look like
                       `data_attrs=dimensions__height__exact__100`
+
+                      `value` may not contain comma, since commas are used as separator between filtering expressions.
+                      If you want to use commas in `value` you can use `data_attr` query parameter.
+                  data_attr:
+                    type: string
+                    description: |
+                      Only include objects that have attributes with certain values.
+
+                      A valid parameter value has the form `key__operator__value`.
+                      `key` is the attribute name, `operator` is the comparison operator to be used and `value` is the attribute value.
+                      Note: Values can be string, numeric, or dates (ISO format; YYYY-MM-DD).
+
+                      Valid operator values are:
+                      * `exact` - equal to
+                      * `gt` - greater than
+                      * `gte` - greater than or equal to
+                      * `lt` - lower than
+                      * `lte` - lower than or equal to
+                      * `icontains` - case-insensitive partial match
+                      * `in` - in a list of values separated by `|`
+
+                      `value` may not contain double underscore or comma characters.
+                      `key` may not contain comma characters and includes double underscore only if it indicates nested attributes.
+
+
+
+                      Example: in order to display only objects with `height` equal to 100, query `data_attr=height__exact__100`
+                      should be used. If `height` is nested inside `dimensions` attribute, query should look like
+                      `data_attr=dimensions__height__exact__100`
+
+                      This filter is very similar to the old `data_attrs` filter, but it has two differences:
+
+                      * `value` may contain commas
+                      * only one filtering expression is allowed
+
+                      If you want to use several filtering expressions, just use this `data_attr` several times in the query string.
+                      Example: `data_attr=height__exact__100&data_attr=naam__icontains__boom`
                   date:
                     type: string
                     format: date
@@ -599,13 +739,16 @@ paths:
                     description: Display record data for the specified registration
                       date, i.e. the specified date would be between `registrationAt`
                       attributes of different records
+                  typeVersion:
+                    type: integer
+                    description: Display record data for the specified type version
                   data_icontains:
                     type: string
                     description: Search in all `data` values of string properties.
                   ordering:
                     type: string
                     description: 'Comma-separated fields, which are used to order
-                      results. For descending order user ''-'' as prefix. Nested fileds
+                      results. For descending order use ''-'' as prefix. Nested fields
                       are also supported. For example: ''-record__data__length,record__index''.'
       security:
       - tokenAuth: []
@@ -717,11 +860,9 @@ components:
         typeVersion:
           type: integer
           maximum: 32767
-          description: Version of the OBJECTTYPE for data in the object record
           minimum: 0
+          description: Version of the OBJECTTYPE for data in the object record
         data:
-          type: object
-          additionalProperties: {}
           description: Object data, based on OBJECTTYPE
         geometry:
           allOf:
@@ -739,6 +880,7 @@ components:
           type: string
           format: date
           readOnly: true
+          nullable: true
           description: Legal end date of the object record
         registrationAt:
           type: string
@@ -746,13 +888,17 @@ components:
           readOnly: true
           description: The date when the record was registered in the system
         correctionFor:
-          type: string
-          readOnly: true
+          type: integer
+          maximum: 2147483647
+          minimum: 0
           description: Index of the record corrected by the current record
-        correctedBy:
-          type: string
           readOnly: true
+        correctedBy:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
           description: Index of the record, which corrects the current record
+          readOnly: true
       required:
       - startAt
       - typeVersion
@@ -777,6 +923,9 @@ components:
       - read_only
       - read_and_write
       type: string
+      description: |-
+        * `read_only` - Read-only
+        * `read_and_write` - Read and write
     MultiLineString:
       type: object
       description: GeoJSON multi-line-string geometry
@@ -869,11 +1018,9 @@ components:
         typeVersion:
           type: integer
           maximum: 32767
-          description: Version of the OBJECTTYPE for data in the object record
           minimum: 0
+          description: Version of the OBJECTTYPE for data in the object record
         data:
-          type: object
-          additionalProperties: {}
           description: Object data, based on OBJECTTYPE
         geometry:
           allOf:
@@ -891,6 +1038,7 @@ components:
           type: string
           format: date
           readOnly: true
+          nullable: true
           description: Legal end date of the object record
         registrationAt:
           type: string
@@ -898,12 +1046,17 @@ components:
           readOnly: true
           description: The date when the record was registered in the system
         correctionFor:
-          type: string
+          type: integer
+          maximum: 2147483647
+          minimum: 0
           description: Index of the record corrected by the current record
+          nullable: true
         correctedBy:
-          type: string
-          readOnly: true
+          type: integer
+          maximum: 2147483647
+          minimum: 0
           description: Index of the record, which corrects the current record
+          readOnly: true
       required:
       - startAt
       - typeVersion
@@ -914,6 +1067,9 @@ components:
           $ref: '#/components/schemas/GeoWithin'
     PaginatedHistoryRecordList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -934,6 +1090,9 @@ components:
             $ref: '#/components/schemas/HistoryRecord'
     PaginatedObjectList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -954,6 +1113,9 @@ components:
             $ref: '#/components/schemas/Object'
     PaginatedPermissionList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -1012,13 +1174,15 @@ components:
         mode:
           allOf:
           - $ref: '#/components/schemas/ModeEnum'
-          description: Permission mode
+          description: |-
+            Permission mode
+
+            * `read_only` - Read-only
+            * `read_and_write` - Read and write
         use_fields:
           type: boolean
           description: Use field-based authorization
         fields:
-          type: object
-          additionalProperties: {}
           nullable: true
           title: Mode
           description: Fields allowed for this token in relation to objecttype versions.
