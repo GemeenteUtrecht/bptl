@@ -7,6 +7,7 @@ from zgw_consumers.models import Service
 from bptl.credentials.tests.factories import AppFactory, AppServiceCredentialsFactory
 from bptl.tasks.models import BaseTask
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.tests.utils import paginated_response
 from bptl.work_units.zgw.objects.client import (
     get_objects_client,
     get_objecttypes_client,

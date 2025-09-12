@@ -71,9 +71,7 @@ def filter_zaakobjects_on_objecttype_label(task: BaseTask) -> List[Dict]:
     label = check_variable(variables, "label", empty_allowed=True)
 
     # fetch objecttypes to be filtered on
-    objecttypes = fetch_objecttypes(
-        task,
-    )
+    objecttypes = fetch_objecttypes(task)
     objecttypes = [
         ot["url"]
         for ot in objecttypes

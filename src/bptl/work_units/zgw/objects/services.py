@@ -32,9 +32,9 @@ def fetch_objecttype(task: BaseTask, url: str) -> Dict:
     return client.get(path)
 
 
-def fetch_objecttypes(task: BaseTask, query_params: dict = dict()) -> List[Dict]:
+def fetch_objecttypes(task: BaseTask) -> List[Dict]:
     client = get_objecttypes_client(task)
-    objecttypes = client.get("objecttypes", request_kwargs={"params": query_params})
+    objecttypes = get_paginated_results(client, "objecttype")
     return objecttypes
 
 
