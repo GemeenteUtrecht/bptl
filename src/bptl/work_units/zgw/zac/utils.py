@@ -240,7 +240,7 @@ def create_zaken_report_xlsx(results: List[Dict[str, Any]]) -> bytes:
         objects_list = _explode_objects(row.get("objecten"))
         if not objects_list:
             # still write a single row with empty object/objecttype
-            objects_list = [{"object": "", "objecttype": ""}]
+            objects_list = [{"object": "N.v.t.", "objecttype": "N.v.t."}]
 
         for obj_entry in objects_list:
             out: List[Any] = [
