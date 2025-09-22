@@ -258,7 +258,7 @@ class ZacEmailVGUReports(WorkUnit):
 
     def perform(self) -> None:
         variables = self.task.get_variables()
-        if not variables.get("startPeriod") or variables.get("endPeriod"):
+        if not (variables.get("startPeriod") or variables.get("endPeriod")):
             variables["startPeriod"], variables["endPeriod"] = get_last_month_period()
 
         check_variable(variables, "recipientList", empty_allowed=False)
