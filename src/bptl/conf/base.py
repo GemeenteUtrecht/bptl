@@ -85,7 +85,6 @@ INSTALLED_APPS = [
     "django_celery_beat",
     # Project applications.
     "bptl.accounts",
-    "bptl.activiti",
     "bptl.camunda",
     "bptl.openklant",
     "bptl.core",
@@ -95,16 +94,12 @@ INSTALLED_APPS = [
     "bptl.dummy",
     "bptl.utils",
     "bptl.crontask",
-    "bptl.work_units.brp",
     "bptl.work_units.camunda_api",
-    "bptl.work_units.kadaster",
     "bptl.work_units.kownsl",
     "bptl.work_units.zgw",
     "bptl.work_units.zgw.objects",
     "bptl.work_units.zgw.zac",
-    "bptl.work_units.valid_sign",
     "bptl.work_units.mail",
-    "bptl.work_units.xential",
     "bptl.work_units.open_klant",
 ]
 
@@ -523,8 +518,6 @@ MAX_DOCUMENT_SIZE = os.getenv("MAX_DOCUMENT_SIZE", 2621440)
 # The size of the document chunks to load in memory
 CHUNK_SIZE = os.getenv("CHUNK_SIZE", 4096)
 
-# Xential ticket settings
-XENTIAL_URL_TOKEN_TIMEOUT_DAYS = os.getenv("XENTIAL_URL_TOKEN_TIMEOUT_DAYS", default=7)
 
 # KlantContact email settings
 KCC_DEFAULT_FROM_EMAIL = os.getenv("KCC_DEFAULT_FROM_EMAIL", DEFAULT_FROM_EMAIL)

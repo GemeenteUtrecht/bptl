@@ -2,7 +2,6 @@ from django.contrib import admin
 
 from polymorphic.admin import PolymorphicChildModelFilter, PolymorphicParentModelAdmin
 
-from bptl.activiti.models import ServiceTask
 from bptl.camunda.models import ExternalTask
 from bptl.openklant.models import OpenKlantInternalTaskModel
 
@@ -27,5 +26,5 @@ class TaskMappingAdmin(admin.ModelAdmin):
 
 @admin.register(BaseTask)
 class BaseTaskAdmin(PolymorphicParentModelAdmin):
-    child_models = (ExternalTask, ServiceTask, OpenKlantInternalTaskModel)
+    child_models = (ExternalTask, OpenKlantInternalTaskModel)
     list_filter = (PolymorphicChildModelFilter, "status")

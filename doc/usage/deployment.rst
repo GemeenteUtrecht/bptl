@@ -9,8 +9,7 @@ The ``docker-compose.yml`` can provide a little insight in the required services
 Dependencies
 ============
 
-BPTL is tested against Camunda. Support for Activiti is minimal but generic in the form
-of REST API endpoints.
+BPTL is tested against Camunda. 
 
 If you're running against Camunda, you need:
 
