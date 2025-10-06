@@ -27,7 +27,6 @@ urlpatterns = [
         name="password_reset_done",
     ),
     path("admin/hijack/", include("hijack.urls")),
-    path("admin/xential/", include("bptl.work_units.xential.admin_urls")),
     path("admin/", admin.site.urls),
     path(
         "reset/<uidb64>/<token>/",
@@ -44,17 +43,7 @@ urlpatterns = [
     path("", IndexView.as_view(), name="index"),
     path("tasks/", include("bptl.dashboard.urls")),
     path("taskmappings/", include("bptl.tasks.urls")),
-    path("api/", include("bptl.activiti.api.urls")),
     path("camunda/", include("bptl.camunda.urls")),
-    path(
-        "contrib/api/",
-        include(
-            [
-                path("validsign/", include("bptl.work_units.valid_sign.urls")),
-                path("xential/", include("bptl.work_units.xential.urls")),
-            ]
-        ),
-    ),
 ]
 
 # NOTE: The staticfiles_urlpatterns also discovers static files (ie. no need to run collectstatic). Both the static

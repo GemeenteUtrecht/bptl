@@ -28,13 +28,8 @@ BPTL consists of a number of components that make it work for various use cases.
 
 **Work units**
 
-Work units are logical units of work that can be performed. This can be a collection of
-API calls, for example to create a **Zaak**, or to check if someone's age is above a
-certain number, using the BRP API's. These are the steps that you want to "embed" in
-your process.
-
-Work units are grouped around themes, such as the ZGW APIs, the BRP, Camunda API or the
-Kadaster APIs.
+Work units are grouped around themes, such as the ZGW APIs, Camunda API or the
+ZAC APIs.
 
 Work units are implemented in Python code.
 
@@ -86,7 +81,6 @@ Process engines
 Currently, two process engines are supported to varying degrees:
 
 * Camunda: arguably the most fleshed out, and the target architecture
-* Activiti: a proof of concept showed promising results
 
 Camunda architecture
 ====================
@@ -102,15 +96,3 @@ topics that BPTL is configured to handle.
 Whenever work is picked up, the task is locked and handled by BPTL. BPTL either completes
 it and sets the relevant process variables, or marks the task as failed if errors occur.
 The failure information is visible in BPTL monitoring and in the Camunda cockpit.
-
-REST-full API architecture
-==========================
-
-Activiti does not use a queue to schedule work. Instead, you can include REST-call
-activities in the process definition. BPTL offers a REST-full API to call/execute
-work units, using a similar format to Camunda's external tasks.
-
-The API endpoints can also be used by other applications who wish to re-use the building
-blocks offered by BPTL.
-
-In this configuration, the workers, beat and task monitoring are not relevant.

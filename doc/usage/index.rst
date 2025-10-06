@@ -12,4 +12,3 @@ This section of the documentation is aimed at usage of the BPTL.
    camunda
    usage
    api
-   contrib/index
