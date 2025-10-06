@@ -76,7 +76,7 @@ INSTALLED_APPS = [
     "solo",
     "django_camunda",
     "django_filters",
-    "drf_yasg",
+    "drf_spectacular",
     "polymorphic",
     "rest_framework",
     "rest_framework.authtoken",
@@ -492,6 +492,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
     # Versioning
@@ -528,3 +529,15 @@ KCC_EMAIL_HOST_PASSWORD = config("KCC_EMAIL_HOST_PASSWORD", default=EMAIL_HOST_P
 KCC_EMAIL_USE_TLS = config("KCC_EMAIL_USE_TLS", default=EMAIL_USE_TLS)
 KCC_EMAIL_USE_SSL = config("KCC_EMAIL_USE_SSL", default=None)
 KCC_EMAIL_TIMEOUT = config("KCC_EMAIL_TIMEOUT", default=EMAIL_TIMEOUT)
+
+
+# DRF spectacular
+SPECTACULAR_SETTINGS = {
+    "TITLE": "BP Task Library API",
+    "DESCRIPTION": "An API to approach BPTL work units",
+    "VERSION": "1.0.0",
+    "LICENSE": {"name": "EUPL 1.2", "url": "https://opensource.org/licenses/EUPL-1.2"},
+    "SERVE_PUBLIC": True,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    # "SERVE_INCLUDE_SCHEMA": False,  # optional: don't include schema endpoint in itself
+}
