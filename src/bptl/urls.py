@@ -6,6 +6,12 @@ from django.contrib.auth import views as auth_views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularJSONAPIView,
+    SpectacularRedocView,
+)
+
 from .views import IndexView
 
 handler500 = "bptl.utils.views.server_error"
@@ -16,6 +22,13 @@ admin.site.index_title = "Welcome to the bptl admin"
 admin.site.has_permission = lambda request: request.user.is_superuser
 
 urlpatterns = [
+    path("", SpectacularJSONAPIView.as_view(schema=None), name="api-schema-json"),
+    path("schema", SpectacularAPIView.as_view(schema=None), name="api-schema"),
+    path(
+        "docs/",
+        SpectacularRedocView.as_view(url_name="api-schema-json"),
+        name="api-docs",
+    ),
     path(
         "admin/password_reset/",
         auth_views.PasswordResetView.as_view(),
