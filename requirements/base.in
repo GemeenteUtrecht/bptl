@@ -23,6 +23,7 @@ django
 django-admin-index < 1.4.0
 django-auth-adfs < 1.7.0
 django-auth-adfs-db
+mozilla-django-oidc-db
 django-axes
 django-camunda
 django-choices

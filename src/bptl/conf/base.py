@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     "axes",
     "django_auth_adfs",
     "django_auth_adfs_db",
+    "mozilla_django_oidc",
+    "mozilla_django_oidc_db",
     "sniplates",
     "hijack",
     "compat",  # Part of hijack
@@ -305,6 +307,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
+        "mozilla_django_oidc": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": True,
+        },
     },
 }
 
@@ -390,6 +397,16 @@ HIJACK_ALLOW_GET_REQUESTS = True
 # AUTH-ADFS
 #
 AUTH_ADFS = {"SETTINGS_CLASS": "django_auth_adfs_db.settings.Settings"}
+
+#
+# MOZILLA DJANGO OIDC DB
+#
+OIDC_AUTHENTICATE_CLASS = "mozilla_django_oidc_db.views.OIDCAuthenticationRequestView"
+OIDC_CALLBACK_CLASS = "mozilla_django_oidc_db.views.OIDCCallbackView"
+MOZILLA_DJANGO_OIDC_DB_CACHE = "oidc"
+MOZILLA_DJANGO_OIDC_DB_CACHE_TIMEOUT = 1
+OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS = 12 * 60 * 60  # 5 minutes
+OIDC_REDIRECT_REQUIRE_HTTPS = True  # for sure
 
 # Sentry SDK
 SENTRY_DSN = os.getenv("SENTRY_DSN")
