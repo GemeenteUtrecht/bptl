@@ -12,6 +12,7 @@ pip
 premailer
 whitenoise
 openpyxl
+jinja2 < 3.1
 
 # zgw-integration
 zgw-consumers

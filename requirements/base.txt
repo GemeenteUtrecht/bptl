@@ -211,8 +211,10 @@ inflection==0.5.1
     # via
     #   django-camunda
     #   drf-spectacular
-jinja2==3.1.6
-    # via sphinx
+jinja2==3.0.3
+    # via
+    #   -r requirements/base.in
+    #   sphinx
 josepy==2.1.0
     # via mozilla-django-oidc
 jsonschema==4.25.1
