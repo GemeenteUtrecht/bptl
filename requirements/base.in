@@ -43,7 +43,7 @@ djangorestframework
 djangorestframework-camel-case
 # django-extra-fields
 # django-filter
-drf-yasg  # api documentation
+drf-spectacular
 djangorestframework-xml
 
 # WSGI servers & monitoring - production oriented

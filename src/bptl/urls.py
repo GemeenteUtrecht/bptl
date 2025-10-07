@@ -6,6 +6,12 @@ from django.contrib.auth import views as auth_views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularJSONAPIView,
+    SpectacularRedocView,
+)
+
 from .views import IndexView
 
 handler500 = "bptl.utils.views.server_error"
@@ -44,6 +50,12 @@ urlpatterns = [
     path("tasks/", include("bptl.dashboard.urls")),
     path("taskmappings/", include("bptl.tasks.urls")),
     path("camunda/", include("bptl.camunda.urls")),
+    path("schema", SpectacularAPIView.as_view(schema=None), name="api-schema"),
+    path(
+        "docs/",
+        SpectacularRedocView.as_view(url_name="api-schema-json"),
+        name="api-docs",
+    ),
 ]
 
 # NOTE: The staticfiles_urlpatterns also discovers static files (ie. no need to run collectstatic). Both the static

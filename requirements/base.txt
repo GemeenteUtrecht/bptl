@@ -10,6 +10,10 @@ amqp==5.3.1
     # via kombu
 asgiref==3.5.0
     # via django
+attrs==25.4.0
+    # via
+    #   jsonschema
+    #   referencing
 babel==2.9.1
     # via sphinx
 billiard==4.2.1
@@ -84,7 +88,7 @@ django==3.2.12
     #   django-timezone-field
     #   djangorestframework
     #   drf-extra-fields
-    #   drf-yasg
+    #   drf-spectacular
     #   zgw-consumers
 django-admin-index==1.3.1
     # via -r requirements/base.in
@@ -153,7 +157,7 @@ djangorestframework==3.12.4
     # via
     #   -r requirements/base.in
     #   drf-extra-fields
-    #   drf-yasg
+    #   drf-spectacular
 djangorestframework-camel-case==1.2.0
     # via -r requirements/base.in
 djangorestframework-xml==2.0.0
@@ -164,7 +168,7 @@ docutils==0.16
     #   sphinx
 drf-extra-fields==3.1.1
     # via -r requirements/base.in
-drf-yasg==1.21.7
+drf-spectacular==0.28.0
     # via -r requirements/base.in
 elastic-apm==6.3.3
     # via -r requirements/base.in
@@ -189,9 +193,13 @@ imagesize==1.4.1
 inflection==0.5.1
     # via
     #   django-camunda
-    #   drf-yasg
+    #   drf-spectacular
 jinja2==3.0.1
     # via sphinx
+jsonschema==4.25.1
+    # via drf-spectacular
+jsonschema-specifications==2025.9.1
+    # via jsonschema
 kombu==5.5.0
     # via celery
 lxml==4.7.1
@@ -208,7 +216,6 @@ orderedmultidict==1.0.1
     # via furl
 packaging==24.1
     # via
-    #   drf-yasg
     #   sphinx
 polib==1.1.1
     # via django-rosetta
@@ -247,16 +254,19 @@ pytz==2021.3
     #   -r requirements/base.in
     #   babel
     #   django
-    #   drf-yasg
     #   flower
 pyyaml==6.0.2
     # via
-    #   drf-yasg
+    #   drf-spectacular
     #   gemma-zds-client
 redis==3.5.3
     # via
     #   celery-once
     #   django-redis
+referencing==0.36.2
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
 requests==2.26.0
     # via
     #   django-auth-adfs
@@ -269,6 +279,10 @@ requests==2.26.0
     #   zgw-consumers
 requests-mock==1.9.3
     # via zgw-consumers
+rpds-py==0.27.1
+    # via
+    #   jsonschema
+    #   referencing
 sentry-sdk==1.3.1
     # via -r requirements/base.in
 six==1.16.0
@@ -302,6 +316,8 @@ sqlparse==0.4.2
     # via django
 tornado==6.1
     # via flower
+typing-extensions==4.15.0
+    # via referencing
 tzdata==2025.1
     # via
     #   celery
@@ -309,7 +325,8 @@ tzdata==2025.1
     #   faker
     #   kombu
 uritemplate==3.0.1
-    # via drf-yasg
+    # via
+    #   drf-spectacular
 urllib3==1.26.6
     # via
     #   elastic-apm

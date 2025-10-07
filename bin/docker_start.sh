@@ -24,6 +24,9 @@ done
 >&2 echo "Apply database migrations"
 python src/manage.py migrate
 
+# build openapi schema
+python src/manage.py spectacular --file src/openapi.yaml
+
 # Start server
 >&2 echo "Starting server"
 exec uwsgi \
@@ -39,3 +42,4 @@ exec uwsgi \
     --post-buffering=8192 \
     --buffer-size=65535
     # processes & threads are needed for concurrency without nginx sitting inbetween
+
