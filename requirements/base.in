@@ -1,28 +1,29 @@
 # Core python libraries
 celery-once
 furl # manipulate urls like magic
-psycopg2 < 2.9 # database driver
+psycopg2 # database driver
 pytz  # handle timezones
 python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
 setuptools
 celery
-sphinx <= 3.1.2
-pip==21.3.1
+sphinx
+pip
 premailer
 whitenoise
 openpyxl
 
 # zgw-integration
 zgw-consumers
-gemma-zds-client
+gemma-zds-client==1.0.1
 
 
 # Framework libraries
-django
+django==3.2.12
 django-admin-index < 1.4.0
 django-auth-adfs < 1.7.0
 django-auth-adfs-db
+mozilla-django-oidc-db == 0.12.0
 django-axes
 django-camunda
 django-choices
@@ -39,11 +40,9 @@ drf-extra-fields
 django-celery-beat
 
 # API libraries
-djangorestframework
+djangorestframework==3.12.2
 djangorestframework-camel-case
-# django-extra-fields
-# django-filter
-drf-yasg  # api documentation
+drf-spectacular  # api documentation
 djangorestframework-xml
 
 # WSGI servers & monitoring - production oriented
