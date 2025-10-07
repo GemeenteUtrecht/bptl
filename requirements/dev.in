@@ -13,4 +13,4 @@ django-extensions
 ddt-api-calls
 
 # Documentation
-sphinx_rtd_theme < 0.5.2
+sphinx_rtd_theme==0.5.0
