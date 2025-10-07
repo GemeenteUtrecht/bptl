@@ -4,7 +4,7 @@
 #
 #    ./bin/compile_dependencies.sh
 #
-alabaster==0.7.16
+alabaster==0.7.12
     # via
     #   -r requirements/base.txt
     #   sphinx
