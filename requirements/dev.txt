@@ -515,30 +515,18 @@ sphinx==3.1.2
     #   sphinx-rtd-theme
 sphinx-rtd-theme==0.5.1
     # via -r requirements/dev.in
-sphinxcontrib-applehelp==2.0.0
-    # via
-    #   -r requirements/ci.txt
-    #   sphinx
-sphinxcontrib-devhelp==2.0.0
-    # via
-    #   -r requirements/ci.txt
-    #   sphinx
-sphinxcontrib-htmlhelp==2.1.0
-    # via
-    #   -r requirements/ci.txt
-    #   sphinx
+sphinxcontrib-applehelp==1.0.2
+    # via sphinx
+sphinxcontrib-devhelp==1.0.2
+    # via sphinx
+sphinxcontrib-htmlhelp==1.0.3
+    # via sphinx
 sphinxcontrib-jsmath==1.0.1
-    # via
-    #   -r requirements/ci.txt
-    #   sphinx
-sphinxcontrib-qthelp==2.0.0
-    # via
-    #   -r requirements/ci.txt
-    #   sphinx
-sphinxcontrib-serializinghtml==2.0.0
-    # via
-    #   -r requirements/ci.txt
-    #   sphinx
+    # via sphinx
+sphinxcontrib-qthelp==1.0.3
+    # via sphinx
+sphinxcontrib-serializinghtml==1.1.4
+    # via sphinx
 sqlparse==0.4.2
     # via
     #   -r requirements/ci.txt
