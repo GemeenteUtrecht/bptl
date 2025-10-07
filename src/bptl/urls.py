@@ -22,13 +22,6 @@ admin.site.index_title = "Welcome to the bptl admin"
 admin.site.has_permission = lambda request: request.user.is_superuser
 
 urlpatterns = [
-    path("", SpectacularJSONAPIView.as_view(schema=None), name="api-schema-json"),
-    path("schema", SpectacularAPIView.as_view(schema=None), name="api-schema"),
-    path(
-        "docs/",
-        SpectacularRedocView.as_view(url_name="api-schema-json"),
-        name="api-docs",
-    ),
     path(
         "admin/password_reset/",
         auth_views.PasswordResetView.as_view(),
@@ -57,6 +50,12 @@ urlpatterns = [
     path("tasks/", include("bptl.dashboard.urls")),
     path("taskmappings/", include("bptl.tasks.urls")),
     path("camunda/", include("bptl.camunda.urls")),
+    path("schema", SpectacularAPIView.as_view(schema=None), name="api-schema"),
+    path(
+        "docs/",
+        SpectacularRedocView.as_view(url_name="api-schema-json"),
+        name="api-docs",
+    ),
 ]
 
 # NOTE: The staticfiles_urlpatterns also discovers static files (ie. no need to run collectstatic). Both the static
