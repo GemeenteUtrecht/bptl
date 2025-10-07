@@ -7,7 +7,7 @@ python-dotenv  # environment variables for secrets
 python-decouple  # processing of envvar configs
 setuptools
 celery
-sphinx <= 3.1.2
+sphinx
 pip
 premailer
 whitenoise
