@@ -58,4 +58,13 @@
     <a href="{% url 'django_auth_adfs:login' %}">{% trans "Login with ADFS" %}</a>
 </div>
 {% endif %}
+{% get_solo 'mozilla_django_oidc_db.OpenIDConnectConfig' as oidc_config %}
+{% if oidc_config.enabled %}
+    <div class="form form--centered form--centered-content">
+        <a href="{% url 'oidc_authentication_init' %}" class="btn btn--primary">
+            {% trans "Login with OIDC" %}
+        </a>
+    </div>
+    <div class="divider divider--short"></div>
+{% endif %}
 {% endblock %}

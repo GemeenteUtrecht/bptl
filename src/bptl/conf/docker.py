@@ -45,6 +45,7 @@ CACHES = {
     "axes_cache": {
         "BACKEND": "django.core.cache.backends.dummy.DummyCache",
     },
+    "oidc": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
 }
 
 # Deal with being hosted on a subpath

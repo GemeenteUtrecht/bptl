@@ -11,6 +11,7 @@ from drf_spectacular.views import (
     SpectacularJSONAPIView,
     SpectacularRedocView,
 )
+from mozilla_django_oidc_db.views import AdminLoginFailure
 
 from .views import IndexView
 
@@ -33,6 +34,7 @@ urlpatterns = [
         name="password_reset_done",
     ),
     path("admin/hijack/", include("hijack.urls")),
+    path("admin/login/failure/", AdminLoginFailure.as_view(), name="admin-oidc-error"),
     path("admin/", admin.site.urls),
     path(
         "reset/<uidb64>/<token>/",
@@ -56,6 +58,7 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="api-schema-json"),
         name="api-docs",
     ),
+    path("oidc/", include("mozilla_django_oidc.urls")),
 ]
 
 # NOTE: The staticfiles_urlpatterns also discovers static files (ie. no need to run collectstatic). Both the static
