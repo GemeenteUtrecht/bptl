@@ -23,7 +23,6 @@ django
 django-admin-index < 1.4.0
 django-auth-adfs < 1.7.0
 django-auth-adfs-db
-mozilla-django-oidc-db
 django-axes
 django-camunda
 django-choices
@@ -38,6 +37,8 @@ django-sniplates
 django-timeline-logger
 drf-extra-fields
 django-celery-beat
+mozilla-django-oidc 
+mozilla-django-oidc-db < 0.17.0
 
 # API libraries
 djangorestframework
