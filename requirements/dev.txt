@@ -142,7 +142,6 @@ django==3.2.12
     #   django-filter
     #   django-hijack
     #   django-jenkins
-    #   django-jsonform
     #   django-polymorphic
     #   django-redis
     #   django-relativedelta
@@ -171,6 +170,10 @@ django-auth-adfs-db==0.3.0
     # via -r requirements/ci.txt
 django-axes==5.20.0
     # via -r requirements/ci.txt
+django-better-admin-arrayfield==1.4.2
+    # via
+    #   -r requirements/ci.txt
+    #   mozilla-django-oidc-db
 django-camunda==0.10.0
     # via -r requirements/ci.txt
 django-celery-beat==2.8.1
@@ -210,10 +213,6 @@ django-ipware==3.0.7
     #   django-axes
 django-jenkins==0.110.0
     # via -r requirements/ci.txt
-django-jsonform==2.23.2
-    # via
-    #   -r requirements/ci.txt
-    #   mozilla-django-oidc-db
 django-ordered-model==3.4.3
     # via
     #   -r requirements/ci.txt
@@ -359,11 +358,11 @@ more-itertools==10.6.0
     # via
     #   -r requirements/ci.txt
     #   cssutils
-mozilla-django-oidc==4.0.1
+mozilla-django-oidc==2.0.0
     # via
     #   -r requirements/ci.txt
     #   mozilla-django-oidc-db
-mozilla-django-oidc-db==0.16.0
+mozilla-django-oidc-db==0.12.0
     # via -r requirements/ci.txt
 mypy-extensions==0.4.3
     # via black
