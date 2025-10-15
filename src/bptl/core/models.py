@@ -7,9 +7,9 @@ from zgw_consumers.constants import APITypes
 
 
 class CoreConfig(SingletonModel):
-    non_adfs_login_enabled = models.BooleanField(
-        _("Non-ADFS login enabled"),
-        help_text=_("A flag that allows non-ADFS login (True) or not (False)."),
+    non_sso_login_enabled = models.BooleanField(
+        _("Non-SSO login enabled"),
+        help_text=_("A flag that allows non-SSO login (True) or not (False)."),
         default=False,
     )
     primary_objecttypes_api = models.ForeignKey(

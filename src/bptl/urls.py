@@ -23,32 +23,9 @@ admin.site.index_title = "Welcome to the bptl admin"
 admin.site.has_permission = lambda request: request.user.is_superuser
 
 urlpatterns = [
-    path(
-        "admin/password_reset/",
-        auth_views.PasswordResetView.as_view(),
-        name="admin_password_reset",
-    ),
-    path(
-        "admin/password_reset/done/",
-        auth_views.PasswordResetDoneView.as_view(),
-        name="password_reset_done",
-    ),
     path("admin/hijack/", include("hijack.urls")),
-    path("admin/login/failure/", AdminLoginFailure.as_view(), name="admin-oidc-error"),
     path("admin/", admin.site.urls),
-    path(
-        "reset/<uidb64>/<token>/",
-        auth_views.PasswordResetConfirmView.as_view(),
-        name="password_reset_confirm",
-    ),
-    path(
-        "reset/done/",
-        auth_views.PasswordResetCompleteView.as_view(),
-        name="password_reset_complete",
-    ),
-    path("adfs/", include("django_auth_adfs.urls")),
-    # Simply show the master template.
-    path("", IndexView.as_view(), name="index"),
+    path("admin/login/failure/", AdminLoginFailure.as_view(), name="admin-oidc-error"),
     path("tasks/", include("bptl.dashboard.urls")),
     path("taskmappings/", include("bptl.tasks.urls")),
     path("camunda/", include("bptl.camunda.urls")),
@@ -59,7 +36,11 @@ urlpatterns = [
         name="api-docs",
     ),
     path("oidc/", include("mozilla_django_oidc.urls")),
+    path("adfs/", include("django_auth_adfs.urls")),
+    # Simply show the master template.
+    path("", IndexView.as_view(), name="index"),
 ]
+
 
 # NOTE: The staticfiles_urlpatterns also discovers static files (ie. no need to run collectstatic). Both the static
 # folder and the media folder are only served via Django if DEBUG = True.

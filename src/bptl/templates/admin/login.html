@@ -28,7 +28,7 @@
 </p>
 {% endif %}
 {% get_solo 'core.CoreConfig' as core_config %}
-{% if core_config.non_adfs_login_enabled %}
+{% if core_config.non_sso_login_enabled %}
     <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
       <div class="form-row">
         {{ form.username.errors }}
@@ -60,11 +60,13 @@
 {% endif %}
 {% get_solo 'mozilla_django_oidc_db.OpenIDConnectConfig' as oidc_config %}
 {% if oidc_config.enabled %}
+<div class="submit-row">
     <div class="form form--centered form--centered-content">
         <a href="{% url 'oidc_authentication_init' %}" class="btn btn--primary">
             {% trans "Login with OIDC" %}
         </a>
     </div>
     <div class="divider divider--short"></div>
+</div>
 {% endif %}
 {% endblock %}
