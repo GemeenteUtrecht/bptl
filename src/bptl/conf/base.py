@@ -328,7 +328,8 @@ AUTH_USER_MODEL = "accounts.User"
 # Allow logging in with both username+password and email+password
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesBackend",
-    "django_auth_adfs_db.backends.AdfsAuthCodeBackend",
+    # "django_auth_adfs_db.backends.AdfsAuthCodeBackend",
+    "mozilla_django_oidc_db.backends.OIDCAuthenticationBackend",
     "bptl.accounts.backends.UserModelEmailBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]

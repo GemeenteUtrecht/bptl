@@ -1,6 +1,19 @@
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.hashers import check_password
+
+from mozilla_django_oidc_db.backends import OIDCAuthenticationBackend
+
+logger = logging.getLogger(__name__)
+
+
+class LoggingBackendMozilla(OIDCAuthenticationBackend):
+    def verify_claims(self, claims) -> bool:
+        logger.info(claims)
+        print(claims)
+        return super().verify_claims(claims)
 
 
 class UserModelEmailBackend(ModelBackend):
