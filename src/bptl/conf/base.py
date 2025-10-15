@@ -329,7 +329,7 @@ AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesBackend",
     # "django_auth_adfs_db.backends.AdfsAuthCodeBackend",
-    "mozilla_django_oidc_db.backends.OIDCAuthenticationBackend",
+    "bptl.accounts.backends.LoggingBackendMozilla",
     "bptl.accounts.backends.UserModelEmailBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
