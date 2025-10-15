@@ -27,11 +27,10 @@ class LoggingBackendMozilla(OIDCAuthenticationBackend):
     def verify_claims(self, claims) -> bool:
         logger.info(claims)
         claims_to_obfuscate = super().get_sensitive_claims_names()
-        claims_to_obfuscate_str = "claims to obfuscate: " + claims_to_obfuscate
+        claims_to_obfuscate_str = f"claims to obfuscate: {claims_to_obfuscate}"
         logger.info(claims_to_obfuscate_str)
-        config_identifier_field_str = "config_identifier_field: " + getattr(
-            self.config, self.config_identifier_field
-        )
+        id_field = getattr(self.config, self.config_identifier_field)
+        config_identifier_field_str = f"config_identifier_field: {id_field}"
         logger.info(config_identifier_field_str)
         return super().verify_claims(claims)
 
