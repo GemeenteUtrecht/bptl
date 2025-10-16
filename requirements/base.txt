@@ -86,6 +86,7 @@ django==3.2.12
     #   django-docutils
     #   django-filter
     #   django-hijack
+    #   django-jsonform
     #   django-polymorphic
     #   django-redis
     #   django-relativedelta
@@ -112,8 +113,6 @@ django-auth-adfs-db==0.3.0
     # via -r requirements/base.in
 django-axes==5.20.0
     # via -r requirements/base.in
-django-better-admin-arrayfield==1.4.2
-    # via mozilla-django-oidc-db
 django-camunda==0.10.0
     # via -r requirements/base.in
 django-celery-beat==2.8.1
@@ -140,6 +139,8 @@ django-hijack-admin==2.1.10
     # via -r requirements/base.in
 django-ipware==3.0.7
     # via django-axes
+django-jsonform==2.23.2
+    # via mozilla-django-oidc-db
 django-ordered-model==3.4.3
     # via django-admin-index
 django-polymorphic==3.0.0
@@ -229,11 +230,11 @@ markupsafe==2.0.1
     # via jinja2
 more-itertools==10.6.0
     # via cssutils
-mozilla-django-oidc==2.0.0
+mozilla-django-oidc==4.0.1
     # via
     #   -r requirements/base.in
     #   mozilla-django-oidc-db
-mozilla-django-oidc-db==0.12.0
+mozilla-django-oidc-db==0.16.0
     # via -r requirements/base.in
 openpyxl==3.1.5
     # via -r requirements/base.in

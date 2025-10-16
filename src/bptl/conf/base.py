@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     "django_auth_adfs_db",
     "mozilla_django_oidc",
     "mozilla_django_oidc_db",
-    "django_better_admin_arrayfield",
+    "django_jsonform",
     "sniplates",
     "hijack",
     "compat",  # Part of hijack
