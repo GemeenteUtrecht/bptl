@@ -1,0 +1,8 @@
+{# templates/includes/hijack_banner.html #}
+{% if request.hijack_user and request.user != request.hijack_user %}
+<div class="hijack-banner">
+  ⚠️ You are impersonating <strong>{{ request.user }}</strong>
+  (original: {{ request.hijack_user }})
+  <a href="{% url 'hijack:release' %}">Return</a>
+</div>
+{% endif %}

@@ -51,12 +51,11 @@ class FilterObjectsTaskTests(TestCase):
             alias="objecttypes",
         )
 
-        cls.mock_parallel_patcher = patch(
+    def setUp(self):
+        self.mock_parallel_patcher = patch(
             "bptl.work_units.zgw.objects.tasks.parallel",
             return_value=mock_parallel(),
         )
-
-    def setUp(self):
         self.mock_parallel_patcher.start()
         self.addCleanup(self.mock_parallel_patcher.stop)
 
