@@ -1,8 +1,8 @@
 import io
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+from zoneinfo import ZoneInfo
 
-import pytz
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
@@ -138,23 +138,28 @@ def get_last_month_period(
     timezone_str: str = "Europe/Amsterdam",
 ) -> Tuple[datetime, datetime]:
     """
-    Returns two timezone-aware ISO datetime strings:
-    1) First day of previous month 00:00:00
-    2) Last day of previous month 23:59:59
+    Returns two timezone-aware datetimes:
+    1) First day of the previous month at 00:00:00
+    2) Last day of the previous month at 23:59:59
     """
-    tz = pytz.timezone(timezone_str)
-    today = datetime.now(tz)
-    first_of_this_month = today.replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0
-    )
+    tz = ZoneInfo(timezone_str)
+    now = datetime.now(tz)
+
+    # first day of current month at midnight
+    first_of_this_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # one second before that moment = end of last month
     last_month_end = first_of_this_month - timedelta(seconds=1)
-    last_month_start_iso = last_month_end.replace(
+
+    # first and last moments of last month
+    last_month_start = last_month_end.replace(
         day=1, hour=0, minute=0, second=0, microsecond=0
     )
-    last_month_end_iso = last_month_end.replace(
+    last_month_end = last_month_end.replace(
         hour=23, minute=59, second=59, microsecond=0
     )
-    return last_month_start_iso, last_month_end_iso
+
+    return last_month_start, last_month_end
 
 
 # -------------------------
