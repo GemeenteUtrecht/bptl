@@ -1,4 +1,4 @@
-""" celery tasks to process camunda external tasks"""
+"""celery tasks to process camunda external tasks"""
 
 from django.conf import settings
 

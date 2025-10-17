@@ -1,4 +1,4 @@
-""" celery tasks to process `cron` tasks"""
+"""celery tasks to process `cron` tasks"""
 
 from django.conf import settings
 
