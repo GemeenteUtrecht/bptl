@@ -6,9 +6,9 @@ from django_webtest import WebTest
 from zgw_consumers.constants import APITypes
 
 from bptl.accounts.tests.factories import SuperUserFactory
+from bptl.credentials.tests.factories import AppFactory
 from bptl.tasks.tests.factories import ServiceFactory
-
-from .factories import AppFactory
+from bptl.tests.utils import get_admin_form
 
 
 class AppCreateAdminTests(WebTest):
@@ -16,14 +16,11 @@ class AppCreateAdminTests(WebTest):
 
     def test_app_create_no_autorisaties_api(self):
         user = SuperUserFactory.create()
-
         page = self.app.get(self.url, user=user)
-
         self.assertEqual(page.status_code, 200)
-        self.assertNotIn(
-            "autorisaties_application",
-            page.form.fields,
-        )
+
+        form = get_admin_form(page)
+        self.assertNotIn("autorisaties_application", form.fields)
 
     @patch("bptl.credentials.forms.get_paginated_results")
     def test_app_create_with_autorisaties_api(self, m_get_paginated_results):
@@ -44,19 +41,17 @@ class AppCreateAdminTests(WebTest):
         m_get_paginated_results.side_effect = side_effect
 
         page = self.app.get(self.url, user=user)
-
         self.assertEqual(page.status_code, 200)
-        self.assertIn(
-            "autorisaties_application",
-            page.form.fields,
-        )
 
+        form = get_admin_form(page)
+
+        self.assertIn("autorisaties_application", form.fields)
         self.assertEqual(
-            page.form["autorisaties_application"].options[1],
+            form["autorisaties_application"].options[1],
             ("https://ac1.nl/api/v1/applicaties/123", False, "app1"),
         )
         self.assertEqual(
-            page.form["autorisaties_application"].options[2],
+            form["autorisaties_application"].options[2],
             ("https://ac2.nl/api/v1/applicaties/456", False, "app2"),
         )
 
@@ -75,14 +70,15 @@ class AppEditAdminTests(WebTest):
         url = reverse("admin:credentials_app_change", args=(app.id,))
 
         change_page = self.app.get(url, user=user)
-
         self.assertEqual(change_page.status_code, 200)
 
+        form = get_admin_form(change_page)
+
         self.assertEqual(
-            change_page.form["autorisaties_application"].options[1],
+            form["autorisaties_application"].options[1],
             ("https://ac.nl/api/v1/applicaties/123", False, "app1"),
         )
         self.assertEqual(
-            change_page.form["autorisaties_application"].options[2],
+            form["autorisaties_application"].options[2],
             ("https://ac.nl/api/v1/applicaties/456", True, "app2"),
         )

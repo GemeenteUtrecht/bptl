@@ -5,10 +5,10 @@ from django.urls import reverse
 from django_webtest import WebTest
 
 from bptl.accounts.models import User
+from bptl.tests.utils import get_admin_form
 
 from ..registry import WorkUnitRegistry
 
-# Set up an isolated registry for tests
 test_register = WorkUnitRegistry()
 
 
@@ -31,15 +31,14 @@ class TaskMappingCreateTests(WebTest):
 
     def setUp(self):
         self.app.set_user(self.user)
-
         patcher = patch("bptl.tasks.forms.register", new=test_register)
         self.mocked_register = patcher.start()
         self.addCleanup(patcher.stop)
 
     def test_show_select_registered_tasks(self):
         url = reverse("admin:tasks_taskmapping_add")
-
         add_page = self.app.get(url)
+        self.assertEqual(add_page.status_code, 200)
 
         html = add_page.text
         self.assertInHTML("task1", html)
@@ -47,9 +46,11 @@ class TaskMappingCreateTests(WebTest):
         self.assertInHTML("task2", html)
         self.assertInHTML("Task 2 documentation", html)
 
-        add_page.form["topic_name"] = "foo"
-        callback_field = add_page.form["callback"]
+        form = get_admin_form(add_page)
+
+        form["topic_name"] = "foo"
+        callback_field = form["callback"]
         callback_field.select("bptl.tasks.tests.test_task_mapping_admin.task2")
 
-        submitted = add_page.form.submit()
+        submitted = form.submit()
         self.assertEqual(submitted.status_code, 302)

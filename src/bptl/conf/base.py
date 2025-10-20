@@ -59,23 +59,20 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "django.contrib.staticfiles",
     "ordered_model",
-    "django_admin_index",
     # Optional applications.
     "django.contrib.admin",
     # 'django.contrib.admindocs',
     "django.contrib.humanize",
     # 'django.contrib.sitemaps',
     # External applications.
+    "simple_certmanager",
     "axes",
-    "django_auth_adfs",
-    "django_auth_adfs_db",
     "mozilla_django_oidc",
     "mozilla_django_oidc_db",
     "django_jsonform",
     "sniplates",
     "hijack",
-    "compat",  # Part of hijack
-    "hijack_admin",
+    "hijack.contrib",
     "solo",
     "django_camunda",
     "django_filters",
@@ -117,6 +114,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "axes.middleware.AxesMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
 ]
 
 ROOT_URLCONF = "bptl.urls"
@@ -142,8 +140,6 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "bptl.utils.context_processors.settings",
-                # REQUIRED FOR ADMIN INDEX
-                "django_admin_index.context_processors.dashboard",
             ],
             "loaders": RAW_TEMPLATE_LOADERS,
         },
@@ -328,7 +324,6 @@ AUTH_USER_MODEL = "accounts.User"
 # Allow logging in with both username+password and email+password
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesBackend",
-    "django_auth_adfs_db.backends.AdfsAuthCodeBackend",
     "bptl.accounts.backends.LoggingBackendMozilla",
     "bptl.accounts.backends.UserModelEmailBackend",
     "django.contrib.auth.backends.ModelBackend",
@@ -355,22 +350,9 @@ ADMIN_INDEX_AUTO_CREATE_APP_GROUP = True
 
 # Django-Axes (4.0+)
 #
-# The number of login attempts allowed before a record is created for the
-# failed logins. Default: 3
 AXES_FAILURE_LIMIT = 10
-# If set, defines a period of inactivity after which old failed login attempts
-# will be forgotten. Can be set to a python timedelta object or an integer. If
-# an integer, will be interpreted as a number of hours. Default: None
 AXES_COOLOFF_TIME = 1
-# If True only locks based on user id and never locks by IP if attempts limit
-# exceed, otherwise utilize the existing IP and user locking logic Default:
-# False
-AXES_ONLY_USER_FAILURES = True
-# If set, specifies a template to render when a user is locked out. Template
-# receives cooloff_time and failure_limit as context variables. Default: None
 AXES_LOCKOUT_TEMPLATE = "account_blocked.html"
-AXES_USE_USER_AGENT = True  # Default: False
-AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True  # Default: False
 
 # The default meta precedence order
 IPWARE_META_PRECEDENCE_ORDER = (
@@ -389,17 +371,17 @@ IPWARE_META_PRECEDENCE_ORDER = (
 # Django-Hijack
 HIJACK_LOGIN_REDIRECT_URL = "/"
 HIJACK_LOGOUT_REDIRECT_URL = reverse_lazy("admin:accounts_user_changelist")
-# The Admin mixin is used because we use a custom User-model.
-HIJACK_REGISTER_ADMIN = False
-# This is a CSRF-security risk.
-# See: http://django-hijack.readthedocs.io/en/latest/configuration/#allowing-get-method-for-hijack-views
-HIJACK_ALLOW_GET_REQUESTS = True
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # hours or timedelta
+AXES_RESET_ON_SUCCESS = True
 
-#
-# AUTH-ADFS
-#
-AUTH_ADFS = {"SETTINGS_CLASS": "django_auth_adfs_db.settings.Settings"}
+# Replace all old booleans with this unified list
+AXES_FAILURE_CRITERIA = ["username_and_ip"]
 
+# Optional convenience URLs
+AXES_LOCKOUT_URL = "/account/locked/"
+AXES_LOCKOUT_TEMPLATE = "registration/lockout.html"
 #
 # MOZILLA DJANGO OIDC DB
 #

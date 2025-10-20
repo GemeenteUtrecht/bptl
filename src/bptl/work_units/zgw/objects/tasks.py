@@ -53,10 +53,10 @@ def filter_zaakobjects_on_objecttype_label(task: BaseTask) -> List[Dict]:
 
             [
                 {
-                    "objectUrl" [str]: URL-reference,
-                    "objectType" [str]: URL-reference,
-                    "objectTypeOverige" [str]: <description>,
-                    "relatieomschrijving" [str]: <description>
+                    "objectUrl": "[str] URL-reference",
+                    "objectType": "[str] URL-reference",
+                    "objectTypeOverige": "[str] <description>",
+                    "relatieomschrijving": "[str] <description>"
                 },
             ]
 

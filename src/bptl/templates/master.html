@@ -1,4 +1,4 @@
-{% load static hijack_tags %}<!DOCTYPE html>
+{% load static hijack %}<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -16,7 +16,7 @@
     </head>
 
     <body class="{% block body-class %}{% endblock %}">
-        {% hijack_notification %}
+        {% include "includes/hijack_banner.html" %}
         <header>
             {% block header %}
                 <div class="container">

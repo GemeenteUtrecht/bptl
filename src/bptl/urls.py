@@ -23,7 +23,7 @@ admin.site.index_title = "Welcome to the bptl admin"
 admin.site.has_permission = lambda request: request.user.is_superuser
 
 urlpatterns = [
-    path("admin/hijack/", include("hijack.urls")),
+    path("hijack/", include("hijack.urls")),
     path("admin/", admin.site.urls),
     path("admin/login/failure/", AdminLoginFailure.as_view(), name="admin-oidc-error"),
     path("tasks/", include("bptl.dashboard.urls")),
@@ -36,7 +36,6 @@ urlpatterns = [
         name="api-docs",
     ),
     path("oidc/", include("mozilla_django_oidc.urls")),
-    path("adfs/", include("django_auth_adfs.urls")),
     # Simply show the master template.
     path("", IndexView.as_view(), name="index"),
 ]
