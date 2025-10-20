@@ -23,8 +23,6 @@ zgw-consumers[drf]<=0.23.2
 # Framework libraries
 django==4.2.*
 django-admin-index < 4.0.0
-django-auth-adfs
-django-auth-adfs-db
 django-axes
 django-camunda
 django-choices

@@ -106,7 +106,6 @@ cron-descriptor==2.0.6
 cryptography==40.0.2
     # via
     #   -r requirements/ci.txt
-    #   django-auth-adfs
     #   django-simple-certmanager
     #   josepy
     #   mozilla-django-oidc
@@ -132,8 +131,6 @@ django==4.2.25
     #   ddt-api-calls
     #   django-admin-index
     #   django-appconf
-    #   django-auth-adfs
-    #   django-auth-adfs-db
     #   django-axes
     #   django-camunda
     #   django-celery-beat
@@ -168,12 +165,6 @@ django-appconf==1.1.0
     # via
     #   -r requirements/ci.txt
     #   django-timeline-logger
-django-auth-adfs==1.15.0
-    # via
-    #   -r requirements/ci.txt
-    #   django-auth-adfs-db
-django-auth-adfs-db==0.3.0
-    # via -r requirements/ci.txt
 django-axes==8.0.0
     # via -r requirements/ci.txt
 django-camunda==0.15.1
@@ -231,7 +222,6 @@ django-sniplates==0.7.2
 django-solo==2.4.0
     # via
     #   -r requirements/ci.txt
-    #   django-auth-adfs-db
     #   django-camunda
     #   mozilla-django-oidc-db
     #   zgw-consumers
@@ -418,7 +408,6 @@ pygments==2.19.2
 pyjwt==2.10.1
     # via
     #   -r requirements/ci.txt
-    #   django-auth-adfs
     #   gemma-zds-client
     #   redis
 pyopenssl==23.1.0
@@ -469,7 +458,6 @@ requests==2.32.5
     # via
     #   -r requirements/ci.txt
     #   ddt-api-calls
-    #   django-auth-adfs
     #   django-camunda
     #   django-rosetta
     #   gemma-zds-client
@@ -577,7 +565,6 @@ uritemplate==4.2.0
 urllib3==2.5.0
     # via
     #   -r requirements/ci.txt
-    #   django-auth-adfs
     #   elastic-apm
     #   requests
     #   sentry-sdk

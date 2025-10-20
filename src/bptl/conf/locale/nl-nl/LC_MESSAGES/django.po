@@ -317,10 +317,6 @@ msgstr ""
 msgid "Administration"
 msgstr "Administratie"
 
-#: src/bptl/templates/admin/login.html:11
-msgid "Login with ADFS"
-msgstr ""
-
 #: src/bptl/templates/includes/pagination.html:20
 msgid "first"
 msgstr "eerste"
