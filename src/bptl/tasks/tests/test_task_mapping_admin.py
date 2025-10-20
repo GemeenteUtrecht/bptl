@@ -5,25 +5,9 @@ from django.urls import reverse
 from django_webtest import WebTest
 
 from bptl.accounts.models import User
+from bptl.tests.utils import get_admin_form
 
 from ..registry import WorkUnitRegistry
-
-
-def get_admin_form(page):
-    """
-    Return the main Django admin form on add/change pages,
-    skipping logout/search forms that confuse django-webtest.
-    """
-    if "taskmapping_form" in page.forms:  # unlikely custom id
-        return page.forms["taskmapping_form"]
-    if "app_form" in page.forms:  # Django’s default admin add form id
-        return page.forms["app_form"]
-    # fall back to the first non-logout form
-    for key, form in page.forms.items():
-        if key != "logout-form":
-            return form
-    raise AssertionError(f"No usable admin form found in {list(page.forms.keys())}")
-
 
 test_register = WorkUnitRegistry()
 

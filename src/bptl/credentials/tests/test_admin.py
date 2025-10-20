@@ -8,21 +8,7 @@ from zgw_consumers.constants import APITypes
 from bptl.accounts.tests.factories import SuperUserFactory
 from bptl.credentials.tests.factories import AppFactory
 from bptl.tasks.tests.factories import ServiceFactory
-
-
-def get_admin_form(page):
-    """
-    Return the main Django admin form, skipping logout/search forms.
-    """
-    # Newer admin templates often have multiple <form>s:
-    # logout-form, search, and the actual model form with id="app_form"
-    if "app_form" in page.forms:
-        return page.forms["app_form"]
-    # fallback to the first non-logout form
-    for key, form in page.forms.items():
-        if key != "logout-form":
-            return form
-    raise AssertionError(f"No usable admin form found in {list(page.forms.keys())}")
+from bptl.tests.utils import get_admin_form
 
 
 class AppCreateAdminTests(WebTest):

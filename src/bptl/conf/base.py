@@ -72,7 +72,7 @@ INSTALLED_APPS = [
     "django_jsonform",
     "sniplates",
     "hijack",
-    "hijack.contrib.admin",
+    "hijack.contrib",
     "solo",
     "django_camunda",
     "django_filters",
