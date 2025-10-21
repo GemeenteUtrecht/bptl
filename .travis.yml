@@ -8,7 +8,7 @@ services:
   - docker
 
 addons:
-  postgresql: "12"
+  postgresql: "14"
 
 env:
   global:
