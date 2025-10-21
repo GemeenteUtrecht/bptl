@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "django.contrib.staticfiles",
     "ordered_model",
+    "django_admin_index",
     # Optional applications.
     "django.contrib.admin",
     # 'django.contrib.admindocs',
