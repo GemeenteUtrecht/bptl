@@ -25,7 +25,7 @@ Services
 
 BPTL requires the following services:
 
-- PostgreSQL 14 or higher database
+- PostgreSQL 13 database
 - Redis as message queue broker, result store and in-memory cache for the web interface
 - Some form of reverse proxy (e.g. Nginx, Traefik...)
 

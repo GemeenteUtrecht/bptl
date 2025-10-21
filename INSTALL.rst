@@ -20,7 +20,7 @@ You need the following libraries and/or programs:
 
 * `Python`_ 3.10 or above
 * Python `Virtualenv`_ and `Pip`_
-* `PostgreSQL`_ 14 or above
+* `PostgreSQL`_ 13 or above
 * `Node.js`_
 * `npm`_
 

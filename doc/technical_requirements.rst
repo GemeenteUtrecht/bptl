@@ -7,7 +7,7 @@ Software requirements
 Software/framework       Version        
 -----------------------  --------------
 Python                   3.10
-PostgreSQL               14+  
+PostgreSQL               13  
 Node                     13
 =======================  ==============
 
