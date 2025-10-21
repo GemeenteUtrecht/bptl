@@ -434,7 +434,7 @@ class CreateZaakTaskTests(TestCase):
                 "omschrijving": "foo",
             }
         )
-        self.fetched_task.save(0)
+        self.fetched_task.save(force_insert=False)
 
         mock_service_oas_get(m, ZTC_URL, "ztc")
         mock_service_oas_get(m, ZRC_URL, "zrc")
