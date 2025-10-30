@@ -2,6 +2,8 @@ import logging
 import os
 from email.mime.image import MIMEImage
 from typing import Dict, Optional
+from email.mime.base import MIMEBase
+from email import encoders
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -82,7 +84,9 @@ def create_email(
     # Attach the image
     filepath = os.path.join(settings.STATIC_ROOT, "img/wapen-utrecht-rood.svg")
     with open(filepath, "rb") as wapen:
-        mime_image = MIMEImage(wapen.read())
+        mime_image = MIMEBase("image", "svg+xml")
+        mime_image.set_payload(wapen.read())
+        encoders.encode_base64(mime_image)
         mime_image.add_header("Content-ID", "<wapen_utrecht_cid>")
         mime_image.add_header(
             "Content-Disposition", "inline", filename="wapen-utrecht-rood.svg"
