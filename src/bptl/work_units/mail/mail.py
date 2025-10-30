@@ -1,9 +1,9 @@
 import logging
 import os
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from typing import Dict, Optional
-from email.mime.base import MIMEBase
-from email import encoders
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
