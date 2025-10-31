@@ -21,13 +21,13 @@ gemma-zds-client<2.0
 zgw-consumers[drf]<=0.23.2
 
 # Framework libraries
-django>=5.2,<5.3
+django<5.0.0
 django-admin-index < 4.0.0
 django-axes
 django-camunda
 django-choices
 django-docutils
-django-filter
+django-filter<25.0
 django-hijack
 django-polymorphic
 django-redis
