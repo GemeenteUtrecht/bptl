@@ -1,7 +1,5 @@
 from django.conf import settings
-from django.core.validators import EmailValidator
-
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 
 from bptl.openklant.client import get_openklant_client
 from bptl.openklant.exceptions import EmailSendFailedException, OpenKlantEmailException
@@ -13,6 +11,7 @@ from bptl.work_units.mail.mail import build_email_messages, create_email
 from bptl.work_units.open_klant.mail import get_kcc_email_connection
 
 from .utils import build_email_context, get_actor_email_from_interne_taak
+from .validators import RFC5322EmailValidator
 
 
 @register
@@ -61,7 +60,7 @@ class NotificeerBetrokkene(WorkUnit):
             self.task.variables, client=client
         )
 
-        email_validator = EmailValidator()
+        email_validator = RFC5322EmailValidator()
         try:
             email_validator(emailaddress)
         except ValidationError as e:
