@@ -73,7 +73,6 @@ class DefaultServiceForm(forms.ModelForm):
 class BaseDefaultServiceFormset(BaseInlineFormSet):
     def clean(self):
         super().clean()
-
         # selected callback - this is not validated because we don't have access to the
         # form.
         # TODO: check if django-extra-views CreateWithInlines has a proper solution for
@@ -121,7 +120,7 @@ class BaseDefaultServiceFormset(BaseInlineFormSet):
                         "The service for alias '{alias}' must be a '{api_type}' service."
                     ).format(
                         alias=alias,
-                        api_type=APITypes.labels[required_service.service_type],
+                        api_type=APITypes(required_service.service_type).label,
                     ),
                 )
 
@@ -149,7 +148,7 @@ class BaseDefaultServiceFormset(BaseInlineFormSet):
                     _(
                         "Missing a service of type '{api_type}' which is required for this task."
                     ).format(
-                        api_type=APITypes.labels[required_service.service_type],
+                        api_type=APITypes(required_service.service_type).label,
                     )
                 )
 

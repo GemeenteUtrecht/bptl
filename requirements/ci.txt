@@ -12,6 +12,10 @@ amqp==5.3.1
     # via
     #   -r requirements/base.txt
     #   kombu
+ape-pie==0.2.0
+    # via
+    #   -r requirements/base.txt
+    #   zgw-consumers
 asgiref==3.10.0
     # via
     #   -r requirements/base.txt
@@ -111,7 +115,7 @@ defusedxml==0.7.1
     # via
     #   -r requirements/base.txt
     #   djangorestframework-xml
-django==4.2.25
+django==5.2.9
     # via
     #   -r requirements/base.txt
     #   django-admin-index
@@ -142,6 +146,7 @@ django==4.2.25
     #   mozilla-django-oidc
     #   mozilla-django-oidc-db
     #   zgw-consumers
+    #   zgw-consumers-oas
 django-admin-index==3.1.1
     # via -r requirements/base.txt
 django-appconf==1.1.0
@@ -155,9 +160,7 @@ django-camunda==0.15.1
 django-celery-beat==2.8.1
     # via -r requirements/base.txt
 django-choices==2.0.0
-    # via
-    #   -r requirements/base.txt
-    #   zgw-consumers
+    # via -r requirements/base.txt
 django-docutils==0.28.0
     # via -r requirements/base.txt
 django-filter==24.3
@@ -246,11 +249,11 @@ face==24.0.0
     #   glom
 factory-boy==3.3.3
     # via -r requirements/test-tools.in
-faker==37.11.0
+faker==40.1.0
     # via
     #   -r requirements/base.txt
     #   factory-boy
-    #   zgw-consumers
+    #   zgw-consumers-oas
 filetype==1.2.0
     # via
     #   -r requirements/base.txt
@@ -260,11 +263,11 @@ flower==2.0.1
 freezegun==1.5.5
     # via -r requirements/test-tools.in
 furl==2.1.4
-    # via -r requirements/base.txt
-gemma-zds-client==1.0.1
     # via
     #   -r requirements/base.txt
-    #   zgw-consumers
+    #   ape-pie
+gemma-zds-client==1.0.1
+    # via -r requirements/base.txt
 glom==24.11.0
     # via
     #   -r requirements/base.txt
@@ -367,10 +370,9 @@ pyjwt==2.10.1
     #   -r requirements/base.txt
     #   gemma-zds-client
     #   redis
-pyopenssl==23.1.0
-    # via
-    #   -r requirements/base.txt
     #   zgw-consumers
+pyopenssl==23.1.0
+    # via -r requirements/base.txt
 pyquery==2.0.1
     # via -r requirements/test-tools.in
 python-crontab==3.3.0
@@ -397,6 +399,7 @@ pyyaml==6.0.3
     #   -r requirements/base.txt
     #   drf-spectacular
     #   gemma-zds-client
+    #   zgw-consumers-oas
 redis==5.3.1
     # via
     #   -r requirements/base.txt
@@ -410,6 +413,7 @@ referencing==0.37.0
 requests==2.32.5
     # via
     #   -r requirements/base.txt
+    #   ape-pie
     #   django-camunda
     #   django-rosetta
     #   gemma-zds-client
@@ -419,10 +423,7 @@ requests==2.32.5
     #   sphinx
     #   zgw-consumers
 requests-mock==1.12.1
-    # via
-    #   -r requirements/base.txt
-    #   -r requirements/test-tools.in
-    #   zgw-consumers
+    # via -r requirements/test-tools.in
 rpds-py==0.27.1
     # via
     #   -r requirements/base.txt
@@ -491,6 +492,8 @@ typing-extensions==4.15.0
     #   django-solo
     #   mozilla-django-oidc-db
     #   referencing
+    #   zgw-consumers
+    #   zgw-consumers-oas
 tzdata==2025.2
     # via
     #   -r requirements/base.txt
@@ -531,7 +534,9 @@ wrapt==2.0.0
     # via
     #   -r requirements/base.txt
     #   elastic-apm
-zgw-consumers[drf]==0.23.2
+zgw-consumers[drf]==1.1.1
+    # via -r requirements/base.txt
+zgw-consumers-oas==1.1.0
     # via -r requirements/base.txt
 
 # The following packages are considered to be unsafe in a requirements file:

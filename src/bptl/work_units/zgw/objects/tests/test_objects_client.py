@@ -28,6 +28,8 @@ class ObjectsandObjectTypesClientsTests(TestCase):
             auth_type=AuthTypes.api_key,
             header_key="Authorization",
             header_value="Token ThisIsNotTheGreatestTokenInTheWorldThisIsJustATribute",
+            label="Objects",
+            slug="objects-client-test",
         )
 
         objecttypes = Service.objects.create(
@@ -36,6 +38,8 @@ class ObjectsandObjectTypesClientsTests(TestCase):
             auth_type=AuthTypes.api_key,
             header_key="Authorization",
             header_value="Token ThisIsNotTheGreatestTokenInTheWorldThisIsJustATributeType",
+            label="ObjectTypes",
+            slug="objecttypes-client-test",
         )
         task_mapping = TaskMappingFactory.create(topic_name="some-topic")
         DefaultServiceFactory.create(

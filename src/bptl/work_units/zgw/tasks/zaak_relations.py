@@ -242,9 +242,7 @@ class CreateEigenschap(ZGWWorkUnit):
         if zei := zaakeigenschappen.get(naam, None):
             zrc_client.partial_update(
                 "zaakeigenschap",
-                {
-                    "waarde": waarde,
-                },
+                waarde=waarde,
                 uuid=zei["uuid"],
                 zaak_uuid=zaak_uuid,
                 request_kwargs={"headers": get_nlx_headers(variables)},
@@ -340,7 +338,7 @@ class RelateerZaak(ZGWWorkUnit):
 
         zrc_client.partial_update(
             "zaak",
-            {"relevanteAndereZaken": relevante_andere_zaken},
+            relevanteAndereZaken=relevante_andere_zaken,
             url=zaak_url,
             request_kwargs={"headers": headers},
         )
@@ -378,7 +376,7 @@ class RelateerZaak(ZGWWorkUnit):
             )
             zrc_client.partial_update(
                 "zaak",
-                {"relevanteAndereZaken": relevante_andere_zaken_bijdrage_zaak},
+                relevanteAndereZaken=relevante_andere_zaken_bijdrage_zaak,
                 url=bijdrage_zaak_url,
                 request_kwargs={"headers": headers},
             )

@@ -73,10 +73,16 @@ class DefaultService(models.Model):
     class Meta:
         verbose_name = _("default service")
         verbose_name_plural = _("default services")
-        unique_together = (
-            ("task_mapping", "service"),
-            ("task_mapping", "alias"),
-        )
+        constraints = [
+            models.UniqueConstraint(
+                fields=["task_mapping", "service"],
+                name="unique_task_mapping_service",
+            ),
+            models.UniqueConstraint(
+                fields=["task_mapping", "alias"],
+                name="unique_task_mapping_alias",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.task_mapping} / {self.alias}"

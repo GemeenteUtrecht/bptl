@@ -60,7 +60,10 @@ class AddDefaultServicesTests(TestCase):
 
     def test_add_one_defaulservice(self):
         zrc = Service.objects.create(
-            api_type=APITypes.zrc, label="ZRC", api_root="https://other.zrc.nl/api/v1/"
+            api_type=APITypes.zrc,
+            label="ZRC",
+            api_root="https://other.zrc.nl/api/v1/",
+            slug="zrc-one-default",
         )
 
         data = self.data.copy()
@@ -81,10 +84,16 @@ class AddDefaultServicesTests(TestCase):
 
     def test_add_two_defaultservices(self):
         zrc = Service.objects.create(
-            api_type=APITypes.zrc, label="ZRC", api_root="https://some.zrc.nl/api/v1/"
+            api_type=APITypes.zrc,
+            label="ZRC",
+            api_root="https://some.zrc.nl/api/v1/",
+            slug="zrc-two-defaults",
         )
         ztc = Service.objects.create(
-            api_type=APITypes.ztc, label="ZTC", api_root="https://some.ztc.nl/api/v1/"
+            api_type=APITypes.ztc,
+            label="ZTC",
+            api_root="https://some.ztc.nl/api/v1/",
+            slug="ztc-two-defaults",
         )
 
         data = self.data.copy()
@@ -124,7 +133,10 @@ class AddDefaultServicesTests(TestCase):
 
     def test_add_two_same_services_fail(self):
         zrc = Service.objects.create(
-            api_type=APITypes.zrc, label="ZRC", api_root="https://some.zrc.nl/api/v1/"
+            api_type=APITypes.zrc,
+            label="ZRC",
+            api_root="https://some.zrc.nl/api/v1/",
+            slug="zrc-same-services-fail",
         )
 
         data = self.data.copy()

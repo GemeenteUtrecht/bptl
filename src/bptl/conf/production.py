@@ -64,7 +64,14 @@ TEMPLATES[0]["OPTIONS"]["loaders"] = [
 # The file storage engine to use when collecting static files with the
 # collectstatic management command.
 # Feel free to enable after checking with Sven
-# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "django.core.files.storage.FileSystemStorage",
+#     },
+#     "staticfiles": {
+#         "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+#     },
+# }
 
 # Production logging facility.
 LOGGING["loggers"].update(
@@ -101,7 +108,6 @@ CSRF_COOKIE_SECURE = True
 # Only set this when we're behind Nginx as configured in our example-deployment
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_CONTENT_TYPE_NOSNIFF = True  # Sets X-Content-Type-Options: nosniff
-SECURE_BROWSER_XSS_FILTER = True  # Sets X-XSS-Protection: 1; mode=block
 
 #
 # Library settings

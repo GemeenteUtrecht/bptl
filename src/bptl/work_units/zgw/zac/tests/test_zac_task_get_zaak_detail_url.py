@@ -6,12 +6,12 @@ from django_camunda.utils import serialize_variable
 from requests.exceptions import HTTPError
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
-from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.credentials.tests.factories import AppServiceCredentialsFactory
 from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.work_units.zgw.tests.compat import mock_service_oas_get
 
 from ..tasks import ZaakDetailURLTask
 

@@ -14,9 +14,20 @@ def get_credentials(app_id: str, *services: Service) -> Dict[Service, Dict[str, 
     }
 
     # explicit overrides defaults
-    default = {
-        service: service.build_client().auth_header
-        for service in services
-        if service not in explicit
-    }
+    # Generate auth headers from service configuration
+    default = {}
+    for service in services:
+        if service not in explicit:
+            client = service.build_client()
+            # Extract auth header from the client's auth (ape_pie.APIClient)
+            if hasattr(client, "auth") and client.auth:
+                # For ZGW auth, we need to trigger token generation
+                from requests import PreparedRequest
+
+                req = PreparedRequest()
+                req.headers = {}
+                client.auth(req)
+                default[service] = dict(req.headers)
+            else:
+                default[service] = {}
     return {**default, **explicit}

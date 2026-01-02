@@ -7,8 +7,8 @@ Software requirements
 Software/framework       Version        
 -----------------------  --------------
 Python                   3.10
-PostgreSQL               13  
-Node                     13
+PostgreSQL               14
+Node                     14
 =======================  ==============
 
 The current python dependencies can be found in github repo bptl/requirements/production.txt.

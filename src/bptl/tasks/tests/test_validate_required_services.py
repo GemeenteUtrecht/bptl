@@ -85,7 +85,7 @@ class RequiredServicesValidationTests(TestCase):
         self.assertIn(
             _("The service for alias '{alias}' must be a '{api_type}' service.").format(
                 alias="svc1",
-                api_type=APITypes.labels[APITypes.orc],
+                api_type=APITypes.orc.label,
             ),
             formset.forms[0].errors["service"],
         )
@@ -106,7 +106,7 @@ class RequiredServicesValidationTests(TestCase):
             _(
                 "Missing a service of type '{api_type}' which is required for this task."
             ).format(
-                api_type=APITypes.labels[APITypes.zrc],
+                api_type=APITypes.zrc.label,
             ),
             formset.non_form_errors(),
         )

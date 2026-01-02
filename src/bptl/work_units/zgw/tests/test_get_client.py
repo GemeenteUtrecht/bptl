@@ -25,7 +25,10 @@ class GetZGWClientTests(TestCase):
         cls.task = ExternalTaskFactory.create(topic_name="some-topic")
         cls.work_unit = ZGWWorkUnit(cls.task)
         cls.service = Service.objects.create(
-            api_type=APITypes.zrc, api_root=ZRC_URL, label="zrc_service"
+            api_type=APITypes.zrc,
+            api_root=ZRC_URL,
+            label="zrc_service",
+            slug="zrc-service",
         )
 
     def test_no_default_services(self):
@@ -60,6 +63,7 @@ class GetZGWClientTests(TestCase):
             api_type=APITypes.zrc,
             label="other ZRC",
             api_root="https://other.zrc.nl/api/v1/",
+            slug="other-zrc-dup",
         )
         with self.assertRaises(IntegrityError):
             DefaultServiceFactory.create(
@@ -71,6 +75,7 @@ class GetZGWClientTests(TestCase):
             api_type=APITypes.zrc,
             label="other ZRC",
             api_root="https://other.zrc.nl/api/v1/",
+            slug="other-zrc-multi",
         )
         DefaultServiceFactory.create(
             task_mapping=self.mapping, service=self.service, alias="ZRC1"

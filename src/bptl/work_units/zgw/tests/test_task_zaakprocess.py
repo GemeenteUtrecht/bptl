@@ -9,7 +9,6 @@ from django_camunda.utils import serialize_variable
 from zgw_consumers.api_models.constants import RolOmschrijving
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
-from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.core.models import CoreConfig
@@ -20,6 +19,10 @@ from bptl.work_units.zgw.objects.models import MetaObjectTypesConfig
 from bptl.work_units.zgw.objects.tests.utils import (
     START_CAMUNDA_PROCESS_FORM,
     START_CAMUNDA_PROCESS_FORM_OBJ,
+)
+from bptl.work_units.zgw.tests.compat import (
+    generate_oas_component,
+    mock_service_oas_get,
 )
 
 from ..tasks import StartCamundaProcessTask
@@ -71,6 +74,7 @@ class StartCamundaProcessTests(TestCase):
             api_type=APITypes.zrc,
             api_root=ZRC_ROOT,
             auth_type=AuthTypes.no_auth,
+            slug="zrc-zaakprocess",
         )
         DefaultServiceFactory.create(
             task_mapping=mapping,
@@ -82,6 +86,7 @@ class StartCamundaProcessTests(TestCase):
             api_type=APITypes.ztc,
             api_root=ZTC_ROOT,
             auth_type=AuthTypes.no_auth,
+            slug="ztc-zaakprocess",
         )
         DefaultServiceFactory.create(
             task_mapping=mapping,
@@ -120,6 +125,7 @@ class StartCamundaProcessTests(TestCase):
             api_type=APITypes.orc,
             api_root=OBJECTTYPES_ROOT,
             auth_type=AuthTypes.no_auth,
+            slug="objecttypes-zaakprocess",
         )
         config = CoreConfig.get_solo()
         config.primary_objecttypes_api = objecttypes_service
