@@ -96,7 +96,6 @@ INSTALLED_APPS = [
     "bptl.utils",
     "bptl.crontask",
     "bptl.work_units.camunda_api",
-    "bptl.work_units.kownsl",
     "bptl.work_units.zgw",
     "bptl.work_units.zgw.objects",
     "bptl.work_units.zgw.zac",
@@ -207,7 +206,14 @@ STATICFILES_FINDERS = [
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 ]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"

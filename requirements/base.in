@@ -18,10 +18,11 @@ redis>=5.0,<6.0
 
 # zgw-integration
 gemma-zds-client<2.0
-zgw-consumers[drf]<=0.23.2
+zgw-consumers[drf]>=1.0,<2.0
+zgw-consumers-oas  # OAS utilities that were removed from zgw-consumers 1.x
 
 # Framework libraries
-django<5.0.0
+django>=5.1,<5.3
 django-admin-index < 4.0.0
 django-axes
 django-camunda
@@ -39,9 +40,9 @@ mozilla-django-oidc
 mozilla-django-oidc-db<0.25
 
 # API libraries
-djangorestframework>=3.16,<3.17
+djangorestframework>=3.16
 drf-extra-fields>=3.7.0,<3.8
-drf-spectacular>=0.28,<0.29
+drf-spectacular>=0.28
 djangorestframework-camel-case>=1.4.2
 djangorestframework-xml>=2.0.0
 

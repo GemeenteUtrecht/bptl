@@ -9,11 +9,11 @@ from django_camunda.models import CamundaConfig
 from django_camunda.utils import serialize_variable
 from requests import HTTPError
 from requests.exceptions import ConnectionError
-from zgw_consumers.test import mock_service_oas_get
 
 from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.utils.constants import Statuses
+from bptl.work_units.zgw.tests.compat import mock_service_oas_get
 
 from .factories import ExternalTaskFactory
 

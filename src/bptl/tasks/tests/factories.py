@@ -15,6 +15,7 @@ class ServiceFactory(factory.django.DjangoModelFactory):
     label = factory.Faker("word")
     api_type = factory.fuzzy.FuzzyChoice(choices=APITypes.values)
     api_root = factory.Faker("url")
+    slug = factory.Sequence(lambda n: f"service-{n}")
 
     class Meta:
         model = "zgw_consumers.Service"

@@ -210,7 +210,15 @@ class ZaakDetailURLTask(ZGWWorkUnit):
 
             retry += 1
             if isinstance(exc, HTTPError) and exc.response.status_code == 404:
-                response = {"error": "Zaak not found in ZAC.", "retry": retry}
+                # Try to get JSON response body for detailed error information
+                try:
+                    error_detail = exc.response.json()
+                    # If we got a JSON response, it's likely from the ZRC (Open Zaak)
+                    # with detailed error information
+                    response = {"error": force_str(error_detail), "retry": retry}
+                except Exception:
+                    # If we can't get JSON, it's likely a 404 from ZAC
+                    response = {"error": "Zaak not found in ZAC.", "retry": retry}
             else:
                 response = {"error": force_str(exc.args[0]), "retry": retry}
 

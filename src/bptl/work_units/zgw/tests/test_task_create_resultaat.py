@@ -4,11 +4,14 @@ from django.test import TestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
-from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.work_units.zgw.tests.compat import (
+    generate_oas_component,
+    mock_service_oas_get,
+)
 
 from ..tasks import CreateResultaatTask
 

@@ -2,10 +2,10 @@ from django.test import TransactionTestCase
 
 import requests_mock
 from django_camunda.utils import serialize_variable
-from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.work_units.zgw.tests.compat import mock_service_oas_get
 
 from ..tasks.documents import SetIndicatieGebruiksrecht
 

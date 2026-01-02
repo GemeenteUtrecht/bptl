@@ -178,26 +178,42 @@ class SetIndicatieGebruiksrecht(GetDRCMixin, ZGWWorkUnit):
         drc_client = self.get_drc_client(data["url"])
 
         # Set indication
-        drc_client.partial_update("enkelvoudiginformatieobject", **data)
+        # data has structure: {"url": "...", "data": {"indicatieGebruiksrecht": False, "lock": "..."}}
+        # We need to pass url + the fields from data["data"] to partial_update
+        drc_client.partial_update(
+            "enkelvoudiginformatieobject", url=data["url"], **data["data"]
+        )
 
     def unlock_document(self, data: dict):
         # zds_client doesnt allow setting expected_status on zds_client.client.Client.operation.
         # The drc returns a 204 on an unlock operation, the zds_client expects a 200.
         # For now use the logic from zds_client.client.Client.operation but add expected_status.
         drc_client = self.get_drc_client(data["url"])
-        url = get_operation_url(
+        # Get the URL from the schema - but use an empty base_url to avoid double-prepending
+        path_with_api_root = get_operation_url(
             drc_client.schema,
             operation="enkelvoudiginformatieobject_unlock",
-            base_url=drc_client.base_url,
+            base_url="",  # Don't prepend base_url since ape_pie will do it
             uuid=get_document_uuid(data["url"]),
         )
-        drc_client.request(
+        # The OAS schema includes the API root path (e.g., /api/v1/enkelvoudiginformatieobjecten/...)
+        # But our client's base_url already includes /api/v1/, so we need to strip it
+        # to avoid double-prepending
+        from urllib.parse import urlparse
+
+        path = urlparse(drc_client.base_url).path.rstrip("/")  # e.g., "/api/v1"
+        url = path_with_api_root.replace(path, "", 1).lstrip("/")
+
+        # Note: The new ZGWClient.request() signature is request(method, url, ...)
+        # instead of the old request(url, method=..., operation=..., expected_status=...)
+        response = drc_client.request(
+            "POST",
             url,
-            operation="enkelvoudiginformatieobject_unlock",
-            method="POST",
             json={"lock": data["data"]["lock"]},
-            expected_status=204,
         )
+        # DRC returns 204 for unlock, which is expected
+        if response.status_code != 204:
+            response.raise_for_status()
 
     def perform(self) -> dict:
         variables = self.task.get_variables()

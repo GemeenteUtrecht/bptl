@@ -6,13 +6,16 @@ import requests_mock
 from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes, AuthTypes
 from zgw_consumers.models import Service
-from zgw_consumers.test import generate_oas_component, mock_service_oas_get
 
 from bptl.camunda.models import ExternalTask
 from bptl.credentials.tests.factories import AppFactory, AppServiceCredentialsFactory
 from bptl.tasks.base import MissingVariable
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
 from bptl.tests.utils import mock_parallel, paginated_response
+from bptl.work_units.zgw.tests.compat import (
+    generate_oas_component,
+    mock_service_oas_get,
+)
 
 from ..models import MetaObjectTypesConfig
 from ..tasks import InitializeChecklistTask
@@ -80,6 +83,7 @@ class InitializeChecklistTaskTest(TestCase):
             api_type=APITypes.zrc,
             api_root=ZAKEN_ROOT,
             auth_type=AuthTypes.no_auth,
+            slug="zrc-checklists-test",
         )
         DefaultServiceFactory.create(
             task_mapping=mapping,
@@ -92,6 +96,7 @@ class InitializeChecklistTaskTest(TestCase):
             api_type=APITypes.ztc,
             api_root=CATALOGI_ROOT,
             auth_type=AuthTypes.no_auth,
+            slug="ztc-checklists-test",
         )
         DefaultServiceFactory.create(
             task_mapping=mapping,

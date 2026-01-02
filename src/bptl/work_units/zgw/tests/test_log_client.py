@@ -5,10 +5,10 @@ from django.test import TestCase
 import requests_mock
 from django_camunda.utils import serialize_variable
 from zgw_consumers.constants import APITypes
-from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.tests.factories import ExternalTaskFactory
 from bptl.tasks.tests.factories import DefaultServiceFactory, TaskMappingFactory
+from bptl.work_units.zgw.tests.compat import mock_service_oas_get
 
 from ..tasks.base import ZGWWorkUnit
 
@@ -46,7 +46,6 @@ class ZGWClientLogTests(TestCase):
         self.assertEqual(self.task.logs.count(), 1)
 
         log = self.task.logs.get()
-        client = self.service.service.build_client()
         auth_header = client.auth_header
 
         self.assertEqual(
@@ -75,6 +74,7 @@ class ZGWClientLogTests(TestCase):
         )
 
     def test_log_client_create(self, m):
+        self.maxDiff = None
         mock_service_oas_get(m, ZRC_URL, "zrc")
         mock_zaak_data = {"url": ZAAK, "identificatie": "ZAAK-2020-0000000013"}
         m.post(f"{ZRC_URL}zaken", json=mock_zaak_data, status_code=201)
@@ -84,7 +84,6 @@ class ZGWClientLogTests(TestCase):
         client.create("zaak", post_data)
 
         self.assertEqual(self.task.logs.count(), 1)
-        client = self.service.service.build_client()
         auth_header = client.auth_header
 
         log = self.task.logs.get()

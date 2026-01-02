@@ -7,7 +7,6 @@ import requests_mock
 from django_camunda.models import CamundaConfig
 from django_camunda.utils import serialize_variable
 from freezegun import freeze_time
-from zgw_consumers.test import mock_service_oas_get
 
 from bptl.camunda.tests.factories import ExternalTaskFactory
 from bptl.tasks.api import TaskExpired
@@ -15,6 +14,7 @@ from bptl.tasks.models import TaskMapping
 from bptl.tasks.tests.factories import DefaultServiceFactory
 from bptl.utils.constants import Statuses
 from bptl.utils.decorators import save_and_log
+from bptl.work_units.zgw.tests.compat import mock_service_oas_get
 
 from ..tasks import task_execute_and_complete, task_fetch_and_lock
 

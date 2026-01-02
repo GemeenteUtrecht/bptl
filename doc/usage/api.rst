@@ -51,11 +51,11 @@ Email
 .. automodule:: bptl.work_units.mail.tasks
     :members:
 
-Kownsl
-------
+.. Kownsl
+.. ------
 
-.. automodule:: bptl.work_units.kownsl.tasks
-    :members:
+.. .. automodule:: bptl.work_units.kownsl.tasks
+..     :members:
 
 Camunda tasks
 ==============

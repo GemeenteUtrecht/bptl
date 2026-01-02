@@ -23,7 +23,16 @@ from .base import *  # noqa isort:skip
 
 DEBUG = True
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
+# Override staticfiles storage for development
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 ADMINS = ()
 MANAGERS = ADMINS
