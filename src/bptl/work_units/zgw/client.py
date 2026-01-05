@@ -430,21 +430,29 @@ class ZGWClient(APIClient):
         # Separate path kwargs from request kwargs
         request_kwargs = kwargs.pop("request_kwargs", {})
         params = kwargs.pop("params", None) or request_kwargs.get("params")
+        headers = request_kwargs.get("headers")
 
         # Get the path and method for this operation
         path, method = self._get_operation_url(operation_id, **kwargs)
 
+        # Build request kwargs
+        req_kwargs = {}
+        if params:
+            req_kwargs["params"] = params
+        if headers:
+            req_kwargs["headers"] = headers
+
         # Make the request
         if method == "GET":
-            response = self.get(path, params=params)
+            response = self.get(path, **req_kwargs)
         elif method == "POST":
-            response = self.post(path, json=data, params=params)
+            response = self.post(path, json=data, **req_kwargs)
         elif method == "PUT":
-            response = self.put(path, json=data, params=params)
+            response = self.put(path, json=data, **req_kwargs)
         elif method == "PATCH":
-            response = self.patch(path, json=data, params=params)
+            response = self.patch(path, json=data, **req_kwargs)
         elif method == "DELETE":
-            response = self.delete(path, params=params)
+            response = self.delete(path, **req_kwargs)
         else:
             raise ValueError(f"Unsupported HTTP method: {method}")
 
@@ -486,7 +494,7 @@ class ZGWClient(APIClient):
         Args:
             resource: The resource type (e.g., "zaak", "document")
             url: Optional full URL to the resource
-            **kwargs: Additional parameters (uuid, etc.)
+            **kwargs: Additional parameters (uuid, request_kwargs, etc.)
 
         Returns:
             Response JSON as a dictionary
@@ -494,7 +502,11 @@ class ZGWClient(APIClient):
         Example:
             zaak = client.retrieve("zaak", url="https://zaken.nl/api/v1/zaken/123")
             zaak = client.retrieve("zaak", uuid="12345678-...")
+            zaak = client.retrieve("zaak", url="...", request_kwargs={"headers": {"Accept-Crs": "EPSG:4326"}})
         """
+        # Extract request_kwargs for headers/params
+        request_kwargs = kwargs.pop("request_kwargs", {})
+
         if url:
             # URL provided directly - extract path from full URL
             from urllib.parse import urlparse
@@ -510,7 +522,14 @@ class ZGWClient(APIClient):
             path, _ = self._get_operation_url(operation_id, **kwargs)
             request_url = path
 
-        response = self.get(request_url)
+        # Apply headers and params from request_kwargs
+        get_kwargs = {}
+        if "headers" in request_kwargs:
+            get_kwargs["headers"] = request_kwargs["headers"]
+        if "params" in request_kwargs:
+            get_kwargs["params"] = request_kwargs["params"]
+
+        response = self.get(request_url, **get_kwargs)
         response.raise_for_status()
         return response.json()
 
@@ -562,7 +581,7 @@ class ZGWClient(APIClient):
         Args:
             resource: The resource type
             data: The complete updated data
-            **kwargs: Additional parameters (url, uuid, etc.)
+            **kwargs: Additional parameters (url, uuid, request_kwargs, etc.)
 
         Returns:
             Response JSON with the updated resource
@@ -570,12 +589,20 @@ class ZGWClient(APIClient):
         Example:
             zaak = client.update("zaak", data={...}, url="https://...")
         """
+        # Extract request_kwargs for headers
+        request_kwargs = kwargs.pop("request_kwargs", {})
+
         if "url" in kwargs:
             request_url = kwargs["url"]
         else:
             request_url = resource
 
-        response = self.put(request_url, json=data)
+        # Apply headers from request_kwargs
+        put_kwargs = {"json": data}
+        if "headers" in request_kwargs:
+            put_kwargs["headers"] = request_kwargs["headers"]
+
+        response = self.put(request_url, **put_kwargs)
         response.raise_for_status()
         return response.json()
 
@@ -599,23 +626,34 @@ class ZGWClient(APIClient):
         request_url = kwargs.pop("url", None)
         uuid = kwargs.pop("uuid", None)
         request_kwargs = kwargs.pop("request_kwargs", {})
-
-        # For operations with path parameters (like zaak_uuid), extract them
-        # These are used to build the path but shouldn't be in the JSON body
         zaak_uuid = kwargs.pop("zaak_uuid", None)
 
-        # Build the request URL
+        # Build the request URL using operation resolution
         if request_url is None:
-            # If there's a zaak_uuid parameter, include it in the path
+            # Construct the operation ID for partial_update
+            operation_id = f"{resource}_partial_update"
+
+            # Build path parameters dict
+            path_params = {}
+            if uuid:
+                path_params["uuid"] = uuid
             if zaak_uuid:
-                # For nested resources under a zaak, we need to use the plural form
-                # e.g., zaken/{uuid}/zaakeigenschappen/{uuid}
-                plural_resource = self._pluralize(resource)
-                request_url = f"zaken/{zaak_uuid}/{plural_resource}"
-                if uuid:
-                    request_url = f"{request_url}/{uuid}"
-            else:
-                request_url = f"{resource}/{uuid}" if uuid else resource
+                path_params["zaak_uuid"] = zaak_uuid
+
+            # Try to resolve via OAS schema
+            try:
+                request_url, _ = self._get_operation_url(operation_id, **path_params)
+            except (ValueError, KeyError):
+                # Fallback to manual construction if schema resolution fails
+                # This handles cases where schemas aren't available
+                if zaak_uuid:
+                    # Fallback: use pluralization for nested resources
+                    plural_resource = self._pluralize(resource)
+                    request_url = f"zaken/{zaak_uuid}/{plural_resource}"
+                    if uuid:
+                        request_url = f"{request_url}/{uuid}"
+                else:
+                    request_url = f"{resource}/{uuid}" if uuid else resource
 
         # Make the PATCH request with remaining kwargs as the JSON body
         patch_kwargs = {"json": kwargs}
