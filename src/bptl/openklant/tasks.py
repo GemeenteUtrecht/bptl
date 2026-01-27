@@ -141,9 +141,7 @@ def update_task_status(failed_task, client, task, success):
             tijd=tijd, toelichting=task.variables.get("toelichting", "")
         )
         client.partial_update(
-            "internetaak",
-            {"toelichting": toelichting},
-            url=task.variables["url"],
+            "internetaak", url=task.variables["url"], toelichting=toelichting
         )
 
 

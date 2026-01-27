@@ -82,9 +82,7 @@ def _update_tasks_status(openklant_client, tasks: List[dict], status: str):
     Update the status of tasks in OpenKlant.
     """
     for task in tasks:
-        openklant_client.partial_update(
-            "internetaak", {"status": status}, url=task["url"]
-        )
+        openklant_client.partial_update("internetaak", url=task["url"], status=status)
 
 
 def _create_internal_task_models(
@@ -126,7 +124,5 @@ def _update_task_toelichting_in_openklant(task, exception):
         toelichting=toelichting,
     )
     openklant_client.partial_update(
-        "internetaak",
-        {"toelichting": formatted_toelichting},
-        url=task.variables["url"],
+        "internetaak", url=task.variables["url"], toelichting=formatted_toelichting
     )
