@@ -191,8 +191,8 @@ class ZGWClient(APIClient):
 
         resource, action = parts
 
-        # Apply pluralization rules for Dutch ZGW APIs
-        resource_plural = resource  # self._pluralize(resource)
+        # Apply pluralization rules for ZGW APIs
+        resource_plural = self._pluralize(resource)
 
         method_map = {
             "list": ("GET", f"{resource_plural}"),
@@ -239,8 +239,8 @@ class ZGWClient(APIClient):
             "rol": "rollen",
             "eigenschap": "eigenschappen",
             "zaakeigenschap": "zaakeigenschappen",
-            "object": "objecten",
-            "objecttype": "objecttypen",
+            "object": "objects",
+            "objecttype": "objecttypes",
             "besluit": "besluiten",
             "besluittype": "besluittypen",
             "document": "documenten",
